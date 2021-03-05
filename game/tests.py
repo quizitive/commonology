@@ -5,7 +5,8 @@ import random
 from copy import deepcopy
 from csv import reader
 
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
 
 from game.models import Player, Team
 from game.utils import next_wed_noon, next_friday_1159
@@ -23,7 +24,7 @@ LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 class HomePage(TestCase):
 
     def test_page(self):
-        client = Client(HTTP_HOST=domain)
+        client = Client()
         response = client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
 

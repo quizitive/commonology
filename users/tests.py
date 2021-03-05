@@ -80,7 +80,7 @@ class UsersManagersTests(TestCase):
         user = get_local_user()
         client = Client()
         client.login(email=NORMAL, password='foo')
-        path = reverse('commonology:profile')
+        path = reverse('profile')
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
 
@@ -111,11 +111,11 @@ class UsersManagersTests(TestCase):
 
         client = Client()
         client.login(email=NORMAL, password='foo')
-        path = reverse('commonology:password_change')
+        path = reverse('password_change')
         response = client.get(path)
         self.assertIn(response.reason_phrase, ['OK', 'Found'])
 
-        path = reverse('commonology:password_change')
+        path = reverse('password_change')
         pw = 'nAPrZuTg9pr8dLN2'
 
         response = client.post(path, {'old_password': 'foo', 'new_password1': pw, 'new_password2': pw})
@@ -134,12 +134,12 @@ class UsersManagersTests(TestCase):
         logged_in = client.login(email=NORMAL, password='foo')
         self.assertEqual(logged_in, True)
 
-        response = client.get(reverse('commonology:password_reset'))
+        response = client.get(reverse('password_reset'))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.template_name[0], 'registration/password_reset_form.html')
 
         mail.outbox = []
-        response = client.post(reverse('commonology:password_reset'), {'email': NORMAL})
+        response = client.post(reverse('password_reset'), {'email': NORMAL})
         self.assertEqual(response.status_code, 302)
 
         self.assertEqual(len(mail.outbox), 1)
@@ -148,11 +148,11 @@ class UsersManagersTests(TestCase):
         token = response.context[0]['token']
         uid = response.context[0]['uid']
 
-        response = client.get(reverse('commonology:password_reset_confirm', kwargs={'token': token, 'uidb64': uid}))
+        response = client.get(reverse('password_reset_confirm', kwargs={'token': token, 'uidb64': uid}))
         self.assertEqual(response.reason_phrase, 'Found')
 
         # Now we post to the same url with our new password:
-        path = reverse('commonology:password_reset_confirm',
+        path = reverse('password_reset_confirm',
                        kwargs={'token': token, 'uidb64': uid})
         response = client.post(path, {'new_password1': 'foo', 'new_password2': 'foo'})
         self.assertEqual(response.status_code, 302)
@@ -183,7 +183,7 @@ class PendingUsersTests(TestCase):
         client = Client()
         client.login(email=NORMAL, password='foo')
         mail.outbox = []
-        response = client.post(reverse('commonology:invite'), data={"email": ABINORMAL})
+        response = client.post(reverse('invite'), data={"email": ABINORMAL})
         self.assertEqual(response.reason_phrase, 'OK')
 
         pe = PendingEmail.objects.get(email=ABINORMAL)
@@ -194,7 +194,7 @@ class PendingUsersTests(TestCase):
         mail.outbox = []
 
         client = Client()
-        path = reverse('commonology:join') + str(pe.uuid)
+        path = reverse('join') + str(pe.uuid)
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
 
@@ -209,7 +209,7 @@ class PendingUsersTests(TestCase):
 
     def join_test_helper(self, data, taint_uuid_flag=False):
         client = Client()
-        response = client.post(reverse('commonology:join'), data={"email": ABINORMAL})
+        response = client.post(reverse('join'), data={"email": ABINORMAL})
         self.assertEqual(response.reason_phrase, 'OK')
 
         msg = mail.outbox[0].body
@@ -247,13 +247,13 @@ class PendingUsersTests(TestCase):
     def test_inhibited_join(self):
         os.environ['INHIBIT_JOIN_VIEW'] = 'True'
         client = Client()
-        path = reverse('commonology:join')
+        path = reverse('join')
         response = client.get(path)
         self.assertEqual(response.url, '/')
         self.assertEqual(response.reason_phrase, 'Found')
 
         del os.environ['INHIBIT_JOIN_VIEW']
         client = Client()
-        path = reverse('commonology:join')
+        path = reverse('join')
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
