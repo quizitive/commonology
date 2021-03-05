@@ -76,15 +76,13 @@ def players_to_db(responses):
         responses['Name'].tolist(),
         responses['Email Address'].tolist()
     )
-    players = [
-        Player(
-            display_name=dn[:100],
-            email=e
+    for dn, e in player_list:
+        Player.objects.update_or_create(
+            email=e,
+            defaults={
+                'display_name': dn[:100],
+            }
         )
-        for dn, e in player_list
-    ]
-    Player.objects.bulk_update_or_create(
-        players, ['display_name'], match_field='email')
 
 
 def answers_to_db(game, responses, update=False):

@@ -7,7 +7,8 @@ import pandas as pd
 
 from django.db.models import Sum, Subquery, OuterRef
 
-from game.models import Game, Answer, AnswerCode, Question, Team
+from users.models import Team
+from game.models import Game, Answer, AnswerCode, Question
 
 
 REDIS = redis.Redis(host='localhost', port=6379, db=0)
@@ -38,7 +39,7 @@ def build_filtered_leaderboard(game, answer_tally, search_term=None, team_id=Non
         leaderboard = leaderboard[leaderboard['id'].isin(members)]
     else:
         # don't show admins in public leaderboard (they could be perceived as cheating)
-        admins = game.admins.values_list('player', flat=True)
+        admins = game.admins.values_list('id', flat=True)
         leaderboard = leaderboard[~leaderboard['id'].isin(admins)]
 
     return leaderboard

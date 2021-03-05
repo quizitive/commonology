@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
+from game.utils import create_key
 from .managers import CustomUserManager
 
 
@@ -35,3 +36,31 @@ class PendingEmail(models.Model):
     email = models.EmailField()
     referrer = models.EmailField(null=True)
     created = models.DateTimeField(auto_now_add=True)
+
+
+class Player(CustomUser):
+    display_name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.email
+
+    @property
+    def games(self):
+        return self.answers.values(
+            game_id=models.F('question__game__game_id')).exclude(
+            game_id=None).distinct().order_by('-game_id')
+
+
+class Team(models.Model):
+    id = models.CharField(primary_key=True, max_length=7, default=create_key)
+    name = models.CharField(max_length=100)
+    admins = models.ManyToManyField(Player, related_name='admin_teams')
+    players = models.ManyToManyField(Player, related_name='teams')
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def games(self):
+        return self.players.values(
+            game_id=models.F('answers__question__game__game_id')).distinct().order_by('-game_id')

@@ -14,8 +14,9 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 from django.core.mail import send_mail
 
+from users.models import Player
 from game.forms import TabulatorForm
-from game.models import Game, Team, Player
+from game.models import Game
 from game.utils import next_event
 from game.leaderboard import build_filtered_leaderboard, build_answer_tally, player_rank_and_percentile_in_game
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
@@ -194,7 +195,7 @@ class DashboardView(LoginRequiredMixin, View):
 
     def _get_context(self, request):
         user = request.user
-        player, _ = Player.objects.get_or_create(user=user)
+        player, _ = Player.objects.get_or_create(id=user.id)
         games = Game.objects.filter(publish=True).order_by('-game_id')
         latest_game_id = games.aggregate(Max('game_id'))['game_id__max']
 

@@ -82,7 +82,7 @@ INSTALLED_APPS = [
     'debug_toolbar'
 ]
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'users.Player'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

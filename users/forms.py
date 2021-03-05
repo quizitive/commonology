@@ -1,23 +1,23 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
-from .models import CustomUser, PendingEmail, LOCATIONS, MAX_LOCATION_LEN
+from .models import Player, PendingEmail, LOCATIONS, MAX_LOCATION_LEN
 
 
-class CustomUserCreationForm(UserCreationForm):
+class PlayerCreationForm(UserCreationForm):
     class Meta(UserCreationForm):
-        model = CustomUser
+        model = Player
         fields = ('email',)
 
 
-class CustomUserChangeForm(UserChangeForm):
+class PlayerChangeForm(UserChangeForm):
     class Meta:
-        model = CustomUser
+        model = Player
         fields = ('email',)
 
 
-class CustomUserDashboardForm(forms.ModelForm):
+class PlayerProfileForm(forms.ModelForm):
     class Meta:
-        model = CustomUser
+        model = Player
         fields = ('email', 'first_name', 'last_name', 'location', 'birth_date', 'referrer')
 
 
@@ -28,7 +28,7 @@ class PendingEmailForm(forms.ModelForm):
         fields = ('email',)
 
 
-class JoinForm(CustomUserCreationForm):
+class JoinForm(PlayerCreationForm):
     required_css_class = 'required'
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
@@ -37,5 +37,5 @@ class JoinForm(CustomUserCreationForm):
                                required=False)
 
     class Meta(UserCreationForm):
-        model = CustomUser
+        model = Player
         fields = ('email', 'first_name', 'last_name', 'location')
