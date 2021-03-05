@@ -1,0 +1,53 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block title %}commonologygame.com{% endblock title %}
+
+{% block page_style %}
+  <link rel="stylesheet" href="{% static "game/css/index.css" %}">
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static "game/js/countdown.js" %}" type="text/javascript"></script>
+  <script>
+  window.onload = function() {
+    let event_time = "{{ event_time }}";
+    getCountdown(event_time);
+  };
+  </script>
+{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+  <div class="w3-container w3-white w3-border-bottom w3-border-black" style="height: 50vh; display: flex;">
+    <div class="logo container" style="margin: auto; display: block; text-align: center">
+      <h1 class="logo" style="margin: auto">Commonology!</h1>
+      <h3 class="subheader">Can <b><i>you</i></b> beat <b><i>your</i></b> friends?</h3>
+    </div>
+  </div>
+  <div class="w3-container w3-blue w3-border-bottom w3-border-black" style="height: 50vh; display: flex;">
+    <div class="countdown-container">
+      <h3 class="subheader">{{ event_text }}</h3>
+      <div class="countdown-display">
+        <div class="countdown-unit-block">
+          <div class="countdown-val" id="days">--</div>
+          <div class="countdown-unit" id="days">days</div>
+        </div>
+        <div class="countdown-unit-block">
+          <div class="countdown-val" id="hours">--</div>
+          <div class="countdown-unit" id="hours">hours</div>
+        </div>
+        <div class="countdown-unit-block">
+          <div class="countdown-val" id="mins">--</div>
+          <div class="countdown-unit" id="mins">minutes</div>
+        </div>
+        <div class="countdown-unit-block">
+          <div class="countdown-val" id="secs">--</div>
+          <div class="countdown-unit" id="secs">seconds</div>
+        </div>
+      </div>
+      <div class="approx"><i>(approximately...)</i></div>
+    </div>
+  </div>
+{% endblock %}

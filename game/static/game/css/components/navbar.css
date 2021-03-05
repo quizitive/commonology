@@ -1,0 +1,24 @@
+#navbar {
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.12);
+}
+h1.logo {
+        font-family: "Bungee Shade", sans-serif;
+        text-align: center;
+        font-size: 8vw;
+        color: #2196F9!important;
+        margin: 0;
+    }
+div.content, div.narrow-content {
+    margin-top: 8vw;
+}
+
+/* Large Screens */
+@media only screen and (min-width: 768px) {
+  h1.logo {
+    font-size: 4rem;
+  }
+  div.content, div.narrow-content {
+    margin-top: 80px;
+}
+
+}

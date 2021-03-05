@@ -1,0 +1,33 @@
+body {
+    font-family: "Poppins", "Quicksand Medium", "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif
+}
+
+div.content {
+    margin: auto;
+    max-width: 778px;
+}
+
+/* so cards have rounded corners on top and bottom */
+header.w3-container {
+    border-radius: 4px 4px 0 0
+}
+
+/* Leaderboard, Results, Dashboard Style */
+.leaderboard {
+    font-family: "Poppins", "Verdana", sans-serif;
+}
+h1.leaderboard {
+    margin: 0;
+}
+.w3-button:hover {
+    color: white!important;
+    background: #0e8df2!important;
+}
+@media only screen and (max-width: 767px) {
+  h1.leaderboard {
+    font-size: 6vw;
+  }
+  h3.leaderboard {
+    font-size: 4vw;
+  }
+}

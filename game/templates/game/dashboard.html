@@ -1,0 +1,96 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block title %}Commonology | Dashboard{% endblock %}
+
+{% block page_style %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block content %}
+  <div class="content">
+    <div class="w3-row" style="padding: 16pt"></div>
+
+    <div class="w3-card w3-round" style="margin:auto;">
+      <header class="w3-container w3-blue">
+        <h3>Welcome, {{ display_name }}!</h3>
+      </header>
+      <div class="w3-container w3-padding-16">
+        <p>{{ message }}</p>
+        <p>
+          <a href="{% url 'game_leaderboard' latest_game_id %}">Week {{ latest_game_id }} Leaderboard</a>
+          <a class="w3-padding-small" href="answers.html">Week {{ latest_game_id }} Results</a>
+        </p>
+        <p></p>
+      </div>
+    </div>
+    <div class="w3-row" style="padding: 8pt"></div>
+    <div class="w3-card w3-round" style="margin:auto;">
+      <header class="w3-container w3-blue">
+        <h3>My Scores</h3>
+      </header>
+      <div class="w3-container w3-padding-16">
+        <p>
+        See how you've performed over time.
+        </p>
+        <div class="w3-dropdown-hover w3-padding-16">
+          <button class="w3-button w3-blue">My Leaderboards</button>
+          <div class="w3-dropdown-content w3-bar-block w3-card-4">
+            {% for game in games %}
+            <a href="{% url 'game_leaderboard' game.game_id %}" class="w3-bar-item w3-button">Week {{ game.game_id }}</a>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="w3-dropdown-hover w3-padding-16">
+          <button class="w3-button w3-blue">My Results</button>
+          <div class="w3-dropdown-content w3-bar-block w3-card-4">
+            {% for game in games %}
+            <a href="{% url 'game_leaderboard' game.game_id %}" class="w3-bar-item w3-button">Week {{ game.game_id }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="w3-row" style="padding: 8pt"></div>
+    <div class="w3-card w3-round" style="margin:auto;">
+      <header class="w3-container w3-blue">
+        <h3>My Teams</h3>
+      </header>
+      <div class="w3-container w3-padding-16">
+        <p>
+        Start a team to see how you stack up against your friends, and compete against other teams!
+        </p>
+        {% for team in teams %}
+          <button class="w3-button w3-blue w3-border w3-border-blue"
+            href="teams.html">Cool Team 1</button>
+        {% endfor %}
+          <button class="w3-button w3-border-blue w3-border">Create a team!</button>
+      </div>
+    </div>
+    <div class="w3-row" style="padding: 8pt"></div>
+    <div class="w3-card w3-round" style="margin:auto;">
+      <header class="w3-container w3-blue">
+        <h3>Invite Friends</h3>
+      </header>
+      <div class="w3-container w3-padding-16">
+        <p>
+        {{ invite_message }}
+        </p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="w3-col" style="width:48px">
+            <button class="w3-button w3-blue w3-border w3-border-blue w3-round" type="submit">
+              <i class="fa fa-paper-plane"></i>
+            </button>
+          </div>
+          <div class="w3-rest">
+            <input type="text" name="invite" class="w3-input w3-round w3-border" placeholder="Enter emails...">
+            <div style="color: grey;"><i>eg. john@thebeatles.com, paul@thebeatles.com</i></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="w3-row" style="padding: 8pt"></div>
+{% endblock %}
+{% block scripts %}{% endblock %}

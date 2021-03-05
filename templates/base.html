@@ -1,0 +1,31 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EFH7JNXR5D"></script>
+  {% if not debug %}
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EFH7JNXR5D');
+  </script>
+  {% endif %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'css/w3.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block base_style %}{% endblock %}
+  {% block app_style %}{% endblock %}
+  {% block page_style %}{% endblock %}
+  <title>{% block title %}{% endblock %}</title>
+</head>
+
+<body>
+{% block navbar %}{% endblock %}
+{% block content %}{% endblock %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,8 @@
+div.spacer {
+    height: 1px;
+}
+
+label.required::after {
+    content: '*';
+    color: red;
+}

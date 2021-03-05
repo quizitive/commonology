@@ -1,0 +1,14 @@
+<!--users/templates/users/email_signup.html-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<p>
+    Thank you for suggesting your friend at {{ email }}.
+    However, an account already exists for that address.
+    It could be that your friend has not visited us and logged in for a very long time.
+    Or, maybe our email messages are going to a spam or junk folder.
+    Perhaps you can suggest that they try to login with us again.
+</p>
+{% endblock %}

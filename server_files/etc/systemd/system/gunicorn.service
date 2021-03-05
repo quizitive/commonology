@@ -1,0 +1,14 @@
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+User=q
+Group=www-data
+WorkingDirectory=/home/django/quizitive
+EnvironmentFile=/home/django/secret_env
+ExecStart=/home/q/.pyenv/versions/quizitive/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/q/quizitive/quizitive.sock project.wsgi:application
+#ExecStart=/home/q/quizitive/scripts/run.bash
+
+[Install]
+WantedBy=multi-user.target

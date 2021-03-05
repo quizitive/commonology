@@ -1,0 +1,27 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block title %}Commonology | Score{% endblock %}
+
+{% block content %}
+  <div class="content">
+    <div class="w3-row" style="padding: 16pt"></div>
+    <div class="w3-row">
+        <div class="w3-blue w3-padding w3-col">
+            <h1>Hello!</h1>
+            <p>Enter the name of the Google Sheet in the box below. Results will be sent directly back to the same sheet. Happy grading!</p>
+        </div>
+    </div>
+    <div class="w3-row">
+        <div class="w3-blue w3-padding w3-col">
+            <form method="post">
+                {% csrf_token %}
+                {{ form }}
+            <br/>
+                <button class="w3-button w3-round w3-white w3-border w3-border w3-margin">Submit</button>
+                {{ msg }}
+            </form>
+        </div>
+    </div>
+  </div>
+{% endblock content %}

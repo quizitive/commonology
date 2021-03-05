@@ -1,0 +1,15 @@
+<!--users/templates/users/email_signup.html-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form method="post">
+    {{ email }}
+    <p>Note: You may change your email address later on your profile page.</p>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Continue">
+</form>
+
+{% endblock %}
