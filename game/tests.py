@@ -133,7 +133,7 @@ class TestGameTabulation(BaseGameDataTestCase):
 
     def _expected_leaderboard(self):
         # local test data file plus some computed/related values
-        lb_data_fp = f'{LOCAL_DIR}/test_data/est_leaderboard.csv'
+        lb_data_fp = f'{LOCAL_DIR}/test_data/test_leaderboard.csv'
         expected_leaderboard = pd.read_csv(lb_data_fp, index_col=0)
         expected_leaderboard['Rank'] = expected_leaderboard['Rank'].astype('int32')
         expected_leaderboard['Score'] = expected_leaderboard['Score'].astype('int32')
