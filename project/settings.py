@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'game',
+    'leaderboard',
     'debug_toolbar'
 ]
 

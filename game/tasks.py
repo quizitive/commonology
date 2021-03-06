@@ -8,12 +8,13 @@ from celery import shared_task
 from django.utils.timezone import make_aware
 from django.db import transaction
 
-from game.models import Game, Question, Player, Answer, AnswerCode
-from users.models import CustomUser as User
+from game.models import Game, Question, Answer, AnswerCode
+from users.models import Player
 
 
 @shared_task
 def add(x, y):
+    import os
     MARC = os.getenv('MARC')
     if MARC == 'Ted':
         return 0
@@ -44,7 +45,7 @@ def game_to_db(filename):
             'name': filename.replace(" (Responses)", ""),
         }
     )
-    staff = User.objects.filter(is_staff=True)
+    staff = Player.objects.filter(is_staff=True)
     game.admins.add(*staff)
     game.save()
     return game
@@ -120,12 +121,12 @@ def new_answers_to_db(game, responses):
     q_text = responses.columns[3:]
     prev_players = Player.objects.filter(answers__question__game=game).values_list('email', flat=True)
     new_responses = responses[~responses['Email Address'].isin(prev_players)]
+    emails = new_responses['Email Address'].tolist()
+    players = dict(Player.objects.filter(email__in=emails).values_list('email', 'id'))
     answers = []
     for qt in q_text:
         question = Question.objects.get(text=qt.strip(), game=game)
         q_id, q_type = question.id, question.type
-        emails = new_responses['Email Address'].tolist()
-        players = dict(Player.objects.filter(email__in=emails).values_list('email', 'id'))
         player_answers = zip(
             new_responses['Timestamp'],
             emails,

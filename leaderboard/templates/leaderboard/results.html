@@ -11,11 +11,11 @@
 
 <div class="content">
 
-  {% include 'game/components/game_header.html' with view="Results" %}
+  {% include 'leaderboard/components/game_header.html' with view="Results" %}
 
   {# Results objs go here #}
   {% for q, responses in answer_tally.items %}
-    {% include 'game/components/results_card.html' with q=q responses=responses %}
+    {% include 'leaderboard/components/results_card.html' with q=q responses=responses %}
   {% endfor %}
 
   <div class="w3-row w3-padding-large"></div>

@@ -1,4 +1,3 @@
-import os
 import datetime
 import string
 import random
@@ -8,10 +7,9 @@ from csv import reader
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from game.models import Player
 from game.utils import next_wed_noon, next_friday_1159
 from game.rollups import *
-from game.leaderboard import *
+from leaderboard.leaderboard import *
 from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
