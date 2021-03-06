@@ -57,4 +57,3 @@ class PlayerHomeView(LoginRequiredMixin, View):
             follow_up = "That puts you in the top half!"
 
         return f"Last week you ranked {latest_rank} out of {player_count} players. {follow_up}"
-
