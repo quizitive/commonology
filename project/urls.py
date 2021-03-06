@@ -11,6 +11,7 @@ urlpatterns = [
     path('', include('users.urls')),
     path('', include('game.urls')),
     path('leaderboard/', include('leaderboard.urls')),
+    path('c/', include('community.urls')),
     path('admin/', admin.site.urls),
     path('__debug__/', include(debug_toolbar.urls)),
     path('', views.index, name='home'),

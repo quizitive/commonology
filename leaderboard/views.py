@@ -13,7 +13,6 @@ from game.models import Game
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
 
 
-
 @login_required
 def loggedin_leaderboard_view(request):
     return _render_leaderboard(request)
