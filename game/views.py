@@ -6,11 +6,9 @@ import datetime
 
 from django.shortcuts import render
 from django.views.generic.base import View
-from django.http import Http404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 from django.core.mail import send_mail
 
@@ -65,6 +63,7 @@ def mailtest(request):
 
     return render(request, 'game/mailtest.html',
                   {'message': message, "emailaddr": emailaddr})
+
 
 @staff_member_required
 def tabulator_form_view(request):
