@@ -1,11 +1,7 @@
-{% extends 'game/base.html' %}
+{% extends 'leaderboard/base.html' %}
 {% load static %}
 
 {% block title %}Commonology | Leaderboard{% endblock %}
-
-{% block page_style %}
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-{% endblock %}
 
 {% block content %}
 
@@ -37,16 +33,34 @@
     <div class="w3-padding-16 w3-col">
       <table class="w3-table w3-striped w3-bordered">
         <thead>
-          <th>Rank</th>
-          <th>Name</th>
-          <th>Score </th>
+          <th class="w3-center" style="vertical-align: bottom;">Rank</th>
+          <th style="vertical-align: bottom;">Name</th>
+          <th style="vertical-align: bottom;">Score </th>
+          <th class="w3-center">
+            <div class="w3-dropdown-hover">
+              <button id="following-drp" class="w3-button w3-blue">
+                <i class="fas fa-check-circle" style="color:white; margin:auto;"></i>
+                <i class="fas fa-caret-down"></i></button>
+              <div class="w3-dropdown-content w3-bar-block w3-card-4" style="right:0;min-width:117px;">
+                <a href="" class="w3-bar-item w3-button">Following</a>
+                <a href="" class="w3-bar-item w3-button">All Players</a>
+              </div>
+            </div>
+          </th>
         </thead>
         <tbody>
           {% for player in leaderboard %}
             <tr>
-              <td>{{ player.Rank }}</td>
+              <td class="w3-center">{{ player.Rank }}</td>
               <td>{{ player.Name }}</td>
               <td>{{ player.Score }}</td>
+              <td class="w3-center">
+                {% if player.id in user_following %}
+                  <i class="fas fa-check-circle" style="color:#4CAF50; margin:auto;"></i>
+                  {% else %}
+                  <i class="far fa-circle" style="color:dimgrey; margin:auto;"></i>
+                {% endif %}
+              </td>
             </tr>
           {% endfor %}
         </tbody>

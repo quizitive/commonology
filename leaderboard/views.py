@@ -1,9 +1,9 @@
-
 import os
 
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
@@ -30,6 +30,14 @@ def uuid_leaderboard_view(request, uuid):
 
 
 def _render_leaderboard(request, game_id=None, published=True):
+    user_following = {}
+    if request.user.is_authenticated:
+        user = Player.objects.get(id=request.user.id)
+        user_following = {
+            p: True
+            for p in user.following.values_list('id', flat=True)
+        }
+
     if published:
         games = Game.objects.filter(publish=True).order_by('-game_id')
     else:
@@ -56,7 +64,8 @@ def _render_leaderboard(request, game_id=None, published=True):
         'date_range': date_range,
         'leaderboard': leaderboard,
         'search_term': search_term,
-        'team': team
+        'team': team,
+        'user_following': user_following
     }
 
     return render(request, 'leaderboard/leaderboard.html', context)
