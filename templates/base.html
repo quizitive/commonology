@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="{% static 'css/w3.css' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.2.1/htmx.min.js" integrity="sha512-Xsn9EFspscbf/oX268GrUeBgvaVWik7iwUqqwCiEdBWiPHEIpDekW3OSFL61BZXxSKnklTPA5RPWqRR99rJoSA==" crossorigin="anonymous"></script>
   {% block base_style %}{% endblock %}
   {% block app_style %}{% endblock %}
   {% block page_style %}{% endblock %}
@@ -29,4 +30,9 @@
 {% block content %}{% endblock %}
 {% block scripts %}{% endblock %}
 </body>
+<script>
+  document.body.addEventListener('htmx:configRequest', (event) => {
+  event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+})
+</script>
 </html>

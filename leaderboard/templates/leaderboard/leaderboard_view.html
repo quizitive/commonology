@@ -1,0 +1,12 @@
+{% extends 'leaderboard/base.html' %}
+{% load static %}
+
+{% block title %}Commonology | Leaderboard{% endblock %}
+
+{% block content %}
+
+<div class="content">
+{% include 'leaderboard/components/game_header.html' with view="Leaderboard" %}
+{% include 'leaderboard/components/leaderboard.html' %}
+</div>
+{% endblock content %}

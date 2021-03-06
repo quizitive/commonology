@@ -1,14 +1,4 @@
-{% extends 'leaderboard/base.html' %}
-{% load static %}
-
-{% block title %}Commonology | Leaderboard{% endblock %}
-
-{% block content %}
-
-<div class="content">
-{% include 'leaderboard/components/game_header.html' with view="Leaderboard" %}
-
-  <div class="w3-row">
+<div class="w3-row">
     <div class="w3-padding-large w3-col">
       <div class="w3-row">
         <form method="get">
@@ -54,19 +44,21 @@
               <td class="w3-center">{{ player.Rank }}</td>
               <td>{{ player.Name }}</td>
               <td>{{ player.Score }}</td>
-              <td class="w3-center">
+
+              {#      Follow Buttons      #}
+              <td class="w3-center" hx-post="{% url 'users:htmx' %}" hx-vals='{"to_follow": "{{ player.id }}"}'>
                 {% if player.id in user_following %}
                   <i class="fas fa-check-circle" style="color:#4CAF50; margin:auto;"></i>
                   {% else %}
                   <i class="far fa-circle" style="color:dimgrey; margin:auto;"></i>
                 {% endif %}
               </td>
+
+
+
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-
-</div>
-{% endblock content %}

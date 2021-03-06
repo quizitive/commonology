@@ -1,8 +1,12 @@
 from django.urls import include, path
-from users.views import user_logout, profile_view, join_view, \
-    email_confirmed_view, send_invite_view
 from django.contrib.auth import views as auth_views
 
+from users.views import user_logout, profile_view, join_view, \
+    email_confirmed_view, send_invite_view
+from users.htmx import PlayersAPIViews
+
+
+app_name = 'users'
 
 urlpatterns = [
     path('logout/', user_logout, name='logout'),
@@ -18,4 +22,5 @@ urlpatterns = [
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    path('htmx/', PlayersAPIViews.as_view(), name='htmx')
 ]
