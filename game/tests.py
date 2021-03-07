@@ -1,4 +1,3 @@
-import os
 import datetime
 import string
 import random
@@ -8,15 +7,14 @@ from csv import reader
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from game.models import Player, Team
 from game.utils import next_wed_noon, next_friday_1159
 from game.rollups import *
-from game.leaderboard import *
+from leaderboard.leaderboard import *
 from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
 
-from users.models import CustomUser as User
+from users.models import Player
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -143,7 +141,7 @@ class TestGameTabulation(BaseGameDataTestCase):
             axis=1
         ).astype('int64')
         expected_leaderboard['is_admin'] = expected_leaderboard.apply(
-            lambda x: x['id'] in self.game.admins.values_list('player__id', flat=True),
+            lambda x: x['id'] in self.game.admins.values_list('id', flat=True),
             axis=1
         )
         q_list = [q.text for q in self.questions[:10]]
@@ -252,13 +250,10 @@ class TestGameTabulation(BaseGameDataTestCase):
 
     def test_admin_exclusion(self):
         # create a user and attach to a player
-        user = User.objects.create(email="user1@fakeemail.com")
         player = Player.objects.get(email="user1@fakeemail.com")
-        player.user = user
-        player.save()
 
         # make user a game admin
-        self.game.admins.add(user)
+        self.game.admins.add(player)
         self.game.save()
 
         # test that the admin is excluded from game answer tally (28 answers per question v 29)

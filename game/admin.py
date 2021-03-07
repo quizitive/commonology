@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from game.models import Game, Question, Player, Team, Answer, AnswerCode
+from game.models import Game, Question, Answer, AnswerCode
 
 
 @admin.register(Game)
@@ -14,18 +14,6 @@ class GameAdmin(admin.ModelAdmin):
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ('text', 'game')
     search_fields = ('text', 'game__name')
-
-
-@admin.register(Player)
-class PlayerAdmin(admin.ModelAdmin):
-    list_display = ('email', 'display_name')
-    search_fields = ('email', 'display_name')
-
-
-@admin.register(Team)
-class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id')
-    search_field = ('name', 'id', 'players__email', 'players__display_name')
 
 
 @admin.register(Answer)

@@ -2,14 +2,13 @@ from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 
 from django.db import models
 
-from users.models import CustomUser as User
-from game.utils import create_key
+from users.models import Player
 
 
 class Game(models.Model):
     game_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=100)
-    admins = models.ManyToManyField(User, related_name='admin_games')
+    admins = models.ManyToManyField(Player, related_name='admin_games')
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
@@ -39,7 +38,7 @@ class Game(models.Model):
             type=Question.op).first().raw_answers.values(
             'player', 'player__display_name').annotate(
             is_admin=models.Case(
-                models.When(player__user__in=self.admins.values_list('id', flat=True), then=True),
+                models.When(player__in=self.admins.values_list('id', flat=True), then=True),
                 default=False,
                 output_field=models.BooleanField()
             )
@@ -63,7 +62,7 @@ class Game(models.Model):
         ).filter(
             question__game=self
         ).exclude(
-            player__user__in=self.admins.values_list('id', flat=True)
+            player__in=self.admins.values_list('id', flat=True)
         ).annotate(count=models.Count('raw_string')).order_by()
 
     @property
@@ -79,7 +78,7 @@ class Game(models.Model):
         ).values_list('player', 'player__display_name', 'question__text').annotate(
             coded_answer=models.Subquery(answer_code_subquery.values('coded_answer')),
             is_admin=models.Case(
-                models.When(player__user__in=self.admins.values_list('id', flat=True), then=True),
+                models.When(player__in=self.admins.values_list('id', flat=True), then=True),
                 default=False,
                 output_field=models.BooleanField()
             )
@@ -116,37 +115,6 @@ class Question(models.Model):
 
     def __str__(self):
         return self.text
-
-
-class Player(models.Model):
-    objects = BulkUpdateOrCreateQuerySet.as_manager()
-    user = models.OneToOneField(User, null=True, on_delete=models.SET_NULL, related_name='player')
-    display_name = models.CharField(max_length=100)
-    email = models.CharField(max_length=256, unique=True)
-
-    def __str__(self):
-        return self.email
-
-    @property
-    def games(self):
-        return self.answers.values(
-            game_id=models.F('question__game__game_id')).exclude(
-            game_id=None).distinct().order_by('-game_id')
-
-
-class Team(models.Model):
-    id = models.CharField(primary_key=True, max_length=7, default=create_key)
-    name = models.CharField(max_length=100)
-    admins = models.ManyToManyField(User, related_name='teams')
-    players = models.ManyToManyField(Player, related_name='teams')
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def games(self):
-        return self.players.values(
-            game_id=models.F('answers__question__game__game_id')).distinct().order_by('-game_id')
 
 
 class Answer(models.Model):
