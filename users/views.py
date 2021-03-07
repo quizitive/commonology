@@ -9,7 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
-from users.forms import CustomUserDashboardForm, PendingEmailForm, JoinForm
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import CustomUser, PendingEmail
 
 from .utils import remove_pending_email_invitations
@@ -23,11 +23,11 @@ def user_logout(request):
 
 def profile_view(request):
     if request.user.id is None:
-        user_form = CustomUserDashboardForm(data=request.POST or None)
+        user_form = PlayerProfileForm(data=request.POST or None)
     else:
         email = request.user.email
         cu = CustomUser.objects.get(email=email)
-        user_form = CustomUserDashboardForm(instance=cu, data=request.POST or None)
+        user_form = PlayerProfileForm(instance=cu, data=request.POST or None)
     if request.method == 'POST' and user_form.is_valid():
         user_form.save()
     return render(request, "users/profile.html", {"user_form": user_form})

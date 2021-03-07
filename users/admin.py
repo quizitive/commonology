@@ -1,14 +1,15 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser, PendingEmail
+from .forms import PlayerCreationForm, PlayerChangeForm
+from .models import Player, PendingEmail, Team
 
 
-class CustomUserAdmin(UserAdmin):
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
-    model = CustomUser
+@admin.register(Player)
+class PlayerUserAdmin(UserAdmin):
+    add_form = PlayerCreationForm
+    form = PlayerChangeForm
+    model = Player
     list_display = ('email', 'is_staff', 'is_active', 'is_superuser')
     list_filter = ('email', 'is_staff', 'is_active', 'is_superuser')
     fieldsets = (
@@ -29,11 +30,14 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('email',)
 
 
+@admin.register(PendingEmail)
 class PendingEmailAdmin(admin.ModelAdmin):
     list_display = ('email', 'referrer', 'created', 'uuid')
     list_filter = ('created',)
     search_fields = ('email', 'referrer', 'uuid')
 
 
-admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(PendingEmail, PendingEmailAdmin)
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id')
+    search_field = ('name', 'id', 'players__email', 'players__display_name')
