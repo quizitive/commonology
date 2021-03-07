@@ -23,8 +23,8 @@
     <div class="w3-padding-16 w3-col">
       <table class="w3-table w3-striped w3-bordered">
         <thead>
-          <th class="w3-center" style="vertical-align: bottom;">Rank</th>
-          <th style="vertical-align: bottom;">Name</th>
+          <th class="w3-center rank" style="vertical-align: bottom;">Rank</th>
+          <th class="name" style="vertical-align: bottom;">Name</th>
           <th style="vertical-align: bottom;">Score </th>
           <th class="w3-center">
             <div class="w3-dropdown-hover">
@@ -42,7 +42,7 @@
           {% for player in leaderboard %}
             <tr>
               <td class="w3-center">{{ player.Rank }}</td>
-              <td>{{ player.Name }}</td>
+              <td class="name">{{ player.Name }}</td>
               <td>{{ player.Score }}</td>
 
               {#      Follow Buttons      #}
