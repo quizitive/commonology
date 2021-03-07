@@ -31,8 +31,21 @@
 {% block scripts %}{% endblock %}
 </body>
 <script>
+  {% if request.user.is_authenticated %}
+    const user_id = {{ request.user.id }}
+  {% else %}
+    const user_id = null
+  {% endif %}
   document.body.addEventListener('htmx:configRequest', (event) => {
-  event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-})
+      event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+  })
+  htmx.on('htmx:beforeRequest', function(evt) {
+        if (user_id == null) {
+          console.log("not a user")
+        } else {
+          console.log("a user")
+        }
+        console.log(evt)
+  });
 </script>
 </html>
