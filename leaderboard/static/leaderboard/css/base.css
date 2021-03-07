@@ -9,6 +9,10 @@ h1.leaderboard {
     color: white!important;
     background: #0e8df2!important;
 }
+.name {
+    width: 65%;
+    word-wrap: break-word;
+}
 @media only screen and (max-width: 767px) {
   h1.leaderboard {
     font-size: 6vw;
