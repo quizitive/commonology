@@ -5,7 +5,7 @@ from django.views.generic.base import View
 from users.models import Player
 
 
-class PlayersAPIViews(View):
+class PlayersHTMXView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
