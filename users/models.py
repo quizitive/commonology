@@ -27,6 +27,9 @@ class CustomUser(AbstractUser):
 
     objects = CustomUserManager()
 
+    class Meta:
+        abstract = True
+
     def __str__(self):
         return self.email
 
@@ -49,6 +52,9 @@ class Player(CustomUser):
         return self.answers.values(
             game_id=models.F('question__game__game_id')).exclude(
             game_id=None).distinct().order_by('-game_id')
+
+
+USER_CLASS = Player
 
 
 class Team(models.Model):
