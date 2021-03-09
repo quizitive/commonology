@@ -38,9 +38,9 @@ def build_filtered_leaderboard(game, answer_tally, search_term=None, team_id=Non
         members = team.players.values_list('id', flat=True)
         leaderboard = leaderboard[leaderboard['id'].isin(members)]
     else:
-        # don't show admins in public leaderboard (they could be perceived as cheating)
-        admins = game.managers.values_list('id', flat=True)
-        leaderboard = leaderboard[~leaderboard['id'].isin(admins)]
+        # don't show hosts in public leaderboard (they could be perceived as cheating)
+        hosts = game.hosts.values_list('id', flat=True)
+        leaderboard = leaderboard[~leaderboard['id'].isin(hosts)]
 
     return leaderboard
 
@@ -75,11 +75,11 @@ def _build_leaderboard_fromdb(game, answer_tally):
         lb_data.append(p_data)
 
     leaderboard = pd.DataFrame(
-        columns=['id', 'is_admin', 'Name'] + lb_cols,
+        columns=['id', 'is_host', 'Name'] + lb_cols,
         data=lb_data
     )
     leaderboard = _score_and_rank(leaderboard, lb_cols)
-    leaderboard = leaderboard[['id', 'is_admin', 'Rank', 'Name', 'Score'] + lb_cols]
+    leaderboard = leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + lb_cols]
     REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 3600)
     return leaderboard
 
