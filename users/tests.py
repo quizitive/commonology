@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core import mail
-from users.models import PendingEmail, CustomUser
+from users.models import PendingEmail, USER_CLASS
 
 
 NORMAL = 'normal@user.com'
@@ -17,8 +17,8 @@ def get_local_user(reset=False):
     global local_user
     if reset:
         try:
-            CustomUser.objects.get(email=NORMAL).delete()
-        except CustomUser.DoesNotExist:
+            USER_CLASS.objects.get(email=NORMAL).delete()
+        except USER_CLASS.DoesNotExist:
             pass
         local_user = None
     if local_user is None:
@@ -88,7 +88,7 @@ class UsersManagersTests(TestCase):
         response = client.post(path, data=data)
         self.assertEqual(response.reason_phrase, 'OK')
 
-        user = CustomUser.objects.get(email=NORMAL)
+        user = USER_CLASS.objects.get(email=NORMAL)
         self.assertEqual(user.first_name, data['first_name'])
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.location, data['location'])
@@ -174,7 +174,7 @@ class PendingUsersTests(TestCase):
         client = Client()
         response = client.post(path, data=data)
         self.assertIn(response.reason_phrase, ['OK', 'Found'])
-        x = CustomUser.objects.filter(email__exact=data['email']).exists()
+        x = USER_CLASS.objects.filter(email__exact=data['email']).exists()
         self.assertEqual(x, flag)
 
     def test_invite(self):
@@ -205,7 +205,7 @@ class PendingUsersTests(TestCase):
         data['password2'] = data['password1']
         self.assert_user_was_created(path, data, True)
 
-        CustomUser.objects.get(email=ABINORMAL).delete()
+        USER_CLASS.objects.get(email=ABINORMAL).delete()
 
     def join_test_helper(self, data, taint_uuid_flag=False):
         client = Client()
@@ -231,7 +231,7 @@ class PendingUsersTests(TestCase):
         self.assert_user_was_created(path, data, flag)
 
         if flag:
-            CustomUser.objects.get(email=ABINORMAL).delete()
+            USER_CLASS.objects.get(email=ABINORMAL).delete()
 
     def test_join(self):
         data = self.data
