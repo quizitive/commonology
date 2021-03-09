@@ -14,7 +14,7 @@ class PlayerUserAdmin(UserAdmin):
     list_filter = ('email', 'is_staff', 'is_active', 'is_superuser')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal', {'fields': ('first_name', 'last_name', 'birth_date')}),
+        ('Personal', {'fields': ('first_name', 'last_name', 'display_name', 'birth_date')}),
         ('Other', {'fields': ('location', 'referrer')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser',
                                     'groups', 'user_permissions')}),
