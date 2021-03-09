@@ -140,12 +140,12 @@ class TestGameTabulation(BaseGameDataTestCase):
             lambda x: Player.objects.get(display_name=x['Name']).id,
             axis=1
         ).astype('int64')
-        expected_leaderboard['is_admin'] = expected_leaderboard.apply(
-            lambda x: x['id'] in self.game.admins.values_list('id', flat=True),
+        expected_leaderboard['is_owner'] = expected_leaderboard.apply(
+            lambda x: x['id'] in self.game.managers.values_list('id', flat=True),
             axis=1
         )
         q_list = [q.text for q in self.questions[:10]]
-        expected_leaderboard = expected_leaderboard[['id', 'is_admin', 'Rank', 'Name', 'Score'] + q_list]
+        expected_leaderboard = expected_leaderboard[['id', 'is_owner', 'Rank', 'Name', 'Score'] + q_list]
         return expected_leaderboard.reset_index(drop=True)
 
     def test_game_to_db(self):
@@ -248,26 +248,26 @@ class TestGameTabulation(BaseGameDataTestCase):
         # change it back
         answers_codes_to_db(self.game, self.answer_codes)
 
-    def test_admin_exclusion(self):
+    def test_owner_exclusion(self):
         # create a user and attach to a player
         player = Player.objects.get(email="user1@fakeemail.com")
 
         # make user a game admin
-        self.game.admins.add(player)
+        self.game.owners.add(player)
         self.game.save()
 
         # test that the admin is excluded from game answer tally (28 answers per question v 29)
-        at_excl_admin = build_answer_tally(self.game)
-        self.assertTrue(all([sum([r for r in resp.values()]) == 28 for resp in at_excl_admin.values()]))
+        at_excl_owner = build_answer_tally(self.game)
+        self.assertTrue(all([sum([r for r in resp.values()]) == 28 for resp in at_excl_owner.values()]))
 
         # and excluded from the leaderboard
-        leaderboard = build_filtered_leaderboard(self.game, at_excl_admin)
+        leaderboard = build_filtered_leaderboard(self.game, at_excl_owner)
         self.assertEqual(sum(leaderboard["Name"] == "User 1"), 0)
 
         # unless it's a team view
         team = Team.objects.create()
         team.players.add(player)
-        leaderboard = build_filtered_leaderboard(self.game, at_excl_admin, team_id=team.id)
+        leaderboard = build_filtered_leaderboard(self.game, at_excl_owner, team_id=team.id)
         self.assertEqual(sum(leaderboard["Name"] == "User 1"), 1)
 
 

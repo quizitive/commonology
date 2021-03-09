@@ -46,7 +46,7 @@ def game_to_db(filename):
         }
     )
     staff = Player.objects.filter(is_staff=True)
-    game.admins.add(*staff)
+    game.managers.add(*staff)
     game.save()
     return game
 
