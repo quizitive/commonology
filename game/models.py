@@ -8,7 +8,7 @@ from users.models import Player
 class Game(models.Model):
     game_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=100)
-    admins = models.ManyToManyField(Player, related_name='admin_games')
+    hosts = models.ManyToManyField(Player, related_name='hosted_games')
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
@@ -37,8 +37,8 @@ class Game(models.Model):
         return self.questions.exclude(
             type=Question.op).first().raw_answers.values(
             'player', 'player__display_name').annotate(
-            is_admin=models.Case(
-                models.When(player__in=self.admins.values_list('id', flat=True), then=True),
+            is_host=models.Case(
+                models.When(player__in=self.hosts.values_list('id', flat=True), then=True),
                 default=False,
                 output_field=models.BooleanField()
             )
@@ -62,7 +62,7 @@ class Game(models.Model):
         ).filter(
             question__game=self
         ).exclude(
-            player__in=self.admins.values_list('id', flat=True)
+            player__in=self.hosts.values_list('id', flat=True)
         ).annotate(count=models.Count('raw_string')).order_by()
 
     @property
@@ -77,8 +77,8 @@ class Game(models.Model):
             question__type=Question.op
         ).values_list('player', 'player__display_name', 'question__text').annotate(
             coded_answer=models.Subquery(answer_code_subquery.values('coded_answer')),
-            is_admin=models.Case(
-                models.When(player__in=self.admins.values_list('id', flat=True), then=True),
+            is_host=models.Case(
+                models.When(player__in=self.hosts.values_list('id', flat=True), then=True),
                 default=False,
                 output_field=models.BooleanField()
             )

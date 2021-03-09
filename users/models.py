@@ -59,9 +59,9 @@ USER_CLASS = Player
 
 
 class Team(models.Model):
-    id = models.CharField(primary_key=True, max_length=7, default=create_key)
+    team_code = models.CharField(unique=True, max_length=7, default=create_key, db_index=True)
     name = models.CharField(max_length=100)
-    admins = models.ManyToManyField(Player, related_name='admin_teams')
+    captains = models.ManyToManyField(Player, related_name='captain_teams')
     players = models.ManyToManyField(Player, related_name='teams')
 
     def __str__(self):
