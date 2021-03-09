@@ -90,7 +90,7 @@ def write_summarized_answer_sheet(sheet_doc, rollups_and_tallies):
 
 
 def write_leaderboard_sheet(sheet_doc, leaderboard):
-    api_lb = leaderboard.drop(columns=['id', 'is_admin'])
+    api_lb = leaderboard.drop(columns=['id', 'is_host'])
     try:
         sheet = sheet_doc.worksheet("[auto] leaderboard")
     except gspread.exceptions.WorksheetNotFound:
