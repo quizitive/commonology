@@ -12,8 +12,12 @@
                 <i class="fas fa-check-circle" style="color:white; margin:auto;"></i>
                 <i class="fas fa-caret-down"></i></button>
               <div class="w3-dropdown-content w3-bar-block w3-card-4" style="right:0;min-width:117px;">
-                <a href="" class="w3-bar-item w3-button">Following</a>
-                <a href="" class="w3-bar-item w3-button">All Players</a>
+                <a hx-get="/leaderboard/htmx/{{ game_id }}?following=true"
+                   hx-target="#component-leaderboard"
+                   class="w3-bar-item w3-button">Following</a>
+                <a hx-get="/leaderboard/htmx/{{ game_id }}"
+                   hx-target="#component-leaderboard"
+                   class="w3-bar-item w3-button">All Players</a>
               </div>
             </div>
           </th>

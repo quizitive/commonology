@@ -14,7 +14,7 @@ from game.models import Game, Answer, AnswerCode, Question
 REDIS = redis.Redis(host='localhost', port=6379, db=0)
 
 
-def build_filtered_leaderboard(game, answer_tally, player_ids=(), search_term=None, team_id=None):
+def build_filtered_leaderboard(game, answer_tally, player_ids=False, search_term=None, team_id=None):
     """
     Get complete leaderboard from cache or build it, then filter results
     This is the primary leaderboard function
@@ -27,8 +27,8 @@ def build_filtered_leaderboard(game, answer_tally, player_ids=(), search_term=No
     """
     leaderboard = _build_leaderboard_fromdb_or_cache(game, answer_tally)
 
-    if player_ids:
-        return leaderboard[leaderboard['id'].isin(player_ids)]
+    if player_ids is not False:
+        leaderboard = leaderboard[leaderboard['id'].isin(player_ids)]
 
     if search_term:
         leaderboard = leaderboard[leaderboard['Name'].str.contains(
