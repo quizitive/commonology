@@ -1,0 +1,11 @@
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block content %}#}
+{#<button onclick="document.getElementById('login-modal').style.display='block'" class="w3-button w3-black">Open Animated Modal</button>#}
+
+<div id="login-modal" class="w3-modal" style="display: none;">
+  <div class="w3-animate-top">
+    {% include 'users/login_card.html' %}
+  </div>
+</div>
+{#{% endblock %}#}

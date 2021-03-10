@@ -1,6 +1,9 @@
 from django import template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.template.loader import render_to_string
+
+from users.forms import LoginForm
 
 
 register = template.Library()
@@ -19,3 +22,10 @@ def login_logout_url(context):
 
 
 login_logout_url.is_safe = True
+
+
+@register.simple_tag
+def login_modal(request):
+    # form = LoginForm
+    # context['form'] = LoginForm
+    return render_to_string('users/login_modal.html', {'form': LoginForm}, request=request)

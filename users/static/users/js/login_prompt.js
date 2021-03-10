@@ -1,3 +1,3 @@
 function loginPrompt() {
-  alert("You need to login to access this feature.")
+  document.getElementById('login-modal').style.display='block';
 }
