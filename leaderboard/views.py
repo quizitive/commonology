@@ -73,8 +73,8 @@ def _render_leaderboard(request, game_id=None, published=True):
 
 class LeaderboardView(View):
 
-    def get(self, request, uuid):
-        if uuid != os.environ.get('LEADERBOARD_UUID'):
+    def get(self, request, uuid=None):
+        if uuid and uuid != os.environ.get('LEADERBOARD_UUID'):
             raise Http404("Page does not exist")
         game_id = Game.objects.aggregate(Max('game_id'))['game_id__max']
         current_game = Game.objects.get(game_id=game_id)
