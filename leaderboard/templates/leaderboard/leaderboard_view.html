@@ -6,7 +6,16 @@
 {% block content %}
 
 <div class="content">
-{% include 'leaderboard/components/game_header.html' with view="Leaderboard" %}
-{% include 'leaderboard/components/leaderboard.html' %}
+  {% include 'leaderboard/components/game_header.html' with view="Leaderboard" %}
+  {% include 'leaderboard/components/leaderboard_search.html' %}
+
+  {# Lazy Leaderboard #}
+  <div class="w3-container w3-center"
+       id="complete-leaderboard"
+       hx-get="/leaderboard/htmx/{{ game_id }}/"
+       hx-trigger="load">
+    <img class="htmx-indicator" width="50" style="margin-top: 100px;" src="{% static 'img/spinners/puff.svg' %}"/>
+  </div>
+
 </div>
 {% endblock content %}

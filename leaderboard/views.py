@@ -76,7 +76,7 @@ class LeaderboardView(View):
     def get(self, request, uuid):
         if uuid != os.environ.get('LEADERBOARD_UUID'):
             raise Http404("Page does not exist")
-        return self._render_leaderboard(request)
+        return render(request, 'leaderboard/leaderboard_view.html', {})
 
     def _render_leaderboard(self, request):
         return _render_leaderboard(request)
