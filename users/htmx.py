@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.views.generic.base import View
-from django.utils.safestring import mark_safe
 
 from users.models import Player
 

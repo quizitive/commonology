@@ -76,7 +76,14 @@ class LeaderboardView(View):
     def get(self, request, uuid):
         if uuid != os.environ.get('LEADERBOARD_UUID'):
             raise Http404("Page does not exist")
-        return render(request, 'leaderboard/leaderboard_view.html', {})
+        game_id = Game.objects.aggregate(Max('game_id'))['game_id__max']
+        current_game = Game.objects.get(game_id=game_id)
+        date_range = current_game.date_range_pretty
+        context = {
+            'game_id': game_id,
+            'date_range': date_range,
+        }
+        return render(request, 'leaderboard/leaderboard_view.html', context)
 
     def _render_leaderboard(self, request):
         return _render_leaderboard(request)
