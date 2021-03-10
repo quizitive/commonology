@@ -1,4 +1,4 @@
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
 from django import forms
 from .models import Player, PendingEmail, LOCATIONS, MAX_LOCATION_LEN
 
@@ -39,3 +39,15 @@ class JoinForm(PlayerCreationForm):
     class Meta(UserCreationForm):
         model = Player
         fields = ('email', 'first_name', 'last_name', 'location')
+
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                'class': 'w3-input',
+                'autofocus': True
+            },
+        )
+    )
+    password = forms.CharField(widget=forms.TextInput(attrs={'class': 'w3-input'}))

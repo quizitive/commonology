@@ -3,17 +3,5 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Login</h2>
-
-<p>{{ msg }}</p>
-
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Login">
-</form>
-
-<a href = "{% url 'users:password_reset' %}">Forgot password?</a>
-
-
+  {% include 'users/login_card.html' %}
 {% endblock %}
