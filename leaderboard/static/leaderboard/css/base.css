@@ -5,10 +5,6 @@
 h1.leaderboard {
     margin: 0;
 }
-.w3-button:hover {
-    color: white!important;
-    background: #0e8df2!important;
-}
 .name {
     width: 65%;
     word-wrap: break-word;
