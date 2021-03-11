@@ -50,4 +50,4 @@ class LoginForm(AuthenticationForm):
             },
         )
     )
-    password = forms.CharField(widget=forms.TextInput(attrs={'class': 'w3-input'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'w3-input'}))

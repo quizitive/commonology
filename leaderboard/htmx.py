@@ -31,8 +31,9 @@ class LeaderboardHTMXView(View):
         # leaderboard filters
         search_term = request.GET.get('q')
         team_id = request.GET.get('team')
-        player_ids = False
-        if request.GET.get('following', False):
+        player_ids = None
+        follow_filter = request.GET.get('following', False)
+        if follow_filter:
             player_ids = user_following
 
         leaderboard = build_filtered_leaderboard(
@@ -44,7 +45,8 @@ class LeaderboardHTMXView(View):
             'date_range': date_range,
             'leaderboard': leaderboard,
             'search_term': search_term,
-            'user_following': user_following
+            'user_following': user_following,
+            'follow_filter': follow_filter,
         }
 
         return render(request, 'leaderboard/components/leaderboard.html', context)
