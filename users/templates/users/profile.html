@@ -13,7 +13,7 @@ Hello {{ user.first_name|default:'Guest' }}
         <input type="submit" value="Save">
         </form>
         <a href="{% url 'logout' %}">Logout</a><br>
-        <a href="{% url 'password_change' %}">Change password</a>
+        <a href="{% url 'password_reset' %}">Change password</a>
     {% else %}
         <a href="{% url 'login' %}">Login</a>
     {% endif %}
