@@ -1,9 +1,9 @@
-
 import os
 
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
@@ -30,6 +30,14 @@ def uuid_leaderboard_view(request, uuid):
 
 
 def _render_leaderboard(request, game_id=None, published=True):
+    user_following = {}
+    if request.user.is_authenticated:
+        user = Player.objects.get(id=request.user.id)
+        user_following = {
+            p: True
+            for p in user.following.values_list('id', flat=True)
+        }
+
     if published:
         games = Game.objects.filter(publish=True).order_by('-game_id')
     else:
@@ -56,10 +64,29 @@ def _render_leaderboard(request, game_id=None, published=True):
         'date_range': date_range,
         'leaderboard': leaderboard,
         'search_term': search_term,
-        'team': team
+        'team': team,
+        'user_following': user_following
     }
 
-    return render(request, 'leaderboard/leaderboard.html', context)
+    return render(request, 'leaderboard/leaderboard_view.html', context)
+
+
+class LeaderboardView(View):
+
+    def get(self, request, uuid=None):
+        if uuid and uuid != os.environ.get('LEADERBOARD_UUID'):
+            raise Http404("Page does not exist")
+        game_id = Game.objects.aggregate(Max('game_id'))['game_id__max']
+        current_game = Game.objects.get(game_id=game_id)
+        date_range = current_game.date_range_pretty
+        context = {
+            'game_id': game_id,
+            'date_range': date_range,
+        }
+        return render(request, 'leaderboard/leaderboard_view.html', context)
+
+    def _render_leaderboard(self, request):
+        return _render_leaderboard(request)
 
 
 class ResultsView(View):

@@ -19,10 +19,6 @@ header.w3-container {
 h1.leaderboard {
     margin: 0;
 }
-.w3-button:hover {
-    color: white!important;
-    background: #0e8df2!important;
-}
 @media only screen and (max-width: 767px) {
   h1.leaderboard {
     font-size: 6vw;
