@@ -7,8 +7,6 @@ from users.htmx import PlayersHTMXView
 from users.forms import LoginForm
 
 
-app_name = 'users'
-
 urlpatterns = [
     path('logout/', user_logout, name='logout'),
     path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
@@ -23,5 +21,5 @@ urlpatterns = [
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
-    path('htmx/', PlayersHTMXView.as_view(), name='htmx')
+    path('htmx/', PlayersHTMXView.as_view(), name='users-htmx')
 ]
