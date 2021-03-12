@@ -260,9 +260,13 @@ class TestGameTabulation(BaseGameDataTestCase):
         at_excl_hosts = build_answer_tally(self.game)
         self.assertTrue(all([sum([r for r in resp.values()]) == 28 for resp in at_excl_hosts.values()]))
 
+        # --------------- DEPRECATED --------------------- #
+        # - Host results can be shown for now, but not a part of score - #
+
         # and excluded from the leaderboard
-        leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts)
-        self.assertEqual(sum(leaderboard["Name"] == "User 1"), 0)
+        # leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts)
+        # self.assertEqual(sum(leaderboard["Name"] == "User 1"), 0)
+        # ------------------------------------------------- #
 
         # unless it's a team view
         team = Team.objects.create()
