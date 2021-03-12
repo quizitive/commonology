@@ -9,7 +9,6 @@ class PlayersHTMXView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            # todo: this can return a nice modal to prompt sign in, make a base class
             raise PermissionDenied("You need to sign in to access this feature")
         return super().dispatch(request, *args, **kwargs)
 
