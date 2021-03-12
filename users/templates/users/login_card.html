@@ -1,4 +1,3 @@
-
 <div class="w3-modal-content w3-round w3-card-2" style="max-width:767px; overflow: hidden;">
     <header class="w3-container w3-teal w3-center">
       <span onclick="document.getElementById('login-modal').style.display='none'"
@@ -6,12 +5,12 @@
       <h3>Welcome to Commonology!</h3>
     </header>
   <div class="w3-container w3-padding">
-    <form method="post" action="{% url 'users:login' %}">
+    <form method="post" action="{% url 'login' %}">
       {% csrf_token %}
       {{ form.as_p }}
       <input type="submit" value="Login" class="w3-button w3-block w3-teal">
     </form>
     <a class="w3-block w3-margin-top w3-centered"
-       href = "{% url 'users:password_reset' %}">Forgot password?</a>
+       href = "{% url 'password_reset' %}">Forgot password?</a>
   </div>
 </div>

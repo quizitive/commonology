@@ -30,7 +30,7 @@
               <td>{{ player.Score }}</td>
 
               {#      Follow Buttons      #}
-              <td class="w3-center" hx-post="{% url 'users:htmx' %}" hx-vals='{"to_follow": "{{ player.id }}"}'>
+              <td class="w3-center" hx-post="{% url 'users-htmx' %}" hx-vals='{"to_follow": "{{ player.id }}"}'>
                 {% if player.id in user_following %}
                   <i class="fas fa-check-circle" style="color:#4CAF50; margin:auto;"></i>
                   {% else %}
