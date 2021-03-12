@@ -1,9 +1,7 @@
-from django.http import HttpResponse
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import render
 from django.views.generic.base import View
 
-from users.models import Player, Team
+from users.models import Player
 from game.models import Game
 from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard
 
