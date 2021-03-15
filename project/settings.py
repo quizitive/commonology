@@ -102,9 +102,8 @@ ROOT_URLCONF = 'project.urls'
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
-if not IS_GITHUB_WORKFLOW:
-    SESSION_ENGINE = 'redis_sessions.session'
 
+SESSION_ENGINE = 'redis_sessions.session'
 SESSION_REDIS = {
     'host': 'localhost',
     'port': 6379,
