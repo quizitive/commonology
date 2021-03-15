@@ -20,3 +20,8 @@ div.content {
 header.w3-container {
     border-radius: 4px 4px 0 0
 }
+
+.w3-button.w3-blue:hover {
+    color: white!important;
+    background: #0e8df2!important;
+}
