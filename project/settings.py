@@ -22,10 +22,7 @@ SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_
 DEBUG = env.get("DEBUG", False)
 INHIBIT_MAIL = env.get("INHIBIT_MAIL", False) == 'True'
 
-INTERNAL_IPS = (
-    '127.0.0.1',
-    'staging.commonologygame.com',
-)
+INTERNAL_IPS = ('127.0.0.1', 'staging.commonologygame.com', )
 
 # Disable Django Debug Toolbar
 # NOTE: Much slower on database intensive operations
@@ -33,22 +30,15 @@ INTERNAL_IPS = (
 if os.environ.get('DISABLE_DEBUG_TOOLBAR'):
     INTERNAL_IPS = ()
 
-DEBUG_TOOLBAR_CONFIG = {
-    'PRETTIFY_SQL': False
-}
+DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
 
 ALLOWED_HOSTS = ['127.0.0.1', 'commonologygame.com', 'staging.commonologygame.com']
 
 # Enable Django Debug Toolbar
 # NOTE: Much slower on database intensive operations
 if os.environ.get('DEBUG_TOOLBAR'):
-    INTERNAL_IPS = [
-        '127.0.0.1',
-        'staging.commonologygame.com',
-    ]
-    DEBUG_TOOLBAR_CONFIG = {
-        'PRETTIFY_SQL': False
-    }
+    INTERNAL_IPS = ['127.0.0.1', 'staging.commonologygame.com']
+    DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
 
 # Celery Configuration Options
 CELERY_TIMEZONE = 'America/New_York'
@@ -102,7 +92,6 @@ ROOT_URLCONF = 'project.urls'
 LOGIN_REDIRECT_URL = "loggedin_leaderboard"
 LOGOUT_REDIRECT_URL = "home"
 
-
 SESSION_ENGINE = 'redis_sessions.session'
 SESSION_REDIS = {
     'host': 'localhost',
@@ -141,13 +130,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DBNAME', 'commonology')
+        'NAME': os.environ.get('DBNAME', PROJECT_SLUG)
     }
 }
 
@@ -155,31 +141,19 @@ DATABASES = {
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
