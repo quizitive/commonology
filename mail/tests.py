@@ -11,12 +11,14 @@ import mailchimp_marketing as MailchimpMarketing
 SERVER_PREFIX = 'us2'
 
 
-class MailchimpTests(TestCase):
-    def test_ping(self):
-        # testing github secrets here.
+class GithubSecretTests(TestCase):
+    def test_secret(self):
         api_key = os.getenv('API_KEY')
         self.assertEqual(api_key, 'Marc Schwarzschild')
 
+
+class MailchimpTests(TestCase):
+    def test_ping(self):
         api_key = os.getenv('MAILCHIMP_APIKEY')
         try:
             client = MailchimpMarketing.Client()
