@@ -15,9 +15,8 @@ SERVER_PREFIX = 'us2'
 
 class MailchimpTests(TestCase):
     def test_ping(self):
+        # testing github secrets here.
         api_key = os.getenv('API_KEY')
-        x = api_key[:20]
-        print('Marc: ', x)
         self.assertEqual(api_key, 'Marc Schwarzschild')
 
         api_key = os.getenv('MAILCHIMP_APIKEY')
