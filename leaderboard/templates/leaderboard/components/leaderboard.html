@@ -32,9 +32,15 @@
               {#      Follow Buttons      #}
               <td class="w3-center" hx-post="{% url 'users-htmx' %}" hx-vals='{"to_follow": "{{ player.id }}"}'>
                 {% if player.id in user_following %}
-                  <i class="fas fa-check-circle" style="color:#4CAF50; margin:auto;"></i>
+                  <label class="container">
+                    <input type="checkbox" checked="checked">
+                    <span class="checkmark"></span>
+                  </label>
+{#                  <i class="fas fa-check-circle" style="color:#4CAF50; margin:auto;"></i>#}
                   {% else %}
-                  <i class="far fa-circle" style="color:dimgrey; margin:auto;"></i>
+                  <input type="checkbox">
+                  <span class="checkmark"></span>
+{#                  <i class="far fa-circle" style="color:dimgrey; margin:auto;"></i>#}
                 {% endif %}
               </td>
 
