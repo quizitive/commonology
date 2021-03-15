@@ -1,7 +1,5 @@
 import os
 from django.test import TestCase
-from django.http import HttpResponse
-
 
 # https://github.com/mailchimp/mailchimp-marketing-python
 import mailchimp_marketing as MailchimpMarketing
@@ -29,4 +27,5 @@ class MailchimpTests(TestCase):
             response = client.ping.get()
             self.assertEqual(response['health_status'], "Everything's Chimpy!")
         except MailchimpMarketing.api_client.ApiClientError:
-            return HttpResponse("Mailchimp API failing to connect.")
+            print("Mailchimp API failing to connect.")
+            self.assertTrue(False)
