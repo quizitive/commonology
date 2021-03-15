@@ -6,10 +6,11 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.views import LoginView
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
-from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, LoginForm
 from users.models import USER_CLASS, PendingEmail
 
 from .utils import remove_pending_email_invitations

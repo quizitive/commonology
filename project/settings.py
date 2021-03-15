@@ -99,7 +99,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'project.urls'
 
 # These redirects are needed for the users app.
-LOGIN_REDIRECT_URL = "home"
+LOGIN_REDIRECT_URL = "loggedin_leaderboard"
 LOGOUT_REDIRECT_URL = "home"
 
 

@@ -14,20 +14,21 @@ from game.models import Game, Answer, AnswerCode, Question
 REDIS = redis.Redis(host='localhost', port=6379, db=0)
 
 
-def build_filtered_leaderboard(game, answer_tally, search_term=None, team_id=None, player_id=None):
+def build_filtered_leaderboard(game, answer_tally, player_ids=None, search_term=None, team_id=None):
     """
     Get complete leaderboard from cache or build it, then filter results
     This is the primary leaderboard function
     :param game: Game object on which to calculate leaderboard
     :param answer_tally: The corresponding answer tally
+    :param player_ids: A list of player_ids on which to filter
     :param search_term: Comma separated search terms for exact match search (case insensitive)
     :param team_id: A Team ID to filter players on
     :return: A scored, ranked and sorted pandas DataFrame of the Leaderboard
     """
     leaderboard = _build_leaderboard_fromdb_or_cache(game, answer_tally)
 
-    if player_id:
-        return leaderboard[leaderboard['id'] == player_id]
+    if player_ids is not None:
+        leaderboard = leaderboard[leaderboard['id'].isin(player_ids)]
 
     if search_term:
         leaderboard = leaderboard[leaderboard['Name'].str.contains(
@@ -37,10 +38,10 @@ def build_filtered_leaderboard(game, answer_tally, search_term=None, team_id=Non
         team = Team.objects.get(id=team_id)
         members = team.players.values_list('id', flat=True)
         leaderboard = leaderboard[leaderboard['id'].isin(members)]
-    else:
-        # don't show hosts in public leaderboard (they could be perceived as cheating)
-        hosts = game.hosts.values_list('id', flat=True)
-        leaderboard = leaderboard[~leaderboard['id'].isin(hosts)]
+    # else:
+    #     # don't show hosts in public leaderboard (they could be perceived as cheating)
+    #     hosts = game.hosts.values_list('id', flat=True)
+    #     leaderboard = leaderboard[~leaderboard['id'].isin(hosts)]
 
     return leaderboard
 
@@ -129,7 +130,7 @@ def player_rank_and_percentile_in_game(player_id, game_id):
     game = Game.objects.get(game_id=game_id)
     answer_tally = build_answer_tally(game)
     try:
-        rank = build_filtered_leaderboard(game, answer_tally, player_id=player_id)['Rank'].values[0]
+        rank = build_filtered_leaderboard(game, answer_tally, player_ids=[player_id])['Rank'].values[0]
     except IndexError:
         raise IndexError("The player id does not exist for this game.")
     percentile = rank / game.players.count()
