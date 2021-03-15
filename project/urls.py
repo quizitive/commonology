@@ -10,6 +10,7 @@ from game import views
 urlpatterns = [
     path('', include('users.urls')),
     path('', include('game.urls')),
+    path('', include('mail.urls')),
     path('leaderboard/', include('leaderboard.urls')),
     path('c/', include('community.urls')),
     path('admin/', admin.site.urls),
