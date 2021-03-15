@@ -16,7 +16,10 @@ SERVER_PREFIX = 'us2'
 class MailchimpTests(TestCase):
     def test_ping(self):
         api_key = os.getenv('API_KEY')
-        print('API_KEY', api_key)
+        x = api_key[:20]
+        print('Marc: ', x)
+        self.assertEqual(api_key, 'Marc Schwarzschild')
+
         api_key = os.getenv('MAILCHIMP_APIKEY')
         try:
             client = MailchimpMarketing.Client()
