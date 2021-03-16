@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
 from django.views.generic.base import View
 
@@ -20,15 +20,13 @@ class PlayersHTMXView(View):
             to_follow = data.get('to_follow')
             return self._follow_unfollow(user, to_follow)
 
-        return HttpResponse('<i class="fas fa-check-circle" style="color:#4CAF50; margin:auto;"></i>')
+        return HttpResponseBadRequest("Request provided no target follower")
 
     @staticmethod
     def _follow_unfollow(user, to_follow):
         if user.following.filter(id=to_follow).exists():
             user.following.remove(to_follow)
-            resp = '<i class="far fa-circle" style="color:dimgrey; margin:auto;"></i>'
         else:
             user.following.add(to_follow)
-            resp = '<i class="fas fa-check-circle" style="color:#4CAF50; margin:auto;"></i>'
         user.save()
-        return HttpResponse(resp)
+        return HttpResponse()
