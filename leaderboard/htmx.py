@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.views.generic.base import View
+from django.db.models import Max
 
 from users.models import Player
 from game.models import Game
@@ -7,6 +8,15 @@ from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboa
 
 
 class LeaderboardHTMXView(View):
+
+    def dispatch(self, request, *args, **kwargs):
+        game_id = request.GET.get('game_id', False)
+        # return most recent game for any non-staff requests, or requests with not game_id
+        if not request.user.is_staff or not game_id:
+            kwargs['game_id'] = Game.objects.filter(publish=True).aggregate(Max('game_id'))['game_id__max']
+        else:
+            kwargs['game_id'] = game_id
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, game_id):
         """
@@ -21,7 +31,6 @@ class LeaderboardHTMXView(View):
             }
 
         current_game = Game.objects.get(game_id=game_id)
-        date_range = current_game.date_range_pretty
 
         # todo: answer_tally is still a bit expensive to calculate every time
         answer_tally = build_answer_tally(current_game)
@@ -40,7 +49,6 @@ class LeaderboardHTMXView(View):
         leaderboard = leaderboard.to_dict(orient='records')
         context = {
             'game_id': game_id,
-            'date_range': date_range,
             'leaderboard': leaderboard,
             'search_term': search_term,
             'user_following': user_following,
