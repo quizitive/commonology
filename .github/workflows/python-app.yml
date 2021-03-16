@@ -12,7 +12,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: github_actions
+          POSTGRES_DB: commonology
         ports:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
@@ -28,7 +28,6 @@ jobs:
           # Maps port 6379 on service container to the host
           - 6379:6379
 
-
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.8
@@ -36,7 +35,7 @@ jobs:
       with:
         python-version: 3.8
     - name: psycopg2 prerequisites
-      run: sudo apt-get install python-dev libpq-dev
+      run: sudo apt-get update -q && sudo apt-get install python-dev libpq-dev
     - name: Install dependencies
       run:
         python -m pip install --upgrade pip
@@ -51,4 +50,7 @@ jobs:
         EAGER_CELERY: false
       run: celery -A project  worker -E -l DEBUG &
     - name: Run tests
+      env:
+        API_KEY: ${{ secrets.API_KEY}}
+        MAILCHIMP_APIKEY: ${{ secrets.MAILCHIMP_APIKEY}}
       run: python manage.py test

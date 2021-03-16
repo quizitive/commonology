@@ -1,6 +1,5 @@
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
-
 from users.views import user_logout, profile_view, join_view, \
     email_confirmed_view, send_invite_view
 from users.htmx import PlayersHTMXView
