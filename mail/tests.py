@@ -29,5 +29,4 @@ class MailchimpTests(TestCase):
             response = client.ping.get()
             self.assertEqual(response['health_status'], "Everything's Chimpy!")
         except MailchimpMarketing.api_client.ApiClientError:
-            print("Mailchimp API failing to connect.")
-            self.assertTrue(False)
+            self.assertTrue(False, msg="Mailchimp API failing to connect.")
