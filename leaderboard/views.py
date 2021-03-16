@@ -1,32 +1,12 @@
-import os
-
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
-from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 
 from users.models import Player, Team
 from game.models import Game
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
-
-
-@login_required
-def loggedin_leaderboard_view(request):
-    return _render_leaderboard(request)
-
-
-@login_required
-def game_leaderboard_view(request, game_id):
-    return _render_leaderboard(request, game_id, False)
-
-
-def uuid_leaderboard_view(request, uuid):
-    if uuid != os.environ.get('LEADERBOARD_UUID'):
-        raise Http404("Page does not exist")
-    return _render_leaderboard(request)
 
 
 def _render_leaderboard(request, game_id=None, published=True):
@@ -73,10 +53,17 @@ def _render_leaderboard(request, game_id=None, published=True):
 
 class LeaderboardView(View):
 
-    def get(self, request, uuid=None):
-        if uuid and uuid != os.environ.get('LEADERBOARD_UUID'):
-            raise Http404("Page does not exist")
-        game_id = Game.objects.aggregate(Max('game_id'))['game_id__max']
+    def dispatch(self, request, *args, **kwargs):
+        game_id = kwargs.get('game_id')
+        # todo: maybe change this to is_authenticated to allow access to historical leaderboards
+        if game_id is not None and not request.user.is_staff:
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, game_id=None):
+        if not game_id:
+            # default to most recent game
+            game_id = Game.objects.aggregate(Max('game_id'))['game_id__max']
         current_game = Game.objects.get(game_id=game_id)
         date_range = current_game.date_range_pretty
         context = {
@@ -84,9 +71,6 @@ class LeaderboardView(View):
             'date_range': date_range,
         }
         return render(request, 'leaderboard/leaderboard_view.html', context)
-
-    def _render_leaderboard(self, request):
-        return _render_leaderboard(request)
 
 
 class ResultsView(View):
