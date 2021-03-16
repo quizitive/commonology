@@ -46,13 +46,18 @@ class LeaderboardHTMXView(View):
         leaderboard = build_filtered_leaderboard(
             current_game, answer_tally, player_ids, search_term, team_id)
 
-        leaderboard = leaderboard.to_dict(orient='records')
+        visible_players = len(leaderboard)
+        total_players = current_game.players.count()
+        leaderboard = leaderboard[:100].to_dict(orient='records')
+
         context = {
             'game_id': game_id,
             'leaderboard': leaderboard,
             'search_term': search_term,
             'user_following': user_following,
             'follow_filter': follow_filter,
+            'visible_players': visible_players,
+            'total_players': total_players
         }
 
         return render(request, 'leaderboard/components/leaderboard.html', context)
