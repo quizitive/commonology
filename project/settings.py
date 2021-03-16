@@ -134,7 +134,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': PROJECT_SLUG,
-        'PORT': 5432
+        'PORT': 5432,
+        'POSTGRES_USER': 'postgres',
+        'POSTGRES_PASSWORD': 'postgres'
     }
 }
 
