@@ -18,7 +18,7 @@
       <div class="w3-container w3-padding-16">
         <p>{{ message }}</p>
         <p>
-          <a href="{% url 'game_leaderboard' latest_game_id %}">Week {{ latest_game_id }} Leaderboard</a>
+          <a href="{% url 'leaderboard-game' latest_game_id %}">Week {{ latest_game_id }} Leaderboard</a>
           <a class="w3-padding-small" href="answers.html">Week {{ latest_game_id }} Results</a>
         </p>
         <p></p>
@@ -37,7 +37,7 @@
           <button class="w3-button w3-blue">My Leaderboards</button>
           <div class="w3-dropdown-content w3-bar-block w3-card-4">
             {% for game in games %}
-            <a href="{% url 'game_leaderboard' game.game_id %}" class="w3-bar-item w3-button">Week {{ game.game_id }}</a>
+            <a href="{% url 'leaderboard-game' game.game_id %}" class="w3-bar-item w3-button">Week {{ game.game_id }}</a>
             {% endfor %}
           </div>
         </div>
@@ -45,7 +45,7 @@
           <button class="w3-button w3-blue">My Results</button>
           <div class="w3-dropdown-content w3-bar-block w3-card-4">
             {% for game in games %}
-            <a href="{% url 'game_leaderboard' game.game_id %}" class="w3-bar-item w3-button">Week {{ game.game_id }}</a>
+            <a href="{% url 'leaderboard-game' game.game_id %}" class="w3-bar-item w3-button">Week {{ game.game_id }}</a>
             {% endfor %}
           </div>
         </div>
