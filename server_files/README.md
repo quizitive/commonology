@@ -215,11 +215,12 @@ That file may define the `DJANGO_SECRET` value used in your Django settings.py f
   $ sudo -u postgres psql
   
   postgres=# CREATE DATABASE commonology;
-  postgres=# CREATE USER django with password 'postgres';
-  postgres=# ALTER ROLE django SET client_encoding TO 'utf8';
-  postgres=# ALTER ROLE django SET default_transaction_isolation TO 'read committed';
-  postgres=# ALTER ROLE django SET timezone TO 'UTC';
-  postgres=# GRANT ALL PRIVILEGES ON DATABASE commonology TO django;
+  postgres=# CREATE USER postgres with password 'postgres';
+  postgres=# ALTER ROLE postgres SET client_encoding TO 'utf8';
+  postgres=# ALTER ROLE postgres SET default_transaction_isolation TO 'read committed';
+  postgres=# ALTER ROLE postgres SET timezone TO 'UTC';
+  postgres=# GRANT ALL PRIVILEGES ON DATABASE commonology TO postgres;
+  postgres=# ALTER USER postgres with superuser;
   postgres=# \q
   ```
 
