@@ -2,17 +2,10 @@ import gspread
 import logging
 import os
 from time import sleep
-import datetime
 
 from django.shortcuts import render
-from django.views.generic.base import View
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Max
-from django.core.mail import send_mail
-
-from users.models import Player
 from game.forms import TabulatorForm
 from game.models import Game
 from game.utils import next_event
@@ -49,20 +42,6 @@ def marc(request):
 @permission_required('is_superuser')
 def ted(request):
     return render(request, 'game/ted.html', {})
-
-
-@login_required
-@permission_required('is_superuser')
-def mailtest(request):
-    emailaddr = request.user.email
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    message = f"Mail sent to {emailaddr} at {now}."
-
-    send_mail(subject="Sending test.", message=message,
-              from_email=None, recipient_list=[emailaddr])
-
-    return render(request, 'game/mailtest.html',
-                  {'message': message, "emailaddr": emailaddr})
 
 
 @staff_member_required
