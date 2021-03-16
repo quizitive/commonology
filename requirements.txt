@@ -18,3 +18,4 @@ django-redis-sessions==0.6.1
 django-debug-toolbar==3.2
 pytz==2021.1
 sentry-sdk==0.19.5
+git+https://github.com/mailchimp/mailchimp-marketing-python.git
