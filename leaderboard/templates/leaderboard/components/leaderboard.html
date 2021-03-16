@@ -30,11 +30,24 @@
               <td>{{ player.Score }}</td>
 
               {#      Follow Buttons      #}
-              <td class="w3-center" hx-post="{% url 'users-htmx' %}" hx-vals='{"to_follow": "{{ player.id }}"}'>
+              <td class="w3-center">
                 {% if player.id in user_following %}
-                  <i class="fas fa-check-circle" style="color:#4CAF50; margin:auto;"></i>
+                  <label class="container">
+                    <input type="checkbox"
+                           checked="checked"
+                           hx-post="{% url 'users-htmx' %}"
+                           hx-vals='{"to_follow": "{{ player.id }}"}'
+                           hx-swap="none">
+                    <span class="checkmark"></span>
+                  </label>
                   {% else %}
-                  <i class="far fa-circle" style="color:dimgrey; margin:auto;"></i>
+                  <label class="container">
+                    <input type="checkbox"
+                           hx-post="{% url 'users-htmx' %}"
+                           hx-vals='{"to_follow": "{{ player.id }}"}'
+                           hx-swap="none">
+                    <span class="checkmark"></span>
+                  </label>
                 {% endif %}
               </td>
 

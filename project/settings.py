@@ -89,7 +89,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'project.urls'
 
 # These redirects are needed for the users app.
-LOGIN_REDIRECT_URL = "loggedin_leaderboard"
+LOGIN_REDIRECT_URL = "leaderboard"
 LOGOUT_REDIRECT_URL = "home"
 
 SESSION_ENGINE = 'redis_sessions.session'
