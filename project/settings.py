@@ -133,7 +133,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DBNAME', PROJECT_SLUG)
+        'NAME': 'commonology'
     }
 }
 
