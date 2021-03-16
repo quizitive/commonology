@@ -14,10 +14,7 @@ h1.leaderboard {
 
 /* Customize the label (the container) */
 .container {
-  display: block;
   position: relative;
-  padding-left: 35px;
-  margin-bottom: 12px;
   cursor: pointer;
   font-size: 22px;
   -webkit-user-select: none;
@@ -39,11 +36,12 @@ h1.leaderboard {
 .checkmark {
   position: absolute;
   top: 0;
-  left: 0;
+  left: -12px;
   height: 20px;
   width: 20px;
-  background-color: #4CAF50;
+  /*background-color: #4CAF50;*/
   border-radius: 10px;
+  border: solid 1px darkgrey;
 }
 
 /* On mouse-over, add a grey background color */
@@ -54,6 +52,7 @@ h1.leaderboard {
 /* When the checkbox is checked, add a blue background */
 .container input:checked ~ .checkmark {
   background-color: #2196F3;
+  border: none;
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */
@@ -70,12 +69,12 @@ h1.leaderboard {
 
 /* Style the checkmark/indicator */
 .container .checkmark:after {
-  left: 8px;
-  top: 5px;
-  width: 5px;
+  left: 7px;
+  top: 4px;
+  width: 6px;
   height: 10px;
   border: solid white;
-  border-width: 0 3px 3px 0;
+  border-width: 0 2px 2px 0;
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
