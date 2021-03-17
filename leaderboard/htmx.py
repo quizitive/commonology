@@ -53,7 +53,6 @@ class LeaderboardHTMXView(View):
             total_players = 0
 
         visible_players = min(len(leaderboard), 100)
-        total_players = current_game.players.count()
         leaderboard = leaderboard[:100].to_dict(orient='records')
 
         context = {
