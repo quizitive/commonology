@@ -46,13 +46,13 @@ class LeaderboardHTMXView(View):
         leaderboard = build_filtered_leaderboard(
             current_game, answer_tally, player_ids, search_term, team_id)
 
-        visible_players = len(leaderboard)
         try:
             total_players = current_game.players.count()
         except AttributeError:
             # a game has no questions or answers yet
             total_players = 0
 
+        visible_players = min(len(leaderboard), 100)
         leaderboard = leaderboard[:100].to_dict(orient='records')
 
         context = {
