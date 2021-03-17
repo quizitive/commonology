@@ -56,7 +56,14 @@
         </tbody>
       </table>
     <div class="w3-container w3-center w3-padding-16">
-      Showing {{ visible_players }} out of {{ total_players }} total players.
+      {% if visible_players == 0 %}
+        <a href="{% url 'login' %}">Sign in</a>
+        or
+        <a href="{% url 'join' %}">join</a>
+        to follow your friends!
+      {% else %}
+        Showing {{ visible_players }} out of {{ total_players }} total players.
+      {% endif %}
     </div>
     </div>
   </div>
