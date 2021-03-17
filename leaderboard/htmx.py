@@ -46,7 +46,7 @@ class LeaderboardHTMXView(View):
         leaderboard = build_filtered_leaderboard(
             current_game, answer_tally, player_ids, search_term, team_id)
 
-        visible_players = len(leaderboard)
+        visible_players = min(len(leaderboard), 100)
         total_players = current_game.players.count()
         leaderboard = leaderboard[:100].to_dict(orient='records')
 
