@@ -3,4 +3,5 @@ from mail import views
 
 urlpatterns = [
     path('mailtest/', views.mailtest, name='mailtest'),
+    path('mailchimp_hook/<uuid>', views.MailchimpWebhook.as_view(), name='mailchimp_hook')
 ]
