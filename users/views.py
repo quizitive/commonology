@@ -4,6 +4,7 @@ from django.forms import HiddenInput
 from django.urls import reverse
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.views import LoginView
@@ -38,7 +39,6 @@ def confirm_or_login(request, email):
     try:
         user = USER_CLASS.objects.get(email=email)
         if user.is_member:
-            from django.contrib import messages
             messages.info(request, 'There is already an account with that email, please login.')
             return redirect('login')
 
@@ -49,6 +49,11 @@ def confirm_or_login(request, email):
     pe = PendingEmail(email=email)
     pe.save()
     send_invite(request, pe)
+
+    messages.info(request, f"An invitation email was sent to {email}. "
+                           f"Don't forget to check your spam or junk folder if need be. "
+                           f"Please follow the instructions in that message to join in the fun.")
+
     return render(request, "users/confirm_sent.html", context={'email': email})
 
 

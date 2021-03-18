@@ -2,9 +2,9 @@
 
 {% block card_extras %}
 
-  <a class="w3-block w3-center w3-padding-small w3-centered"
+  <a class="w3-block w3-center w3-padding-small"
    href = "{% url 'password_reset' %}">Forgot password?</a>
-  <p class="w3-center"><a href="{% url 'join' %}" class="">Don't have an account? Join us!</a></p>
+  <a href="{% url 'join' %}" class="w3-center w3-block w3-padding">Don't have an account? Join us!</a>
 
 
 {% endblock %}
