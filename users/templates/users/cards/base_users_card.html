@@ -11,9 +11,11 @@
   <div class="w3-container w3-padding-large">
 
   {% if messages %}
+    <div style="margin-bottom:24px;">
     {% for msg in messages %}
       <p class="user-msg w3-padding-top w3-margin-bottom">{{ msg }}</p>
     {% endfor %}
+    </div>
   {% endif %}
 
     <form method="post">
