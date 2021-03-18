@@ -66,7 +66,9 @@ def join_view(request):
         return redirect('/')
 
     if request.method == 'POST':
-        email = request.POST['email']
+        email = request.POST.get('email')
+        if not email:
+            return redirect('login')
         return confirm_or_login(request, email)
 
     context = {'form': PendingEmailForm}
