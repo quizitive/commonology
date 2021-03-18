@@ -1,14 +1,12 @@
 <!--users/templates/users/email_signup.html-->
 
-{% extends 'base.html' %}
+{% extends 'users/base.html' %}
 
 {% block content %}
-{% include 'users/cards/join_card.html' %}
 
-{#<form method="post">#}
-{#    {% csrf_token %}#}
-{#    {{ form.as_p }}#}
-{#    <input type="submit" value="Continue">#}
-{#</form>#}
+<div class="content">
+    <br/><br/>
+    {% include 'users/cards/join_card.html' with header="Join the Community!" button="Join"%}
+  </div>
 
 {% endblock %}
