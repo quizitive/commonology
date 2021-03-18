@@ -1,6 +1,8 @@
 import os
 from django.test import TestCase, Client
 from django.urls import reverse
+from users.tests import get_local_user, NORMAL
+from django.contrib.auth import get_user_model
 
 # https://github.com/mailchimp/mailchimp-marketing-python
 import mailchimp_marketing as MailchimpMarketing
@@ -33,14 +35,19 @@ class MailchimpTests(TestCase):
             self.assertTrue(False, msg="Mailchimp API failing to connect.")
 
     def test_mailchimphook(self):
+        u = get_local_user()
+        self.assertTrue(u.subscribed)
         uuid = os.getenv('MAILCHIMP_HOOK_UUID')
         client = Client()
         path = reverse('mailchimp_hook', kwargs={'uuid': uuid})
         data = {'type': ['unsubscribe'], 'fired_at': ['2021-03-17 14:16:55'], 'data[action]': ['unsub'],
-                'data[reason]': ['manual'], 'data[id]': ['96b581d0ae'], 'data[email]': ['ms@koplon.com'],
+                'data[reason]': ['manual'], 'data[id]': ['96b581d0ae'], 'data[email]': [NORMAL],
                 'data[email_type]': ['html'], 'data[ip_opt]': ['100.16.130.45'], 'data[web_id]': ['1362500348'],
                 'data[merges][EMAIL]': ['ms@koplon.com'], 'data[merges][FNAME]': ['Marc'],
                 'data[merges][LNAME]': ['Schwarzschild'], 'data[merges][ADDRESS]': [''], 'data[merges][PHONE]': [''],
                 'data[list_id]': ['36b9567454']}
         response = client.post(path, data=data)
         self.assertEqual(response.reason_phrase, 'OK')
+        User = get_user_model()
+        u = User.objects.get(email=NORMAL)
+        self.assertFalse(u.subscribed)

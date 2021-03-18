@@ -21,6 +21,7 @@ class CustomUser(AbstractUser):
     location = models.CharField(max_length=MAX_LOCATION_LEN, choices=LOCATIONS, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     referrer = models.EmailField(_('Referrer email address'), blank=True, null=True)
+    subscribed = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

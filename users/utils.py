@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from .models import PendingEmail
+from django.contrib.auth import get_user_model
 
 
 def remove_pending_email_invitations(n=7):
@@ -8,4 +9,7 @@ def remove_pending_email_invitations(n=7):
 
 
 def unsubscribe(email):
-    print(f"Unsubscribe not implemented yet: {email}")
+    User = get_user_model()
+    u = User.objects.get(email=email)
+    u.subscribed = False
+    u.save()
