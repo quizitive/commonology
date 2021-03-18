@@ -3,11 +3,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% include 'users/cards/join_card.html' %}
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Continue">
-</form>
+{#<form method="post">#}
+{#    {% csrf_token %}#}
+{#    {{ form.as_p }}#}
+{#    <input type="submit" value="Continue">#}
+{#</form>#}
 
 {% endblock %}
