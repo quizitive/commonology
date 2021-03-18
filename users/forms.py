@@ -22,6 +22,7 @@ class PlayerProfileForm(forms.ModelForm):
 
 
 class PendingEmailForm(forms.ModelForm):
+    email = forms.CharField(widget=forms.TextInput(attrs={'class': 'w3-input'}))
 
     class Meta:
         model = PendingEmail
