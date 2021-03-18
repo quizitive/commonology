@@ -1,11 +1,13 @@
 <!--users/templates/users/confirm_sent.html-->
 
-{% extends 'base.html' %}
+{% extends 'users/base.html' %}
 
 {% block content %}
 
-<p>An invitation email was sent to {{ email }}.</p>
-<p>Don't forget to check your spam or junk folder if need be.</p>
-<p>Please follow the instructions in that message to join in the fun.</p>
+<div class="content">
+    <br/><br/>
+    {% include 'users/cards/base_users_card.html' with header="Invitation sent!" button="Ok"%}
+  </div>
 
 {% endblock %}
+

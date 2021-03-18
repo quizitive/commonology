@@ -1,17 +1,21 @@
 <div class="w3-modal-content w3-round w3-card-2" style="max-width:767px; overflow: hidden;">
-    <header class="w3-container w3-teal w3-center">
+  <header class="w3-container w3-teal w3-center">
 
-      {% if is_modal %}
-      <span onclick="document.getElementById({{ modal_name }}).style.display='none'"
-      class="w3-button w3-display-topright">&times;</span>
-      {% endif %}
+    {% if is_modal %}
+    <span onclick="document.getElementById({{ modal_name }}).style.display='none'"
+    class="w3-button w3-display-topright">&times;</span>
+    {% endif %}
 
-      <h3>{{ header }}</h3>
-    </header>
-  <div class="w3-container w3-padding">
+    <h3>{{ header }}</h3>
+  </header>
+  <div class="w3-container w3-padding-large">
+
+  {% if messages %}
     {% for msg in messages %}
-      <p class="user-msg">{{ msg }}</p>
+      <p class="user-msg w3-padding-top w3-margin-bottom">{{ msg }}</p>
     {% endfor %}
+  {% endif %}
+
     <form method="post">
       {% csrf_token %}
       {{ form.as_p }}
