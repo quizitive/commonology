@@ -37,12 +37,9 @@ def profile_view(request):
 def confirm_or_login(request, email):
     try:
         user = USER_CLASS.objects.get(email=email)
-        # this means the user has played a game, but is not necessarily a member
         if user.is_member:
-            # return redirect('login', extra_context={
-            #     'header': "Foo!", 'msg': "You already have an account."})
             from django.contrib import messages
-            messages.info(request, 'Three credits remain in your account.')
+            messages.info(request, 'There is already an account with that email, please login.')
             return redirect('login')
 
     except USER_CLASS.DoesNotExist:
