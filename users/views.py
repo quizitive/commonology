@@ -36,14 +36,23 @@ def profile_view(request):
 
 def confirm_or_login(request, email):
     try:
-        USER_CLASS.objects.get(email=email)
-        return redirect('login/', msg='You already have an account.')
-    except (USER_CLASS.DoesNotExist):
-        remove_pending_email_invitations()
-        pe = PendingEmail(email=email)
-        pe.save()
-        send_invite(request, pe)
-        return render(request, "users/confirm_sent.html", context={'email': email})
+        user = USER_CLASS.objects.get(email=email)
+        # this means the user has played a game, but is not necessarily a member
+        if user.is_member:
+            # return redirect('login', extra_context={
+            #     'header': "Foo!", 'msg': "You already have an account."})
+            from django.contrib import messages
+            messages.info(request, 'Three credits remain in your account.')
+            return redirect('login')
+
+    except USER_CLASS.DoesNotExist:
+        pass
+
+    remove_pending_email_invitations()
+    pe = PendingEmail(email=email)
+    pe.save()
+    send_invite(request, pe)
+    return render(request, "users/confirm_sent.html", context={'email': email})
 
 
 def join_view(request):

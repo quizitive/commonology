@@ -44,6 +44,10 @@ class PendingEmail(models.Model):
 class Player(CustomUser):
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
+    is_member = models.BooleanField(
+        default=False,
+        help_text="Designates whether this player has joined the online community."
+    )
 
     def __str__(self):
         return self.email

@@ -14,7 +14,11 @@ urlpatterns = [
     path("join/<uidb64>", email_confirmed_view, name='join'),
     path("join/", join_view, name='join'),
     path("invite/", send_invite_view, name='invite'),
-    path("login/", auth_views.LoginView.as_view(template_name="users/login.html", form_class=LoginForm), name="login"),
+    path("login/", auth_views.LoginView.as_view(
+        template_name="users/login.html",
+        form_class=LoginForm,
+        extra_context={"header": "Login"}
+    ), name="login"),
     path("accounts/login/", auth_views.LoginView.as_view(template_name="users/login.html")),
     path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
