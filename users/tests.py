@@ -181,7 +181,7 @@ class PendingUsersTests(TestCase):
         user = get_local_user()
 
         client = Client()
-        client.login(email=NORMAL, password='foo')
+        client.login(email=NORMAL, password='foo', follow=True)
         mail.outbox = []
         response = client.post(reverse('invite'), data={"email": ABINORMAL})
         self.assertEqual(response.status_code, 200)
