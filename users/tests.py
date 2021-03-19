@@ -28,6 +28,13 @@ def get_local_user(reset=False):
     return local_user
 
 
+def remove_abinormal():
+    try:
+        User.objects.get(email=ABINORMAL).delete()
+    except User.DoesNotExist:
+        pass
+
+
 class MailTests(TestCase):
 
     def test_sendmail(self):
@@ -181,11 +188,7 @@ class PendingUsersTests(TestCase):
 
     def test_invite(self):
         user = get_local_user()
-
-        try:
-            User.objects.get(email=ABINORMAL).delete()
-        except User.DoesNotExist:
-            pass
+        remove_abinormal()
 
         client = Client()
         client.login(email=NORMAL, password='foo')
@@ -212,7 +215,7 @@ class PendingUsersTests(TestCase):
         data['password2'] = data['password1']
         self.assert_user_was_created(path, data, True)
 
-        User.objects.get(email=ABINORMAL).delete()
+        remove_abinormal()
 
     def join_test_helper(self, data, taint_uuid_flag=False):
         client = Client()
@@ -238,7 +241,7 @@ class PendingUsersTests(TestCase):
         self.assert_user_was_created(path, data, flag)
 
         if flag:
-            User.objects.get(email=ABINORMAL).delete()
+            remove_abinormal()
 
     def test_join(self):
         data = self.data
