@@ -142,7 +142,7 @@ class UsersManagersTests(TestCase):
 
         mail.outbox = []
         response = client.post(reverse('password_reset'), {'email': NORMAL})
-        #self.assertEqual(response.status_code, 200)
+        self.assertIn(response.status_code, [200, 302])
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, 'Commonology password reset')
@@ -151,9 +151,8 @@ class UsersManagersTests(TestCase):
         uid = response.context[0]['uid']
 
         response = client.get(reverse('password_reset_confirm',
-                                      kwargs={'token': token, 'uidb64': uid}),
-                                      follow=True)
-        self.assertEqual(response.status_code, 200)
+                                      kwargs={'token': token, 'uidb64': uid}))
+        self.assertIn(response.status_code, [200, 302])
 
         # Now we post to the same url with our new password:
         path = reverse('password_reset_confirm',
