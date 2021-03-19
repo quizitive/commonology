@@ -172,10 +172,12 @@ def send_invite(request, pe):
 
 class PwdResetDoneView(PasswordResetDoneView):
 
-    def get(self, *args, **kwargs):
-        # todo: fix me
-        messages.info("We've emailed you instructions for setting your password, "
+    def get(self, request, *args, **kwargs):
+        messages.info(request, "We've emailed you instructions for setting your password, "
                       "if an account exists with the email you entered. You should receive them shortly.")
-        messages.info("If you don't receive an email, please make sure you've entered the address"
+        messages.info(request, "If you don't receive an email, please make sure you've entered the address"
                       " you registered with, and check your spam folder")
-        return
+        return render(request, 'registration/password_reset_done.html')
+
+    def post(self, request, *args, **kwargs):
+        return redirect('login')
