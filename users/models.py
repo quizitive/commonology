@@ -3,7 +3,6 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
-from django.utils import timezone
 
 from game.utils import create_key
 from .managers import CustomUserManager
@@ -54,9 +53,6 @@ class Player(CustomUser):
         return self.answers.values(
             game_id=models.F('question__game__game_id')).exclude(
             game_id=None).distinct().order_by('-game_id')
-
-
-USER_CLASS = Player
 
 
 class Team(models.Model):

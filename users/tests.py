@@ -5,8 +5,9 @@ from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core import mail
-from users.models import PendingEmail, USER_CLASS
+from users.models import PendingEmail
 
+User = get_user_model()
 
 NORMAL = 'normal@user.com'
 ABINORMAL = 'abinormal@user.com'
@@ -14,11 +15,11 @@ local_user = None
 
 
 def get_local_user(reset=False):
-    global local_user
+    global local_user, User
     if reset:
         try:
-            USER_CLASS.objects.get(email=NORMAL).delete()
-        except USER_CLASS.DoesNotExist:
+            User.objects.get(email=NORMAL).delete()
+        except User.DoesNotExist:
             pass
         local_user = None
     if local_user is None:
@@ -88,7 +89,7 @@ class UsersManagersTests(TestCase):
         response = client.post(path, data=data)
         self.assertEqual(response.reason_phrase, 'OK')
 
-        user = USER_CLASS.objects.get(email=NORMAL)
+        user = User.objects.get(email=NORMAL)
         self.assertEqual(user.first_name, data['first_name'])
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.location, data['location'])
@@ -175,7 +176,7 @@ class PendingUsersTests(TestCase):
         client = Client()
         response = client.post(path, data=data)
         self.assertIn(response.status_code, [200, 302])
-        x = USER_CLASS.objects.filter(email__exact=data['email']).exists()
+        x = User.objects.filter(email__exact=data['email']).exists()
         self.assertEqual(x, flag)
 
     def test_invite(self):
@@ -206,7 +207,7 @@ class PendingUsersTests(TestCase):
         data['password2'] = data['password1']
         self.assert_user_was_created(path, data, True)
 
-        USER_CLASS.objects.get(email=ABINORMAL).delete()
+        User.objects.get(email=ABINORMAL).delete()
 
     def join_test_helper(self, data, taint_uuid_flag=False):
         client = Client()
@@ -232,7 +233,7 @@ class PendingUsersTests(TestCase):
         self.assert_user_was_created(path, data, flag)
 
         if flag:
-            USER_CLASS.objects.get(email=ABINORMAL).delete()
+            User.objects.get(email=ABINORMAL).delete()
 
     def test_join(self):
         data = self.data
