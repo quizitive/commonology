@@ -181,7 +181,7 @@ class PendingUsersTests(TestCase):
 
     def test_invite(self):
         user = get_local_user()
-        User.objects.filter(email=ABINORMAL).delete()()
+        User.objects.filter(email=ABINORMAL).delete()
 
         client = Client()
         result = client.login(email=NORMAL, password='foo')
@@ -191,6 +191,7 @@ class PendingUsersTests(TestCase):
         url = reverse('invite')
         print(f"Marc Schwarzschild - about to post to invite at {url}.")
         response = client.post(url, data={"email": ABINORMAL})
+        self.assertTrue(response.context[‘request’].user.is_authenticated())
         print('response:')
         print(response)
         self.assertIn(response.status_code, [200, 302])
@@ -214,7 +215,7 @@ class PendingUsersTests(TestCase):
         data['password2'] = data['password1']
         self.assert_user_was_created(path, data, True)
 
-        User.objects.filter(email=ABINORMAL).delete()()
+        User.objects.filter(email=ABINORMAL).delete()
 
     def join_test_helper(self, data, taint_uuid_flag=False):
         client = Client()
@@ -240,7 +241,7 @@ class PendingUsersTests(TestCase):
         self.assert_user_was_created(path, data, flag)
 
         if flag:
-            User.objects.filter(email=ABINORMAL).delete()()
+            User.objects.filter(email=ABINORMAL).delete()
 
     def test_join(self):
         data = self.data
