@@ -63,7 +63,7 @@ def join_view(request):
     return render(request, "users/join.html", context)
 
 
-#@login_required()
+# @login_required()
 def send_invite_view(request):
     print(f"Marc Schwarzschild - entering send_invite_view.")
     if request.method == 'POST':
