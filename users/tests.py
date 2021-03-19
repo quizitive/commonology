@@ -184,7 +184,7 @@ class PendingUsersTests(TestCase):
         client.login(email=NORMAL, password='foo')
         mail.outbox = []
         response = client.post(reverse('invite'), data={"email": ABINORMAL})
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.status_code, 200)
 
         pe = PendingEmail.objects.get(email=ABINORMAL)
         self.assertEqual(NORMAL, pe.referrer)
