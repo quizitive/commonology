@@ -70,6 +70,7 @@ def send_invite_view(request):
         context = {"email": email}
         try:
             User.objects.get(email=email)
+            print(f"Marc Schwarzschild - {email} has account already.")
             return render(request, "users/has_account.html", context)
         except (User.DoesNotExist):
             remove_pending_email_invitations()
