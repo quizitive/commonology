@@ -53,6 +53,7 @@ jobs:
       env:
         API_KEY: ${{secrets.API_KEY}}
         MAILCHIMP_APIKEY: ${{secrets.MAILCHIMP_APIKEY}}
-        MAILCHIMP_HOOK_UUID: ${{ secrets.MAILCHIMP_HOOK_UUID}}
-        MAILCHIMP_AUDIENCE: ${{ secrets.MAILCHIMP_AUDIENCE}}
+        MAILCHIMP_HOOK_UUID: ${{secrets.MAILCHIMP_HOOK_UUID}}
+        MAILCHIMP_AUDIENCE: ${{secrets.MAILCHIMP_AUDIENCE}}
+        TEST_CLIENT_PW: foo
       run: python manage.py test

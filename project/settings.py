@@ -91,10 +91,6 @@ ROOT_URLCONF = 'project.urls'
 LOGIN_REDIRECT_URL = "loggedin_leaderboard"
 LOGOUT_REDIRECT_URL = "home"
 
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_SSL_REDIRECT = True
-
 # SESSION_ENGINE = 'redis_sessions.session'
 # SESSION_REDIS = {
 #     'host': 'localhost',

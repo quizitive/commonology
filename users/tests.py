@@ -12,16 +12,17 @@ User = get_user_model()
 NORMAL = 'normal@user.com'
 ABINORMAL = 'abinormal@user.com'
 local_user = None
+test_pw = os.getenv('TEST_CLIENT_PW', 'foo')
 
 
 def get_local_user(reset=False):
-    global local_user, User
+    global local_user, User, test_pw
     if reset:
         User.objects.filter(email=NORMAL).delete()
         local_user = None
     if local_user is None:
         User = get_user_model()
-        local_user = User.objects.create_user(email=NORMAL, password='foo')
+        local_user = User.objects.create_user(email=NORMAL, password=test_pw)
     return local_user
 
 
@@ -58,12 +59,12 @@ class UsersManagersTests(TestCase):
         with self.assertRaises(TypeError):
             User.objects.create_user(email='')
         with self.assertRaises(ValueError):
-            User.objects.create_user(email='', password="foo")
+            User.objects.create_user(email='', password=test_pw)
 
     def test_create_superuser(self):
         su = "super@user.com"
         User = get_user_model()
-        admin_user = User.objects.create_superuser(su, 'foo')
+        admin_user = User.objects.create_superuser(su, test_pw)
         self.assertEqual(admin_user.email, su)
         self.assertTrue(admin_user.is_active)
         self.assertTrue(admin_user.is_staff)
@@ -76,12 +77,12 @@ class UsersManagersTests(TestCase):
             pass
         with self.assertRaises(ValueError):
             User.objects.create_superuser(
-                email=su, password='foo', is_superuser=False)
+                email=su, password=test_pw, is_superuser=False)
 
     def test_profile(self):
         user = get_local_user()
         client = Client()
-        client.login(email=NORMAL, password='foo')
+        client.login(email=NORMAL, password=test_pw)
         path = reverse('profile')
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
@@ -100,7 +101,7 @@ class UsersManagersTests(TestCase):
         get_local_user(reset=True)
 
         client = Client()
-        logged_in = client.login(email=NORMAL, password='foo')
+        logged_in = client.login(email=NORMAL, password=test_pw)
         self.assertTrue(logged_in)
         logged_in = client.logout()
         self.assertEqual(logged_in, None)
@@ -112,7 +113,7 @@ class UsersManagersTests(TestCase):
         mail.outbox = []
 
         client = Client()
-        client.login(email=NORMAL, password='foo')
+        client.login(email=NORMAL, password=test_pw)
         path = reverse('password_change')
         response = client.get(path)
         self.assertIn(response.status_code, [200, 302])
@@ -120,7 +121,7 @@ class UsersManagersTests(TestCase):
         path = reverse('password_change')
         pw = 'nAPrZuTg9pr8dLN2'
 
-        response = client.post(path, {'old_password': 'foo', 'new_password1': pw, 'new_password2': pw})
+        response = client.post(path, {'old_password': test_pw, 'new_password1': pw, 'new_password2': pw})
         self.assertIn(response.status_code, [200, 302])
 
         logged_in = client.logout()
@@ -133,7 +134,7 @@ class UsersManagersTests(TestCase):
         get_local_user(reset=True)
 
         client = Client()
-        logged_in = client.login(email=NORMAL, password='foo')
+        logged_in = client.login(email=NORMAL, password=test_pw)
         self.assertEqual(logged_in, True)
 
         response = client.get(reverse('password_reset'))
@@ -157,7 +158,7 @@ class UsersManagersTests(TestCase):
         # Now we post to the same url with our new password:
         path = reverse('password_reset_confirm',
                        kwargs={'token': token, 'uidb64': uid})
-        response = client.post(path, {'new_password1': 'foo', 'new_password2': 'foo'})
+        response = client.post(path, {'new_password1': test_pw, 'new_password2': test_pw})
         self.assertIn(response.status_code, [200, 302])
 
 
@@ -185,7 +186,7 @@ class PendingUsersTests(TestCase):
         remove_abinormal()
 
         client = Client()
-        result = client.login(email=NORMAL, password='foo')
+        result = client.login(email=NORMAL, password=test_pw)
         self.assertTrue(result)
 
         mail.outbox = []
@@ -210,7 +211,7 @@ class PendingUsersTests(TestCase):
         self.assertEqual(response.reason_phrase, 'OK')
 
         data = self.data
-        data['password2'] = 'foo'
+        data['password2'] = test_pw
         self.assert_user_was_created(path, data, False)
 
         data['password2'] = data['password1']
@@ -249,7 +250,7 @@ class PendingUsersTests(TestCase):
 
         self.join_test_helper(data, taint_uuid_flag=True)
 
-        data['password2'] = 'foo'
+        data['password2'] = test_pw
         self.join_test_helper(data)
         data['password2'] = data['password1']
 
