@@ -15,7 +15,7 @@ local_user = None
 test_pw = os.getenv('TEST_CLIENT_PW', 'foo')
 
 
-def get_local_user(reset=False):
+def get_local_user_(reset=False):
     global local_user, User, test_pw
     if reset:
         User.objects.filter(email=NORMAL).delete()
@@ -24,6 +24,11 @@ def get_local_user(reset=False):
         User = get_user_model()
         local_user = User.objects.create_user(email=NORMAL, password=test_pw)
     return local_user
+
+
+def get_local_user():
+    User.objects.filter(email=NORMAL).delete()
+    return User.objects.create_user(email=NORMAL, password=test_pw)
 
 
 def remove_abinormal():
