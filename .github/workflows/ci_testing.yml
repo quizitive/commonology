@@ -55,5 +55,5 @@ jobs:
         MAILCHIMP_APIKEY: ${{secrets.MAILCHIMP_APIKEY}}
         MAILCHIMP_HOOK_UUID: ${{secrets.MAILCHIMP_HOOK_UUID}}
         MAILCHIMP_AUDIENCE: ${{secrets.MAILCHIMP_AUDIENCE}}
-        TEST_CLIENT_PW: foo
+        TEST_CLIENT_PW: ${{secrets.TEST_CLIENT_PW}}
       run: python manage.py test
