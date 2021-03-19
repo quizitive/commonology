@@ -182,6 +182,11 @@ class PendingUsersTests(TestCase):
     def test_invite(self):
         user = get_local_user()
 
+        try:
+            User.objects.get(email=ABINORMAL).delete()
+        except User.DoesNotExist:
+            pass
+
         client = Client()
         client.login(email=NORMAL, password='foo')
         mail.outbox = []
