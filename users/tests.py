@@ -185,6 +185,9 @@ class PendingUsersTests(TestCase):
         user = get_local_user()
         remove_abinormal()
 
+        x = User.objects.get(email=NORMAL)
+        print(f"Marc Schwarzschild found user {x.email}.")
+
         print(f"Marc Schwarzschild - test pw is {test_pw}.")
         self.assertEqual(test_pw, 'foo')
         client = Client()
