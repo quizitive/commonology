@@ -65,6 +65,7 @@ def join_view(request):
 
 @login_required()
 def send_invite_view(request):
+    print(f"Marc Schwarzschild - entering send_invite_view.")
     if request.method == 'POST':
         email = request.POST['email']
         context = {"email": email}
@@ -82,6 +83,7 @@ def send_invite_view(request):
 
         return redirect('/')
 
+    print(f"Marc Schwarzschild - leaving as get send_invite_view.")
     context = {'form': PendingEmailForm}
     return render(request, "users/invite.html", context)
 
