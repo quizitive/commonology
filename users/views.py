@@ -5,15 +5,16 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.views import LoginView
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
-from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, LoginForm
-from users.models import USER_CLASS, PendingEmail
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
+from users.models import PendingEmail
 
 from .utils import remove_pending_email_invitations
+
+User = get_user_model()
 
 
 @login_required()
@@ -27,7 +28,7 @@ def profile_view(request):
         user_form = PlayerProfileForm(data=request.POST or None)
     else:
         email = request.user.email
-        cu = USER_CLASS.objects.get(email=email)
+        cu = User.objects.get(email=email)
         user_form = PlayerProfileForm(instance=cu, data=request.POST or None)
     if request.method == 'POST' and user_form.is_valid():
         user_form.save()
@@ -36,9 +37,9 @@ def profile_view(request):
 
 def confirm_or_login(request, email):
     try:
-        USER_CLASS.objects.get(email=email)
+        User.objects.get(email=email)
         return redirect('login/', msg='You already have an account.')
-    except (USER_CLASS.DoesNotExist):
+    except (User.DoesNotExist):
         remove_pending_email_invitations()
         pe = PendingEmail(email=email)
         pe.save()
@@ -68,9 +69,9 @@ def send_invite_view(request):
         email = request.POST['email']
         context = {"email": email}
         try:
-            USER_CLASS.objects.get(email=email)
+            User.objects.get(email=email)
             return render(request, "users/has_account.html", context)
-        except (USER_CLASS.DoesNotExist):
+        except (User.DoesNotExist):
             remove_pending_email_invitations()
             pe = PendingEmail(email=email, referrer=request.user.email)
             pe.save()
@@ -113,9 +114,9 @@ def email_confirmed_view(request, uidb64):
         email = pe.email
 
         try:
-            USER_CLASS.objects.get(email=email)
+            User.objects.get(email=email)
             return redirect('login/', msg='You already have an account.')
-        except (USER_CLASS.DoesNotExist):
+        except (User.DoesNotExist):
             form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer})
             form.fields['email'].widget.attrs['readonly'] = True
             form.fields['email'].widget = HiddenInput()
@@ -139,7 +140,7 @@ def send_invite(request, pe):
     join_url = make_uuid_url(request, uuid=pe.uuid)
     referrer_str = ""
     if pe.referrer:
-        referrer = USER_CLASS.objects.filter(email=pe.referrer).first()
+        referrer = User.objects.filter(email=pe.referrer).first()
         if referrer is None:
             # Do not send invite if referrer does not exist.
             return 0
