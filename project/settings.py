@@ -20,8 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
 
 DEBUG = env.get("DEBUG", False)
-INHIBIT_MAIL = env.get("INHIBIT_MAIL", False) == 'True'
 
+ALLOWED_HOSTS = ['127.0.0.1', 'commonologygame.com', 'staging.commonologygame.com', 'staging.quizitive.com']
 INTERNAL_IPS = ('127.0.0.1', 'staging.commonologygame.com', )
 
 # Disable Django Debug Toolbar
@@ -31,8 +31,6 @@ if os.environ.get('DISABLE_DEBUG_TOOLBAR'):
     INTERNAL_IPS = ()
 
 DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
-
-ALLOWED_HOSTS = ['127.0.0.1', 'commonologygame.com', 'staging.commonologygame.com']
 
 # Enable Django Debug Toolbar
 # NOTE: Much slower on database intensive operations
@@ -59,6 +57,7 @@ CELERY_TIMEZONE = 'America/New_York'
 
 # Application definition
 INSTALLED_APPS = [
+    'sslserver',
     'users',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -153,23 +152,17 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
-USE_I18N = True
-USE_L10N = True
-USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'project/static')
 ]
 
-if INHIBIT_MAIL:
+if env.get("INHIBIT_MAIL", False) == 'True':
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
