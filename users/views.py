@@ -75,6 +75,7 @@ def send_invite_view(request):
             remove_pending_email_invitations()
             pe = PendingEmail(email=email, referrer=request.user.email)
             pe.save()
+            print(f"Marc Schwarzschild - Just saved {email} to PendingUsers.")
             send_invite(request, pe)
             return render(request, "users/invite_sent.html", context)
 
