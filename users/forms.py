@@ -1,4 +1,5 @@
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
+    AuthenticationForm, PasswordResetForm
 from django import forms
 from .models import Player, PendingEmail, LOCATIONS, MAX_LOCATION_LEN
 
@@ -52,3 +53,14 @@ class LoginForm(AuthenticationForm):
         )
     )
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'w3-input'}))
+
+
+class PwdResetForm(PasswordResetForm):
+    email = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                'class': 'w3-input',
+                'autofocus': True
+            },
+        )
+    )

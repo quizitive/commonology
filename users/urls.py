@@ -3,7 +3,7 @@ from django.contrib.auth import views as auth_views
 from users.views import user_logout, profile_view, join_view, \
     email_confirmed_view, send_invite_view
 from users.htmx import PlayersHTMXView
-from users.forms import LoginForm
+from users.forms import LoginForm, PwdResetForm
 
 
 urlpatterns = [
@@ -20,7 +20,10 @@ urlpatterns = [
         extra_context={"header": "Login"}
     ), name="login"),
     path("accounts/login/", auth_views.LoginView.as_view(template_name="users/login.html")),
-    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(
+        template_name="users/pwd_reset.html",
+        form_class=PwdResetForm
+    ), name='password_reset'),
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),

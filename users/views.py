@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import PasswordResetDoneView
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
@@ -168,3 +168,14 @@ def send_invite(request, pe):
 
     return send_mail(subject='Join us', message=msg,
                      from_email=None, recipient_list=[email])
+
+
+class PwdResetDoneView(PasswordResetDoneView):
+
+    def get(self, *args, **kwargs):
+        # todo: fix me
+        messages.info("We've emailed you instructions for setting your password, "
+                      "if an account exists with the email you entered. You should receive them shortly.")
+        messages.info("If you don't receive an email, please make sure you've entered the address"
+                      " you registered with, and check your spam folder")
+        return
