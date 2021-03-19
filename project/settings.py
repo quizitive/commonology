@@ -95,14 +95,14 @@ LOGOUT_REDIRECT_URL = "home"
 # CSRF_COOKIE_SECURE = True
 # SECURE_SSL_REDIRECT = True
 
-SESSION_ENGINE = 'redis_sessions.session'
-SESSION_REDIS = {
-    'host': 'localhost',
-    'port': 6379,
-    'db': 0,
-    'prefix': 'session',
-    'socket_timeout': 1
-}
+# SESSION_ENGINE = 'redis_sessions.session'
+# SESSION_REDIS = {
+#     'host': 'localhost',
+#     'port': 6379,
+#     'db': 0,
+#     'prefix': 'session',
+#     'socket_timeout': 1
+# }
 
 CACHES = {
     "default": {
