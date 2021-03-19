@@ -91,14 +91,14 @@ ROOT_URLCONF = 'project.urls'
 LOGIN_REDIRECT_URL = "loggedin_leaderboard"
 LOGOUT_REDIRECT_URL = "home"
 
-# SESSION_ENGINE = 'redis_sessions.session'
-# SESSION_REDIS = {
-#     'host': 'localhost',
-#     'port': 6379,
-#     'db': 0,
-#     'prefix': 'session',
-#     'socket_timeout': 1
-# }
+SESSION_ENGINE = 'redis_sessions.session'
+SESSION_REDIS = {
+    'host': 'localhost',
+    'port': 6379,
+    'db': 0,
+    'prefix': 'session',
+    'socket_timeout': 1
+}
 
 CACHES = {
     "default": {
