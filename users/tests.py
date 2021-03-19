@@ -191,7 +191,7 @@ class PendingUsersTests(TestCase):
         url = reverse('invite')
         print(f"Marc Schwarzschild - about to post to invite at {url}.")
         response = client.post(url, data={"email": ABINORMAL})
-        self.assertTrue(response.context[‘request’].user.is_authenticated())
+        self.assertTrue(response.context['request'].user.is_authenticated)
         print('response:')
         print(response)
         self.assertIn(response.status_code, [200, 302])
