@@ -65,25 +65,21 @@ def join_view(request):
 
 @login_required()
 def send_invite_view(request):
-    print(f"Marc Schwarzschild - entering send_invite_view.")
     if request.method == 'POST':
         email = request.POST['email']
         context = {"email": email}
         try:
             User.objects.get(email=email)
-            print(f"Marc Schwarzschild - {email} has account already.")
             return render(request, "users/has_account.html", context)
         except (User.DoesNotExist):
             remove_pending_email_invitations()
             pe = PendingEmail(email=email, referrer=request.user.email)
             pe.save()
-            print(f"Marc Schwarzschild - Just saved {email} to PendingUsers.")
             send_invite(request, pe)
             return render(request, "users/invite_sent.html", context)
 
         return redirect('/')
 
-    print(f"Marc Schwarzschild - leaving as get send_invite_view.")
     context = {'form': PendingEmailForm}
     return render(request, "users/invite.html", context)
 

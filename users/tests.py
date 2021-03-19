@@ -11,24 +11,12 @@ User = get_user_model()
 
 NORMAL = 'normal@user.com'
 ABINORMAL = 'abinormal@user.com'
-local_user = None
 test_pw = os.getenv('TEST_CLIENT_PW', 'foo')
 
 
-def get_local_user_(reset=False):
-    global local_user, User, test_pw
-    if reset:
-        User.objects.filter(email=NORMAL).delete()
-        local_user = None
-    if local_user is None:
-        User = get_user_model()
-        local_user = User.objects.create_user(email=NORMAL, password=test_pw)
-    return local_user
-
-
-def get_local_user():
-    User.objects.filter(email=NORMAL).delete()
-    return User.objects.create_user(email=NORMAL, password=test_pw)
+def get_local_user(e=NORMAL):
+    User.objects.filter(email=e).delete()
+    return User.objects.create_user(email=e, password=test_pw)
 
 
 def remove_abinormal():
@@ -103,7 +91,7 @@ class UsersManagersTests(TestCase):
 
     def test_logout(self):
         # Make sure user exists.
-        get_local_user(reset=True)
+        get_local_user()
 
         client = Client()
         logged_in = client.login(email=NORMAL, password=test_pw)
@@ -113,7 +101,7 @@ class UsersManagersTests(TestCase):
 
     def test_password_change(self):
         # Make sure user exists.
-        get_local_user(reset=True)
+        get_local_user()
 
         mail.outbox = []
 
@@ -136,7 +124,7 @@ class UsersManagersTests(TestCase):
 
     def test_forgot_password(self):
         # Make sure user exists.
-        get_local_user(reset=True)
+        get_local_user()
 
         client = Client()
         logged_in = client.login(email=NORMAL, password=test_pw)
@@ -190,10 +178,6 @@ class PendingUsersTests(TestCase):
         user = get_local_user()
         remove_abinormal()
 
-        x = User.objects.get(email=NORMAL)
-        print(f"Marc Schwarzschild found user {x.email}.")
-
-        print(f"Marc Schwarzschild - test pw is {test_pw}.")
         self.assertEqual(test_pw, 'foo')
         client = Client()
         result = client.login(email=NORMAL, password=test_pw)
@@ -201,11 +185,8 @@ class PendingUsersTests(TestCase):
 
         mail.outbox = []
         url = reverse('invite')
-        print(f"Marc Schwarzschild - about to post to invite at {url}.")
         response = client.post(url, data={"email": ABINORMAL})
         self.assertTrue(response.context['request'].user.is_authenticated)
-        print('response:')
-        print(response)
         self.assertIn(response.status_code, [200, 302])
 
         pe = PendingEmail.objects.get(email=ABINORMAL)
