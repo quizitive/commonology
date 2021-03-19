@@ -191,7 +191,9 @@ class PendingUsersTests(TestCase):
         remove_abinormal()
 
         client = Client()
-        client.login(email=NORMAL, password='foo')
+        result = client.login(email=NORMAL, password='foo')
+        self.assertEqual(True)
+
         mail.outbox = []
         url = reverse('invite')
         print(f"Marc Schwarzschild - about to post to invite at {url}.")
