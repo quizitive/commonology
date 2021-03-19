@@ -192,7 +192,7 @@ class PendingUsersTests(TestCase):
 
         client = Client()
         result = client.login(email=NORMAL, password='foo')
-        self.assertEqual(True)
+        self.assertTrue(result)
 
         mail.outbox = []
         url = reverse('invite')
