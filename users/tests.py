@@ -193,7 +193,9 @@ class PendingUsersTests(TestCase):
         client = Client()
         client.login(email=NORMAL, password='foo')
         mail.outbox = []
-        response = client.post(reverse('invite'), data={"email": ABINORMAL})
+        url = reverse('invite')
+        print(f"Marc Schwarzschild - about to post to invite at {url}.")
+        response = client.post(url, data={"email": ABINORMAL})
         self.assertIn(response.status_code, [200, 302])
 
         pe = PendingEmail.objects.get(email=ABINORMAL)
