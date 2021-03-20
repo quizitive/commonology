@@ -11,6 +11,7 @@ from django.contrib.auth.views import PasswordResetDoneView
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
+from django.views.generic.base import View
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, LoginForm
 from users.models import USER_CLASS, PendingEmail
 
@@ -96,12 +97,33 @@ def send_invite_view(request):
     return render(request, "users/invite.html", context)
 
 
-def email_confirmed_view(request, uidb64):
-    uidb64 = uuid.UUID(uidb64)
-    if request.method == 'POST':
+class EmailConfirmedView(View):
+
+    def get(self, request, uidb64, *args, **kwargs):
+        try:
+            pe = PendingEmail.objects.filter(uuid__exact=uidb64).first()
+            if pe is None:
+                return render(request, "users/join_fail.html")
+
+            email = pe.email
+
+            try:
+                USER_CLASS.objects.get(email=email)
+                return redirect('login/', msg='You already have an account.')
+            except USER_CLASS.DoesNotExist:
+                form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer})
+                messages.info(request, f"Email: {pe.email} (this can be changed after signing up)")
+                return render(request, "users/register.html", {"form": self._format_form(form), "email": email})
+
+        except PendingEmail.DoesNotExist:
+            return render(request, "users/join_fail.html")
+        except ValidationError:
+            return render(request, "users/join_fail.html")
+
+    def post(self, request, uidb64, *args, **kwargs):
         form = JoinForm(request.POST)
+        email = request.POST['email']
         if form.is_valid():
-            email = request.POST['email']
 
             pe = PendingEmail.objects.filter(email__exact=email).filter(uuid=uidb64).first()
 
@@ -110,34 +132,24 @@ def email_confirmed_view(request, uidb64):
 
             user = form.save(commit=False)
             user.referrer = pe.referrer
+            user.is_member = True
             user.save()
             raw_password = form.clean_password2()
             user = authenticate(email=user.email, password=raw_password)
             login(request, user)
             PendingEmail.objects.filter(email__iexact=user.email).delete()
             return redirect('/')
-        return render(request, "users/register.html", {"form": form})
+        messages.info(request, f"Email: {email} (this can be changed after signing up)")
+        return render(request, "users/register.html", {"form": self._format_form(form)})
 
-    try:
-        pe = PendingEmail.objects.filter(uuid__exact=uidb64).first()
-        if pe is None:
-            return render(request, "users/join_fail.html")
-
-        email = pe.email
-
-        try:
-            USER_CLASS.objects.get(email=email)
-            return redirect('login/', msg='You already have an account.')
-        except (USER_CLASS.DoesNotExist):
-            form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer})
-            form.fields['email'].widget.attrs['readonly'] = True
-            form.fields['email'].widget = HiddenInput()
-            return render(request, "users/register.html", {"form": form, "email": email})
-
-    except PendingEmail.DoesNotExist:
-        return render(request, "users/join_fail.html")
-    except ValidationError:
-        return render(request, "users/join_fail.html")
+    @staticmethod
+    def _format_form(form):
+        for key, field in form.fields.items():
+            field.widget.attrs['class'] = 'w3-input'
+            field.widget.attrs['style'] = 'background:none;'
+        form.fields['email'].widget.attrs['readonly'] = True
+        form.fields['email'].widget = HiddenInput()
+        return form
 
 
 def make_uuid_url(request, uuid=None):
