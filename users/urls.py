@@ -1,7 +1,7 @@
 from django.urls import include, path
 from django.contrib.auth import views as auth_views
 from users.views import user_logout, profile_view, join_view, \
-    email_confirmed_view, send_invite_view, PwdResetDoneView
+    send_invite_view, PwdResetDoneView, EmailConfirmedView
 from users.htmx import PlayersHTMXView
 from users.forms import LoginForm, PwdResetForm
 
@@ -11,7 +11,7 @@ urlpatterns = [
     path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('password_change_done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
     path("profile/", profile_view, name="profile"),
-    path("join/<uidb64>", email_confirmed_view, name='join'),
+    path("join/<uidb64>", EmailConfirmedView.as_view(), name='join'),
     path("join/", join_view, name='join'),
     path("invite/", send_invite_view, name='invite'),
     path("login/", auth_views.LoginView.as_view(
