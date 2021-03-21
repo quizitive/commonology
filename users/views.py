@@ -103,7 +103,7 @@ class EmailConfirmedView(View):
         try:
             pe = PendingEmail.objects.filter(uuid__exact=uidb64).first()
             if pe is None:
-                return render(request, "users/join_fail.html")
+                return self._join_fail(request)
 
             email = pe.email
 
@@ -112,23 +112,25 @@ class EmailConfirmedView(View):
                 return redirect('login/', msg='You already have an account.')
             except USER_CLASS.DoesNotExist:
                 form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer})
-                messages.info(request, f"Email: {pe.email} (this can be changed after signing up)")
+                messages.info(request, f"Email: {pe.email} (you can change this after signing up)")
                 return render(request, "users/register.html", {"form": self._format_form(form), "email": email})
 
         except PendingEmail.DoesNotExist:
-            return render(request, "users/join_fail.html")
+            return self._join_fail(request)
         except ValidationError:
-            return render(request, "users/join_fail.html")
+            return self._join_fail(request)
 
     def post(self, request, uidb64, *args, **kwargs):
         form = JoinForm(request.POST)
-        email = request.POST['email']
+        email = request.POST.get('email')
+        if not email:
+            return redirect('home')
+
         if form.is_valid():
 
             pe = PendingEmail.objects.filter(email__exact=email).filter(uuid=uidb64).first()
-
             if pe is None:
-                return render(request, "users/join_fail.html")
+                return self._join_fail(request)
 
             user = form.save(commit=False)
             user.referrer = pe.referrer
@@ -139,7 +141,8 @@ class EmailConfirmedView(View):
             login(request, user)
             PendingEmail.objects.filter(email__iexact=user.email).delete()
             return redirect('/')
-        messages.info(request, f"Email: {email} (this can be changed after signing up)")
+
+        messages.info(request, f"Email: {email} (you can change this after signing up)")
         return render(request, "users/register.html", {"form": self._format_form(form)})
 
     @staticmethod
@@ -150,6 +153,12 @@ class EmailConfirmedView(View):
         form.fields['email'].widget.attrs['readonly'] = True
         form.fields['email'].widget = HiddenInput()
         return form
+
+    def _join_fail(self, request):
+        messages.error(request, "It seems the url link we sent you has something wrong with it. "
+                                "Please try one more time.")
+        messages.error(request, "If that does not work then please do not give up on us. Send us a help message.")
+        return render(request, 'users/join_fail.html', {})
 
 
 def make_uuid_url(request, uuid=None):
