@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
+from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 
@@ -68,8 +69,9 @@ class LeaderboardView(View):
         date_range = current_game.date_range_pretty
         context = {
             'game_id': game_id,
-            'date_range': date_range,
+            'date_range': date_range
         }
+        messages.info(request, "Login to follow your friends and much more coming soon!")
         return render(request, 'leaderboard/leaderboard_view.html', context)
 
 
