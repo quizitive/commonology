@@ -3,37 +3,19 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from users.tests import get_local_user, NORMAL
 from django.contrib.auth import get_user_model
+from .mailchimp_utils import Mailchimp
+from project.settings import MAILCHIMP_SERVER, MAILCHIMP_API_KEY
 
-# https://github.com/mailchimp/mailchimp-marketing-python
-import mailchimp_marketing as MailchimpMarketing
 
-
-# log into your Mailchimp account and look at the URL in your browser.
-# You’ll see something like https://us19.admin.mailchimp.com/
-# the us19 part is the server prefix.
-SERVER_PREFIX = 'us2'
-
+# ID for Audience named Marc
+MAILCHIMP_TEST_LIST_ID='36b9567454'
 
 class GithubSecretTests(TestCase):
     def test_secret(self):
         api_key = os.getenv('API_KEY')
         self.assertEqual(api_key, 'Marc Schwarzschild')
 
-
-class MailchimpTests(TestCase):
-    def test_ping(self):
-        api_key = os.getenv('MAILCHIMP_APIKEY')
-        try:
-            client = MailchimpMarketing.Client()
-            client.set_config({
-                "api_key": api_key,
-                "server": SERVER_PREFIX
-            })
-            response = client.ping.get()
-            self.assertEqual(response['health_status'], "Everything's Chimpy!")
-        except MailchimpMarketing.api_client.ApiClientError:
-            self.assertTrue(False, msg="Mailchimp API failing to connect.")
-
+class MailchimpHookTests(TestCase):
     def test_mailchimphook(self):
         u = get_local_user()
         self.assertTrue(u.subscribed)
@@ -51,3 +33,62 @@ class MailchimpTests(TestCase):
         User = get_user_model()
         u = User.objects.get(email=NORMAL)
         self.assertFalse(u.subscribed)
+
+
+class MailchimpAPITests(TestCase):
+
+    def setUp(self):
+        self.mc_client = Mailchimp(MAILCHIMP_SERVER, MAILCHIMP_API_KEY, MAILCHIMP_TEST_LIST_ID)
+        self.user = get_local_user()
+        self.mc_client.subscribe(self.user.email)
+
+    def test_ping(self):
+        response = self.mc_client.ping()
+        j = response.json()
+        self.assertEqual(j['health_status'], "Everything's Chimpy!")
+
+    def test_getmembers(self):
+        status_code, members = self.mc_client.get_members()
+        print(members)  #...
+
+    def test_deletemember(self):
+        status_code, j = self.mc_client.add_list('marc_testing')
+        print(status_code)
+        print(j)
+        return
+
+        email = 'foo@quizitive.com'
+        status_code, j = self.mc_client.add_member_to_list(email)
+        print(status_code)
+        print(j)
+        status_code, j = self.mc_client.delete_member('foo@quizitive.com')
+        print(status_code)
+        print(j)
+
+
+    def test_getmemberinfo(self):
+        pass # ...
+
+    def test_unsubscribe(self):
+        # test resubscribe here
+        # test delete list member
+        pass # ...
+
+
+
+    def test_getlist(self):
+        email = 'foo@quizitive.com'
+        response = self.mc_client.subscribe(email)
+        pass
+
+    def test_subscribe(self):
+        email = 'foo@quizitive.com'
+        #email = 'ms@brookhavenstrategies.com'
+        m = self.mc_client
+        x = m.ping()
+        # x = m.get_members()
+        #x = m.unsubscribe(email)
+        #x = m.resubscribe(email)
+        #x = m.add_email(email)
+        print(x)
+
