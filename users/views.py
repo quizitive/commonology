@@ -40,12 +40,12 @@ def profile_view(request):
 
 def confirm_or_login(request, email):
     try:
-        user = USER_CLASS.objects.get(email=email)
+        user = User.objects.get(email=email)
         if user.is_member:
             messages.info(request, 'There is already an account with that email, please login.')
             return redirect('login')
 
-    except USER_CLASS.DoesNotExist:
+    except User.DoesNotExist:
         pass
 
     remove_pending_email_invitations()
@@ -110,9 +110,9 @@ class EmailConfirmedView(View):
             email = pe.email
 
             try:
-                USER_CLASS.objects.get(email=email)
+                User.objects.get(email=email)
                 return redirect('login/', msg='You already have an account.')
-            except USER_CLASS.DoesNotExist:
+            except User.DoesNotExist:
                 form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer})
                 messages.info(request, f"Email: {pe.email} (you can change this after signing up)")
                 return render(request, "users/register.html", {"form": self._format_form(form), "email": email})
