@@ -6,6 +6,6 @@
 
 <div id="login-modal" class="w3-modal" style="display: none;">
   <div class="w3-animate-top">
-    {% include 'users/cards/login_card.html' with is_modal='True' modal_name="'login-modal'" header='Login' %}
+    {% include 'users/cards/login_card.html' with header='Login' is_modal='True' modal_name="'login-modal'" button_label='Login' form_action='/login/'%}
   </div>
 </div>
