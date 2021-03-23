@@ -10,6 +10,10 @@
   </header>
   <div class="w3-container w3-padding-large">
 
+  {% if custom_message %}
+    <p class="custom-msg w3-padding-top w3-margin-bottom">{{ custom_message }}</p>
+  {% endif %}
+
   {% if messages %}
     <div style="margin-bottom:24px;">
     {% for msg in messages %}
@@ -18,10 +22,10 @@
     </div>
   {% endif %}
 
-    <form method="post">
+    <form method="post" {% if form_action %}action="{{ form_action }}"{% endif %}>
       {% csrf_token %}
       {{ form.as_p }}
-      <input type="submit" value="{{ button }}" class="w3-button w3-block w3-teal w3-margin-bottom">
+      <input type="submit" value="{{ button_label }}" class="w3-button w3-block w3-teal w3-margin-bottom">
     </form>
 
     {% block card_extras %}{% endblock %}
