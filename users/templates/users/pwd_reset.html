@@ -1,0 +1,12 @@
+<!--users/templates/users/pwd_reset.html-->
+
+{% extends 'users/base.html' %}
+
+{% block content %}
+
+<div class="content">
+    <br/><br/>
+    {% include 'users/cards/base_users_card.html' with header="Reset Password" button_label="Send"%}
+  </div>
+
+{% endblock %}

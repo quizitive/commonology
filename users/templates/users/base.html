@@ -1,15 +1,24 @@
 <!--users/templates/users/base.html-->
 
-<style>
-    label, input {
-        display: block;
-    }
-    span.helptext {
-        display: none;
-    }
-</style>
+{#<style>#}
+{#    label, input {#}
+{#        display: block;#}
+{#    }#}
+{#    span.helptext {#}
+{#        display: none;#}
+{#    }#}
+{#</style>#}
+{##}
+{#<h1>Welcome</h1>#}
 
-<h1>Welcome</h1>
+{% extends 'base.html' %}
+{% load static %}
 
-{% block content %}
+{% block navbar %}
+  {% include 'components/navbar.html' %}
+{% endblock %}
+
+{% block app_style %}
+  <link rel="stylesheet" href="{% static 'css/components/navbar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/users/base.css' %}">
 {% endblock %}

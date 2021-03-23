@@ -1,7 +1,10 @@
 <!--users/templates/users/login.html-->
 
-{% extends 'base.html' %}
+{% extends 'users/base.html' %}
 
 {% block content %}
-  {% include 'users/login_card.html' %}
+  <div class="content">
+    <br/><br/>
+    {% include 'users/cards/login_card.html' with header="Login" button_label="Login"%}
+  </div>
 {% endblock %}
