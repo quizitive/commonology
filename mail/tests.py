@@ -1,4 +1,5 @@
 import os
+import uuid
 from django.test import TestCase, Client
 from django.urls import reverse
 from users.tests import get_local_user, NORMAL
@@ -7,13 +8,11 @@ from .mailchimp_utils import Mailchimp
 from project.settings import MAILCHIMP_SERVER, MAILCHIMP_API_KEY
 
 
-# ID for Audience named Marc
-MAILCHIMP_TEST_LIST_ID='36b9567454'
-
 class GithubSecretTests(TestCase):
     def test_secret(self):
         api_key = os.getenv('API_KEY')
         self.assertEqual(api_key, 'Marc Schwarzschild')
+
 
 class MailchimpHookTests(TestCase):
     def test_mailchimphook(self):
@@ -36,59 +35,42 @@ class MailchimpHookTests(TestCase):
 
 
 class MailchimpAPITests(TestCase):
-
     def setUp(self):
-        self.mc_client = Mailchimp(MAILCHIMP_SERVER, MAILCHIMP_API_KEY, MAILCHIMP_TEST_LIST_ID)
-        self.user = get_local_user()
-        self.mc_client.subscribe(self.user.email)
+        self.mc_client = Mailchimp(MAILCHIMP_SERVER, MAILCHIMP_API_KEY)
+        self.list_name = 'marc_testing'
+
+        self.mc_client.delete_list_by_name(self.list_name)
+        status_code, self.list_id = self.mc_client.add_list(self.list_name)
+        self.assertEqual(status_code, 200)
+
+    def tearDown(self):
+        status_code = self.mc_client.delete_list_by_name(self.list_name)
+        self.assertEqual(status_code, 204)
 
     def test_ping(self):
         response = self.mc_client.ping()
         j = response.json()
         self.assertEqual(j['health_status'], "Everything's Chimpy!")
 
-    def test_getmembers(self):
-        status_code, members = self.mc_client.get_members()
-        print(members)  #...
+    def test_member(self):
+        email = f'moe{str(uuid.uuid4().int)}@foo.com'
 
-    def test_deletemember(self):
-        status_code, j = self.mc_client.add_list('marc_testing')
-        print(status_code)
-        print(j)
-        return
-
-        email = 'foo@quizitive.com'
         status_code, j = self.mc_client.add_member_to_list(email)
-        print(status_code)
-        print(j)
-        status_code, j = self.mc_client.delete_member('foo@quizitive.com')
-        print(status_code)
-        print(j)
+        self.assertEqual(status_code, 200)
 
+        status_code, members = self.mc_client.get_members()
+        self.assertEqual(status_code, 200)
+        self.assertIn(email, members)
+        subcribe_status = members[email]
+        self.assertEqual(subcribe_status, 'subscribed')
 
-    def test_getmemberinfo(self):
-        pass # ...
+        status_code, status = self.mc_client.unsubscribe(email)
+        self.assertEqual(status_code, 200)
+        self.assertEqual(status, 'unsubscribed')
 
-    def test_unsubscribe(self):
-        # test resubscribe here
-        # test delete list member
-        pass # ...
+        status_code, status = self.mc_client.subscribe(email)
+        self.assertEqual(status_code, 200)
+        self.assertEqual(status, 'subscribed')
 
-
-
-    def test_getlist(self):
-        email = 'foo@quizitive.com'
-        response = self.mc_client.subscribe(email)
-        pass
-
-    def test_subscribe(self):
-        email = 'foo@quizitive.com'
-        #email = 'ms@brookhavenstrategies.com'
-        m = self.mc_client
-        x = m.ping()
-        # x = m.get_members()
-        #x = m.unsubscribe(email)
-        #x = m.resubscribe(email)
-        #x = m.add_email(email)
-        print(x)
-
+        status_code = self.mc_client.delete_permanent(email)
+        self.assertEqual(status_code, 204)
