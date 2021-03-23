@@ -136,7 +136,7 @@ class UsersManagersTests(TestCase):
 
         response = client.get(reverse('password_reset'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.template_name[0], 'registration/password_reset_form.html')
+        self.assertEqual(response.template_name[0], 'users/pwd_reset.html')
 
         mail.outbox = []
         response = client.post(reverse('password_reset'), {'email': NORMAL})
@@ -165,6 +165,7 @@ class PendingUsersTests(TestCase):
         self.data = {'email': ABINORMAL,
                      'first_name': 'Abi',
                      'last_name': 'Normal',
+                     'display_name': 'abnormal',
                      'location': 'Andorra',
                      'referrer': NORMAL,
                      'password1': pw,
