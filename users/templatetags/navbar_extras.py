@@ -26,4 +26,4 @@ login_logout_url.is_safe = True
 
 @register.simple_tag
 def login_modal(request):
-    return render_to_string('users/login_modal.html', {'form': LoginForm}, request=request)
+    return render_to_string('users/modals/login_modal.html', {'form': LoginForm}, request=request)

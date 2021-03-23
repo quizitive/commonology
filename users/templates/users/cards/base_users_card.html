@@ -1,0 +1,34 @@
+<div class="w3-modal-content w3-round w3-card-2" style="max-width:767px; overflow: hidden;">
+  <header class="w3-container w3-teal w3-center">
+
+    {% if is_modal %}
+    <span onclick="document.getElementById({{ modal_name }}).style.display='none'"
+    class="w3-button w3-display-topright">&times;</span>
+    {% endif %}
+
+    <h3>{{ header }}</h3>
+  </header>
+  <div class="w3-container w3-padding-large">
+
+  {% if custom_message %}
+    <p class="custom-msg w3-padding-top w3-margin-bottom">{{ custom_message }}</p>
+  {% endif %}
+
+  {% if messages %}
+    <div style="margin-bottom:24px;">
+    {% for msg in messages %}
+      <p class="user-msg w3-padding-top w3-margin-bottom">{{ msg }}</p>
+    {% endfor %}
+    </div>
+  {% endif %}
+
+    <form method="post" {% if form_action %}action="{{ form_action }}"{% endif %}>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" value="{{ button_label }}" class="w3-button w3-block w3-teal w3-margin-bottom">
+    </form>
+
+    {% block card_extras %}{% endblock %}
+
+  </div>
+</div>

@@ -1,15 +1,50 @@
-<!--users/templates/users/email_signup.html-->
 
-{% extends 'base.html' %}
+{% extends 'users/base.html' %}
+
+{% block page_style %}
+  <style>
+  p {
+    margin-bottom:24px;
+  }
+  ul {
+    color: grey;
+    font-size: 12px;
+    font-style: italic;
+    list-style-type: none;
+    padding: 0;
+    margin: -20px 0 24px 0;
+  }
+  .helptext {
+    color: grey;
+    font-size: 12px;
+    font-style: italic;
+  }
+  #id_location {
+    border: 1px solid dimgrey;
+    border-radius: 4px;
+  }
+  .errorlist {
+    color: red;
+  }
+  .user-msg {
+    {#font-size: 16px;#}
+    font-weight: bold;
+    padding: 12px;
+    text-align: center;
+    border: solid 1px darkseagreen;
+    border-radius: 5px;
+    background: #e2f6f1;
+    color: #396049;
+  }
+  </style>
+
+{% endblock %}
 
 {% block content %}
 
-<form method="post">
-    {{ email }}
-    <p>Note: You may change your email address later on your profile page.</p>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Continue">
-</form>
+<div class="content">
+    <br/><br/>
+    {% include 'users/cards/base_users_card.html' with header="Register" button_label="Ok"%}
+  </div>
 
 {% endblock %}
