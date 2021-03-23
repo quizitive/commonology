@@ -18,5 +18,4 @@ django-redis-sessions==0.6.1
 django-debug-toolbar==3.2
 pytz==2021.1
 sentry-sdk==0.19.5
-mailchimp-marketing==3.0.36
 django-sslserver==0.22

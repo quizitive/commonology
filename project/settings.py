@@ -173,6 +173,10 @@ EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = os.environ.get('SENDGRID_APIKEY')
 DEFAULT_FROM_EMAIL = 'concierge@commonologygame.com'
 
+MAILCHIMP_API_KEY = os.getenv('MAILCHIMP_APIKEY')
+MAILCHIMP_SERVER = 'us2'
+MAILCHIMP_EMAIL_LIST_ID = os.getenv('MAILCHIMP_AUDIENCE')
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
