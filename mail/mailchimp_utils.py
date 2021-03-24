@@ -74,7 +74,7 @@ class Mailchimp(object):
         url = f"{self.get_members_baseurl()}"
         data = {"email_address": email, "status": "subscribed"}
         r = requests.post(url, auth=self.auth, data=json.dumps(data))
-        return r.status_code, r.json()
+        return r.status_code, r.json()['status']
 
     def update_member(self, email, data={'status': 'subscribed'}):
         sub_hash = hash_subscriber(email)
@@ -87,8 +87,11 @@ class Mailchimp(object):
         return self.update_member(email, data)
 
     def subscribe(self, email):
-        data = {'status': 'subscribed'}
-        return self.update_member(email, data)
+        status_code, status = self.add_member_to_list(email)
+        if status_code != 200:
+            data = {'status': 'subscribed'}
+            status_code, status = self.update_member(email, data)
+        return status_code, status
 
     def delete_permanent(self, email):
         # THIS IS VERY PERMANENT
