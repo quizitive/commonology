@@ -8,12 +8,13 @@ import platform
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
+PROJECT_NAME = 'commonology'
 domain = 'commonologygame.com'
 IS_PRODUCTION = platform.node() == domain
 
 env = os.environ
 DEBUG = env.get("DEBUG", False)
-PROJECT_NAME = env['PROJECT_NAME']
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env["DJANGO_SECRET_KEY"]  # '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
 
@@ -32,7 +33,7 @@ DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
 # Enable Django Debug Toolbar
 # NOTE: Much slower on database intensive operations
 if env.get('DEBUG_TOOLBAR'):
-    INTERNAL_IPS = ['127.0.0.1', 'staging.commonologygame.com']
+    INTERNAL_IPS = ['127.0.0.1', 'staging.' + domain]
     DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
 
 # Celery Configuration Options
@@ -167,7 +168,7 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = env['SENDGRID_APIKEY']
-DEFAULT_FROM_EMAIL = 'concierge@commonologygame.com'
+DEFAULT_FROM_EMAIL = 'concierge@' + domain
 
 MAILCHIMP_API_KEY = env['MAILCHIMP_APIKEY']
 MAILCHIMP_HOOK_UUID = env['MAILCHIMP_HOOK_UUID']
