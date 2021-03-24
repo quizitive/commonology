@@ -55,7 +55,7 @@ class MailchimpAPITests(TestCase):
     def test_member(self):
         email = f'moe{str(uuid.uuid4().int)}@foo.com'
 
-        status_code, j = self.mc_client.add_member_to_list(email)
+        status_code, status = self.mc_client.add_member_to_list(email)
         self.assertEqual(status_code, 200)
 
         status_code, members = self.mc_client.get_members()
@@ -74,3 +74,9 @@ class MailchimpAPITests(TestCase):
 
         status_code = self.mc_client.delete_permanent(email)
         self.assertEqual(status_code, 204)
+
+        # Test subscribe when contact has not already been added to the list.
+        email = f'moe{str(uuid.uuid4().int)}@foo.com'
+        status_code, status = self.mc_client.subscribe(email)
+        self.assertEqual(status_code, 200)
+        self.assertEqual(status, 'subscribed')
