@@ -25,7 +25,7 @@
     <form method="post" {% if form_action %}action="{{ form_action }}"{% endif %}>
       {% csrf_token %}
       {{ form.as_p }}
-      <input type="submit" value="{{ button_label }}" class="w3-button w3-block w3-teal w3-margin-bottom">
+      <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-block w3-teal w3-margin-bottom">
     </form>
 
     {% block card_extras %}{% endblock %}
