@@ -8,7 +8,7 @@ import platform
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-PROJECT_NAME = 'commonology'
+project_name = 'commonology'
 domain = 'commonologygame.com'
 IS_PRODUCTION = platform.node() == domain
 
@@ -16,7 +16,7 @@ env = os.environ
 DEBUG = env.get("DEBUG", False)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = env["DJANGO_SECRET_KEY"]  # '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
+SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
 
 
 ALLOWED_HOSTS = ['127.0.0.1', domain, 'staging.' + domain, 'staging.quizitive.com']
@@ -104,7 +104,7 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         },
-        "KEY_PREFIX": PROJECT_NAME
+        "KEY_PREFIX": project_name
     }
 }
 
@@ -129,7 +129,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': PROJECT_NAME,
+        'NAME': project_name,
         'HOST': '127.0.0.1',
         'PORT': 5432,
         'USER': 'postgres',
