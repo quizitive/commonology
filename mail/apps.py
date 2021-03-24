@@ -6,4 +6,3 @@ class MailConfig(AppConfig):
 
     def ready(self):
         import mail.signals
-

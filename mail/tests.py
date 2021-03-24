@@ -43,7 +43,6 @@ class MailchimpAPITests(TestCase):
         status_code, self.list_id = self.mc_client.add_list(self.list_name)
         self.assertEqual(status_code, 200)
 
-
     def tearDown(self):
         status_code = self.mc_client.delete_list_by_name(self.list_name)
         self.assertEqual(status_code, 204)
@@ -81,7 +80,6 @@ class MailchimpAPITests(TestCase):
         status_code, status = self.mc_client.subscribe(email)
         self.assertEqual(status_code, 200)
         self.assertEqual(status, 'subscribed')
-
 
     def test_player_save_signal(self):
         print('About to save.')
