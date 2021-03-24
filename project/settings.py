@@ -176,6 +176,7 @@ DEFAULT_FROM_EMAIL = 'concierge@commonologygame.com'
 MAILCHIMP_API_KEY = os.getenv('MAILCHIMP_APIKEY')
 MAILCHIMP_SERVER = 'us2'
 MAILCHIMP_EMAIL_LIST_ID = os.getenv('MAILCHIMP_AUDIENCE')
+MAILCHIMP_SIGNAL_INHIBIT = False
 
 LOGGING = {
     'version': 1,
