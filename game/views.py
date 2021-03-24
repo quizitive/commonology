@@ -26,15 +26,11 @@ def index(request):
 
 @permission_required('is_superuser')
 def marc(request):
-    m = os.environ.get('MARC', 'Ted')
-
     result = add.delay(3, 5)
     sleep(3)
 
     x = [i[1] for i in result.collect()][0]
-    if 0 == x:
-        x = "0 because the env var MARC was not defined for Celery."
-    x = {'MARC': m, 'SumResult': x}
+    x = {'SumResult': x}
 
     return render(request, 'game/marc.html', x)
 
