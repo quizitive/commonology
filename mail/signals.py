@@ -9,4 +9,3 @@ def player_postsave(sender, instance, **kwargs):
     if settings.MAILCHIMP_SIGNAL_INHIBIT:
         return
     print("Receiver finished.")
-
