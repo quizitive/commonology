@@ -5,7 +5,7 @@ from django.urls import reverse
 from users.tests import get_local_user, NORMAL
 from django.contrib.auth import get_user_model
 from .mailchimp_utils import Mailchimp
-from project.settings import MAILCHIMP_SERVER, MAILCHIMP_API_KEY
+from project import settings
 
 
 class GithubSecretTests(TestCase):
@@ -36,12 +36,13 @@ class MailchimpHookTests(TestCase):
 
 class MailchimpAPITests(TestCase):
     def setUp(self):
-        self.mc_client = Mailchimp(MAILCHIMP_SERVER, MAILCHIMP_API_KEY)
+        self.mc_client = Mailchimp(settings.MAILCHIMP_SERVER, settings.MAILCHIMP_API_KEY)
         self.list_name = 'marc_testing'
 
         self.mc_client.delete_list_by_name(self.list_name)
         status_code, self.list_id = self.mc_client.add_list(self.list_name)
         self.assertEqual(status_code, 200)
+
 
     def tearDown(self):
         status_code = self.mc_client.delete_list_by_name(self.list_name)
@@ -80,3 +81,11 @@ class MailchimpAPITests(TestCase):
         status_code, status = self.mc_client.subscribe(email)
         self.assertEqual(status_code, 200)
         self.assertEqual(status, 'subscribed')
+
+
+    def test_player_save_signal(self):
+        print('About to save.')
+        u = get_local_user()
+        settings.MAILCHIMP_INHIBIT = True
+        print('About to save again.')
+        u = get_local_user()
