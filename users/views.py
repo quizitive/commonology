@@ -61,10 +61,6 @@ def confirm_or_login(request, email):
 
 
 def join_view(request):
-    flag = os.environ.get('INHIBIT_JOIN_VIEW', 'False')
-    if flag.lower() == 'true':
-        return redirect('/')
-
     if request.user.is_authenticated:
         return redirect('/')
 

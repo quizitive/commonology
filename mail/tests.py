@@ -5,20 +5,14 @@ from django.urls import reverse
 from users.tests import get_local_user, NORMAL
 from django.contrib.auth import get_user_model
 from .mailchimp_utils import Mailchimp
-from project.settings import MAILCHIMP_SERVER, MAILCHIMP_API_KEY
-
-
-class GithubSecretTests(TestCase):
-    def test_secret(self):
-        api_key = os.getenv('API_KEY')
-        self.assertEqual(api_key, 'Marc Schwarzschild')
+from project.settings import MAILCHIMP_SERVER, MAILCHIMP_API_KEY, MAILCHIMP_HOOK_UUID
 
 
 class MailchimpHookTests(TestCase):
     def test_mailchimphook(self):
         u = get_local_user()
         self.assertTrue(u.subscribed)
-        uuid = os.getenv('MAILCHIMP_HOOK_UUID')
+        uuid = MAILCHIMP_HOOK_UUID
         client = Client()
         path = reverse('mailchimp_hook', kwargs={'uuid': uuid})
         data = {'type': ['unsubscribe'], 'fired_at': ['2021-03-17 14:16:55'], 'data[action]': ['unsub'],

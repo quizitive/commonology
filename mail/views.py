@@ -1,4 +1,3 @@
-import os
 import datetime
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
@@ -6,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
+from project.settings import MAILCHIMP_HOOK_UUID, MAILCHIMP_EMAIL_LIST_ID
 
 from users.utils import unsubscribe
 
@@ -28,12 +28,12 @@ def mailtest(request):
 class MailchimpWebhook(View):
 
     def post(self, request, uuid):
-        assert(uuid == os.getenv('MAILCHIMP_HOOK_UUID'))
+        assert(uuid == MAILCHIMP_HOOK_UUID)
 
         data = request.POST
 
         list_id = data['data[list_id]']
-        assert(list_id == os.getenv('MAILCHIMP_AUDIENCE'))
+        assert(list_id == MAILCHIMP_EMAIL_LIST_ID)
 
         email = data['data[email]']
         action = data.get('type', 'unknown')
