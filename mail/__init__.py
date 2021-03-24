@@ -1,1 +1,1 @@
-default_app_config = 'commonology.mail.apps.MailConfig'
+default_app_config = 'mail.apps.MailConfig'
