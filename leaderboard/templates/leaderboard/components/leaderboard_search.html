@@ -2,7 +2,7 @@
     <div class="w3-padding-large w3-col">
       <div class="w3-row">
         <form method="get"
-              hx-get="/leaderboard/htmx/{{ game_id }}"
+              hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
               hx-target="#component-leaderboard">
           <div class="w3-col" style="width:48px">
             <button class="w3-button w3-round w3-blue w3-border w3-border-blue"
