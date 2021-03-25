@@ -194,7 +194,7 @@ LOGGING = {
 }
 
 # Sentry
-SENTRY_KEY = env['SENTRY_KEY']
+SENTRY_KEY = env.get('SENTRY_KEY')
 sentry_sdk.init(
     dsn=f"https://{SENTRY_KEY}@o520957.ingest.sentry.io/5631994",
     integrations=[DjangoIntegration()],
