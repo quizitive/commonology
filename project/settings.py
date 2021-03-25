@@ -9,15 +9,14 @@ import platform
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
+
+project_name = 'commonology'
 domain = 'commonologygame.com'
 IS_PRODUCTION = platform.node() == domain
+
 DEBUG = env.get("DEBUG", False)
 if IS_PRODUCTION:
     DEBUG = False
-
-project_name = 'commonology'
-
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
