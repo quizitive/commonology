@@ -6,7 +6,7 @@ from pathlib import Path
 import os
 import platform
 import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
+
 
 project_name = 'commonology'
 domain = 'commonologygame.com'
@@ -187,7 +187,7 @@ LOGGING = {
 SENTRY_KEY = env.get('SENTRY_KEY')
 sentry_sdk.init(
     dsn=f"https://{SENTRY_KEY}@o520957.ingest.sentry.io/5631994",
-    integrations=[DjangoIntegration()],
+    integrations=[sentry_sdk.integrations.django.DjangoIntegration()],
     traces_sample_rate=0.2,
     send_default_pii=True
 )
