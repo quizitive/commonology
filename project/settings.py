@@ -9,11 +9,13 @@ import platform
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-
+IS_PRODUCTION = platform.node() == domain
 DEBUG = env.get("DEBUG", False)
+if IS_PRODUCTION:
+    DEBUG = False
+
 project_name = 'commonology'
 domain = 'commonologygame.com'
-IS_PRODUCTION = platform.node() == domain
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
