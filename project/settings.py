@@ -10,11 +10,11 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
 
+DEBUG = env.get("DEBUG", False)
 project_name = 'commonology'
 domain = 'commonologygame.com'
 IS_PRODUCTION = platform.node() == domain
 
-DEBUG = env.get("DEBUG", False)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
@@ -160,8 +160,8 @@ EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = env.get('SENDGRID_APIKEY', 'foo')
 DEFAULT_FROM_EMAIL = 'concierge@' + domain
 
-MAILCHIMP_API_KEY = env['MAILCHIMP_APIKEY']
-MAILCHIMP_HOOK_UUID = env['MAILCHIMP_HOOK_UUID']
+MAILCHIMP_API_KEY = env.get('MAILCHIMP_APIKEY')
+MAILCHIMP_HOOK_UUID = env.get('MAILCHIMP_HOOK_UUID')
 MAILCHIMP_SERVER = 'us2'
 MAILCHIMP_PRODUCTION_LIST_ID = '4f9a2e9bd6'
 MAILCHIMP_STAGING_LIST_ID = '36b9567454'
