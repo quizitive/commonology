@@ -43,8 +43,6 @@ jobs:
     - name: PEP8
       run:
         pycodestyle --config=./setup.cfg .
-    - name: Run migrations
-      run: python manage.py migrate
     - name: Celery
       env:
         EAGER_CELERY: false
@@ -56,4 +54,5 @@ jobs:
         MAILCHIMP_HOOK_UUID: ${{secrets.MAILCHIMP_HOOK_UUID}}
         MAILCHIMP_AUDIENCE: ${{secrets.MAILCHIMP_AUDIENCE}}
         TEST_CLIENT_PW: ${{secrets.TEST_CLIENT_PW}}
+      run: python manage.py migrate
       run: python manage.py test
