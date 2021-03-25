@@ -36,7 +36,8 @@ if env.get('DEBUG_TOOLBAR'):
     INTERNAL_IPS = ['127.0.0.1', 'staging.' + domain]
     DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
 
-# Celery Configuration Options
+TIME_ZONE = 'UTC'
+
 CELERY_TIMEZONE = 'America/New_York'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
@@ -52,7 +53,6 @@ if env.get('EAGER_CELERY', False):
     CELERY_TASK_EAGER_PROPAGATES = True
     BROKER_BACKEND = 'memory'
 
-# Application definition
 INSTALLED_APPS = [
     'sslserver',
     'users',
@@ -147,12 +147,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 
-# Internationalization
-# https://docs.djangoproject.com/en/3.1/topics/i18n/
-TIME_ZONE = 'UTC'
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static/'
 STATICFILES_DIRS = [
@@ -193,7 +187,6 @@ LOGGING = {
     },
 }
 
-# Sentry
 SENTRY_KEY = env.get('SENTRY_KEY')
 sentry_sdk.init(
     dsn=f"https://{SENTRY_KEY}@o520957.ingest.sentry.io/5631994",
