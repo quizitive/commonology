@@ -54,5 +54,4 @@ jobs:
         MAILCHIMP_HOOK_UUID: ${{secrets.MAILCHIMP_HOOK_UUID}}
         MAILCHIMP_AUDIENCE: ${{secrets.MAILCHIMP_AUDIENCE}}
         TEST_CLIENT_PW: ${{secrets.TEST_CLIENT_PW}}
-      run: python manage.py migrate
-      run: python manage.py test
+      run: python manage.py migrate & python manage.py test
