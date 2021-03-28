@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.contrib.auth.views import PasswordResetDoneView
+from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
@@ -193,7 +193,7 @@ def send_invite(request, pe):
                      from_email=None, recipient_list=[email])
 
 
-class PwdResetDoneView(PasswordResetDoneView):
+class PwdResetRequestSentView(PasswordResetDoneView):
 
     def get(self, request, *args, **kwargs):
         messages.info(request, "We've emailed you instructions for setting your password, "
@@ -203,4 +203,15 @@ class PwdResetDoneView(PasswordResetDoneView):
         return render(request, 'registration/password_reset_done.html')
 
     def post(self, request, *args, **kwargs):
-        return redirect('login')
+        return redirect('/login/')
+
+
+class PwdResetConfirmView(PasswordResetConfirmView):
+
+    def post(self, request, *args, **kwargs):
+        self.success_url = reverse('login')
+        if self.form_valid:
+            messages.info(request, "Your password has been successfully changed.")
+        else:
+            messages.warning(request, "There was an error updating your password, please try again.")
+        return super().post(request, args, kwargs)

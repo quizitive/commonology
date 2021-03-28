@@ -1,16 +1,5 @@
 <!--users/templates/users/base.html-->
 
-{#<style>#}
-{#    label, input {#}
-{#        display: block;#}
-{#    }#}
-{#    span.helptext {#}
-{#        display: none;#}
-{#    }#}
-{#</style>#}
-{##}
-{#<h1>Welcome</h1>#}
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -21,4 +10,19 @@
 {% block app_style %}
   <link rel="stylesheet" href="{% static 'css/components/navbar.css' %}">
   <link rel="stylesheet" href="{% static 'css/users/base.css' %}">
+{% endblock %}
+
+{% block content %}
+
+  <div class="content">
+
+    <br/><br/>
+
+    {# --- Simple card-on-screen view with default card --- #}
+    {% block card %}
+    {% include 'users/cards/base_users_card.html' with header="Welcome to Commonology" button_label="Ok"%}
+    {% endblock %}
+
+  </div>
+
 {% endblock %}
