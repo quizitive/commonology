@@ -1,7 +1,6 @@
 from datetime import datetime
 from pytz import timezone
 
-import redis
 import pandas as pd
 from celery import shared_task
 
@@ -14,10 +13,6 @@ from users.models import Player
 
 @shared_task
 def add(x, y):
-    import os
-    MARC = os.getenv('MARC')
-    if MARC == 'Ted':
-        return 0
     return x + y
 
 
