@@ -9,14 +9,14 @@ import platform
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-
 project_name = 'commonology'
 domain = 'commonologygame.com'
 IS_PRODUCTION = platform.node() == domain
 
+# NOTE: DEV determines which resources are used.  DEBUG determines what info is displayed.
+DEV = env.get("DEV", not IS_PRODUCTION)
 DEBUG = env.get("DEBUG", False)
-if IS_PRODUCTION:
-    DEBUG = False
+DISABLE_DEBUG_TOOLBAR = env.get('DISABLE_DEBUG_TOOLBAR', not DEV)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
@@ -26,16 +26,9 @@ INTERNAL_IPS = ('127.0.0.1', 'staging.' + domain, )
 # Disable Django Debug Toolbar
 # NOTE: Much slower on database intensive operations
 # NOTE: Disabling this will enable Google Analytics. Comment out the script in base.html.
-if env.get('DISABLE_DEBUG_TOOLBAR'):
+if DISABLE_DEBUG_TOOLBAR:
     INTERNAL_IPS = ()
-
 DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
-
-# Enable Django Debug Toolbar
-# NOTE: Much slower on database intensive operations
-if env.get('DEBUG_TOOLBAR'):
-    INTERNAL_IPS = ['127.0.0.1', 'staging.' + domain]
-    DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
 
 TIME_ZONE = 'UTC'
 
@@ -47,7 +40,6 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'America/New_York'
 
 if env.get('EAGER_CELERY', False):
     CELERY_TASK_ALWAYS_EAGER = True
@@ -185,10 +177,9 @@ LOGGING = {
     },
 }
 
-SENTRY_KEY = env.get('SENTRY_KEY')
-sentry_sdk.init(
-    dsn=f"https://{SENTRY_KEY}@o520957.ingest.sentry.io/5631994",
-    integrations=[DjangoIntegration()],
-    traces_sample_rate=0.2,
-    send_default_pii=True
-)
+if IS_PRODUCTION:
+    SENTRY_KEY = env.get('SENTRY_KEY')
+    sentry_sdk.init(dsn=f"https://{SENTRY_KEY}@o520957.ingest.sentry.io/5631994",
+                    integrations=[DjangoIntegration()],
+                    traces_sample_rate=0.2,
+                    send_default_pii=True)
