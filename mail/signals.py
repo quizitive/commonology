@@ -9,4 +9,5 @@ from .tasks import add_to_mailchimp
 def player_postsave(sender, instance, **kwargs):
     if settings.MAILCHIMP_SIGNAL_INHIBIT:
         return
+    print(kwargs['update_fields'])
     add_to_mailchimp(instance.email, is_subscribed=instance.subscribed)

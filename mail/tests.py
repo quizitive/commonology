@@ -87,11 +87,10 @@ class MailchimpAPITests(TestCase):
         self.assertEqual(status, 'subscribed')
 
     def test_player_save_signal(self):
-        print(f"Test List ID: {self.mc_client.list_id}")
-        print('About to save.')
-        u = get_local_user()
-        self.assert_mail_status(u.email, 'subscribed')
+        email = f'moe{str(uuid.uuid4().int)}@foo.com'
+        u = get_local_user(e=email)
+        self.assert_mail_status(email, 'subscribed')
 
-        print('About to save again.')
-        u = get_local_user(subscribed=False)
-        self.assert_mail_status(u.email, 'unsubscribed')
+        u.subscribed = False
+        u.save()
+        self.assert_mail_status(email, 'unsubscribed')
