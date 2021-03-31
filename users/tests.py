@@ -16,9 +16,9 @@ ABINORMAL = 'abinormal@user.com'
 test_pw = 'foo'
 
 
-def get_local_user(e=NORMAL):
+def get_local_user(e=NORMAL, subscribed=True):
     User.objects.filter(email=e).delete()
-    return User.objects.create_user(email=e, password=test_pw)
+    return User.objects.create_user(email=e, password=test_pw, subscribed=subscribed)
 
 
 def remove_abinormal():

@@ -58,12 +58,18 @@ class Mailchimp(object):
         r = requests.delete(url, auth=self.auth)
         return r.status_code
 
-    def delete_list_by_name(self, name):
+    def get_list_id(self, name):
+        list_id = -1
         status_code, result = self.get_lists()
         if 200 == status_code and (name in result):
             list_id = result[name]
+        return list_id
+
+    def delete_list_by_name(self, name):
+        list_id = self.get_list_id(name)
+        if type(list_id) == str:
             status_code = self.delete_list(list_id)
-        return status_code
+        return list_id
 
     def get_members(self):
         baseurl = self.get_members_baseurl()
