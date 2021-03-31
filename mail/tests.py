@@ -45,25 +45,29 @@ class MailchimpAPITests(TestCase):
         self.assertEqual(status_code, 200)
 
     def tearDown(self):
-        status_code = self.mc_client.delete_list_by_name(self.list_name)
-        self.assertEqual(status_code, 204)
+        list_id = self.mc_client.delete_list_by_name(self.list_name)
+        self.assertEqual(type(list_id), str)
 
     def test_ping(self):
         response = self.mc_client.ping()
         j = response.json()
         self.assertEqual(j['health_status'], "Everything's Chimpy!")
 
+    def assert_mail_status(self, email, status):
+        status_code, members = self.mc_client.get_members()
+        self.assertEqual(status_code, 200)
+        self.assertIn(email, members)
+        subcribe_status = members[email]
+        self.assertEqual(subcribe_status, status)
+
     def test_member(self):
         email = f'moe{str(uuid.uuid4().int)}@foo.com'
 
         status_code, status = self.mc_client.add_member_to_list(email)
         self.assertEqual(status_code, 200)
+        self.assertEqual(status, 'subscribed')
 
-        status_code, members = self.mc_client.get_members()
-        self.assertEqual(status_code, 200)
-        self.assertIn(email, members)
-        subcribe_status = members[email]
-        self.assertEqual(subcribe_status, 'subscribed')
+        self.assert_mail_status(email, 'subscribed')
 
         status_code, status = self.mc_client.unsubscribe(email)
         self.assertEqual(status_code, 200)
@@ -83,9 +87,11 @@ class MailchimpAPITests(TestCase):
         self.assertEqual(status, 'subscribed')
 
     def test_player_save_signal(self):
+        print(f"Test List ID: {self.mc_client.list_id}")
         print('About to save.')
         u = get_local_user()
-        settings.MAILCHIMP_INHIBIT = True
+        self.assert_mail_status(u.email, 'subscribed')
 
         print('About to save again.')
-        u = get_local_user()
+        u = get_local_user(subscribed=False)
+        self.assert_mail_status(u.email, 'unsubscribed')
