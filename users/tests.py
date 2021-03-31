@@ -13,7 +13,7 @@ User = get_user_model()
 
 NORMAL = 'normal@user.com'
 ABINORMAL = 'abinormal@user.com'
-test_pw = os.getenv('TEST_CLIENT_PW', 'foo')
+test_pw = 'foo'
 
 
 def get_local_user(e=NORMAL):
@@ -251,17 +251,3 @@ class PendingUsersTests(TestCase):
         data['password2'] = data['password1']
 
         self.join_test_helper(data)
-
-    def test_inhibited_join(self):
-        os.environ['INHIBIT_JOIN_VIEW'] = 'True'
-        client = Client()
-        path = reverse('join')
-        response = client.get(path)
-        self.assertEqual(response.url, '/')
-        self.assertIn(response.status_code, [200, 302])
-
-        del os.environ['INHIBIT_JOIN_VIEW']
-        client = Client()
-        path = reverse('join')
-        response = client.get(path)
-        self.assertEqual(response.reason_phrase, 'OK')

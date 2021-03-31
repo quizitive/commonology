@@ -13,10 +13,6 @@ from users.models import Player
 
 @shared_task
 def add(x, y):
-    import os
-    MARC = os.getenv('MARC')
-    if MARC == 'Ted':
-        return 0
     return x + y
 
 

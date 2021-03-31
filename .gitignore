@@ -7,9 +7,7 @@
 __pycache__
 *.icloud
 secret_env
-secret_env.staging
 pg_dumps
 celerybeat-schedule.bak
 celerybeat-schedule.dat
 celerybeat-schedule.dir
-
