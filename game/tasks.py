@@ -1,7 +1,6 @@
 from datetime import datetime
 from pytz import timezone
 
-import redis
 import pandas as pd
 from celery import shared_task
 

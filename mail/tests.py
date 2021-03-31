@@ -41,6 +41,7 @@ class MailchimpAPITests(TestCase):
 
         self.mc_client.delete_list_by_name(self.list_name)
         status_code, self.list_id = self.mc_client.add_list(self.list_name)
+        settings.MAILCHIMP_EMAIL_LIST_ID = self.list_id
         self.assertEqual(status_code, 200)
 
     def tearDown(self):
@@ -85,5 +86,6 @@ class MailchimpAPITests(TestCase):
         print('About to save.')
         u = get_local_user()
         settings.MAILCHIMP_INHIBIT = True
+
         print('About to save again.')
         u = get_local_user()
