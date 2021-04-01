@@ -5,7 +5,8 @@ from django.urls import reverse
 from django.test import Client
 from django.contrib.auth import get_user_model
 
-from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
+from project.utils import REDIS
+from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from game.models import Game, AnswerCode
 from game.tests import BaseGameDataTestCase
 from users.models import Player, Team
@@ -144,6 +145,7 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
 
         # recreate the answer tally and leaderboard
         new_answer_tally = build_answer_tally(self.game)
+        REDIS.delete(lb_cache_key(self.game, new_answer_tally))
         new_leaderboard = build_filtered_leaderboard(self.game, new_answer_tally)
 
         # make sure they get 0 points
