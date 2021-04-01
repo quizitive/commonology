@@ -7,6 +7,14 @@ div.content, div.narrow-content {
 .navbar-logo {
   max-height: 50px;
 }
+.navbar-dropdown.w3-dropdown-content {
+  font-size: 16px;
+  right:4vw;
+  min-width:140px;
+}
+.navbar-dropdown.w3-dropdown-hover {
+  background: none;
+}
 
 /* Large Screens */
 @media only screen and (min-width: 768px) {
