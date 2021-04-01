@@ -1,13 +1,18 @@
 {% load navbar_extras %}
+{% load static %}
 
 <div class="w3-top">
     <div id="navbar" class="w3-bar w3-light-gray w3-xlarge">
       <div class="w3-cell-row">
-        <div class="w3-cell w3-container" style="width:10%;">&nbsp</div>
-        <h1 class="w3-cell logo m10">Commonology!</h1>
-        <div class="w3-cell w3-padding w3-center w3-cell-bottom" style="width:10%;">
-          {% login_logout_url %}
+        <div class="w3-cell w3-cell-middle" style="width:5%;">&nbsp</div>
+        <div class="w3-cell w3-cell-middle" style="width:75%;">
+          <img class="navbar-logo" src="{% static 'img/logo.png' %}">
         </div>
+        <div class="w3-cell w3-right" >
+          <i class="fas fa-caret-down fa-2x" style="color:orange;width:10%;"></i>
+{#          {% login_logout_url %}#}
+        </div>
+        <div class="w3-cell w3-cell-middle" style="width:5%;">&nbsp</div>
       </div>
     </div>
 </div>
