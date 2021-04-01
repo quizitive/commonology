@@ -1,6 +1,7 @@
 from django import forms
+from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
-    AuthenticationForm, PasswordResetForm
+    AuthenticationForm, PasswordResetForm, SetPasswordForm
 from django.utils.translation import gettext, gettext_lazy as _
 from django.contrib.auth.password_validation import password_validators_help_text_html
 from .models import Player, PendingEmail, LOCATIONS, MAX_LOCATION_LEN
@@ -78,4 +79,20 @@ class PwdResetForm(PasswordResetForm):
                 'autofocus': True
             },
         )
+    )
+
+
+class NewPwdForm(SetPasswordForm):
+    new_password1 = forms.CharField(
+        label="New password",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={'autocomplete': 'new-password', 'class': 'w3-input'}),
+    )
+    new_password2 = forms.CharField(
+        label="New password confirmation",
+        widget=forms.PasswordInput(
+            attrs={'autocomplete': 'new-password', 'class': 'w3-input'}),
+        strip=False,
+        help_text=password_validators_help_text_html(),
     )
