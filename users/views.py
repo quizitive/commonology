@@ -80,7 +80,7 @@ def join_view(request):
         'header': "Join the Community!",
         'button_label': "Join"
     }
-    return render(request, "users/base.html", context)
+    return render(request, "users/join.html", context)
 
 
 @login_required()
