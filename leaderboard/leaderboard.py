@@ -67,7 +67,12 @@ def _build_leaderboard_fromdb(game, answer_tally):
         this_p_id = p_id
         while this_p_id == p_id and cpas:
             _, _, q_text, ans, _ = cpas.popleft()
-            p_data.append(answer_tally[q_text][ans])
+            try:
+                p_data.append(answer_tally[q_text][ans])
+            except KeyError:
+                # this happens when an answer or player is omitted,
+                # and their answer is a unique string
+                p_data.append(0)
             if cpas:
                 this_p_id, *_ = cpas[0]
         lb_data.append(p_data)
