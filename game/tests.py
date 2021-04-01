@@ -1,15 +1,18 @@
 import datetime
 import string
 import random
+import json
 from copy import deepcopy
 from csv import reader
 
 from django.test import TestCase, Client
 from django.urls import reverse
 
+from project.utils import REDIS
 from game.utils import next_wed_noon, next_friday_1159
+from game.models import Question, Answer
 from game.rollups import *
-from leaderboard.leaderboard import *
+from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
@@ -204,32 +207,6 @@ class TestGameTabulation(BaseGameDataTestCase):
 
         # change it back
         answers_codes_to_db(self.game, self.answer_codes)
-
-    def test_host_exclusion(self):
-        # create a user and attach to a player
-        player = Player.objects.get(email="user1@fakeemail.com")
-
-        # make user a game admin
-        self.game.hosts.add(player)
-        self.game.save()
-
-        # test that the admin is excluded from game answer tally (28 answers per question v 29)
-        at_excl_hosts = build_answer_tally(self.game)
-        self.assertTrue(all([sum([r for r in resp.values()]) == 28 for resp in at_excl_hosts.values()]))
-
-        # --------------- DEPRECATED --------------------- #
-        # - Host results can be shown for now, but not a part of score - #
-
-        # and excluded from the leaderboard
-        # leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts)
-        # self.assertEqual(sum(leaderboard["Name"] == "User 1"), 0)
-        # ------------------------------------------------- #
-
-        # unless it's a team view
-        team = Team.objects.create()
-        team.players.add(player)
-        leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts, team_id=team.id)
-        self.assertEqual(sum(leaderboard["Name"] == "User 1"), 1)
 
 
 class TestGSheetsAPI(BaseGameDataTestCase):

@@ -5,15 +5,15 @@ from django.urls import reverse
 from django.test import Client
 from django.contrib.auth import get_user_model
 
-from game.models import Game
+from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
+from game.models import Game, AnswerCode
 from game.tests import BaseGameDataTestCase
-
-from users.models import Player
+from users.models import Player, Team
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-class TestHTMXLeaderboard(BaseGameDataTestCase):
+class TestLeaderboardViews(BaseGameDataTestCase):
 
     def setUp(self):
         self.game.publish = True
@@ -52,6 +52,12 @@ class TestHTMXLeaderboard(BaseGameDataTestCase):
         staff_resp = self.client.get(url, {'game_id': new_game.game_id})
         self.assertEqual(staff_resp.status_code, 200)
         self.assertNotEqual(staff_resp.content, pub_resp.content)
+
+
+class TestLeaderboardEngine(BaseGameDataTestCase):
+
+    def setUp(self):
+        super().setUp()
 
     def test_build_answer_tally(self):
         canada_answer_tally = {
@@ -95,3 +101,59 @@ class TestHTMXLeaderboard(BaseGameDataTestCase):
         q_list = [q.text for q in self.questions[:10]]
         expected_leaderboard = expected_leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + q_list]
         return expected_leaderboard.reset_index(drop=True)
+
+    def test_host_exclusion(self):
+
+        player = self._add_host()
+
+        # test that the admin is excluded from game answer tally (28 answers per question v 29)
+        at_excl_hosts = build_answer_tally(self.game)
+        self.assertTrue(all([sum([r for r in resp.values()]) == 28 for resp in at_excl_hosts.values()]))
+
+        # --------------- DEPRECATED --------------------- #
+        # - Host results can be shown for now, but not a part of score - #
+
+        # and excluded from the leaderboard
+        # leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts)
+        # self.assertEqual(sum(leaderboard["Name"] == "User 1"), 0)
+        # ------------------------------------------------- #
+
+        # unless it's a team view
+        team = Team.objects.create()
+        team.players.add(player)
+        leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts, team_id=team.id)
+        self.assertEqual(sum(leaderboard["Name"] == "User 1"), 1)
+
+    def test_omitted_unique_answer(self):
+        # test that if an omitted answer (e.g. a host or something offensive) is a unique string
+        # leaderboard can still be rendered
+        player = self._add_host()
+
+        # change an answer to something unique
+        unique_string = 'foo-999-xxx-unique'
+        an_answer = player.answers.first()
+        an_answer.raw_string = unique_string
+        an_answer.save()
+
+        # give the answer a unique coding
+        AnswerCode.objects.create(
+            raw_string=unique_string,
+            question=an_answer.question,
+            coded_answer=unique_string
+        )
+
+        # recreate the answer tally and leaderboard
+        new_answer_tally = build_answer_tally(self.game)
+        new_leaderboard = build_filtered_leaderboard(self.game, new_answer_tally)
+
+        # make sure they get 0 points
+        self.assertEqual(
+            new_leaderboard.loc[new_leaderboard['Name'] == player.display_name,
+                                an_answer.question.text].values[0], 0)
+
+    def _add_host(self, email="user1@fakeemail.com"):
+        # make user a game host
+        player = Player.objects.get(email=email)
+        self.game.hosts.add(player)
+        self.game.save()
+        return player
