@@ -17,8 +17,8 @@ def login_logout_url(context):
     else:
         s = 'login'
     url = reverse(s)
-    url = f"<A HREF={url}>{s}</A>"
-    return mark_safe(url)
+    # url = f"<A HREF={url}>{s}</A>"
+    return url
 
 
 login_logout_url.is_safe = True
