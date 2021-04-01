@@ -2,16 +2,13 @@ import re
 import json
 from collections import OrderedDict, deque
 
-import redis
 import pandas as pd
 
 from django.db.models import Sum, Subquery, OuterRef
 
+from project.utils import REDIS
 from users.models import Team
 from game.models import Game, Answer, AnswerCode, Question
-
-
-REDIS = redis.Redis(host='localhost', port=6379, db=0)
 
 
 def build_filtered_leaderboard(game, answer_tally, player_ids=None, search_term=None, team_id=None):
@@ -70,7 +67,12 @@ def _build_leaderboard_fromdb(game, answer_tally):
         this_p_id = p_id
         while this_p_id == p_id and cpas:
             _, _, q_text, ans, _ = cpas.popleft()
-            p_data.append(answer_tally[q_text][ans])
+            try:
+                p_data.append(answer_tally[q_text][ans])
+            except KeyError:
+                # this happens when an answer or player is omitted,
+                # and their answer is a unique string
+                p_data.append(0)
             if cpas:
                 this_p_id, *_ = cpas[0]
         lb_data.append(p_data)
