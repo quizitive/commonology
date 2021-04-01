@@ -1,15 +1,11 @@
 #navbar {
     box-shadow: 0 2px 4px 0 rgba(0,0,0,0.12);
 }
-h1.logo {
-        font-family: "Bungee Shade", sans-serif;
-        text-align: center;
-        font-size: 8vw;
-        color: #2196F9!important;
-        margin: 0;
-    }
 div.content, div.narrow-content {
     margin-top: 8vw;
+}
+.navbar-logo {
+  max-height: 50px;
 }
 
 /* Large Screens */
