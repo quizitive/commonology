@@ -2,16 +2,13 @@ import re
 import json
 from collections import OrderedDict, deque
 
-import redis
 import pandas as pd
 
 from django.db.models import Sum, Subquery, OuterRef
 
+from project.utils import REDIS
 from users.models import Team
 from game.models import Game, Answer, AnswerCode, Question
-
-
-REDIS = redis.Redis(host='localhost', port=6379, db=0)
 
 
 def build_filtered_leaderboard(game, answer_tally, player_ids=None, search_term=None, team_id=None):
