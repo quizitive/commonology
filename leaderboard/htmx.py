@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.db.models import Max
+from django.http import Http404
 
 from users.models import Player
 from game.models import Game
@@ -30,7 +31,10 @@ class LeaderboardHTMXView(View):
                 for p in user.following.values_list('id', flat=True)
             }
 
-        current_game = Game.objects.get(game_id=game_id)
+        try:
+            current_game = Game.objects.get(game_id=game_id)
+        except Game.DoesNotExist:
+            raise Http404("Game does not exist")
 
         # todo: answer_tally is still a bit expensive to calculate every time
         answer_tally = build_answer_tally(current_game)

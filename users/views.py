@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.contrib.auth.views import PasswordResetDoneView
+from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
@@ -57,7 +57,8 @@ def confirm_or_login(request, email):
                            f"Don't forget to check your spam or junk folder if need be. "
                            f"Please follow the instructions in that message to join in the fun.")
 
-    return render(request, "users/confirm_sent.html", context={'email': email})
+    context = {'header': "Invitation sent!", 'email': email}
+    return render(request, "users/base.html", context)
 
 
 def join_view(request):
@@ -70,7 +71,11 @@ def join_view(request):
             return redirect('login')
         return confirm_or_login(request, email)
 
-    context = {'form': PendingEmailForm}
+    context = {
+        'form': PendingEmailForm,
+        'header': "Join the Community!",
+        'button_label': "Join"
+    }
     return render(request, "users/join.html", context)
 
 
@@ -78,10 +83,11 @@ def join_view(request):
 def send_invite_view(request):
     if request.method == 'POST':
         email = request.POST['email']
-        context = {"email": email}
+        context = {'email': email, 'header': "Register"}
         try:
             User.objects.get(email=email)
-            return render(request, "users/has_account.html", context)
+            # can't join if user exists
+            return render(request, "users/base.html", context)
         except (User.DoesNotExist):
             remove_pending_email_invitations()
             pe = PendingEmail(email=email, referrer=request.user.email)
@@ -156,7 +162,8 @@ class EmailConfirmedView(View):
         messages.error(request, "It seems the url link we sent you has something wrong with it. "
                                 "Please try one more time.")
         messages.error(request, "If that does not work then please do not give up on us. Send us a help message.")
-        return render(request, 'users/join_fail.html', {})
+        context = {'header': "Join Fail"}
+        return render(request, 'users/base.html', context)
 
 
 def make_uuid_url(request, uuid=None):
@@ -189,14 +196,27 @@ def send_invite(request, pe):
                      from_email=None, recipient_list=[email])
 
 
-class PwdResetDoneView(PasswordResetDoneView):
+class PwdResetRequestSentView(PasswordResetDoneView):
 
     def get(self, request, *args, **kwargs):
         messages.info(request, "We've emailed you instructions for setting your password, "
                       "if an account exists with the email you entered. You should receive them shortly.")
         messages.info(request, "If you don't receive an email, please make sure you've entered the address"
                       " you registered with, and check your spam folder")
-        return render(request, 'registration/password_reset_done.html')
+
+        context = {'header': "Reset Password"}
+        return render(request, 'users/base.html', context)
 
     def post(self, request, *args, **kwargs):
-        return redirect('login')
+        return redirect('/login/')
+
+
+class PwdResetConfirmView(PasswordResetConfirmView):
+
+    def post(self, request, *args, **kwargs):
+        self.success_url = reverse('login')
+        if self.form_valid:
+            messages.info(request, "Your password has been successfully changed.")
+        else:
+            messages.warning(request, "There was an error updating your password, please try again.")
+        return super().post(request, args, kwargs)
