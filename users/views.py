@@ -57,7 +57,8 @@ def confirm_or_login(request, email):
                            f"Don't forget to check your spam or junk folder if need be. "
                            f"Please follow the instructions in that message to join in the fun.")
 
-    return render(request, "users/confirm_sent.html", context={'email': email})
+    context = {'header': "Invitation sent!", 'email': email}
+    return render(request, "users/base.html", context)
 
 
 def join_view(request):
@@ -74,18 +75,23 @@ def join_view(request):
             return redirect('login')
         return confirm_or_login(request, email)
 
-    context = {'form': PendingEmailForm}
-    return render(request, "users/join.html", context)
+    context = {
+        'form': PendingEmailForm,
+        'header': "Join the Community!",
+        'button_label': "Join"
+    }
+    return render(request, "users/base.html", context)
 
 
 @login_required()
 def send_invite_view(request):
     if request.method == 'POST':
         email = request.POST['email']
-        context = {"email": email}
+        context = {'email': email, 'header': "Register"}
         try:
             User.objects.get(email=email)
-            return render(request, "users/has_account.html", context)
+            # can't join if user exists
+            return render(request, "users/base.html", context)
         except (User.DoesNotExist):
             remove_pending_email_invitations()
             pe = PendingEmail(email=email, referrer=request.user.email)
@@ -160,7 +166,8 @@ class EmailConfirmedView(View):
         messages.error(request, "It seems the url link we sent you has something wrong with it. "
                                 "Please try one more time.")
         messages.error(request, "If that does not work then please do not give up on us. Send us a help message.")
-        return render(request, 'users/join_fail.html', {})
+        context = {'header': "Join Fail"}
+        return render(request, 'users/base.html', context)
 
 
 def make_uuid_url(request, uuid=None):
@@ -200,7 +207,9 @@ class PwdResetRequestSentView(PasswordResetDoneView):
                       "if an account exists with the email you entered. You should receive them shortly.")
         messages.info(request, "If you don't receive an email, please make sure you've entered the address"
                       " you registered with, and check your spam folder")
-        return render(request, 'registration/password_reset_done.html')
+
+        context = {'header': "Reset Password"}
+        return render(request, 'users/base.html', context)
 
     def post(self, request, *args, **kwargs):
         return redirect('/login/')

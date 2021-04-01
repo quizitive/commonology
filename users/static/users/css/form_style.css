@@ -1,0 +1,26 @@
+p {
+    margin-bottom:24px;
+}
+ul {
+  color: grey;
+  font-size: 12px;
+  font-style: italic;
+  list-style-type: none;
+  padding: 0;
+  margin: -20px 0 24px 0;
+}
+ul.nonfield {
+  margin: 0;
+}
+.helptext {
+  color: grey;
+  font-size: 12px;
+  font-style: italic;
+}
+#id_location {
+  border: 1px solid dimgrey;
+  border-radius: 4px;
+}
+.errorlist {
+  color: red;
+}
