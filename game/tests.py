@@ -1,15 +1,18 @@
 import datetime
 import string
 import random
+import json
 from copy import deepcopy
 from csv import reader
 
 from django.test import TestCase, Client
 from django.urls import reverse
 
+from project.utils import REDIS
 from game.utils import next_wed_noon, next_friday_1159
+from game.models import Question, Answer
 from game.rollups import *
-from leaderboard.leaderboard import *
+from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
@@ -104,49 +107,6 @@ class TestGameTabulation(BaseGameDataTestCase):
 
         # this won't work if any answers don't have an associated code
         build_filtered_leaderboard(self.game, mr_answer_tally)
-
-    def test_build_answer_tally(self):
-        canada_answer_tally = {
-            k: v for k, v in self.answer_tally["Name a province in Canada."].items()
-            if v
-        }
-        self._test_answer_tally(canada_answer_tally)
-
-    def _test_answer_tally(self, answer_tally):
-        correct_tally = pd.Series(
-            data=[13, 10, 3, 1, 1, 1],
-            index=["Quebec", "Ontario", "British Columbia", "Ottowa", "Nova Scotia", "New Brunswick"]
-        )
-        # Test the labels
-        self.assertSetEqual(set(correct_tally.keys()), set(answer_tally.keys()))
-
-        for idx in correct_tally.index:
-            self.assertEqual(correct_tally[idx], answer_tally[idx])
-
-    def test_build_leaderboard(self):
-        expected_leaderboard = self._expected_leaderboard()
-        expected_leaderboard.rename(columns={"Name (First & Last)": "Name"}, inplace=True)
-        pd.testing.assert_frame_equal(
-            expected_leaderboard, self.leaderboard.reset_index(drop=True)
-        )
-
-    def _expected_leaderboard(self):
-        # local test data file plus some computed/related values
-        lb_data_fp = f'{LOCAL_DIR}/test_data/test_leaderboard.csv'
-        expected_leaderboard = pd.read_csv(lb_data_fp, index_col=0)
-        expected_leaderboard['Rank'] = expected_leaderboard['Rank'].astype('int32')
-        expected_leaderboard['Score'] = expected_leaderboard['Score'].astype('int32')
-        expected_leaderboard['id'] = expected_leaderboard.apply(
-            lambda x: Player.objects.get(display_name=x['Name']).id,
-            axis=1
-        ).astype('int64')
-        expected_leaderboard['is_host'] = expected_leaderboard.apply(
-            lambda x: x['id'] in self.game.hosts.values_list('id', flat=True),
-            axis=1
-        )
-        q_list = [q.text for q in self.questions[:10]]
-        expected_leaderboard = expected_leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + q_list]
-        return expected_leaderboard.reset_index(drop=True)
 
     def test_game_to_db(self):
         self.assertEqual(self.game.sheet_name, self.sheet_name)
@@ -247,32 +207,6 @@ class TestGameTabulation(BaseGameDataTestCase):
 
         # change it back
         answers_codes_to_db(self.game, self.answer_codes)
-
-    def test_host_exclusion(self):
-        # create a user and attach to a player
-        player = Player.objects.get(email="user1@fakeemail.com")
-
-        # make user a game admin
-        self.game.hosts.add(player)
-        self.game.save()
-
-        # test that the admin is excluded from game answer tally (28 answers per question v 29)
-        at_excl_hosts = build_answer_tally(self.game)
-        self.assertTrue(all([sum([r for r in resp.values()]) == 28 for resp in at_excl_hosts.values()]))
-
-        # --------------- DEPRECATED --------------------- #
-        # - Host results can be shown for now, but not a part of score - #
-
-        # and excluded from the leaderboard
-        # leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts)
-        # self.assertEqual(sum(leaderboard["Name"] == "User 1"), 0)
-        # ------------------------------------------------- #
-
-        # unless it's a team view
-        team = Team.objects.create()
-        team.players.add(player)
-        leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts, team_id=team.id)
-        self.assertEqual(sum(leaderboard["Name"] == "User 1"), 1)
 
 
 class TestGSheetsAPI(BaseGameDataTestCase):
