@@ -4,6 +4,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from users.tests import get_local_user, NORMAL
 from django.contrib.auth import get_user_model
+from project.bases import ProjectTestCase
 from .mailchimp_utils import Mailchimp
 from .tasks import update_mailing_list
 from django.conf import settings
@@ -15,7 +16,7 @@ class GithubSecretTests(TestCase):
         self.assertEqual(api_key, 'Marc Schwarzschild')
 
 
-class MailchimpHookTests(TestCase):
+class MailchimpHookTests(ProjectTestCase):
     def test_mailchimphook(self):
         u = get_local_user()
         self.assertTrue(u.subscribed)
