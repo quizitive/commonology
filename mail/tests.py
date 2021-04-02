@@ -24,7 +24,7 @@ class MailchimpHookTests(TestCase):
                 'data[merges][LNAME]': ['Django'], 'data[merges][ADDRESS]': [''], 'data[merges][PHONE]': [''],
                 'data[list_id]': [list_id]}
         response = client.post(path, data=data)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.status_code, 200)
         User = get_user_model()
         u = User.objects.get(email=NORMAL)
         self.assertFalse(u.subscribed)
