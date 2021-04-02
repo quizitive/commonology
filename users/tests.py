@@ -1,11 +1,13 @@
 import os
 import re
 import uuid
+
 from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core import mail
 from users.models import PendingEmail
+
 
 User = get_user_model()
 
@@ -14,9 +16,9 @@ ABINORMAL = 'abinormal@user.com'
 test_pw = 'foo'
 
 
-def get_local_user(e=NORMAL):
+def get_local_user(e=NORMAL, subscribed=True):
     User.objects.filter(email=e).delete()
-    return User.objects.create_user(email=e, password=test_pw)
+    return User.objects.create_user(email=e, password=test_pw, subscribed=subscribed)
 
 
 def remove_abinormal():
@@ -33,7 +35,6 @@ class MailTests(TestCase):
 
 
 class UsersManagersTests(TestCase):
-
     def test_create_user(self):
         User = get_user_model()
         user = get_local_user()
