@@ -16,12 +16,12 @@ class MailchimpHookTests(TestCase):
         uu = os.getenv('MAILCHIMP_HOOK_UUID')
         client = Client()
         path = reverse('mailchimp_hook', kwargs={'uuid': uu})
-        list_id = settings.MAILCHIMP_STAGING_LIST_ID
+        list_id = settings.MAILCHIMP_EMAIL_LIST_ID
         data = {'type': ['unsubscribe'], 'fired_at': ['2021-03-17 14:16:55'], 'data[action]': ['unsub'],
                 'data[reason]': ['manual'], 'data[id]': ['96b581d0ae'], 'data[email]': [NORMAL],
                 'data[email_type]': ['html'], 'data[ip_opt]': ['100.16.130.45'], 'data[web_id]': ['1362500348'],
-                'data[merges][EMAIL]': ['ms@koplon.com'], 'data[merges][FNAME]': ['Marc'],
-                'data[merges][LNAME]': ['Schwarzschild'], 'data[merges][ADDRESS]': [''], 'data[merges][PHONE]': [''],
+                'data[merges][EMAIL]': [NORMAL], 'data[merges][FNAME]': ['Normal'],
+                'data[merges][LNAME]': ['Django'], 'data[merges][ADDRESS]': [''], 'data[merges][PHONE]': [''],
                 'data[list_id]': [list_id]}
         response = client.post(path, data=data)
         self.assertEqual(response.reason_phrase, 'OK')
