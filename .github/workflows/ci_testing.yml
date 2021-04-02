@@ -46,11 +46,11 @@ jobs:
     - name: Celery
       env:
         EAGER_CELERY: True
-        DJANGO_SETTINGS_MODULE="project.settings_test"
+        DJANGO_SETTINGS_MODULE: project.settings_test
       run: celery -A project  worker -E -l DEBUG &
     - name: Run tests
       env:
-        DJANGO_SETTINGS_MODULE="project.settings_test"
+        DJANGO_SETTINGS_MODULE: project.settings_test
         EAGER_CELERY: True
         API_KEY: ${{secrets.API_KEY}}
         MAILCHIMP_APIKEY: ${{secrets.MAILCHIMP_APIKEY}}
