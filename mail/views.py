@@ -5,8 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
-from project.settings import MAILCHIMP_HOOK_UUID, MAILCHIMP_EMAIL_LIST_ID
-
+from django.conf import settings
 from users.utils import unsubscribe
 
 
@@ -32,12 +31,11 @@ class MailchimpWebhook(View):
         return HttpResponse("OK")
 
     def post(self, request, uuid):
-        assert(uuid == MAILCHIMP_HOOK_UUID)
+        assert(uuid == settings.MAILCHIMP_HOOK_UUID)
 
         data = request.POST
-
         list_id = data['data[list_id]']
-        assert(list_id == MAILCHIMP_EMAIL_LIST_ID)
+        assert(list_id == str(settings.MAILCHIMP_EMAIL_LIST_ID))
 
         email = data['data[email]']
         action = data.get('type', 'unknown')
