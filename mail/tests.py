@@ -5,7 +5,8 @@ from django.urls import reverse
 from users.tests import get_local_user, NORMAL
 from django.contrib.auth import get_user_model
 from .mailchimp_utils import Mailchimp
-from project import settings
+from .tasks import update_mailing_list
+from django.conf import settings
 
 
 class GithubSecretTests(TestCase):
@@ -18,9 +19,9 @@ class MailchimpHookTests(TestCase):
     def test_mailchimphook(self):
         u = get_local_user()
         self.assertTrue(u.subscribed)
-        uuid = os.getenv('MAILCHIMP_HOOK_UUID')
+        uu = os.getenv('MAILCHIMP_HOOK_UUID')
         client = Client()
-        path = reverse('mailchimp_hook', kwargs={'uuid': uuid})
+        path = reverse('mailchimp_hook', kwargs={'uuid': uu})
         data = {'type': ['unsubscribe'], 'fired_at': ['2021-03-17 14:16:55'], 'data[action]': ['unsub'],
                 'data[reason]': ['manual'], 'data[id]': ['96b581d0ae'], 'data[email]': [NORMAL],
                 'data[email_type]': ['html'], 'data[ip_opt]': ['100.16.130.45'], 'data[web_id]': ['1362500348'],
@@ -42,6 +43,7 @@ class MailchimpAPITests(TestCase):
         self.mc_client.delete_list_by_name(self.list_name)
         status_code, self.list_id = self.mc_client.add_list(self.list_name)
         settings.MAILCHIMP_EMAIL_LIST_ID = self.list_id
+        self.mc_client.make_list_baseurl(self.list_id)
         self.assertEqual(status_code, 200)
 
     def tearDown(self):
@@ -50,15 +52,14 @@ class MailchimpAPITests(TestCase):
 
     def test_ping(self):
         response = self.mc_client.ping()
-        j = response.json()
-        self.assertEqual(j['health_status'], "Everything's Chimpy!")
+        self.assertEqual(response, "Everything's Chimpy!")
 
     def assert_mail_status(self, email, status):
         status_code, members = self.mc_client.get_members()
         self.assertEqual(status_code, 200)
         self.assertIn(email, members)
-        subcribe_status = members[email]
-        self.assertEqual(subcribe_status, status)
+        subscribe_status = members[email]
+        self.assertEqual(subscribe_status, status)
 
     def test_member(self):
         email = f'moe{str(uuid.uuid4().int)}@foo.com'
@@ -77,6 +78,12 @@ class MailchimpAPITests(TestCase):
         self.assertEqual(status_code, 200)
         self.assertEqual(status, 'subscribed')
 
+        update_mailing_list(email, is_subscribed=False)
+        self.assert_mail_status(email, 'unsubscribed')
+
+        update_mailing_list(email)
+        self.assert_mail_status(email, 'subscribed')
+
         status_code = self.mc_client.delete_permanent(email)
         self.assertEqual(status_code, 204)
 
@@ -85,12 +92,3 @@ class MailchimpAPITests(TestCase):
         status_code, status = self.mc_client.subscribe(email)
         self.assertEqual(status_code, 200)
         self.assertEqual(status, 'subscribed')
-
-    def test_player_save_signal(self):
-        email = f'moe{str(uuid.uuid4().int)}@foo.com'
-        u = get_local_user(e=email)
-        self.assert_mail_status(email, 'subscribed')
-
-        u.subscribed = False
-        u.save()
-        self.assert_mail_status(email, 'unsubscribed')

@@ -9,6 +9,7 @@ from django.db import transaction
 
 from game.models import Game, Question, Answer, AnswerCode
 from users.models import Player
+from mail.tasks import update_mailing_list
 
 
 @shared_task
@@ -73,12 +74,12 @@ def players_to_db(responses):
         responses['Email Address'].tolist()
     )
     for dn, e in player_list:
-        Player.objects.update_or_create(
+        _, created = Player.objects.update_or_create(
             email=e,
-            defaults={
-                'display_name': dn[:100],
-            }
+            defaults={'display_name': dn[:100]}
         )
+        if created:
+            update_mailing_list.delay(e)
 
 
 def answers_to_db(game, responses, update=False):
