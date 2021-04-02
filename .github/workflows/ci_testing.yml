@@ -49,10 +49,10 @@ jobs:
       run: celery -A project  worker -E -l DEBUG &
     - name: Run tests
       env:
+        DJANGO_SETTINGS_MODULE=project.settings_test
         EAGER_CELERY: True
         API_KEY: ${{secrets.API_KEY}}
         MAILCHIMP_APIKEY: ${{secrets.MAILCHIMP_APIKEY}}
         MAILCHIMP_HOOK_UUID: ${{secrets.MAILCHIMP_HOOK_UUID}}
-        # MAILCHIMP_AUDIENCE: ${{secrets.MAILCHIMP_AUDIENCE}}
         TEST_CLIENT_PW: ${{secrets.TEST_CLIENT_PW}}
       run: python manage.py migrate && python manage.py test
