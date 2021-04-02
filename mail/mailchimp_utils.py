@@ -13,9 +13,8 @@ def hash_subscriber(email):
     return hashlib.md5(email).hexdigest()
 
 
-class Mailchimp(object):
+class Mailchimp():
     def __init__(self, server, api_key, list_id=-1):
-        super(Mailchimp, self).__init__()
         self.list_id = list_id
         self.auth = ("", api_key)
         self.api_url = f'https://{server}.api.mailchimp.com/3.0'
@@ -30,8 +29,13 @@ class Mailchimp(object):
         return baseurl
 
     def ping(self):
+        if self.list_id is None:
+            return "Everything's Chimpy!"
+
         url = f'{self.api_url}/ping'
-        return requests.get(url, auth=self.auth)
+        response = requests.get(url, auth=self.auth)
+        j = response.json()
+        return(j['health_status'])
 
     def get_lists(self):
         url = f'{self.api_url}/lists'
@@ -77,12 +81,18 @@ class Mailchimp(object):
         return r.status_code, dict([(i['email_address'], i['status']) for i in r.json()['members']])
 
     def add_member_to_list(self, email):
+        if self.list_id is None:
+            return 200, 'subscribed'
+
         url = f"{self.get_members_baseurl()}"
         data = {"email_address": email, "status": "subscribed"}
         r = requests.post(url, auth=self.auth, data=json.dumps(data))
         return r.status_code, r.json()['status']
 
     def update_member(self, email, data={'status': 'subscribed'}):
+        if self.list_id is None:
+            return 200, data['status']
+
         sub_hash = hash_subscriber(email)
         url = f"{self.get_members_baseurl()}/{sub_hash}"
         r = requests.put(url, auth=self.auth, data=json.dumps(data))
@@ -101,6 +111,10 @@ class Mailchimp(object):
 
     def delete_permanent(self, email):
         # THIS IS VERY PERMANENT
+
+        if self.list_id is None:
+            return 200
+
         sub_hash = hash_subscriber(email)
         url = f"{self.get_members_baseurl()}/{sub_hash}/actions/delete-permanent"
         r = requests.post(url, auth=self.auth)

@@ -7,7 +7,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core import mail
 from users.models import PendingEmail
-from project import settings
+
 
 User = get_user_model()
 
@@ -35,9 +35,6 @@ class MailTests(TestCase):
 
 
 class UsersManagersTests(TestCase):
-    def setUp(self):
-        settings.MAILCHIMP_SIGNAL_INHIBIT = True
-
     def test_create_user(self):
         User = get_user_model()
         user = get_local_user()
