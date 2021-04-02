@@ -27,6 +27,10 @@ def mailtest(request):
 @method_decorator(csrf_exempt, name='dispatch')
 class MailchimpWebhook(View):
 
+    def get(self, request):
+        # Need this for Mailchimp to validate hook when setting up an audience.
+        return HttpResponse("OK")
+
     def post(self, request, uuid):
         assert(uuid == MAILCHIMP_HOOK_UUID)
 
