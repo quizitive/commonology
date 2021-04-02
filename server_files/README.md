@@ -343,4 +343,14 @@ Note this can be used for Django, described in the next subsection, or most mail
 
 See `project/settings.py` and `game.views.mailmarc()`
 
+### Mailchimp
+
+You need to logon to Mailchimp and set the Webhook URLs for the Audiences as follows.
+
+Set the Mailchimp webhook for production:
+https://commonologygame.com/mailchimp_hook/
+
+Set the Mailchimp webhook for staging:
+https://staging.commonologygame.com/mailchimp_hook/
+
 # Try it!
