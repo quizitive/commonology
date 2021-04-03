@@ -11,8 +11,8 @@ urlpatterns = [
     path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('password_change_done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
     path("profile/", views.profile_view, name="profile"),
+        path("join/", views.join_view, name='join'),
     path("join/<uidb64>", views.EmailConfirmedView.as_view(), name='join'),
-    path("join/", views.join_view, name='join'),
     path("invite/", views.send_invite_view, name='invite'),
     path("login/", auth_views.LoginView.as_view(
         template_name="users/login.html",
