@@ -13,7 +13,7 @@ urlpatterns = [
     path("profile/", views.profile_view, name="profile"),
     path("join/", views.join_view, name='join'),
     path("join/<uidb64>", views.EmailConfirmedView.as_view(), name='join'),
-    path("invite/", views.send_invite_view, name='invite'),
+    path("invite/", views.InviteFriendsView.as_view(), name='invite'),
     path("login/", auth_views.LoginView.as_view(
         template_name="users/login.html",
         form_class=LoginForm,
