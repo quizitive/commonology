@@ -343,4 +343,16 @@ Note this can be used for Django, described in the next subsection, or most mail
 
 See `project/settings.py` and `game.views.mailmarc()`
 
+### Mailchimp
+
+You need to logon to Mailchimp and set the Webhook URLs for the Audiences as follows.
+
+You need to create a UUID and put it in the secret_env file and use it in the webhook URL.
+
+Set the Mailchimp webhook for production:
+https://commonologygame.com/mailchimp_hook/<UUID>
+
+Set the Mailchimp webhook for staging:
+https://staging.commonologygame.com/mailchimp_hook/<UUID>
+
 # Try it!
