@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from django.views.generic.base import View
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail
+from users.htmx import InviteFriendsHTMXView
 
 from .utils import remove_pending_email_invitations, send_invite
 
