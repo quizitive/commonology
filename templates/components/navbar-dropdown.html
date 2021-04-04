@@ -1,0 +1,22 @@
+{% load navbar_extras %}
+
+{% if user.is_authenticated %}
+
+<div class="navbar-dropdown w3-dropdown-click w3-hover-none">
+  <i id="navbar-dropdown-icon"
+      class="fas fa-caret-down fa-3x"
+      style="color:orange;width:10%;"></i>
+  <div id="navbar-dropdown-content"
+       class="navbar-dropdown w3-dropdown-content w3-bar-block w3-border w3-round" style="overflow: hidden;">
+    <div class="w3-bar-item w3-button w3-border-bottom" style="padding:12px 16px"><b>{{ user.first_name }} {{ user.last_name }}</b></div>
+    <a href="{% url 'invite' %}" class="w3-bar-item w3-button">Invite Friends</a>
+    <a href="{% login_logout_url %}" class="w3-bar-item w3-button">Logout</a>
+  </div>
+</div>
+
+{% else %}
+
+<a href="{% url 'login' %}"><button class="w3-button w3-round">Login</button></a>
+<a href="{% url 'join' %}"><button class="w3-button w3-round w3-blue">Join</button></a>
+
+{% endif %}
