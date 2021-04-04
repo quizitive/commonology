@@ -13,9 +13,8 @@ def hash_subscriber(email):
     return hashlib.md5(email).hexdigest()
 
 
-class Mailchimp(object):
+class Mailchimp():
     def __init__(self, server, api_key, list_id=-1):
-        super(Mailchimp, self).__init__()
         self.list_id = list_id
         self.auth = ("", api_key)
         self.api_url = f'https://{server}.api.mailchimp.com/3.0'
@@ -30,8 +29,13 @@ class Mailchimp(object):
         return baseurl
 
     def ping(self):
+        if self.list_id is None:
+            return "Everything's Chimpy!"
+
         url = f'{self.api_url}/ping'
-        return requests.get(url, auth=self.auth)
+        response = requests.get(url, auth=self.auth)
+        j = response.json()
+        return(j['health_status'])
 
     def get_lists(self):
         url = f'{self.api_url}/lists'
@@ -58,12 +62,18 @@ class Mailchimp(object):
         r = requests.delete(url, auth=self.auth)
         return r.status_code
 
-    def delete_list_by_name(self, name):
+    def get_list_id(self, name):
+        list_id = -1
         status_code, result = self.get_lists()
         if 200 == status_code and (name in result):
             list_id = result[name]
+        return list_id
+
+    def delete_list_by_name(self, name):
+        list_id = self.get_list_id(name)
+        if type(list_id) == str:
             status_code = self.delete_list(list_id)
-        return status_code
+        return list_id
 
     def get_members(self):
         baseurl = self.get_members_baseurl()
@@ -71,12 +81,18 @@ class Mailchimp(object):
         return r.status_code, dict([(i['email_address'], i['status']) for i in r.json()['members']])
 
     def add_member_to_list(self, email):
+        if self.list_id is None:
+            return 200, 'subscribed'
+
         url = f"{self.get_members_baseurl()}"
         data = {"email_address": email, "status": "subscribed"}
         r = requests.post(url, auth=self.auth, data=json.dumps(data))
-        return r.status_code, r.json()
+        return r.status_code, r.json()['status']
 
     def update_member(self, email, data={'status': 'subscribed'}):
+        if self.list_id is None:
+            return 200, data['status']
+
         sub_hash = hash_subscriber(email)
         url = f"{self.get_members_baseurl()}/{sub_hash}"
         r = requests.put(url, auth=self.auth, data=json.dumps(data))
@@ -87,11 +103,18 @@ class Mailchimp(object):
         return self.update_member(email, data)
 
     def subscribe(self, email):
-        data = {'status': 'subscribed'}
-        return self.update_member(email, data)
+        status_code, status = self.add_member_to_list(email)
+        if status_code != 200:
+            data = {'status': 'subscribed'}
+            status_code, status = self.update_member(email, data)
+        return status_code, status
 
     def delete_permanent(self, email):
         # THIS IS VERY PERMANENT
+
+        if self.list_id is None:
+            return 200
+
         sub_hash = hash_subscriber(email)
         url = f"{self.get_members_baseurl()}/{sub_hash}/actions/delete-permanent"
         r = requests.post(url, auth=self.auth)
