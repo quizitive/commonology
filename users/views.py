@@ -5,17 +5,17 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
 from django.views.generic.base import View
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail
+from users.htmx import InviteFriendsHTMXView
 
-from .utils import remove_pending_email_invitations
+from .utils import remove_pending_email_invitations, send_invite
 
 User = get_user_model()
 
@@ -79,26 +79,43 @@ def join_view(request):
     return render(request, "users/join.html", context)
 
 
-@login_required()
-def send_invite_view(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        context = {'email': email, 'header': "Register"}
-        try:
-            User.objects.get(email=email)
-            # can't join if user exists
-            return render(request, "users/base.html", context)
-        except (User.DoesNotExist):
-            remove_pending_email_invitations()
-            pe = PendingEmail(email=email, referrer=request.user.email)
-            pe.save()
-            send_invite(request, pe)
-            return render(request, "users/invite_sent.html", context)
+class InviteFriendsView(LoginRequiredMixin, View):
 
-        return redirect('/')
+    header = "Invite Friends"
+    form = PendingEmailForm()
+    card_template = 'users/cards/invite_card.html'
+    page_template = 'users/base.html'
 
-    context = {'form': PendingEmailForm}
-    return render(request, "users/invite.html", context)
+    def get(self, request, *args, **kwargs):
+        messages.info(request, "Enter your friends' emails to invite them to Commonology!")
+        context = self._context()
+        return render(request, self.page_template, context)
+
+    def post(self, request, *args, **kwargs):
+        emails = request.POST['email'].split(",")
+        emails = [e.strip().lower() for e in emails]
+        for email in emails:
+            try:
+                User.objects.get(email=email)
+                # can't join if user exists
+                messages.warning(request, f"User {email} already exists")
+            except (User.DoesNotExist):
+                remove_pending_email_invitations()
+                pe = PendingEmail(email=email, referrer=request.user.email)
+                pe.save()
+                send_invite(request, pe)
+                messages.info(request, f"Invite successfully sent to {email}.")
+
+        return render(request, "users/base.html", self._context())
+
+    def _context(self):
+        self.form.fields['email'].widget.attrs['class'] = 'w3-input w3-border'
+        context = {
+            'header': self.header,
+            'form': self.form,
+            'card_template': self.card_template
+        }
+        return context
 
 
 class EmailConfirmedView(View):
@@ -164,36 +181,6 @@ class EmailConfirmedView(View):
         messages.error(request, "If that does not work then please do not give up on us. Send us a help message.")
         context = {'header': "Join Fail"}
         return render(request, 'users/base.html', context)
-
-
-def make_uuid_url(request, uuid=None):
-    url = request.build_absolute_uri('/join/')
-    if uuid:
-        url += str(uuid)
-    return url
-
-
-def send_invite(request, pe):
-    email = pe.email
-    join_url = make_uuid_url(request, uuid=pe.uuid)
-    referrer_str = ""
-    if pe.referrer:
-        referrer = User.objects.filter(email=pe.referrer).first()
-        if referrer is None:
-            # Do not send invite if referrer does not exist.
-            return 0
-
-        if referrer.first_name and referrer.last_name:
-            referrer_str = f'{referrer.first_name} {referrer.last_name}, whose email address is {referrer.email} requested this invitation.'
-
-        else:
-            referrer_str = f'Your friend whose email address is {referrer.email} requested this invitation.'
-
-    context = {'referrer_str': referrer_str, 'join_url': join_url}
-    msg = render_to_string('users/invite_email.html', context)
-
-    return send_mail(subject='Join us', message=msg,
-                     from_email=None, recipient_list=[email])
 
 
 class PwdResetRequestSentView(PasswordResetDoneView):
