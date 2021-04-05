@@ -118,7 +118,6 @@ class InviteFriendsView(LoginRequiredMixin, View):
         return context
 
 
-
 class EmailConfirmedView(View):
 
     def get(self, request, uidb64, *args, **kwargs):
