@@ -9,7 +9,7 @@
   <div id="navbar-dropdown-content"
        class="navbar-dropdown w3-dropdown-content w3-bar-block w3-border w3-round" style="overflow: hidden;">
     <div class="w3-bar-item w3-button w3-border-bottom" style="padding:12px 16px"><b>{{ user.first_name }} {{ user.last_name }}</b></div>
-    <a href="#" class="w3-bar-item w3-button">Invite Friends</a>
+    <a href="{% url 'invite' %}" class="w3-bar-item w3-button">Invite Friends</a>
     <a href="{% login_logout_url %}" class="w3-bar-item w3-button">Logout</a>
   </div>
 </div>
