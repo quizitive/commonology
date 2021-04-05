@@ -1,6 +1,5 @@
-from django.urls import include, path, reverse
+from django.urls import path
 from django.contrib.auth import views as auth_views
-from django.views.generic.base import RedirectView
 from users import views
 from users.htmx import PlayersHTMXView
 from users.forms import LoginForm, PwdResetForm, NewPwdForm
