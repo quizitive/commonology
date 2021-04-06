@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from .models import PendingEmail
 from django.contrib.auth import get_user_model
+from mail.tasks import update_mailing_list
 
 
 def remove_pending_email_invitations(n=7):
@@ -13,3 +14,4 @@ def unsubscribe(email):
     u = User.objects.get(email=email)
     u.subscribed = False
     u.save()
+    update_mailing_list.delay(email, is_subscribed=False)
