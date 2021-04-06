@@ -31,7 +31,7 @@ class UserCardFormView(FormMixin, View):
     form_class = None
     header = "Welcome To Commonology"
     button_label = "Ok"
-    card_template = 'users/cards/invite_card.html'
+    card_template = 'users/cards/base_users_card.html'
     page_template = 'users/base.html'
 
     def get(self, request, *args, **kwargs):
@@ -57,6 +57,7 @@ class UserCardFormView(FormMixin, View):
 class ProfileView(LoginRequiredMixin, UserCardFormView):
 
     form_class = PlayerProfileForm
+    header = "Edit Profile"
 
     # def get(self, request, *args, **kwargs):
     #     form = self._form(request)
@@ -72,6 +73,7 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
         return render(request, "users/base.html", {"form": form})
 
     def _form(self, request):
+        # todo: override get_form to contextually add instance
         email = request.user.email
         cu = User.objects.get(email=email)
         form = PlayerProfileForm(instance=cu, data=request.POST or None)
