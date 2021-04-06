@@ -2,20 +2,20 @@
 $(function() {
   // click anywhere closes dropdown
     $(document).bind("click", (event) => {
-    showHideDropdown(event)
+    showHideElement(event, "#navbar-dropdown-content")
   })
   // clicking on caret can open or close dropdown
   $("#navbar-dropdown-icon").bind("click", (event) => {
-    showHideDropdown(event,true)
+    showHideElement(event,"#navbar-dropdown-content",true)
   });
 })
 
 // --- define listener functionality ---- //
-function showHideDropdown(e, canOpen=false) {
-  const drpdn = $("#navbar-dropdown-content")
+function showHideElement(e, elem, canOpen=false) {
+  const drpdn = $(elem)
   if (!drpdn.hasClass("w3-show") && canOpen === true) {
-    drpdn.addClass("w3-show")
-    e.stopPropagation();
+    drpdn.addClass("w3-show").removeClass("w3-hide")
+    e.stopPropagation()
   } else {
     drpdn.removeClass("w3-show")
   }
