@@ -1,15 +1,12 @@
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
-
 from django.db import models
-
-from django.contrib.auth import get_user_model
+from users.models import Player
 
 
 class Game(models.Model):
     game_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=100)
-    User = get_user_model()
-    hosts = models.ManyToManyField(User, related_name='hosted_games')
+    hosts = models.ManyToManyField(Player, related_name='hosted_games')
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
@@ -120,8 +117,7 @@ class Question(models.Model):
 
 class Answer(models.Model):
     timestamp = models.DateTimeField()
-    User = get_user_model()
-    player = models.ForeignKey(User, on_delete=models.CASCADE, related_name='answers', db_index=True)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='answers', db_index=True)
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, related_name='raw_answers', db_index=True)
     raw_string = models.CharField(max_length=1000)
