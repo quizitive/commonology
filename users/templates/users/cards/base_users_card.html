@@ -1,12 +1,12 @@
-<div class="w3-modal-content w3-round w3-card-2" style="max-width:767px; overflow: hidden;">
-  <header class="w3-container w3-teal w3-center">
+<div class="w3-modal-content w3-round w3-card-0 w3-border w3-border-grey" style="max-width:767px; overflow: hidden;">
+  <header class="w3-container w3-border-bottom w3-center">
 
     {% if is_modal %}
     <span onclick="document.getElementById({{ modal_name }}).style.display='none'"
     class="w3-button w3-display-topright">&times;</span>
     {% endif %}
 
-    <h3>{{ header }}</h3>
+    <h4>{{ header }}</h4>
   </header>
   <div class="w3-container w3-padding-large">
 
@@ -25,7 +25,7 @@
     <form method="{{ form_method|default:'post' }}" {% if form_action %}action="{{ form_action }}"{% endif %}>
       {% csrf_token %}
       {{ form.as_p }}
-      <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-block w3-teal w3-margin-bottom">
+      <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block w3-blue w3-margin-bottom">
     </form>
 
     {% block card_extras %}{% endblock %}
