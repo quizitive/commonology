@@ -34,8 +34,11 @@ def profile_view(request):
         user_form = PlayerProfileForm(instance=cu, data=request.POST or None)
     if request.method == 'POST' and user_form.is_valid():
         user_form.save()
+        if 'email' in user_form.changed_data:
+            update_mailing_list.delay(email, is_subscribed=False)
+            update_mailing_list.delay(user_form.instance.email)
         #
-        # todo If email or subscribe is changed then call update_mailing_list.deloy()
+        # todo Add subscribe to this form and then use update_mailing_list to manage that.
         #
     return render(request, "users/profile.html", {"user_form": user_form})
 
@@ -146,11 +149,6 @@ class EmailConfirmedView(View):
             user = authenticate(email=user.email, password=raw_password)
             login(request, user)
             PendingEmail.objects.filter(email__iexact=user.email).delete()
-
-            #
-            # todo Use update_mailing_list.deloy(old_email, is_subscribed=False)
-            # to remove old email address from mailing list.
-            #
 
             update_mailing_list.delay(email)
 
