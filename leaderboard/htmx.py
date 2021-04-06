@@ -3,7 +3,7 @@ from django.views.generic.base import View
 from django.db.models import Max
 from django.http import Http404
 
-from users.models import Player
+from django.contrib.auth import get_user_model
 from game.models import Game
 from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard
 
@@ -25,7 +25,8 @@ class LeaderboardHTMXView(View):
         """
         user_following = {}
         if request.user.is_authenticated:
-            user = Player.objects.get(id=request.user.id)
+            User = get_user_model()
+            user = User.objects.get(id=request.user.id)
             user_following = {
                 p: True
                 for p in user.following.values_list('id', flat=True)

@@ -17,7 +17,8 @@ from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
 
-from users.models import Player
+from django.contrib.auth import get_user_model
+
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -132,7 +133,8 @@ class TestGameTabulation(BaseGameDataTestCase):
             data=[['user1@fakeemail.com', 'New Display Name']]
         )
         players_to_db(new_disply_name_df)
-        new_display_name = Player.objects.get(email='user1@fakeemail.com').display_name
+        User = get_user_model()
+        new_display_name = User.objects.get(email='user1@fakeemail.com').display_name
         self.assertEqual(new_display_name, 'New Display Name')
 
     def test_player_name_trim(self):
@@ -142,7 +144,8 @@ class TestGameTabulation(BaseGameDataTestCase):
             data=[['long_name@fakeemail.com', long_name]]
         )
         players_to_db(new_disply_name_df)
-        new_display_name = Player.objects.get(email='long_name@fakeemail.com').display_name
+        User = get_user_model()
+        new_display_name = User.objects.get(email='long_name@fakeemail.com').display_name
         self.assertEqual(new_display_name, long_name[:100])
 
     def test_answers_to_db(self):
@@ -156,7 +159,8 @@ class TestGameTabulation(BaseGameDataTestCase):
 
     def test_blank_answers(self):
         new_user_email = "userX@fakeemail.com"
-        p = Player.objects.create(email=new_user_email)
+        User = get_user_model()
+        p = User.objects.create(email=new_user_email)
         new_answer_with_blanks = pd.DataFrame([[
             "2020-12-02 16:11:00",
             new_user_email,

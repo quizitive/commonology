@@ -5,7 +5,8 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 
-from users.models import Player, Team
+from users.models import Team
+from django.contrib.auth import get_user_model
 from game.models import Game
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
 
@@ -13,7 +14,8 @@ from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tal
 def _render_leaderboard(request, game_id=None, published=True):
     user_following = {}
     if request.user.is_authenticated:
-        user = Player.objects.get(id=request.user.id)
+        User = get_user_model()
+        user = User.objects.get(id=request.user.id)
         user_following = {
             p: True
             for p in user.following.values_list('id', flat=True)
