@@ -36,10 +36,9 @@ def profile_view(request):
         user_form.save()
         if 'email' in user_form.changed_data:
             update_mailing_list.delay(email, is_subscribed=False)
+            # todo: email confirm message and use next line when email is confirmed.
             update_mailing_list.delay(user_form.instance.email)
-        #
-        # todo Add subscribe to this form and then use update_mailing_list to manage that.
-        #
+            # todo Add subscribe to this form and then use update_mailing_list to manage that.
     return render(request, "users/profile.html", {"user_form": user_form})
 
 
