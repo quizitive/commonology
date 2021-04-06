@@ -23,4 +23,5 @@ ul.nonfield {
 }
 .errorlist {
   color: red;
+  margin: 0 0 -4px 0;
 }
