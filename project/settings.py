@@ -140,10 +140,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'project/static')
 ]
 
-if env.get("INHIBIT_MAIL", False) == 'True':
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else:
+if env.get("ENABLE_MAIL"):
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
