@@ -1,5 +1,3 @@
-import os
-import uuid
 from django.forms import HiddenInput
 from django.urls import reverse
 from django.shortcuts import render
@@ -14,6 +12,7 @@ from django.core.exceptions import ValidationError
 from django.views.generic.base import View
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail
+from mail.tasks import update_mailing_list
 
 from .utils import remove_pending_email_invitations
 
@@ -35,6 +34,9 @@ def profile_view(request):
         user_form = PlayerProfileForm(instance=cu, data=request.POST or None)
     if request.method == 'POST' and user_form.is_valid():
         user_form.save()
+        #
+        # todo If email or subscribe is changed then call update_mailing_list.deloy()
+        #
     return render(request, "users/profile.html", {"user_form": user_form})
 
 
@@ -144,6 +146,14 @@ class EmailConfirmedView(View):
             user = authenticate(email=user.email, password=raw_password)
             login(request, user)
             PendingEmail.objects.filter(email__iexact=user.email).delete()
+
+            #
+            # todo Use update_mailing_list.deloy(old_email, is_subscribed=False)
+            # to remove old email address from mailing list.
+            #
+
+            update_mailing_list.delay(email)
+
             return redirect('/')
 
         messages.info(request, f"Email: {email} (you can change this after signing up)")
