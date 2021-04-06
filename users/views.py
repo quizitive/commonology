@@ -96,6 +96,12 @@ class InviteFriendsView(LoginRequiredMixin, View):
         emails = [e.strip().lower() for e in emails]
         for email in emails:
             try:
+                validate_email(email)
+            except ValidationError:
+                messages.warning(request, f"{email} is not a valid email")
+                continue
+
+            try:
                 User.objects.get(email=email)
                 # can't join if user exists
                 messages.warning(request, f"User {email} already exists")
