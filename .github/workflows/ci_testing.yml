@@ -46,7 +46,6 @@ jobs:
     - name: Celery
       env:
         EAGER_CELERY: True
-        DJANGO_SETTINGS_MODULE: project.settings_test
       run: celery -A project  worker -E -l DEBUG &
     - name: Run tests
       env:
