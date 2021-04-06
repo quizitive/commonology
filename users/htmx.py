@@ -2,7 +2,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
 from django.views.generic.base import View
 
-from users.models import Player
+from django.contrib.auth import get_user_model
 
 
 class PlayersHTMXView(View):
@@ -13,7 +13,8 @@ class PlayersHTMXView(View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request):
-        user = Player.objects.get(id=request.user.id)
+        User = get_user_model()
+        user = User.objects.get(id=request.user.id)
         data = request.POST.dict()
 
         if data.get('to_follow'):
