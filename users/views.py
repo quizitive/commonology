@@ -1,7 +1,7 @@
 import os
 import uuid
 from django.forms import HiddenInput
-from django.urls import reverse
+from django.urls import reverse, resolve
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -10,10 +10,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.views.generic.base import View
+from django.views.generic.edit import FormMixin
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail
-from users.htmx import InviteFriendsHTMXView
 
 from .utils import remove_pending_email_invitations, send_invite
 
@@ -26,16 +27,55 @@ def user_logout(request):
     return redirect(reverse('home'))
 
 
-def profile_view(request):
-    if request.user.id is None:
-        user_form = PlayerProfileForm(data=request.POST or None)
-    else:
+class UserCardFormView(FormMixin, View):
+    form_class = None
+    header = "Welcome To Commonology"
+    button_label = "Ok"
+    card_template = 'users/cards/invite_card.html'
+    page_template = 'users/base.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.page_template, self.get_context())
+
+    @staticmethod
+    def _format_form(form):
+        for key, field in form.fields.items():
+            field.widget.attrs['class'] = 'w3-input'
+            field.widget.attrs['style'] = 'background:none;'
+        form.fields['email'].widget.attrs['readonly'] = True
+        form.fields['email'].widget = HiddenInput()
+        return form
+
+    def get_context(self):
+        return {
+            'header': self.header,
+            'form': self._format_form(self.get_form()),
+            'card_template': self.card_template
+        }
+
+
+class ProfileView(LoginRequiredMixin, UserCardFormView):
+
+    form_class = PlayerProfileForm
+
+    # def get(self, request, *args, **kwargs):
+    #     form = self._form(request)
+    #     return render(request, "users/base.html", {"form": form})
+
+    def post(self, request, *args, **kwargs):
+        form = self._form(request)
+        if form.is_valid():
+            form.save()
+            messages.info(request, "Your changes have been saved!")
+        else:
+            messages.error(request, "There was a problem saving your changes. Please try again.")
+        return render(request, "users/base.html", {"form": form})
+
+    def _form(self, request):
         email = request.user.email
         cu = User.objects.get(email=email)
-        user_form = PlayerProfileForm(instance=cu, data=request.POST or None)
-    if request.method == 'POST' and user_form.is_valid():
-        user_form.save()
-    return render(request, "users/profile.html", {"user_form": user_form})
+        form = PlayerProfileForm(instance=cu, data=request.POST or None)
+        return self._format_form(form)
 
 
 def confirm_or_login(request, email):
@@ -207,8 +247,9 @@ class PwdResetRequestSentView(PasswordResetDoneView):
 class PwdResetConfirmView(PasswordResetConfirmView):
 
     def post(self, request, *args, **kwargs):
+        form = self.get_form()
         self.success_url = reverse('login')
-        if self.form_valid:
+        if form.is_valid():
             messages.info(request, "Your password has been successfully changed.")
         else:
             messages.warning(request, "There was an error updating your password, please try again.")
