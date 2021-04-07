@@ -1,7 +1,5 @@
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
-
 from django.db import models
-
 from users.models import Player
 
 

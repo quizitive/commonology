@@ -3,7 +3,7 @@ from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max
 
-from users.models import Player
+from django.contrib.auth import get_user_model
 from game.models import Game
 
 from leaderboard.leaderboard import player_rank_and_percentile_in_game
@@ -25,7 +25,8 @@ class PlayerHomeView(LoginRequiredMixin, View):
 
     def _get_context(self, request):
         user = request.user
-        player, _ = Player.objects.get_or_create(id=user.id)
+        User = get_user_model()
+        player, _ = User.objects.get_or_create(id=user.id)
         games = Game.objects.filter(publish=True).order_by('-game_id')
         latest_game_id = games.aggregate(Max('game_id'))['game_id__max']
 

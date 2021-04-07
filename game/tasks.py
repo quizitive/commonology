@@ -8,7 +8,7 @@ from django.utils.timezone import make_aware
 from django.db import transaction
 
 from game.models import Game, Question, Answer, AnswerCode
-from users.models import Player
+from django.contrib.auth import get_user_model
 from mail.tasks import update_mailing_list
 
 
@@ -41,7 +41,8 @@ def game_to_db(filename):
             'name': filename.replace(" (Responses)", ""),
         }
     )
-    staff = Player.objects.filter(is_staff=True)
+    User = get_user_model()
+    staff = User.objects.filter(is_staff=True)
     game.hosts.add(*staff)
     game.save()
     return game
@@ -73,8 +74,9 @@ def players_to_db(responses):
         responses['Name'].tolist(),
         responses['Email Address'].tolist()
     )
+    User = get_user_model()
     for dn, e in player_list:
-        _, created = Player.objects.update_or_create(
+        _, created = User.objects.update_or_create(
             email=e,
             defaults={'display_name': dn[:100]}
         )
@@ -91,7 +93,8 @@ def answers_to_db(game, responses, update=False):
 
 @transaction.atomic
 def update_answers_in_db(game, responses):
-    prev_players = Player.objects.filter(
+    User = get_user_model()
+    prev_players = User.objects.filter(
         answers__question__game=game).values_list('email', flat=True)
     prev_answers = Answer.objects.filter(
         question__game=game, player__email__in=prev_players).values(
@@ -115,10 +118,12 @@ def update_answers_in_db(game, responses):
 @transaction.atomic
 def new_answers_to_db(game, responses):
     q_text = responses.columns[3:]
-    prev_players = Player.objects.filter(answers__question__game=game).values_list('email', flat=True)
+    User = get_user_model()
+    prev_players = User.objects.filter(answers__question__game=game).values_list('email', flat=True)
     new_responses = responses[~responses['Email Address'].isin(prev_players)]
     emails = new_responses['Email Address'].tolist()
-    players = dict(Player.objects.filter(email__in=emails).values_list('email', 'id'))
+    User = get_user_model()
+    players = dict(User.objects.filter(email__in=emails).values_list('email', 'id'))
     answers = []
     for qt in q_text:
         question = Question.objects.get(text=qt.strip(), game=game)
