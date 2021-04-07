@@ -3,14 +3,17 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
+from django.core.validators import validate_email
+from django.template.loader import render_to_string
 from django.views.generic.base import View
-from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
+from django.views.generic.edit import FormMixin
+from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
 from users.models import PendingEmail
 from mail.tasks import update_mailing_list
 
@@ -25,84 +28,172 @@ def user_logout(request):
     return redirect(reverse('home'))
 
 
-def profile_view(request):
-    if request.user.id is None:
-        user_form = PlayerProfileForm(data=request.POST or None)
-    else:
-        email = request.user.email
+class UserCardFormView(FormMixin, View):
+    """
+    A base class with sensible defaults for our basic user form-in-card
+    See template users/cards/base_users_card.html for additional template
+    variables that can be set to customize form further.
+
+    Common use case would be to define a form_class and override post()
+    to handle form-specific functionality
+    """
+    form_class = None
+    header = "Welcome To Commonology"
+    custom_message = None
+    button_label = "Ok"
+    card_template = 'users/cards/base_users_card.html'
+    page_template = 'users/base.html'
+
+    def get(self, request, *args, **kwargs):
+        return self.render(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.render(request, *args, **kwargs)
+
+    def render(self, request, *args, **kwargs):
+        return render(request, self.page_template, self.get_context(**kwargs))
+
+    def get_context(self, *args, **kwargs):
+        context = {
+            'header': self.header,
+            'form': self.format_form(self.get_form()),
+            'card_template': self.card_template,
+            'button_label': self.button_label,
+            'custom_message': self.custom_message
+            }
+        context.update(kwargs)
+        return context
+
+    @staticmethod
+    def format_form(form):
+        for key, field in form.fields.items():
+            field.widget.attrs['class'] = 'w3-input'
+            field.widget.attrs['style'] = 'background:none;'
+        return form
+
+
+class ProfileView(LoginRequiredMixin, UserCardFormView):
+
+    form_class = PlayerProfileForm
+    header = "Edit Profile"
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            form.save()
+            if 'email' in form.changed_data:
+                email = self.request.user.email
+                update_mailing_list.delay(email, is_subscribed=False)
+                # todo: email confirm message and use next line when email is confirmed.
+                update_mailing_list.delay(form.instance.email)
+                # todo Add subscribe to this form and then use update_mailing_list to manage that.
+            messages.info(request, "Your changes have been saved!")
+        else:
+            messages.error(request, "There was a problem saving your changes. Please try again.")
+        return super().post(request)
+
+    def get_form(self, form_class=None):
+        email = self.request.user.email
         cu = User.objects.get(email=email)
-        user_form = PlayerProfileForm(instance=cu, data=request.POST or None)
-    if request.method == 'POST' and user_form.is_valid():
-        user_form.save()
-        if 'email' in user_form.changed_data:
-            update_mailing_list.delay(email, is_subscribed=False)
-            # todo: email confirm message and use next line when email is confirmed.
-            update_mailing_list.delay(user_form.instance.email)
-            # todo Add subscribe to this form and then use update_mailing_list to manage that.
-    return render(request, "users/profile.html", {"user_form": user_form})
+        form = self.form_class(instance=cu, data=self.request.POST or None)
+        return self.format_form(form)
 
 
-def confirm_or_login(request, email):
-    try:
-        user = User.objects.get(email=email)
-        if user.is_member:
-            messages.info(request, 'There is already an account with that email, please login.')
-            return redirect('login')
+class JoinView(UserCardFormView):
+    form_class = PendingEmailForm
+    header = "Join Commonology!"
+    button_label = "Join"
 
-    except User.DoesNotExist:
-        pass
-
-    remove_pending_email_invitations()
-    pe = PendingEmail(email=email)
-    pe.save()
-    send_invite(request, pe)
-
-    messages.info(request, f"An invitation email was sent to {email}. "
-                           f"Don't forget to check your spam or junk folder if need be. "
-                           f"Please follow the instructions in that message to join in the fun.")
-
-    context = {'header': "Invitation sent!", 'email': email}
-    return render(request, "users/base.html", context)
-
-
-def join_view(request):
-    if request.user.is_authenticated:
-        return redirect('/')
-
-    if request.method == 'POST':
+    def post(self, request, *args, **kwargs):
         email = request.POST.get('email')
         if not email:
             return redirect('login')
-        return confirm_or_login(request, email)
 
-    context = {
-        'form': PendingEmailForm,
-        'header': "Join the Community!",
-        'button_label': "Join"
-    }
-    return render(request, "users/join.html", context)
-
-
-@login_required()
-def send_invite_view(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        context = {'email': email, 'header': "Register"}
         try:
-            User.objects.get(email=email)
-            # can't join if user exists
-            return render(request, "users/base.html", context)
-        except (User.DoesNotExist):
-            remove_pending_email_invitations()
-            pe = PendingEmail(email=email, referrer=request.user.email)
-            pe.save()
-            send_invite(request, pe)
-            return render(request, "users/invite_sent.html", context)
+            user = User.objects.get(email=email)
+            if user.is_member:
+                messages.info(request, 'There is already an account with that email, please login.')
+                return redirect('login')
 
-        return redirect('/')
+        except User.DoesNotExist:
+            pass
 
-    context = {'form': PendingEmailForm}
-    return render(request, "users/invite.html", context)
+        remove_pending_email_invitations()
+        pe = PendingEmail(email=email)
+        pe.save()
+        send_invite(request, pe)
+
+        self.custom_message = f"We sent your unique join link to {email}. " \
+                              f"Don't forget to check your spam or junk folder if need be. " \
+                              f"You may close this window now."
+
+        self.header = "Invitation Sent!"
+        return self.render(request)
+
+
+def make_uuid_url(request, uuid=None):
+    url = request.build_absolute_uri('/join/')
+    if uuid:
+        url += str(uuid)
+    return url
+
+
+def send_invite(request, pe):
+    email = pe.email
+    join_url = make_uuid_url(request, uuid=pe.uuid)
+    referrer_str = ""
+    if pe.referrer:
+        referrer = User.objects.filter(email=pe.referrer).first()
+        if referrer is None:
+            # Do not send invite if referrer does not exist.
+            return 0
+
+        if referrer.first_name and referrer.last_name:
+            referrer_str = f'{referrer.first_name} {referrer.last_name}, ' \
+                           f'whose email address is {referrer.email} requested this invitation.'
+
+        else:
+            referrer_str = f'Your friend whose email address is {referrer.email} requested this invitation.'
+
+    context = {'referrer_str': referrer_str, 'join_url': join_url}
+    msg = render_to_string('users/invite_email.html', context)
+
+    return send_mail(subject='Join us', message=msg,
+                     from_email=None, recipient_list=[email])
+
+
+class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
+
+    header = "Invite Friends"
+    form_class = InviteFriendsForm
+    button_label = "Send"
+
+    def get(self, request, *args, **kwargs):
+        messages.info(request, "Enter your friends' emails to invite them to Commonology!")
+        return super().get(request)
+
+    def post(self, request, *args, **kwargs):
+        emails = request.POST['emails'].split(",")
+        emails = [e.strip().lower() for e in emails]
+        for email in emails:
+            try:
+                validate_email(email)
+            except ValidationError:
+                messages.warning(request, f"{email} is not a valid email")
+                continue
+
+            try:
+                User.objects.get(email=email)
+                # can't join if user exists
+                messages.warning(request, f"User {email} already exists")
+            except User.DoesNotExist:
+                remove_pending_email_invitations()
+                pe = PendingEmail(email=email, referrer=request.user.email)
+                pe.save()
+                send_invite(request, pe)
+                messages.info(request, f"Invite successfully sent to {email}.")
+
+        return super().post(request)
 
 
 class EmailConfirmedView(View):
@@ -173,45 +264,15 @@ class EmailConfirmedView(View):
         return render(request, 'users/base.html', context)
 
 
-def make_uuid_url(request, uuid=None):
-    url = request.build_absolute_uri('/join/')
-    if uuid:
-        url += str(uuid)
-    return url
-
-
-def send_invite(request, pe):
-    email = pe.email
-    join_url = make_uuid_url(request, uuid=pe.uuid)
-    referrer_str = ""
-    if pe.referrer:
-        referrer = User.objects.filter(email=pe.referrer).first()
-        if referrer is None:
-            # Do not send invite if referrer does not exist.
-            return 0
-
-        if referrer.first_name and referrer.last_name:
-            referrer_str = f'{referrer.first_name} {referrer.last_name}, whose email address is {referrer.email} requested this invitation.'
-
-        else:
-            referrer_str = f'Your friend whose email address is {referrer.email} requested this invitation.'
-
-    context = {'referrer_str': referrer_str, 'join_url': join_url}
-    msg = render_to_string('users/invite_email.html', context)
-
-    return send_mail(subject='Join us', message=msg,
-                     from_email=None, recipient_list=[email])
-
-
 class PwdResetRequestSentView(PasswordResetDoneView):
 
     def get(self, request, *args, **kwargs):
-        messages.info(request, "We've emailed you instructions for setting your password, "
-                      "if an account exists with the email you entered. You should receive them shortly.")
-        messages.info(request, "If you don't receive an email, please make sure you've entered the address"
-                      " you registered with, and check your spam folder")
+        custom_message = f"We've emailed you instructions for setting your password, " \
+                         f"if an account exists with the email you entered. You should receive them shortly." \
+                         f"\n\nIf you don't receive an email, please make sure you've entered the address" \
+                         f" you registered with, and check your spam folder"
 
-        context = {'header': "Reset Password"}
+        context = {'header': "Reset Password", 'custom_message': custom_message}
         return render(request, 'users/base.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -221,8 +282,9 @@ class PwdResetRequestSentView(PasswordResetDoneView):
 class PwdResetConfirmView(PasswordResetConfirmView):
 
     def post(self, request, *args, **kwargs):
+        form = self.get_form()
         self.success_url = reverse('login')
-        if self.form_valid:
+        if form.is_valid():
             messages.info(request, "Your password has been successfully changed.")
         else:
             messages.warning(request, "There was an error updating your password, please try again.")

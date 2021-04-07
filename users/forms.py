@@ -22,7 +22,7 @@ class PlayerChangeForm(UserChangeForm):
 class PlayerProfileForm(forms.ModelForm):
     class Meta:
         model = Player
-        fields = ('email', 'first_name', 'last_name', 'location', 'birth_date', 'referrer')
+        fields = ('email', 'first_name', 'last_name', 'location', 'birth_date')
 
 
 class PendingEmailForm(forms.ModelForm):
@@ -31,6 +31,13 @@ class PendingEmailForm(forms.ModelForm):
     class Meta:
         model = PendingEmail
         fields = ('email',)
+
+
+class InviteFriendsForm(forms.Form):
+    emails = forms.CharField(
+        max_length=256,
+        help_text="Enter multiple emails as a comma separated list, e.g. john@thebeatles.com, paul@thebeatles.com"
+    )
 
 
 class JoinForm(PlayerCreationForm):
