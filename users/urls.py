@@ -1,6 +1,5 @@
-from django.urls import include, path, reverse
+from django.urls import path
 from django.contrib.auth import views as auth_views
-from django.views.generic.base import RedirectView
 from users import views
 from users.htmx import PlayersHTMXView
 from users.forms import LoginForm, PwdResetForm, NewPwdForm
@@ -10,10 +9,10 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('password_change_done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
-    path("profile/", views.profile_view, name="profile"),
+    path("profile/", views.ProfileView.as_view(), name="profile"),
+    path("join/", views.JoinView.as_view(), name='join'),
     path("join/<uidb64>", views.EmailConfirmedView.as_view(), name='join'),
-    path("join/", views.join_view, name='join'),
-    path("invite/", views.send_invite_view, name='invite'),
+    path("invite/", views.InviteFriendsView.as_view(), name='invite'),
     path("login/", auth_views.LoginView.as_view(
         template_name="users/login.html",
         form_class=LoginForm,

@@ -1,8 +1,7 @@
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
-from django.views.generic.base import View
-
 from django.contrib.auth import get_user_model
+from django.views.generic.base import View
 
 
 class PlayersHTMXView(View):

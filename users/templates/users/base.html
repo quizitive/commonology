@@ -21,7 +21,7 @@
 
     {# --- Simple card-on-screen view with default card --- #}
     {% block card %}
-    {% include 'users/cards/base_users_card.html' with header=header|default:"Welcome to Commonology" button_label="Ok"%}
+    {% include card_template|default:"users/cards/base_users_card.html" %}
     {% endblock %}
 
   </div>
