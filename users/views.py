@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
-from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
+from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
 from users.models import PendingEmail
 
 from .utils import remove_pending_email_invitations, send_invite
@@ -28,30 +28,47 @@ def user_logout(request):
 
 
 class UserCardFormView(FormMixin, View):
+    """
+    A base class with sensible defaults for our basic user form-in-card
+    See template users/cards/base_users_card.html for additional template
+    variables that can be set to customize form further.
+
+    Common use case would be to define a form_class and override post()
+    to handle form-specific functionality
+    """
     form_class = None
     header = "Welcome To Commonology"
+    custom_message = None
     button_label = "Ok"
     card_template = 'users/cards/base_users_card.html'
     page_template = 'users/base.html'
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.page_template, self.get_context())
+        return self.render(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.render(request, *args, **kwargs)
+
+    def render(self, request, *args, **kwargs):
+        return render(request, self.page_template, self.get_context(**kwargs))
+
+    def get_context(self, *args, **kwargs):
+        context = {
+            'header': self.header,
+            'form': self.format_form(self.get_form()),
+            'card_template': self.card_template,
+            'button_label': self.button_label,
+            'custom_message': self.custom_message
+            }
+        context.update(kwargs)
+        return context
 
     @staticmethod
-    def _format_form(form):
+    def format_form(form):
         for key, field in form.fields.items():
             field.widget.attrs['class'] = 'w3-input'
             field.widget.attrs['style'] = 'background:none;'
-        form.fields['email'].widget.attrs['readonly'] = True
-        form.fields['email'].widget = HiddenInput()
         return form
-
-    def get_context(self):
-        return {
-            'header': self.header,
-            'form': self._format_form(self.get_form()),
-            'card_template': self.card_template
-        }
 
 
 class ProfileView(LoginRequiredMixin, UserCardFormView):
@@ -59,82 +76,66 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
     form_class = PlayerProfileForm
     header = "Edit Profile"
 
-    # def get(self, request, *args, **kwargs):
-    #     form = self._form(request)
-    #     return render(request, "users/base.html", {"form": form})
-
     def post(self, request, *args, **kwargs):
-        form = self._form(request)
+        form = self.get_form()
         if form.is_valid():
             form.save()
             messages.info(request, "Your changes have been saved!")
         else:
             messages.error(request, "There was a problem saving your changes. Please try again.")
-        return render(request, "users/base.html", {"form": form})
+        return super().post(request)
 
-    def _form(self, request):
-        # todo: override get_form to contextually add instance
-        email = request.user.email
+    def get_form(self, form_class=None):
+        email = self.request.user.email
         cu = User.objects.get(email=email)
-        form = PlayerProfileForm(instance=cu, data=request.POST or None)
-        return self._format_form(form)
+        form = self.form_class(instance=cu, data=self.request.POST or None)
+        return self.format_form(form)
 
 
-def confirm_or_login(request, email):
-    try:
-        user = User.objects.get(email=email)
-        if user.is_member:
-            messages.info(request, 'There is already an account with that email, please login.')
-            return redirect('login')
+class JoinView(UserCardFormView):
+    form_class = PendingEmailForm
+    header = "Join Commonology!"
+    button_label = "Join"
 
-    except User.DoesNotExist:
-        pass
-
-    remove_pending_email_invitations()
-    pe = PendingEmail(email=email)
-    pe.save()
-    send_invite(request, pe)
-
-    messages.info(request, f"An invitation email was sent to {email}. "
-                           f"Don't forget to check your spam or junk folder if need be. "
-                           f"Please follow the instructions in that message to join in the fun.")
-
-    context = {'header': "Invitation sent!", 'email': email}
-    return render(request, "users/base.html", context)
-
-
-def join_view(request):
-    if request.user.is_authenticated:
-        return redirect('/')
-
-    if request.method == 'POST':
+    def post(self, request, *args, **kwargs):
         email = request.POST.get('email')
         if not email:
             return redirect('login')
-        return confirm_or_login(request, email)
 
-    context = {
-        'form': PendingEmailForm,
-        'header': "Join the Community!",
-        'button_label': "Join"
-    }
-    return render(request, "users/join.html", context)
+        try:
+            user = User.objects.get(email=email)
+            if user.is_member:
+                messages.info(request, 'There is already an account with that email, please login.')
+                return redirect('login')
+
+        except User.DoesNotExist:
+            pass
+
+        remove_pending_email_invitations()
+        pe = PendingEmail(email=email)
+        pe.save()
+        send_invite(request, pe)
+
+        self.custom_message = f"We sent your unique join link to {email}. " \
+                              f"Don't forget to check your spam or junk folder if need be. " \
+                              f"You may close this window now."
+
+        self.header = "Invitation Sent!"
+        return self.render(request)
 
 
-class InviteFriendsView(LoginRequiredMixin, View):
+class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
 
     header = "Invite Friends"
-    form = PendingEmailForm()
-    card_template = 'users/cards/invite_card.html'
-    page_template = 'users/base.html'
+    form_class = InviteFriendsForm
+    button_label = "Send"
 
     def get(self, request, *args, **kwargs):
         messages.info(request, "Enter your friends' emails to invite them to Commonology!")
-        context = self._context()
-        return render(request, self.page_template, context)
+        return super().get(request)
 
     def post(self, request, *args, **kwargs):
-        emails = request.POST['email'].split(",")
+        emails = request.POST['emails'].split(",")
         emails = [e.strip().lower() for e in emails]
         for email in emails:
             try:
@@ -154,16 +155,7 @@ class InviteFriendsView(LoginRequiredMixin, View):
                 send_invite(request, pe)
                 messages.info(request, f"Invite successfully sent to {email}.")
 
-        return render(request, "users/base.html", self._context())
-
-    def _context(self):
-        self.form.fields['email'].widget.attrs['class'] = 'w3-input w3-border'
-        context = {
-            'header': self.header,
-            'form': self.form,
-            'card_template': self.card_template
-        }
-        return context
+        return super().post(request)
 
 
 class EmailConfirmedView(View):
@@ -227,19 +219,19 @@ class EmailConfirmedView(View):
         messages.error(request, "It seems the url link we sent you has something wrong with it. "
                                 "Please try one more time.")
         messages.error(request, "If that does not work then please do not give up on us. Send us a help message.")
-        context = {'header': "Join Fail"}
-        return render(request, 'users/base.html', context)
+        # context = {'header': "Join Fail"}
+        return render(request, 'users/base.html', self.get_context())
 
 
 class PwdResetRequestSentView(PasswordResetDoneView):
 
     def get(self, request, *args, **kwargs):
-        messages.info(request, "We've emailed you instructions for setting your password, "
-                      "if an account exists with the email you entered. You should receive them shortly.")
-        messages.info(request, "If you don't receive an email, please make sure you've entered the address"
-                      " you registered with, and check your spam folder")
+        custom_message = f"We've emailed you instructions for setting your password, " \
+                         f"if an account exists with the email you entered. You should receive them shortly." \
+                         f"\n\nIf you don't receive an email, please make sure you've entered the address" \
+                         f" you registered with, and check your spam folder"
 
-        context = {'header': "Reset Password"}
+        context = {'header': "Reset Password", 'custom_message': custom_message}
         return render(request, 'users/base.html', context)
 
     def post(self, request, *args, **kwargs):

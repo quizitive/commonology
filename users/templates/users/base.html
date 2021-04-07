@@ -21,7 +21,7 @@
 
     {# --- Simple card-on-screen view with default card --- #}
     {% block card %}
-    {% include card_template %}
+    {% include card_template|default:"users/cards/base_users_card.html" %}
     {% endblock %}
 
   </div>

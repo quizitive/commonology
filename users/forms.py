@@ -33,6 +33,13 @@ class PendingEmailForm(forms.ModelForm):
         fields = ('email',)
 
 
+class InviteFriendsForm(forms.Form):
+    emails = forms.CharField(
+        max_length=256,
+        help_text="Enter multiple emails as a comma separated list, e.g. john@thebeatles.com, paul@thebeatles.com"
+    )
+
+
 class JoinForm(PlayerCreationForm):
     required_css_class = 'required'
     first_name = forms.CharField(max_length=30)

@@ -10,7 +10,7 @@ urlpatterns = [
     path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('password_change_done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
     path("profile/", views.ProfileView.as_view(), name="profile"),
-    path("join/", views.join_view, name='join'),
+    path("join/", views.JoinView.as_view(), name='join'),
     path("join/<uidb64>", views.EmailConfirmedView.as_view(), name='join'),
     path("invite/", views.InviteFriendsView.as_view(), name='invite'),
     path("login/", auth_views.LoginView.as_view(
