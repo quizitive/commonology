@@ -187,7 +187,7 @@ class PendingUsersTests(TestCase):
 
         mail.outbox = []
         url = reverse('invite')
-        response = client.post(url, data={"email": ABINORMAL})
+        response = client.post(url, data={"emails": ABINORMAL})
         self.assertTrue(response.context['request'].user.is_authenticated)
         self.assertIn(response.status_code, [200, 302])
 
