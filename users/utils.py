@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
 from .models import PendingEmail
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
 from mail.tasks import update_mailing_list
 
