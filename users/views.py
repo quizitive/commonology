@@ -1,7 +1,5 @@
-import os
-import uuid
 from django.forms import HiddenInput
-from django.urls import reverse, resolve
+from django.urls import reverse
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -15,6 +13,7 @@ from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
 from users.models import PendingEmail
+from mail.tasks import update_mailing_list
 
 from .utils import remove_pending_email_invitations, send_invite
 
@@ -80,6 +79,12 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
         form = self.get_form()
         if form.is_valid():
             form.save()
+            if 'email' in form.changed_data:
+                email = self.request.user.email
+                update_mailing_list.delay(email, is_subscribed=False)
+                # todo: email confirm message and use next line when email is confirmed.
+                update_mailing_list.delay(form.instance.email)
+                # todo Add subscribe to this form and then use update_mailing_list to manage that.
             messages.info(request, "Your changes have been saved!")
         else:
             messages.error(request, "There was a problem saving your changes. Please try again.")
@@ -201,6 +206,9 @@ class EmailConfirmedView(View):
             user = authenticate(email=user.email, password=raw_password)
             login(request, user)
             PendingEmail.objects.filter(email__iexact=user.email).delete()
+
+            update_mailing_list.delay(email)
+
             return redirect('/')
 
         messages.info(request, f"Email: {email} (you can change this after signing up)")

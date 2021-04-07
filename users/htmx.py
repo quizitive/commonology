@@ -1,13 +1,7 @@
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 from django.views.generic.base import View
-
-from users.models import PendingEmail
-
-from .utils import remove_pending_email_invitations, send_invite
-
-User = get_user_model()
 
 
 class PlayersHTMXView(View):
@@ -18,6 +12,7 @@ class PlayersHTMXView(View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request):
+        User = get_user_model()
         user = User.objects.get(id=request.user.id)
         data = request.POST.dict()
 
@@ -35,24 +30,3 @@ class PlayersHTMXView(View):
             user.following.add(to_follow)
         user.save()
         return HttpResponse()
-
-
-class InviteFriendsHTMXView(View):
-
-    def post(self, request, *args, **kwargs):
-        data = request.POST.dict()
-        emails = data.get('email')
-        responses = []
-        for email in emails:
-            try:
-                User.objects.get(email=email)
-                # can't join if user exists
-                responses.append(HttpResponse(f"User {email} already exists", status_code=409))
-            except (User.DoesNotExist):
-                remove_pending_email_invitations()
-                pe = PendingEmail(email=email, referrer=request.user.email)
-                pe.save()
-                send_invite(request, pe)
-                responses.append(HttpResponse(f"Invite successfully sent to {email}."))
-
-        return JsonResponse({'responses': responses})

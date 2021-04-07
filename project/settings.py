@@ -11,24 +11,17 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 project_name = 'commonology'
 domain = 'commonologygame.com'
-IS_PRODUCTION = platform.node() == domain
 
-# NOTE: DEV determines which resources are used.  DEBUG determines what info is displayed.
-DEV = env.get("DEV", not IS_PRODUCTION)
 DEBUG = env.get("DEBUG", False)
-DISABLE_DEBUG_TOOLBAR = env.get('DISABLE_DEBUG_TOOLBAR', not DEV)
+DEBUG_TOOLBAR = env.get("DEBUG_TOOLBAR", False)
+DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
 ALLOWED_HOSTS = ['127.0.0.1', domain, 'staging.' + domain, 'staging.quizitive.com']
-INTERNAL_IPS = ('127.0.0.1', 'staging.' + domain, )
-
-# Disable Django Debug Toolbar
-# NOTE: Much slower on database intensive operations
-# NOTE: Disabling this will enable Google Analytics. Comment out the script in base.html.
-if DISABLE_DEBUG_TOOLBAR:
-    INTERNAL_IPS = ()
-DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
+INTERNAL_IPS = ()
+if DEBUG:
+    INTERNAL_IPS = ('127.0.0.1', 'staging.' + domain, )
 
 TIME_ZONE = 'UTC'
 
@@ -59,8 +52,10 @@ INSTALLED_APPS = [
     'community',
     'game',
     'leaderboard',
-    'debug_toolbar'
 ]
+
+if DEBUG_TOOLBAR:
+    INSTALLED_APPS.append('debug_toolbar')
 
 AUTH_USER_MODEL = 'users.Player'
 
@@ -72,8 +67,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
+
+if DEBUG_TOOLBAR:
+    MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'project.urls'
 
@@ -144,10 +141,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'project/static')
 ]
 
-if env.get("INHIBIT_MAIL", False) == 'True':
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else:
+if env.get("ENABLE_MAIL"):
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
@@ -158,11 +155,7 @@ DEFAULT_FROM_EMAIL = 'concierge@' + domain
 MAILCHIMP_API_KEY = env.get('MAILCHIMP_APIKEY')
 MAILCHIMP_HOOK_UUID = env.get('MAILCHIMP_HOOK_UUID')
 MAILCHIMP_SERVER = 'us2'
-MAILCHIMP_PRODUCTION_LIST_ID = '4f9a2e9bd6'
-MAILCHIMP_STAGING_LIST_ID = 'eb9908bc80'
-MAILCHIMP_EMAIL_LIST_ID = env.get("MAILCHIMP_EMAIL_LIST_ID", MAILCHIMP_STAGING_LIST_ID)
-if IS_PRODUCTION:
-    MAILCHIMP_EMAIL_LIST_ID = MAILCHIMP_PRODUCTION_LIST_ID
+MAILCHIMP_EMAIL_LIST_ID = env.get("MAILCHIMP_EMAIL_LIST_ID")
 
 
 LOGGING = {
@@ -179,7 +172,7 @@ LOGGING = {
     },
 }
 
-if IS_PRODUCTION:
+if 'SENTRY_KEY' in env:
     SENTRY_KEY = env.get('SENTRY_KEY')
     sentry_sdk.init(dsn=f"https://{SENTRY_KEY}@o520957.ingest.sentry.io/5631994",
                     integrations=[DjangoIntegration()],

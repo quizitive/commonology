@@ -9,7 +9,8 @@ from project.utils import REDIS
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from game.models import Game, AnswerCode
 from game.tests import BaseGameDataTestCase
-from users.models import Player, Team
+from users.models import Team
+from django.contrib.auth import get_user_model
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -91,8 +92,9 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         expected_leaderboard = pd.read_csv(lb_data_fp, index_col=0)
         expected_leaderboard['Rank'] = expected_leaderboard['Rank'].astype('int32')
         expected_leaderboard['Score'] = expected_leaderboard['Score'].astype('int32')
+        User = get_user_model()
         expected_leaderboard['id'] = expected_leaderboard.apply(
-            lambda x: Player.objects.get(display_name=x['Name']).id,
+            lambda x: User.objects.get(display_name=x['Name']).id,
             axis=1
         ).astype('int64')
         expected_leaderboard['is_host'] = expected_leaderboard.apply(
@@ -155,7 +157,8 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
 
     def _add_host(self, email="user1@fakeemail.com"):
         # make user a game host
-        player = Player.objects.get(email=email)
+        User = get_user_model()
+        player = User.objects.get(email=email)
         self.game.hosts.add(player)
         self.game.save()
         return player
