@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@shared_task
+@shared_task(queue='serial')
 def update_mailing_list(email, is_subscribed=True):
     mc_client = get_mc_client()
 
