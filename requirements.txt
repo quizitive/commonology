@@ -19,3 +19,4 @@ django-debug-toolbar==3.2
 pytz==2021.1
 sentry-sdk==0.19.5
 django-sslserver==0.22
+fontawesome-free==5.15.3
