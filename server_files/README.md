@@ -245,11 +245,13 @@ systemd files for celery
 
 ```
 # cp /home/django/commonology/server_files/etc/systemd/system/celery.service /etc/systemd/system/
+# cp /home/django/commonology/server_files/etc/systemd/system/celeryserial.service /etc/systemd/system/
 # cp /home/django/commonology/server_files/etc/systemd/system/celerybeat.service /etc/systemd/system/
 # mkdir /etc/conf.d
 # cp /home/django/commonology/server_files/etc/conf.d/celery /etc/conf.d/
 # cp /home/django/commonology/server_files/etc/tmpfiles.d/celery.conf /etc/tmpfiles.d/ 
 # systemctl enable celery
+# systemctl enable celeryserial
 # systemctl enable celerybeat
 # sudo systemctl daemon-reload
 # mkdir /var/log/celery
@@ -257,8 +259,11 @@ systemd files for celery
 # mkdir /var/run/celery
 # chown django:django /var/run/celery
 # sudo systemctl restart celery
+# sudo systemctl restart celeryserial
 # sudo systemctl restart celerybeat
 ```
+
+Note: you can use wildcards with systemctl like this `sudo systemctl restart 'celery*'`.
 
 ## GUnicorn
 
@@ -341,7 +346,7 @@ Note this can be used for Django, described in the next subsection, or most mail
 
 ### Configure Django Sendmail
 
-See `project/settings.py` and `game.views.mailmarc()`
+See `project/settings.py`
 
 ### Mailchimp
 
