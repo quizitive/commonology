@@ -13,11 +13,6 @@ from mail.tasks import update_mailing_list
 
 
 @shared_task
-def add(x, y):
-    return x + y
-
-
-@shared_task
 def api_to_db(filename, responses, answer_codes, update):
     # convert back to dataframe from json (needed for celery)
     if not isinstance(responses, pd.DataFrame):

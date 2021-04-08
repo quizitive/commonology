@@ -1,7 +1,5 @@
 import gspread
 import logging
-import os
-from time import sleep
 
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
@@ -12,7 +10,7 @@ from game.utils import next_event
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
-from game.tasks import api_to_db, add
+from game.tasks import api_to_db
 
 
 def index(request):
@@ -22,17 +20,6 @@ def index(request):
         'event_text': event_text
     }
     return render(request, 'game/index.html', context)
-
-
-@permission_required('is_superuser')
-def marc(request):
-    result = add.delay(3, 5)
-    sleep(3)
-
-    x = [i[1] for i in result.collect()][0]
-    x = {'SumResult': x}
-
-    return render(request, 'game/marc.html', x)
 
 
 @permission_required('is_superuser')

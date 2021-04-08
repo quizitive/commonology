@@ -341,7 +341,7 @@ Note this can be used for Django, described in the next subsection, or most mail
 
 ### Configure Django Sendmail
 
-See `project/settings.py` and `game.views.mailmarc()`
+See `project/settings.py`
 
 ### Mailchimp
 
