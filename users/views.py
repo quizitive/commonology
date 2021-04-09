@@ -68,8 +68,10 @@ class UserCardFormView(FormMixin, View):
     @staticmethod
     def format_form(form):
         for key, field in form.fields.items():
-            field.widget.attrs['class'] = 'w3-input'
-            field.widget.attrs['style'] = 'background:none;'
+            if field.widget.__class__.__name__ == 'CheckboxInput':
+                field.widget.attrs['class'] = 'w3-check'
+            else:
+                field.widget.attrs['class'] = 'w3-input'
         return form
 
 
@@ -97,7 +99,7 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
                 remove_pending_email_invitations()
                 pe = PendingEmail(email=new_email, referrer=email)
                 pe.save()
-                send_change_confirm(request, pe)
+                self.send_change_confirm(request, pe)
             else:
                 form.save()
 
@@ -112,6 +114,16 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
         cu = User.objects.get(email=email)
         form = self.form_class(instance=cu, data=self.request.POST or None)
         return self.format_form(form)
+
+    def send_change_confirm(request, pe):
+        email = pe.email
+        confirm_url = make_uuid_url(request, uuid=pe.uuid, name='/email_change_confirm/')
+
+        context = {'confirm_url': confirm_url}
+        msg = render_to_string('users/email_change.html', context)
+
+        return send_mail(subject='Email confirmation', from_email=None,
+                         message=msg, recipient_list=[email])
 
 
 class JoinView(UserCardFormView):
@@ -208,7 +220,7 @@ class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
                 send_invite(request, pe)
                 messages.info(request, f"Invite successfully sent to {email}.")
 
-        return super().post(request)
+        return super().render(request)
 
 
 class EmailConfirmedView(View):
@@ -304,17 +316,6 @@ class PwdResetConfirmView(PasswordResetConfirmView):
         else:
             messages.warning(request, "There was an error updating your password, please try again.")
         return super().post(request, args, kwargs)
-
-
-def send_change_confirm(request, pe):
-    email = pe.email
-    confirm_url = make_uuid_url(request, uuid=pe.uuid, name='/email_change_confirm/')
-
-    context = {'confirm_url': confirm_url}
-    msg = render_to_string('users/email_change.html', context)
-
-    return send_mail(subject='Email confirmation', from_email=None,
-                     message=msg, recipient_list=[email])
 
 
 class EmailChangeConfirmedView(View):

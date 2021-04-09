@@ -24,6 +24,9 @@ class PlayerProfileForm(forms.ModelForm):
         model = Player
         fields = ('email', 'first_name', 'last_name', 'location',
                   'birth_date', 'subscribed')
+        help_texts = {
+            'subscribed': 'Unchecking this will remove you from the game emails.',
+        }
 
 
 class PendingEmailForm(forms.ModelForm):
