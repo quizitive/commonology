@@ -115,6 +115,7 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
         form = self.form_class(instance=cu, data=self.request.POST or None)
         return self.format_form(form)
 
+    @staticmethod
     def send_change_confirm(request, pe):
         email = pe.email
         confirm_url = make_uuid_url(request, uuid=pe.uuid, name='/email_change_confirm/')
