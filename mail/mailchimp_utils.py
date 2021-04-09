@@ -109,6 +109,16 @@ class Mailchimp():
             status_code, status = self.update_member(email, data)
         return status_code, status
 
+    def archive(self, email):
+        # Use this to delete a member from a list, not permanently.
+        if self.list_id is None:
+            return 200
+
+        sub_hash = hash_subscriber(email)
+        url = f"{self.get_members_baseurl()}/{sub_hash}"
+        r = requests.delete(url, auth=self.auth)
+        return r.status_code
+
     def delete_permanent(self, email):
         # THIS IS VERY PERMANENT
 
