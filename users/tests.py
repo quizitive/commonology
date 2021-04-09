@@ -248,3 +248,34 @@ class PendingUsersTests(TestCase):
         data['password2'] = data['password1']
 
         self.join_test_helper(data)
+
+    def test_email_change(self):
+        get_local_user()
+        client = Client()
+        client.login(email=NORMAL, password=test_pw)
+        path = reverse('profile')
+        response = client.get(path)
+        self.assertEqual(response.reason_phrase, 'OK')
+
+        data = {'email': ABINORMAL, 'first_name': 'Iam', 'last_name': 'Normal', 'location': 'Turkey'}
+        mail.outbox = []
+        response = client.post(path, data=data)
+        self.assertEqual(response.reason_phrase, 'OK')
+
+        flag = User.objects.filter(email__exact=ABINORMAL).exists()
+        self.assertFalse(flag)
+
+        msg = mail.outbox[0].body
+        url = re.search("(?P<url>https?://[^\s]+)", msg).group("url")
+        mail.outbox = []
+
+        response = client.get(url)
+        self.assertIn(response.status_code, [302, 404])
+
+        flag = User.objects.filter(email__exact=ABINORMAL).exists()
+        self.assertTrue(flag)
+
+        flag = User.objects.filter(email__exact=NORMAL).exists()
+        self.assertFalse(flag)
+
+        remove_abinormal()
