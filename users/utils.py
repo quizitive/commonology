@@ -14,4 +14,4 @@ def unsubscribe(email):
     u = User.objects.get(email=email)
     u.subscribed = False
     u.save()
-    update_mailing_list.delay(email, is_subscribed=False)
+    update_mailing_list.delay(email, action='archive')
