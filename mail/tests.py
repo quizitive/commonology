@@ -84,7 +84,7 @@ class MailchimpAPITests(TestCase):
         update_mailing_list(email)
         self.assert_mail_status(email, 'subscribed')
 
-        update_mailing_list(email, is_subscribed=False)
+        update_mailing_list(email, action='archive')
         self.assert_mail_status(email, 'archived')
 
         update_mailing_list(email)

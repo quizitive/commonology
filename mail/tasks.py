@@ -6,13 +6,14 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(queue='serial')
-def update_mailing_list(email, is_subscribed=True):
+def update_mailing_list(email, action='subscribe'):
     mc_client = get_mc_client()
 
-    if is_subscribed:
+    if 'subscribe' == action:
         status_code, status = mc_client.subscribe(email)
+    elif 'unsubscribe' == action:
+        status_code, status = mc_client.unsubscribe(email)
     else:
-        # status_code, status = mc_client.unsubscribe(email)
         status = 'archived'
         status_code = mc_client.archive(email)
 
