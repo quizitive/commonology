@@ -22,7 +22,8 @@ class PlayerChangeForm(UserChangeForm):
 class PlayerProfileForm(forms.ModelForm):
     class Meta:
         model = Player
-        fields = ('email', 'first_name', 'last_name', 'location', 'birth_date')
+        fields = ('email', 'first_name', 'last_name', 'location',
+                  'birth_date', 'subscribed')
 
 
 class PendingEmailForm(forms.ModelForm):
