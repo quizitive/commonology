@@ -38,6 +38,7 @@ class MailchimpAPITests(TestCase):
         self.list_name = 'marc_testing'
 
         self.mc_client.delete_list_by_name(self.list_name)
+        self.mc_client.delete_list_by_name(self.list_name)
         status_code, self.list_id = self.mc_client.add_list(self.list_name)
         settings.MAILCHIMP_EMAIL_LIST_ID = self.list_id
         self.mc_client.make_list_baseurl(self.list_id)
@@ -54,9 +55,12 @@ class MailchimpAPITests(TestCase):
     def assert_mail_status(self, email, status):
         status_code, members = self.mc_client.get_members()
         self.assertEqual(status_code, 200)
-        self.assertIn(email, members)
-        subscribe_status = members[email]
-        self.assertEqual(subscribe_status, status)
+        if 'archived' == status:
+            self.assertNotIn(email, members)
+        else:
+            self.assertIn(email, members)
+            subscribe_status = members[email]
+            self.assertEqual(subscribe_status, status)
 
     def test_member(self):
         email = f'moe{str(uuid.uuid4().int)}@foo.com'
@@ -75,8 +79,13 @@ class MailchimpAPITests(TestCase):
         self.assertEqual(status_code, 200)
         self.assertEqual(status, 'subscribed')
 
+        status_code = self.mc_client.archive(email)
+        self.assertEqual(status_code, 204)
+        update_mailing_list(email)
+        self.assert_mail_status(email, 'subscribed')
+
         update_mailing_list(email, is_subscribed=False)
-        self.assert_mail_status(email, 'unsubscribed')
+        self.assert_mail_status(email, 'archived')
 
         update_mailing_list(email)
         self.assert_mail_status(email, 'subscribed')

@@ -12,6 +12,7 @@ urlpatterns = [
     path("profile/", views.ProfileView.as_view(), name="profile"),
     path("join/", views.JoinView.as_view(), name='join'),
     path("join/<uidb64>", views.EmailConfirmedView.as_view(), name='join'),
+    path("email_change/<uidb64>", views.EmailChangeConfirmedView.as_view(), name='email_change_confirm'),
     path("invite/", views.InviteFriendsView.as_view(), name='invite'),
     path("login/", auth_views.LoginView.as_view(
         template_name="users/login.html",
