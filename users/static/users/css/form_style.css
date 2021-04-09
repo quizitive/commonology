@@ -25,3 +25,9 @@ ul.nonfield {
   color: red;
   margin: 0 0 -4px 0;
 }
+.w3-input {
+  background: None;
+}
+.w3-check {
+  margin: 0 8px 0 4px;
+}
