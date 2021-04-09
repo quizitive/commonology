@@ -86,9 +86,10 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
                 new_email = user.email
                 user.email = email
                 user.save()
+                form.email = email
 
                 messages.info(request,
-                              f"We sent an email conformation to {new_email} and will "
+                              f"We sent an email confirmation to {new_email} and will "
                               f"updated your profile once you have followed the confirmation link.")
 
                 remove_pending_email_invitations()
@@ -317,6 +318,7 @@ def send_change_confirm(request, pe):
 class EmailChangeConfirmedView(View):
 
     def get(self, request, uidb64):
+        print(f'testing uidb64 = {uidb64}')
         try:
             pe = PendingEmail.objects.filter(uuid__exact=uidb64).first()
 
@@ -330,7 +332,7 @@ class EmailChangeConfirmedView(View):
                 user = User.objects.get(email=current_email)
                 user.email = new_email
                 user.save()
-                update_mailing_list.delay(current_email, is_subscribed=False)
+                update_mailing_list.delay(current_email, action='archive')
                 update_mailing_list.delay(new_email)
                 return redirect(reverse('profile'))
             except User.DoesNotExist:
