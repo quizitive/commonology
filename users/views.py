@@ -1,12 +1,14 @@
+from abc import ABC
+
 from django.forms import HiddenInput
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView
+from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView, PasswordChangeView
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.validators import validate_email
@@ -28,7 +30,7 @@ def user_logout(request):
     return redirect(reverse('home'))
 
 
-class UserCardFormView(FormMixin, View):
+class UserCardFormView(ABC, FormMixin, View):
     """
     A base class with sensible defaults for our basic user form-in-card
     See template users/cards/base_users_card.html for additional template
@@ -37,7 +39,7 @@ class UserCardFormView(FormMixin, View):
     Common use case would be to define a form_class and override post()
     to handle form-specific functionality
     """
-    form_class = None
+    # form_class = YourFormClass
     header = "Welcome To Commonology"
     custom_message = None
     button_label = "Ok"
@@ -47,13 +49,10 @@ class UserCardFormView(FormMixin, View):
     def get(self, request, *args, **kwargs):
         return self.render(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        return self.render(request, *args, **kwargs)
-
     def render(self, request, *args, **kwargs):
-        return render(request, self.page_template, self.get_context(**kwargs))
+        return render(request, self.page_template, self.get_context_data(**kwargs))
 
-    def get_context(self, *args, **kwargs):
+    def get_context_data(self, *args, **kwargs):
         context = {
             'header': self.header,
             'form': self.format_form(self.get_form()),
@@ -62,7 +61,11 @@ class UserCardFormView(FormMixin, View):
             'custom_message': self.custom_message
             }
         context.update(kwargs)
-        return context
+        return super().get_context_data(**context)
+
+    def get_form(self, form_class=None):
+        form = super().get_form()
+        return self.format_form(form)
 
     @staticmethod
     def format_form(form):
@@ -75,6 +78,7 @@ class UserCardFormView(FormMixin, View):
 class ProfileView(LoginRequiredMixin, UserCardFormView):
 
     form_class = PlayerProfileForm
+    card_template = 'users/cards/profile_card.html'
     header = "Edit Profile"
 
     def post(self, request, *args, **kwargs):
@@ -289,3 +293,12 @@ class PwdResetConfirmView(PasswordResetConfirmView):
         else:
             messages.warning(request, "There was an error updating your password, please try again.")
         return super().post(request, args, kwargs)
+
+
+class PwdChangeView(UserCardFormView, PasswordChangeView):
+    header = "Change Password"
+    success_url = reverse_lazy('profile')
+
+    def form_valid(self, form):
+        messages.info(self.request, "Your password has been successfully updated.")
+        return super().form_valid(form)

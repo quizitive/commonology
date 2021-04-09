@@ -7,8 +7,10 @@ from users.forms import LoginForm, PwdResetForm, NewPwdForm
 
 urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
-    path('password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
-    path('password_change_done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
+    path('password_change/', views.PwdChangeView.as_view(
+        template_name='users/base.html'
+    ), name='password_change'),
+    path('password_change_done/', views.PwdChangeView.as_view(), name='password_change_done'),
     path("profile/", views.ProfileView.as_view(), name="profile"),
     path("join/", views.JoinView.as_view(), name='join'),
     path("join/<uidb64>", views.EmailConfirmedView.as_view(), name='join'),
