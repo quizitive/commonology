@@ -26,7 +26,7 @@ An obvious first step.
   Digital Ocean will assign a domain name for the droplet.  
   In the next section I will change it to fit my domain.
  
-- Set the DNS A record for for your domain or subdomain for that server. 
+- Set the DNS A record for your domain or subdomain for that server. 
 
   I use http://namecheap.com for domain registaration and DNS services.  
   Other popular choices are http://godaddy.com or http://aws.com.
@@ -36,10 +36,10 @@ An obvious first step.
   ```
 
   Obviously replace <ip address> with the ip address for your droplet.  
-  Note, this is a DNS record change and could hours or even days before it works.
+  Note, this is a DNS record change and could take hours or even days before it works.
 
   You may want other servers as subdomains.  
-  I like to have a second staging server/droplet so I added this A record as well:
+  I like to have a second staging server/droplet, so I added this A record as well:
 
   ```
   A staging <your staging droplet ip address>
@@ -51,7 +51,7 @@ An obvious first step.
 - login as root
   ```
   # ssh root@staging.commonologygame.com
-  # apt udpate
+  # apt update
   # apt upgrade
   ```
 - You may want to add your development platform public ssh key to the droplets root account 
