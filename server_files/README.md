@@ -251,7 +251,7 @@ Note: you can use wildcards with systemctl like this `sudo systemctl restart 'ce
 ```shell
 $ sudo su -
 # cd /etc/systemd/system/
-# cp /home/django/commonologygame/server_files/etc/systemd/system/gunicorn.service ./
+# cp /home/django/commonology/server_files/etc/systemd/system/gunicorn.service ./
 # systemctl start gunicorn
 # systemctl enable gunicorn
 # exit
