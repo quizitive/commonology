@@ -2,6 +2,7 @@ from django import template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
+from django.shortcuts import render
 
 from users.forms import LoginForm
 
@@ -26,4 +27,6 @@ login_logout_url.is_safe = True
 
 @register.simple_tag
 def login_modal(request):
-    return render_to_string('users/modals/login_modal.html', {'form': LoginForm}, request=request)
+    if not request:
+        return
+    return render(request, 'users/modals/login_modal.html', {'form': LoginForm})

@@ -3,12 +3,11 @@ Description=gunicorn daemon
 After=network.target
 
 [Service]
-User=q
+User=django
 Group=www-data
-WorkingDirectory=/home/django/quizitive
+WorkingDirectory=/home/django/commonology
 EnvironmentFile=/home/django/secret_env
-ExecStart=/home/q/.pyenv/versions/quizitive/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/q/quizitive/quizitive.sock project.wsgi:application
-#ExecStart=/home/q/quizitive/scripts/run.bash
+ExecStart=/home/django/commonology/.tox/py39/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/django/commonology/commonology.sock project.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
