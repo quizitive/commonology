@@ -219,7 +219,7 @@ That file may define the `DJANGO_SECRET` value used in your Django settings.py f
 
 ## Redis
 
-This was installed earlier when Ubuntu packages were installed.  There should  be anything else to do.
+This was installed earlier when Ubuntu packages were installed.  There shouldn't  be anything else to do.
 
 ## Celery
 systemd files for celery
