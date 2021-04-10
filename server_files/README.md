@@ -134,6 +134,28 @@ You can visit the server with your browser now to see that it is running Nginx.
 Just put http://staging.commonologygame.com in our browser.  You should see a "Welcome to nginx!" page.
 Don't worry yet that it isn't secure.  We'll get an ssl certificate soon to secure it.
 
+## Create user django.
+
+  ```
+  $ adduser django
+  ```
+
+  Enable django to as sudo user, allow django to run commands as superuser using sudo.
+
+  Add this line to the end of `/etc/sudoers`. You'll have to temporarily change the permissions with 
+  `chmod +w /etc/sudoers` and then after editing change it back with `chmod -w /etc/sudoers`.
+
+  `django ALL=(ALL) NOPASSWD:ALL`
+
+  You may want to put your public ssh key in `/home/django/.ssh/authorized_keys` so you can login without a password.
+
+  Now you can logout as root and login again:
+
+  `ssh django@staging.commonologygame.com`
+
+  This way you can organize your project in the q user account and use git commands etc.  
+  But if you need to do some superuser operations you have permission.
+
 ## Set up pyenv
 
 Reference: [pyenv-installer](https://github.com/pyenv/pyenv-installer)
