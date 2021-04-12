@@ -100,12 +100,15 @@ An obvious first step.
 
 ## Install Software
 
-At this point you can copy the contents of `packages.txt` and add them to a new file in your root directory.
+At this point you can copy the contents of `packages.txt` and add them to a new file in your root directory. You will need to copy them from your local directory, as the git repo is not yet available on the server.
+
+From your local terminal:
+```
+  $ scp packages.txt staging.commonologygame.com:
+```
  
 ```
   # apt update -y
-  # touch packages.txt
-  # vim packages.txt
   # xargs -a /root/packages.txt sudo apt-get install
   # cd /usr/bin
   # ln -s pip3 pip
