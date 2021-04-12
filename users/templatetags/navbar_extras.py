@@ -1,6 +1,5 @@
 from django import template
 from django.urls import reverse
-from django.utils.safestring import mark_safe
 from django.template.loader import render_to_string
 
 from users.forms import LoginForm

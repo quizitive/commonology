@@ -1,4 +1,4 @@
-python3-pippython3-dev
+python3-dev
 libpq-dev
 postgresql
 postgresql-contrib

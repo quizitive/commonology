@@ -26,7 +26,7 @@ An obvious first step.
   Digital Ocean will assign a domain name for the droplet.  
   In the next section I will change it to fit my domain.
  
-- Set the DNS A record for for your domain or subdomain for that server. 
+- Set the DNS A record for your domain or subdomain for that server. 
 
   I use http://namecheap.com for domain registaration and DNS services.  
   Other popular choices are http://godaddy.com or http://aws.com.
@@ -36,10 +36,10 @@ An obvious first step.
   ```
 
   Obviously replace <ip address> with the ip address for your droplet.  
-  Note, this is a DNS record change and could hours or even days before it works.
+  Note, this is a DNS record change and could take hours or even days before it works.
 
   You may want other servers as subdomains.  
-  I like to have a second staging server/droplet so I added this A record as well:
+  I like to have a second staging server/droplet, so I added this A record as well:
 
   ```
   A staging <your staging droplet ip address>
@@ -51,7 +51,7 @@ An obvious first step.
 - login as root
   ```
   # ssh root@staging.commonologygame.com
-  # apt udpate
+  # apt update
   # apt upgrade
   ```
 - You may want to add your development platform public ssh key to the droplets root account 
@@ -99,11 +99,17 @@ An obvious first step.
 ```
 
 ## Install Software
+
+At this point you can copy the contents of `packages.txt` and add them to a new file in your root directory. You will need to copy them from your local directory, as the git repo is not yet available on the server.
+
+From your local terminal:
+```
+  $ scp packages.txt staging.commonologygame.com:
+```
  
 ```
   # apt update -y
-  # cd /home/django/commonologygame/server_files/
-  # xargs -a /packages.txt sudo apt-get install
+  # xargs -a /root/packages.txt sudo apt-get install
   # cd /usr/bin
   # ln -s pip3 pip
   # ufw allow "Nginx Full"
@@ -238,7 +244,7 @@ That file may define the `DJANGO_SECRET` value used in your Django settings.py f
 
 ## Redis
 
-This was installed earlier when Ubuntu packages were installed.  There should  be anything else to do.
+This was installed earlier when Ubuntu packages were installed.  There shouldn't  be anything else to do.
 
 ## Celery
 systemd files for celery
@@ -270,7 +276,7 @@ Note: you can use wildcards with systemctl like this `sudo systemctl restart 'ce
 ```shell
 $ sudo su -
 # cd /etc/systemd/system/
-# cp /home/django/commonologygame/server_files/etc/systemd/system/gunicorn.service ./
+# cp /home/django/commonology/server_files/etc/systemd/system/gunicorn.service ./
 # systemctl start gunicorn
 # systemctl enable gunicorn
 # exit
