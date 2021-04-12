@@ -72,6 +72,14 @@ else
     echo "failed to restart celery."
 fi
 
+echo "About to restart celeryserial."
+sudo systemctl restart celeryserial
+if [ $? -eq 0 ]; then
+    echo OK
+else
+    echo "failed to restart celeryserial."
+fi
+
 echo "About to restart celerybeat."
 sudo systemctl restart celerybeat
 if [ $? -eq 0 ]; then

@@ -173,7 +173,7 @@ Then logout and log back in again.
 ```
   $ pyenv install 3.8.2
   $ pyenv shell 3.8.2
-  $ pyenv virtualenv commonology
+  $ pyenv virtualenv project
 ```
 
 
@@ -198,7 +198,7 @@ Clone your git project in the django account on the server.
 ```
 $ cd
 $ git clone git@github.com:quizitive/commonology.git
-$ pyenv shell commonology
+$ pyenv shell project
 $ cd commonology
 $ pip install -r requirements
 $ python manage.py collectstatic --noinput
@@ -211,6 +211,14 @@ Note: you will need to make sure your project settings.py file has the appropria
 
 I use a file with private environment vars defined.
 That file may define the `DJANGO_SECRET` value used in your Django settings.py file.
+
+Add this to the end of the ~/.bashrc file:
+
+```
+set -a
+source $HOME/secret_env
+set +a
+```
 
 ## Postgres
 
