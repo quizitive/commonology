@@ -322,7 +322,6 @@ class PwdResetConfirmView(PasswordResetConfirmView):
 class EmailChangeConfirmedView(View):
 
     def get(self, request, uidb64):
-        print(f'testing uidb64 = {uidb64}')
         try:
             pe = PendingEmail.objects.filter(uuid__exact=uidb64).first()
 
