@@ -4,11 +4,11 @@ set -a
 source /home/django/secret_env
 set +a
 
-export PATH=$PATH:/home/q/.pyenv/bin
+export PATH=$PATH:/home/django/.pyenv/bin
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 
 eval "$(pyenv init -)"
-pyenv activate commonology
+pyenv activate project
 
 cd /home/django/commonology
 
