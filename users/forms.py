@@ -20,14 +20,16 @@ class PlayerChangeForm(UserChangeForm):
 
 
 class PlayerProfileForm(forms.ModelForm):
-    birth_date = forms.DateField(widget=forms.DateInput())
+    birth_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}), required=False)
 
     class Meta:
         model = Player
-        fields = ('email', 'first_name', 'last_name', 'location',
+        fields = ('email', 'first_name', 'last_name', 'display_name', 'location',
                   'birth_date', 'subscribed')
         help_texts = {
             'subscribed': 'Unchecking this will remove you from the game emails.',
+            'display_name': 'This is what displays on the public leaderboard. If left '
+                            'blank we will use your first and last name.'
         }
 
 
@@ -50,7 +52,11 @@ class JoinForm(PlayerCreationForm):
     required_css_class = 'required'
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
-    display_name = forms.CharField(max_length=30, help_text="This displays on the public leaderboard")
+    display_name = forms.CharField(
+        max_length=100,
+        help_text="This is what displays on the public leaderboard. If left "
+                  "blank we will use your first and last name."
+    )
     location = forms.CharField(label='Where do you live?',
                                widget=forms.Select(choices=LOCATIONS),
                                required=False)
@@ -70,6 +76,10 @@ class JoinForm(PlayerCreationForm):
         model = Player
         fields = ('email', 'first_name', 'last_name', 'display_name',
                   'password1', 'password2', 'location')
+        help_texts = {
+            'display_name': 'This is what displays on the public leaderboard. If left '
+                            'blank we will use your first and last name.'
+        }
 
 
 class LoginForm(AuthenticationForm):
