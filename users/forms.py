@@ -20,6 +20,8 @@ class PlayerChangeForm(UserChangeForm):
 
 
 class PlayerProfileForm(forms.ModelForm):
+    birth_date = forms.DateField(widget=forms.DateInput())
+
     class Meta:
         model = Player
         fields = ('email', 'first_name', 'last_name', 'location',
