@@ -23,7 +23,6 @@ class MailchimpHookTests(TestCase):
                 'data[merges][EMAIL]': [NORMAL], 'data[merges][FNAME]': ['Normal'],
                 'data[merges][LNAME]': ['Django'], 'data[merges][ADDRESS]': [''], 'data[merges][PHONE]': [''],
                 'data[list_id]': [list_id]}
-        print(path)
         response = client.post(path, data=data)
         return
         self.assertEqual(response.status_code, 200)
