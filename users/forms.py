@@ -28,8 +28,7 @@ class PlayerProfileForm(forms.ModelForm):
                   'birth_date', 'subscribed')
         help_texts = {
             'subscribed': 'Unchecking this will remove you from the game emails.',
-            'display_name': 'This is what displays on the public leaderboard. If left '
-                            'blank we will use your first and last name.'
+            'display_name': 'This is what displays on the public leaderboard.'
         }
 
 
