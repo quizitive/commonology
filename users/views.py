@@ -156,7 +156,7 @@ class JoinView(UserCardFormView):
                               f"You may close this window now."
 
         self.header = "Invitation Sent!"
-        return self.render(request)
+        return self.render(request, form=None, button_label='Ok')
 
 
 def make_uuid_url(request, uuid=None, name='/join/'):
@@ -221,7 +221,7 @@ class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
                 send_invite(request, pe)
                 messages.info(request, f"Invite successfully sent to {email}.")
 
-        return super().render(request)
+        return redirect('invite')
 
 
 class EmailConfirmedView(View):
