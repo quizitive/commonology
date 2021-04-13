@@ -6,7 +6,7 @@ from django.views import View
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from users.utils import unsubscribe
+from users.utils import unsubscribe, subscribe
 
 
 @login_required
@@ -40,6 +40,10 @@ class MailchimpWebhook(View):
         email = data['data[email]']
         action = data.get('type', 'unknown')
         if action == 'unsubscribe':
+            unsubscribe(email)
+        elif action == 'subscribe':
+            subscribe(email)
+        elif action == 'archived':
             unsubscribe(email)
 
         return HttpResponse("OK")
