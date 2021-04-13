@@ -1,7 +1,7 @@
 import gspread
 import logging
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
 from game.forms import TabulatorForm
@@ -19,7 +19,8 @@ def index(request):
         'event_time': event_time,
         'event_text': event_text
     }
-    return render(request, 'game/index.html', context)
+    # return render(request, 'game/index.html', context)
+    return redirect('leaderboard')
 
 
 @permission_required('is_superuser')
