@@ -12,7 +12,7 @@ label.required::after {
 }
 
 div.content {
-    margin: auto auto 80px;
+    margin: 64px auto;
     max-width: 778px;
 }
 

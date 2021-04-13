@@ -10,10 +10,7 @@
   </header>
   <div class="w3-container w3-padding-large">
 
-  {% if custom_message %}
-    <p class="custom-msg w3-padding-top w3-margin-bottom">{{ custom_message|linebreaks }}</p>
-  {% endif %}
-
+  <!-- standard Django user messages e.g. messages.info(request, "message') -->
   {% if messages %}
     <div style="margin-bottom:24px;">
     {% for msg in messages %}
@@ -21,6 +18,13 @@
     {% endfor %}
     </div>
   {% endif %}
+
+  {% block card_top %}
+    <!-- any other custom messaging -->
+    {% if custom_message %}
+    <p class="custom-msg w3-padding-top w3-margin-bottom">{{ custom_message|linebreaks }}</p>
+    {% endif %}
+  {% endblock %}
 
   {% block form %}
     <form method="{{ form_method|default:'post' }}" {% if form_action %}action="{{ form_action }}"{% endif %}>

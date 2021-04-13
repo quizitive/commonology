@@ -28,13 +28,15 @@ class PlayerProfileForm(forms.ModelForm):
                   'birth_date', 'subscribed')
         help_texts = {
             'subscribed': 'Unchecking this will remove you from the game emails.',
-            'display_name': 'This is what displays on the public leaderboard. If left '
-                            'blank we will use your first and last name.'
+            'display_name': 'This is what displays on the public leaderboard.'
         }
 
 
 class PendingEmailForm(forms.ModelForm):
-    email = forms.CharField(widget=forms.TextInput(attrs={'class': 'w3-input'}))
+    email = forms.CharField(
+        widget=forms.TextInput(attrs={'class': 'w3-input'}),
+        help_text="Current players: you're in the right place! Enter your email to claim your account."
+    )
 
     class Meta:
         model = PendingEmail
