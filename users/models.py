@@ -43,7 +43,7 @@ class PendingEmail(models.Model):
 
 
 class Player(CustomUser):
-    display_name = models.CharField(max_length=100)
+    display_name = models.CharField(max_length=100, blank=True, null=True)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
     is_member = models.BooleanField(
         default=False,
@@ -52,6 +52,13 @@ class Player(CustomUser):
 
     def __str__(self):
         return self.email
+
+    @property
+    def name(self):
+        if not self.display_name:
+            return f"{self.first_name} {self.last_name}"
+        else:
+            return self.display_name
 
     @property
     def games(self):

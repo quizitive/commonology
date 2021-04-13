@@ -54,6 +54,7 @@ class JoinForm(PlayerCreationForm):
     last_name = forms.CharField(max_length=30)
     display_name = forms.CharField(
         max_length=100,
+        required=False,
         help_text="This is what displays on the public leaderboard. If left "
                   "blank we will use your first and last name."
     )
