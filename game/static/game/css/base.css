@@ -2,11 +2,6 @@ body {
     font-family: "Poppins", "Quicksand Medium", "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif
 }
 
-div.content {
-    margin: auto;
-    max-width: 778px;
-}
-
 /* so cards have rounded corners on top and bottom */
 header.w3-container {
     border-radius: 4px 4px 0 0
