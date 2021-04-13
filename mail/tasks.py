@@ -5,6 +5,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def update_mailing_list_subscribed(email, subscribed):
+    if subscribed:
+        update_mailing_list.delay(email, action='subscribe')
+    else:
+        update_mailing_list.delay(email, action='archived')
+
+
 @shared_task(queue='serial')
 def update_mailing_list(email, action='subscribe'):
     mc_client = get_mc_client()
