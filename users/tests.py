@@ -251,14 +251,15 @@ class PendingUsersTests(TestCase):
         self.join_test_helper(data)
 
     def test_email_change(self):
-        get_local_user()
+        user = get_local_user()
         client = Client()
         client.login(email=NORMAL, password=test_pw)
         path = reverse('profile')
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
 
-        data = {'email': ABINORMAL, 'first_name': 'Iam', 'last_name': 'Normal', 'location': 'Turkey'}
+        data = {'email': ABINORMAL, 'first_name': 'Iam', 'last_name': 'Normal',
+                'location': 'Turkey', 'display_name': user.display_name}
         mail.outbox = []
         response = client.post(path, data=data)
         self.assertEqual(response.reason_phrase, 'OK')
