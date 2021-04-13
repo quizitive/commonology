@@ -18,7 +18,7 @@ test_pw = 'foo'
 
 def get_local_user(e=NORMAL, subscribed=True):
     User.objects.filter(email=e).delete()
-    return User.objects.create_user(email=e, password=test_pw, subscribed=subscribed)
+    return User.objects.create_user(email=e, password=test_pw, subscribed=subscribed, display_name='dn')
 
 
 def remove_abinormal():
@@ -81,7 +81,8 @@ class UsersManagersTests(TestCase):
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
 
-        data = {'email': NORMAL, 'first_name': 'Iam', 'last_name': 'Normal', 'location': 'Turkey'}
+        data = {'email': NORMAL, 'first_name': 'Iam', 'last_name': 'Normal',
+                'location': 'Turkey', 'display_name': user.display_name}
         response = client.post(path, data=data)
         self.assertEqual(response.reason_phrase, 'OK')
 
@@ -250,14 +251,15 @@ class PendingUsersTests(TestCase):
         self.join_test_helper(data)
 
     def test_email_change(self):
-        get_local_user()
+        user = get_local_user()
         client = Client()
         client.login(email=NORMAL, password=test_pw)
         path = reverse('profile')
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
 
-        data = {'email': ABINORMAL, 'first_name': 'Iam', 'last_name': 'Normal', 'location': 'Turkey'}
+        data = {'email': ABINORMAL, 'first_name': 'Iam', 'last_name': 'Normal',
+                'location': 'Turkey', 'display_name': user.display_name}
         mail.outbox = []
         response = client.post(path, data=data)
         self.assertEqual(response.reason_phrase, 'OK')
