@@ -28,7 +28,8 @@ class HomePage(TestCase):
     def test_page(self):
         client = Client()
         response = client.get(reverse('home'))
-        self.assertEqual(response.status_code, 200)
+        # we're redirecting to the leaderboard for now
+        self.assertEqual(response.status_code, 302)
 
 
 class BaseGameDataTestCase(TestCase):
