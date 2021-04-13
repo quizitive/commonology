@@ -15,7 +15,7 @@ from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
 from users.models import PendingEmail
-from mail.tasks import update_mailing_list
+from mail.tasks import update_mailing_list_subscribed
 
 from .utils import remove_pending_email_invitations
 
@@ -268,7 +268,7 @@ class EmailConfirmedView(View):
             login(request, user)
             PendingEmail.objects.filter(email__iexact=user.email).delete()
 
-            update_mailing_list.delay(email)
+            update_mailing_list_subscribed(email)
 
             return redirect('/')
 
@@ -335,8 +335,8 @@ class EmailChangeConfirmedView(View):
                 user = User.objects.get(email=current_email)
                 user.email = new_email
                 user.save()
-                update_mailing_list.delay(current_email, action='archive')
-                update_mailing_list.delay(new_email)
+                update_mailing_list_subscribed(current_email, subscribed=False)
+                update_mailing_list_subscribed(new_email, subscribed=True)
                 return redirect(reverse('profile'))
             except User.DoesNotExist:
                 return self._confirm_fail(request)

@@ -1,3 +1,4 @@
+from django.db import connection
 from celery import shared_task
 from .utils import get_mc_client
 import logging
@@ -5,7 +6,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def update_mailing_list_subscribed(email, subscribed):
+def update_mailing_list_subscribed(email, subscribed=True):
+
+    # Do not call API for tests
+    if connection.settings_dict['NAME'].startswith('test_'):
+        return
+
     if subscribed:
         update_mailing_list.delay(email, action='subscribe')
     else:
