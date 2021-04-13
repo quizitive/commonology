@@ -131,6 +131,9 @@ class JoinView(UserCardFormView):
     form_class = PendingEmailForm
     header = "Join Commonology!"
     button_label = "Join"
+    card_template = 'users/cards/join_card.html'
+    custom_message = "Enter your email to join the game, follow your friends, " \
+                     "and much more coming soon. We'll send you a unique link to confirm your account."
 
     def post(self, request, *args, **kwargs):
         email = request.POST.get('email')

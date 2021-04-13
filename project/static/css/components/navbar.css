@@ -2,7 +2,7 @@
     box-shadow: 0 1px 2px 0 rgba(0,0,0,0.12);
 }
 div.content, div.narrow-content {
-    margin-top: 8vw;
+    margin-top: 48px;
 }
 .navbar-logo {
   max-height: 38px;
@@ -22,7 +22,7 @@ div.content, div.narrow-content {
     font-size: 4rem;
   }
   div.content, div.narrow-content {
-    margin-top: 80px;
+    margin-top: 64px;
 }
 
 }
