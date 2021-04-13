@@ -23,9 +23,8 @@ def index(request):
     return redirect('leaderboard')
 
 
-@permission_required('is_superuser')
-def ted(request):
-    return render(request, 'game/ted.html', {})
+def about_view(request):
+    return render(request, 'game/about.html', {})
 
 
 @staff_member_required
