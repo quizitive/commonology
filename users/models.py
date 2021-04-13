@@ -43,7 +43,7 @@ class PendingEmail(models.Model):
 
 
 class Player(CustomUser):
-    display_name = models.CharField(max_length=100, blank=True, null=True)
+    display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
     is_member = models.BooleanField(
         default=False,
