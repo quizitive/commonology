@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 from .models import PendingEmail
 from django.contrib.auth import get_user_model
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def remove_pending_email_invitations(n=7):
@@ -13,6 +16,7 @@ def unsubscribe(email):
     u = User.objects.get(email=email)
     u.subscribed = False
     u.save()
+    logger.info(f"{email} just unsubscribed.")
 
 
 def subscribe(email):
@@ -20,3 +24,4 @@ def subscribe(email):
     u = User.objects.get(email=email)
     u.subscribed = True
     u.save()
+    logger.info(f"{email} just subscribed.")
