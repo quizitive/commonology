@@ -54,6 +54,13 @@ class Player(CustomUser):
         return self.email
 
     @property
+    def name(self):
+        if not self.display_name:
+            return f"{self.first_name} {self.last_name}"
+        else:
+            return self.display_name
+
+    @property
     def games(self):
         return self.answers.values(
             game_id=models.F('question__game__game_id')).exclude(
