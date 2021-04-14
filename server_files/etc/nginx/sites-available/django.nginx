@@ -3,14 +3,20 @@
 
 
 server {
-        listen 80; #  default_server;
-        return 301 https://$host$request_uri;
- }
+       listen 80;
+       return 301 https://$host$request_uri;
+}
 
 server {
+        if ($host != "commonologygame.com") {
+	  return 301 https://commonologygame.com$request_uri;
+	}
+
+
+        listen 443 ssl;
         index index.html index.htm index.nginx-debian.html;
 
-        server_name $host;
+        server_name commonologygame.com;
 
 	set $project_name commonology;
 	set $project_dir /home/django/$project_name;
@@ -25,8 +31,8 @@ server {
     	    proxy_pass http://unix:$project_dir/$project_name.sock;
     	}
 
-    #listen [::]:443 ssl ipv6only=on; # managed by Certbot
-    listen 443 ssl; # managed by Certbot
+    # listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    #listen 443 ssl; # managed by Certbot
     ssl_certificate /etc/letsencrypt/live/commonologygame.com/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/commonologygame.com/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
