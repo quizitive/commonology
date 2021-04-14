@@ -1,9 +1,5 @@
 #!/bin/bash
 
-set -a
-source /home/django/secret_env
-set +a
-
 export PATH=$PATH:/home/django/.pyenv/bin
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 
