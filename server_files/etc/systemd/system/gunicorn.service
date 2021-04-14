@@ -6,7 +6,7 @@ After=network.target
 User=django
 Group=www-data
 WorkingDirectory=/home/django/commonology
-EnvironmentFile=/home/django/secret_env
+EnvironmentFile=/etc/profile.d/django_project.sh
 ExecStart=/home/django/.pyenv/versions/project/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/django/commonology/commonology.sock project.wsgi:application
 
 [Install]

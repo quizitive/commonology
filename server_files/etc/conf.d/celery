@@ -10,7 +10,6 @@ CELERY_BIN="/home/django/.pyenv/versions/project/bin/celery"
 
 # App instance to use
 # comment out this line if you don't use an app
-#CELERY_APP="quizitive"
 CELERY_APP="project"
 # or fully qualified:
 #CELERY_APP="quizitive.tasks:app"
