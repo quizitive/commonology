@@ -240,7 +240,7 @@ class EmailConfirmedView(View):
             try:
                 user = User.objects.get(email=email)
                 if user.is_member:
-                    return redirect('login/', msg='You already have an account.')
+                    return redirect('/login/', msg='You already have an account.')
                 display_name = user.display_name
             except User.DoesNotExist:
                 display_name = ''
