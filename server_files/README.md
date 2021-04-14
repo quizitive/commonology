@@ -375,7 +375,7 @@ These three lines should be added to /etc/crontab.  That file is in the repo.
 
 ```shell
 15 3 * * 1 root /usr/bin/certbot renew --quiet
-0 21 * * * q /home/django/commonology/scripts/pg_backup.bash
+0 21 * * * django /home/django/commonology/scripts/pg_backup.bash
 55 15 * * * root certbot renew --renew-hook 'service nginx reload'
 ```
 
