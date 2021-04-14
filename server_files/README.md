@@ -304,8 +304,8 @@ $ sudo su
 ```
 
 If this is a staging server and the domain name is `staging.commonologygame.com` rather than just `commonologygame.com`
-then edit `/etc/nginix/sites-available/commonologygame.com` and `/etc/nginx/sites-available/commonologygame.com` and 
-prefix those domain names with `staging`.
+then edit `/etc/nginix/sites-available/django.nginx` and prefix the domain names with `staging`.  Pay attention
+to the lines at the end that configure the letsencrypt certficates.
 
 ```shell
 # systemctl restart nginx
@@ -359,13 +359,13 @@ See `project/settings.py`
 
 You need to logon to Mailchimp and set the Webhook URLs for the Audiences as follows.
 
-You need to create a UUID and put it in the secret_env file and use it in the webhook URL.
+You need to create a UUID and put it in the `/etc/profile.d/djang_project.sh` file and use it in the webhook URL.
 
 Set the Mailchimp webhook for production:
-https://commonologygame.com/mailchimp_hook/<UUID>
+`https://commonologygame.com/mailchimp_hook/<UUID>`
 
 Set the Mailchimp webhook for staging:
-https://staging.commonologygame.com/mailchimp_hook/<UUID>
+`https://staging.commonologygame.com/mailchimp_hook/<UUID>`
 
 ## Add a few houskeeping items to /etc/crontab
 
