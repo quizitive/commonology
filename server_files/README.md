@@ -207,18 +207,12 @@ $ python manage.py collectstatic --noinput
 Note: you will need to make sure your project settings.py file has the appropriate files for ALLOWED_HOSTS.
 
 
-## Create env vars in /home/django/secret_env
+## Environment Variables
 
-I use a file with private environment vars defined.
-That file may define the `DJANGO_SECRET` value used in your Django settings.py file.
+Environment Variables are in `/etc/profile.d/django_project.sh`.
+That file may contain secrets and so it is not in the repo.
 
-Add this to the end of the ~/.bashrc file:
-
-```
-set -a
-source $HOME/secret_env
-set +a
-```
+That file would define the `DJANGO_SECRET` value used in your Django settings.py file.
 
 ## Postgres
 
@@ -285,6 +279,7 @@ Note: you can use wildcards with systemctl like this `sudo systemctl restart 'ce
 $ sudo su -
 # cd /etc/systemd/system/
 # cp /home/django/commonology/server_files/etc/systemd/system/gunicorn.service ./
+# sudo systemctl daemon-reload
 # systemctl start gunicorn
 # systemctl enable gunicorn
 # exit
@@ -303,16 +298,14 @@ Copy site config files from repo.
 ```shell
 $ sudo su 
 # cp /home/django/commonology/server_files/etc/nginx/nginx.conf /etc/nginx/
-# cp /home/django/commonology/server_files/etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-available/
-# cp /home/django/commonology/server_files/etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-available/
-# ln -s /etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-enabled/
-# ln -s /etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-enabled/
+# cp /home/django/commonology/server_files/etc/nginx/sites-available/django.nginx /etc/nginx/sites-available/
+# ln -s /etc/nginx/sites-available/django.nginx /etc/nginx/sites-enabled/
 # rm /etc/nginx/sites-enabled/default
 ```
 
 If this is a staging server and the domain name is `staging.commonologygame.com` rather than just `commonologygame.com`
-then edit `/etc/nginix/sites-available/commonologygame.com` and `/etc/nginx/sites-available/commonologygame.com` and 
-prefix those domain names with `staging`.
+then edit `/etc/nginix/sites-available/django.nginx` and prefix the domain names with `staging`.  Pay attention
+to the lines at the end that configure the letsencrypt certficates.
 
 ```shell
 # systemctl restart nginx
@@ -366,12 +359,33 @@ See `project/settings.py`
 
 You need to logon to Mailchimp and set the Webhook URLs for the Audiences as follows.
 
-You need to create a UUID and put it in the secret_env file and use it in the webhook URL.
+You need to create a UUID and put it in the `/etc/profile.d/djang_project.sh` file and use it in the webhook URL.
 
 Set the Mailchimp webhook for production:
-https://commonologygame.com/mailchimp_hook/<UUID>
+`https://commonologygame.com/mailchimp_hook/<UUID>`
 
 Set the Mailchimp webhook for staging:
-https://staging.commonologygame.com/mailchimp_hook/<UUID>
+`https://staging.commonologygame.com/mailchimp_hook/<UUID>`
+
+## Add a few houskeeping items to /etc/crontab
+
+### Crontab
+
+These three lines should be added to /etc/crontab.  That file is in the repo.
+
+```shell
+15 3 * * 1 root /usr/bin/certbot renew --quiet
+0 21 * * * django /home/django/commonology/scripts/pg_backup.bash
+55 15 * * * root certbot renew --renew-hook 'service nginx reload'
+```
+
+### pg_dumps
+
+Need a pg_dumps dir for the cron'd `pg_backup.bash` script.
+
+```shell
+$ mkdir /home/django/pg_dumps/
+```
+
 
 # Try it!
