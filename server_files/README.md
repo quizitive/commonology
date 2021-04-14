@@ -214,6 +214,14 @@ That file may contain secrets and so it is not in the repo.
 
 That file would define the `DJANGO_SECRET` value used in your Django settings.py file.
 
+Add this to the end of `/home/django/.bashrc`.
+
+```shell
+set -a
+source /etc/profile.d/django_project.sh
+set +a
+```
+
 ## Postgres
 
  

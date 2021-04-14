@@ -1,4 +1,8 @@
 #!/bin/bash
+set -a
+source /etc/profile.d/django_project.sh
+set +a
+
 
 export PATH=$PATH:/home/django/.pyenv/bin
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1
