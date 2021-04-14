@@ -303,10 +303,8 @@ Copy site config files from repo.
 ```shell
 $ sudo su 
 # cp /home/django/commonology/server_files/etc/nginx/nginx.conf /etc/nginx/
-# cp /home/django/commonology/server_files/etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-available/
-# cp /home/django/commonology/server_files/etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-available/
-# ln -s /etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-enabled/
-# ln -s /etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-enabled/
+# cp /home/django/commonology/server_files/etc/nginx/sites-available/django.nginx /etc/nginx/sites-available/
+# ln -s /etc/nginx/sites-available/django.nginx /etc/nginx/sites-enabled/
 # rm /etc/nginx/sites-enabled/default
 ```
 
@@ -373,5 +371,26 @@ https://commonologygame.com/mailchimp_hook/<UUID>
 
 Set the Mailchimp webhook for staging:
 https://staging.commonologygame.com/mailchimp_hook/<UUID>
+
+## Add a few houskeeping items to /etc/crontab
+
+### Crontab
+
+These three lines should be added to /etc/crontab.  That file is in the repo.
+
+```shell
+15 3 * * 1 root /usr/bin/certbot renew --quiet
+0 21 * * * q /home/django/commonology/scripts/pg_backup.bash
+55 15 * * * root certbot renew --renew-hook 'service nginx reload'
+```
+
+### pg_dumps
+
+Need a pg_dumps dir for the cron'd `pg_backup.bash` script.
+
+```shell
+$ mkdir /home/django/pg_dumps/
+```
+
 
 # Try it!

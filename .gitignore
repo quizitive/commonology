@@ -7,6 +7,7 @@
 __pycache__
 *.icloud
 secret_env.*
+django_project.sh
 pg_dumps
 celerybeat-schedule.bak
 celerybeat-schedule.dat
