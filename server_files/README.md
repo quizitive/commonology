@@ -207,18 +207,12 @@ $ python manage.py collectstatic --noinput
 Note: you will need to make sure your project settings.py file has the appropriate files for ALLOWED_HOSTS.
 
 
-## Create env vars in /home/django/secret_env
+## Environment Variables
 
-I use a file with private environment vars defined.
-That file may define the `DJANGO_SECRET` value used in your Django settings.py file.
+Environment Variables are in `/etc/profile.d/django_project.sh`.
+That file may contain secrets and so it is not in the repo.
 
-Add this to the end of the ~/.bashrc file:
-
-```
-set -a
-source $HOME/secret_env
-set +a
-```
+That file would define the `DJANGO_SECRET` value used in your Django settings.py file.
 
 ## Postgres
 
