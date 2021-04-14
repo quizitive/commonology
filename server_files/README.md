@@ -279,6 +279,7 @@ Note: you can use wildcards with systemctl like this `sudo systemctl restart 'ce
 $ sudo su -
 # cd /etc/systemd/system/
 # cp /home/django/commonology/server_files/etc/systemd/system/gunicorn.service ./
+# sudo systemctl daemon-reload
 # systemctl start gunicorn
 # systemctl enable gunicorn
 # exit
