@@ -1,6 +1,7 @@
 import gspread
 import logging
 
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required, permission_required
@@ -39,7 +40,7 @@ def tabulator_form_view(request):
         fn = request.POST.get('sheet_name')
         context['fn'] = fn
         form.fields['sheet_name'].initial = fn
-        gc = gspread.service_account()
+        gc = gspread.service_account(settings.GOOGLE_GSPREAD_API_CONFIG)
         update = request.POST.get('update_existing') == 'on'
 
         try:
