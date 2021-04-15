@@ -11,12 +11,12 @@ class PlayerUserAdmin(UserAdmin):
     add_form = PlayerCreationForm
     form = PlayerChangeForm
     model = Player
-    list_display = ('email', 'is_staff', 'is_active', 'is_superuser')
-    list_filter = ('is_staff', 'is_active', 'is_superuser')
+    list_display = ('email', 'date_joined', 'first_name', 'last_name', 'subscribed')
+    list_filter = ('date_joined', 'is_staff', 'is_active', 'is_superuser')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal', {'fields': ('first_name', 'last_name', 'display_name', 'birth_date', 'is_member', 'subscribed')}),
-        ('Other', {'fields': ('location', 'referrer')}),
+        ('Other', {'fields': ('date_joined', 'location', 'referrer')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser',
                                     'groups', 'user_permissions')}),
     )
