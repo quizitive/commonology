@@ -129,11 +129,10 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
 
 class JoinView(UserCardFormView):
     form_class = PendingEmailForm
-    header = "Join Commonology!"
+    header = "Join Commonology"
     button_label = "Join"
     card_template = 'users/cards/join_card.html'
-    custom_message = "Enter your email to join the game, follow your friends, " \
-                     "and much more coming soon. We'll send you a unique link to confirm your account."
+    custom_message = "Enter your email to join the game, follow your friends, and much more coming soon!"
 
     def post(self, request, *args, **kwargs):
         email = request.POST.get('email')
@@ -238,12 +237,17 @@ class EmailConfirmedView(View):
             email = pe.email
 
             try:
-                User.objects.get(email=email)
-                return redirect('login/', msg='You already have an account.')
+                user = User.objects.get(email=email)
+                if user.is_member:
+                    messages.info(request, 'You already have an account.')
+                    return redirect('/login/')
+                display_name = user.display_name
             except User.DoesNotExist:
-                form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer})
-                messages.info(request, f"Email: {pe.email} (you can change this after signing up)")
-                return render(request, "users/register.html", {"form": self._format_form(form), "email": email})
+                display_name = ''
+
+            form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer, 'display_name': display_name})
+            messages.info(request, f"Email: {pe.email} (you can change this after signing up)")
+            return render(request, "users/register.html", {"form": self._format_form(form), "email": email})
 
         except PendingEmail.DoesNotExist:
             return self._join_fail(request)
