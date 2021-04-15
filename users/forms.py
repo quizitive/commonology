@@ -35,7 +35,7 @@ class PlayerProfileForm(forms.ModelForm):
 class PendingEmailForm(forms.ModelForm):
     email = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'w3-input'}),
-        help_text="Current players: you're in the right place! Enter your email to claim your account."
+        # help_text="Current players: you're in the right place! Enter your email to claim your account."
     )
 
     class Meta:
@@ -56,9 +56,7 @@ class JoinForm(PlayerCreationForm):
     last_name = forms.CharField(max_length=30)
     display_name = forms.CharField(
         max_length=100,
-        required=False,
-        help_text="This is what displays on the public leaderboard. If left "
-                  "blank we will use your first and last name."
+        help_text="This is what displays on the public leaderboard."
     )
     location = forms.CharField(label='Where do you live?',
                                widget=forms.Select(choices=LOCATIONS),
@@ -79,10 +77,6 @@ class JoinForm(PlayerCreationForm):
         model = Player
         fields = ('email', 'first_name', 'last_name', 'display_name',
                   'password1', 'password2', 'location')
-        help_texts = {
-            'display_name': 'This is what displays on the public leaderboard. If left '
-                            'blank we will use your first and last name.'
-        }
 
 
 class LoginForm(AuthenticationForm):
