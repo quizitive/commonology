@@ -375,6 +375,15 @@ Set the Mailchimp webhook for production:
 Set the Mailchimp webhook for staging:
 `https://staging.commonologygame.com/mailchimp_hook/<UUID>`
 
+## Google API config
+
+The Google API is used to get game form responses.  On the servers there
+needs to be this file: ```/home/django/.config/gspread/service_account.json```.
+
+That file contains secrets and is not in this repo.
+
+This file is discussed int the [API document](https://gspread.readthedocs.io/en/latest/oauth2.html#for-bots-using-service-account).
+
 ## Add a few houskeeping items to /etc/crontab
 
 ### Crontab
