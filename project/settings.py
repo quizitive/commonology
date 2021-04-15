@@ -159,7 +159,7 @@ MAILCHIMP_SERVER = 'us2'
 MAILCHIMP_EMAIL_LIST_ID = env.get("MAILCHIMP_EMAIL_LIST_ID")
 
 # This service file is in ~/.config/gspread/
-GOOGLE_GSPREAD_API_CONFIG = 'service_account.json'
+GOOGLE_GSPREAD_API_CONFIG = 'commonology_service_account.json'
 
 
 LOGGING = {
