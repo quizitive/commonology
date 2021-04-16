@@ -20,3 +20,7 @@ pytz==2021.1
 sentry-sdk==0.19.5
 django-sslserver==0.22
 fontawesome-free==5.15.3
+sendgrid==6.6.0
+django-quill==0.1.0
+django-quill-editor==0.1.22
+

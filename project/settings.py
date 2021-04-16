@@ -18,6 +18,9 @@ DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100
+
 ALLOWED_HOSTS = ['127.0.0.1', domain, 'staging.' + domain, 'staging.quizitive.com']
 INTERNAL_IPS = ()
 if DEBUG:
@@ -53,6 +56,7 @@ INSTALLED_APPS = [
     'community',
     'game',
     'leaderboard',
+    'django_quill',
 ]
 
 if DEBUG_TOOLBAR:
@@ -152,6 +156,7 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = env.get('SENDGRID_APIKEY', 'foo')
 DEFAULT_FROM_EMAIL = 'concierge@' + domain
+DEFAULT_FROM_EMAIL_NAME = 'CommonologyGame Concierge'
 
 MAILCHIMP_API_KEY = env.get('MAILCHIMP_APIKEY')
 MAILCHIMP_HOOK_UUID = env.get('MAILCHIMP_HOOK_UUID')

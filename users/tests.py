@@ -7,6 +7,8 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core import mail
 from users.models import PendingEmail
+from users.utils import make_unsubscribe_link
+from django.test.client import RequestFactory
 
 
 User = get_user_model()
@@ -155,6 +157,35 @@ class UsersManagersTests(TestCase):
                        kwargs={'token': token, 'uidb64': uid})
         response = client.post(path, {'new_password1': test_pw, 'new_password2': test_pw})
         self.assertIn(response.status_code, [200, 302])
+
+    def test_unsubscribe_link(self):
+        request = RequestFactory().get('/')
+        user = get_local_user()
+        url = make_unsubscribe_link(request, user)
+        self.assertEqual(url, 'http://testserver/unsubscribe/1:sfu2_vFpd-AdTuSFyrj8V9xLdgocZsZjNJA9YqSQKow')
+
+        self.assertTrue(user.subscribed)
+        client = Client()
+
+        token = url.lstrip('http://testserver/unsubscribe/')
+        url = reverse('unsubscribe', kwargs={'token': token})
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        email = user.email
+        user = User.objects.get(email=email)
+        self.assertFalse(user.subscribed)
+
+        user.subscribed = True
+        user.save()
+
+        # Trying a bad unsubscribe url
+        url += 'foo'
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        user = User.objects.get(email=email)
+        self.assertTrue(user.subscribed)
+
+        # try a bad unsubscribe link
 
 
 class PendingUsersTests(TestCase):
