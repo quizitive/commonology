@@ -1,3 +1,6 @@
+div.w3-modal-content {
+  max-width: 778px;
+}
 p {
     margin-bottom:24px;
 }
