@@ -31,5 +31,6 @@ urlpatterns = [
         form_class=NewPwdForm
     ), name='password_reset_confirm'),
     path('password_reset_complete/', auth_views.PasswordChangeDoneView.as_view(), name='password_reset_complete'),
-    path('htmx/', PlayersHTMXView.as_view(), name='users-htmx')
+    path('htmx/', PlayersHTMXView.as_view(), name='users-htmx'),
+    path('unsubscribe/<token>', views.UnsubscribeView.as_view(), name='unsubscribe')
 ]
