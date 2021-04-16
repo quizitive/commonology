@@ -14,6 +14,7 @@ urlpatterns = [
     path('leaderboard/', include('leaderboard.urls')),
     path('c/', include('community.urls')),
     path('admin/', admin.site.urls),
+    path('', include('social_django.urls', namespace='social')),
     path('__debug__/', include(debug_toolbar.urls)),
     path('', views.index, name='home'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
