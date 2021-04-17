@@ -11,7 +11,7 @@ cd $COMMONOLOGY_DEV_DIR/pg_dumps
 rsync -avz -e ssh django@commonologygame.com:~/pg_dumps $COMMONOLOGY_DEV_DIR/
 fn=`ls -d *(om[1])`
 echo $fn
-/usr/local/bin/pg_restore --verbose --clean --no-acl --no-owner -d $DB_NAME $fn
+/usr/local/bin/pg_restore --verbose --clean --no-acl --no-owner -d commonology $fn
 
 
 
