@@ -50,7 +50,7 @@ class UsersManagersTests(TestCase):
             pass
         with self.assertRaises(TypeError):
             User.objects.create_user()
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             User.objects.create_user(email='')
         with self.assertRaises(ValueError):
             User.objects.create_user(email='', password=test_pw)
@@ -93,13 +93,46 @@ class UsersManagersTests(TestCase):
 
     def test_display_name_from_first_and_last(self):
         new_user = User.objects.create_user(
-            email="test@oauthuser.com",
+            email="test1@oauthuser.com",
             first_name="first",
             last_name="last"
         )
-        self.assertEqual(new_user.display_name, "first last")
+        self.assertEqual("first last", new_user.display_name)
+
+        no_first_name = User.objects.create_user(
+            email="test2@oauthuser.com",
+            last_name="last"
+        )
+        self.assertEqual("last", no_first_name.display_name)
+
+        no_last_name = User.objects.create_user(
+            email="test3@oauthuser.com",
+            first_name="first"
+        )
+        self.assertEqual("first", no_last_name.display_name)
 
     def test_first_and_last_from_display_name(self):
+        new_user1 = User.objects.create_user(
+            email="test1@avgplayer.com",
+            display_name="notice me 😱 i'm complicated"
+        )
+        self.assertEqual(new_user1.first_name, "notice")
+        self.assertEqual(new_user1.last_name, "me 😱 i'm complicated")
+
+        new_user2 = User.objects.create_user(
+            email="test2@avgplayer.com",
+            display_name="test"
+        )
+        self.assertEqual(new_user2.first_name, "test")
+        self.assertEqual(new_user2.last_name, "")
+
+        jerk_user = User.objects.create_user(
+            email="jerkuser@avgplayer.com",
+            display_name=" "
+        )
+        self.assertEqual(jerk_user.first_name, "")
+
+    def test_last_name_only(self):
         new_user = User.objects.create_user(
             email="test@avgplayer.com",
             display_name="notice me 😱 i'm complicated",
