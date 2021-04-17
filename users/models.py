@@ -70,6 +70,24 @@ class Player(CustomUser):
             game_id=models.F('question__game__game_id')).exclude(
             game_id=None).distinct().order_by('-game_id')
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            # we really want all names set for all new users
+            if not self.display_name:
+                self.display_name = f"{self.first_name} {self.last_name}".strip()
+            elif not self.first_name or not self.last_name:
+                # we're going to put the first word of display_name as first_name
+                # and the rest as last_name... if they don't already exist
+                parsed_name = self.display_name.split()
+                try:
+                    possible_first_name = parsed_name.pop(0)[:30]
+                    self.first_name = self.first_name or possible_first_name
+                    self.last_name = self.last_name or " ".join(parsed_name)[:30]
+                except IndexError:
+                    self.first_name = ""
+                    self.last_name = ""
+        super().save(*args, **kwargs)
+
 
 class Team(models.Model):
     team_code = models.CharField(unique=True, max_length=7, default=create_key, db_index=True)
