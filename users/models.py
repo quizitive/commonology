@@ -57,10 +57,12 @@ class Player(CustomUser):
 
     @property
     def name(self):
-        if not self.display_name:
+        if self.first_name:
             return f"{self.first_name} {self.last_name}"
-        else:
+        elif self.display_name:
             return self.display_name
+        else:
+            return self.email
 
     @property
     def games(self):
@@ -68,21 +70,6 @@ class Player(CustomUser):
             game_id=models.F('question__game__game_id')).exclude(
             game_id=None).distinct().order_by('-game_id')
 
-
-@receiver(post_save, sender=Player)
-def new_player_name_resolution(sender, instance, created, **kwargs):
-    if created:
-        # we really want all names set for all new users
-        if not instance.display_name:
-            instance.display_name = f"{instance.first_name} {instance.last_name}".strip()
-        else:
-            parsed_name = instance.display_name.split()
-            try:
-                instance.first_name = parsed_name.pop(0)[:30]
-                instance.last_name = " ".join(parsed_name)[:30]
-            except IndexError:
-                instance.first_name = ""
-                instance.last_name = ""
 
 class Team(models.Model):
     team_code = models.CharField(unique=True, max_length=7, default=create_key, db_index=True)
