@@ -49,6 +49,17 @@ class Player(CustomUser):
         default=False,
         help_text="Designates whether this player has joined the online community."
     )
+    #
+    # def save(self, *args, **kwargs):
+    #     if not self.pk:
+    #         # we really want all names set for all new users
+    #         if not self.display_name:
+    #             self.display_name = f"{self.first_name} {self.last_name}"
+    #         else:
+    #             parsed_name = self.display_name.split()
+    #             self.first_name = parsed_name.pop(0)
+    #             self.last_name = " ".join(parsed_name)
+    #     super().save(*args, **kwargs)
 
     def __str__(self):
         return self.email
