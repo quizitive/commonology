@@ -91,6 +91,23 @@ class UsersManagersTests(TestCase):
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.location, data['location'])
 
+    def test_display_name_from_first_and_last(self):
+        new_user = User.objects.create_user(
+            email="test@oauthuser.com",
+            first_name="first",
+            last_name="last"
+        )
+        self.assertEqual(new_user.display_name, "first last")
+
+    def test_first_and_last_from_display_name(self):
+        new_user = User.objects.create_user(
+            email="test@avgplayer.com",
+            display_name="notice me 😱 i'm complicated",
+            last_name="last"
+        )
+        self.assertEqual(new_user.first_name, "notice")
+        self.assertEqual(new_user.last_name, "me 😱 i'm complicated")
+
     def test_logout(self):
         # Make sure user exists.
         get_local_user()
