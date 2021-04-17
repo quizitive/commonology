@@ -141,6 +141,25 @@ class UsersManagersTests(TestCase):
         self.assertEqual(new_user.first_name, "notice")
         self.assertEqual(new_user.last_name, "me 😱 i'm complicated")
 
+    def test_user_name_property(self):
+        all_names_user = User.objects.create_user(
+            email="test@name.com",
+            display_name="dn",
+            first_name='fn',
+            last_name="ln"
+        )
+        self.assertEqual(all_names_user.name, "fn ln")
+
+        # test users without first name show display name
+        all_names_user.first_name = ""
+        all_names_user.save()
+        self.assertEqual(all_names_user.name, all_names_user.display_name)
+
+        # test users without first or display_name show email
+        all_names_user.display_name = ""
+        all_names_user.save()
+        self.assertEqual(all_names_user.name, all_names_user.email)
+
     def test_logout(self):
         # Make sure user exists.
         get_local_user()
