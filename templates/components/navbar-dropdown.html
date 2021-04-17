@@ -1,11 +1,13 @@
 {% load navbar_extras %}
+{% load static %}
 
 {% if user.is_authenticated %}
 
-<div class="navbar-dropdown w3-dropdown-click w3-hover-none">
-  <i id="navbar-dropdown-icon"
-      class="fas fa-caret-down fa-3x"
-      style="color:orange;width:10%;"></i>
+<div class="navbar-dropdown w3-cell w3-cell-middle w3-dropdown-click w3-center w3-hover-none">
+{#  <i id="navbar-dropdown-icon"#}
+{#      class="fas fa-caret-square-down fa-2x"#}
+{#      style="color:#aaaaaa;margin-top: 12px;"></i>#}
+  <img id="navbar-dropdown-icon" class="navbar-icon" src="{% static 'img/caret-square-down-solid.svg' %}">
   <div id="navbar-dropdown-content"
        class="navbar-dropdown w3-dropdown-content w3-bar-block w3-border w3-round" style="overflow: hidden;">
     <a href="{% url 'profile' %}">
@@ -19,6 +21,6 @@
 {% else %}
 
 <a href="{% url 'login' %}"><button class="w3-button w3-round">Login</button></a>
-<a href="{% url 'join' %}"><button class="w3-button w3-round w3-blue">Join</button></a>
+<a href="{% url 'join' %}"><button class="w3-button w3-round cg-blue">Join</button></a>
 
 {% endif %}
