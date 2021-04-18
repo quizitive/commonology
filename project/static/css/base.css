@@ -21,7 +21,73 @@ header.w3-container {
     border-radius: 4px 4px 0 0
 }
 
-.w3-button.w3-blue:hover {
+.w3-button.cg-blue {
     color: white!important;
-    background: #0e8df2!important;
+}
+
+.w3-button.cg-blue:hover {
+    color: white!important;
+    background: #0090ce!important;
+}
+
+.cg-border-blue {
+    border-color: #0095da!important;
+}
+
+/* --- Colors --- */
+.cg-blue {
+    color: #fff!important;
+    background: #0095da!important;
+}
+.cg-teal {
+    color: #fff!important;
+    background: #237073!important;
+}
+.cg-dark-purple {
+    color: #fff!important;
+    background: #522e91!important;
+}
+.cg-red {
+    color: #fff!important;
+    background: #ec1c24!important;
+}
+.cg-yellow {
+    color: #fff!important;
+    background: #fdb913!important;
+}
+.cg-orange {
+    color: #fff!important;
+    background: #f58220!important;
+}
+.cg-light-green {
+    color: #fff!important;
+    background: #52ac68!important;
+}
+.cg-light-purple {
+    color: #fff!important;
+    background: #884990!important;
+}
+.cg-dark-green {
+    color: #fff!important;
+    background: #006838!important;
+}
+.cg-robins-egg-blue {
+    color: #fff!important;
+    background: #2a9fbc!important;
+}
+.cg-pink {
+    color: #fff!important;
+    background: #c63d96!important;
+}
+.cg-grass-green {
+    color: #fff!important;
+    background: #8bc53f!important;
+}
+.cg-deep-blue {
+    color: #fff !important;
+    background: #2b388f!important;
+}
+.cg-salmon {
+    color: #fff!important;
+    background: #f26649!important;
 }

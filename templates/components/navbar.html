@@ -2,12 +2,12 @@
 {% load static %}
 
 <div class="w3-top">
-    <div id="navbar" class="w3-bar w3-white w3-medium w3-padding-small">
+    <div id="navbar" class="w3-bar w3-medium">
       <div class="w3-cell-row">
-        <div class="w3-cell w3-mobile" style="width:5%;"></div>
+        <div class="w3-cell w3-mobile" style="width:6%;"></div>
         <div class="w3-cell w3-cell-middle">
           <a href="{% url 'leaderboard' %}">
-            <img class="navbar-logo" src="{% static 'img/logo.png' %}">
+            <img class="navbar-logo" src="{% static 'img/logo.svg' %}">
           </a>
         </div>
         <div class="w3-cell w3-right w3-cell-middle">
@@ -15,7 +15,7 @@
           {% include 'components/navbar-dropdown.html' %}
 
         </div>
-        <div class="w3-cell w3-mobile" style="width:5%;"></div>
+        <div class="w3-cell w3-mobile" style="width:6%;"></div>
       </div>
     </div>
 </div>
