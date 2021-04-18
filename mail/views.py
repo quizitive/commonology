@@ -1,5 +1,5 @@
 import datetime
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -52,12 +52,11 @@ class MailchimpWebhook(View):
         return HttpResponse("OK")
 
 
-
 class MassMail(PermissionRequiredMixin, View):
     permission_required = 'is_staff'
 
     def get(self, request):
-        m = MassMailMessage()
+        m = MassMailMessage.objects.first()
         form = MassEmailForm(m)
         return render(request, 'mail/massmaileditor.html', {'form': form})
 
