@@ -45,6 +45,9 @@ if env.get('EAGER_CELERY', False):
 INSTALLED_APPS = [
     'sslserver',
     'users',
+    #'mail.apps.MailConfig',
+    'ckeditor',
+    'ckeditor_uploader',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,7 +59,6 @@ INSTALLED_APPS = [
     'community',
     'game',
     'leaderboard',
-    'django_quill',
 ]
 
 if DEBUG_TOOLBAR:
@@ -145,6 +147,10 @@ STATIC_ROOT = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'project/static')
 ]
+
+CKEDITOR_UPLOAD_PATH = "ckeditor_uploads/"
+MEDIA_URL='/media/'
+MEDIA_ROOT='media/'
 
 if env.get("ENABLE_MAIL"):
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

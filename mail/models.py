@@ -1,7 +1,7 @@
 from django.db import models
-from django_quill.fields import QuillField
+from ckeditor.fields import RichTextField
 from django.utils import timezone
 
 class MassMailMessage(models.Model):
-    message = QuillField()
+    message = RichTextField(blank=True)
     created = models.DateTimeField(default=timezone.now)
