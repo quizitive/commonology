@@ -45,7 +45,6 @@ if env.get('EAGER_CELERY', False):
 INSTALLED_APPS = [
     'sslserver',
     'users',
-    #'mail.apps.MailConfig',
     'ckeditor',
     'ckeditor_uploader',
     'django.contrib.admin',
@@ -55,10 +54,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'fontawesome-free',
-    'mail',
     'community',
     'game',
     'leaderboard',
+    'mail',
 ]
 
 if DEBUG_TOOLBAR:
@@ -148,9 +147,11 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'project/static')
 ]
 
+CKEDITOR_JQUERY_URL = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
 CKEDITOR_UPLOAD_PATH = "ckeditor_uploads/"
-MEDIA_URL='/media/'
-MEDIA_ROOT='media/'
+CKEDITOR_IMAGE_BACKEND = "pillow"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = 'media/'
 
 if env.get("ENABLE_MAIL"):
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
