@@ -19,6 +19,7 @@ def update_mailing_list_subscribed(email, subscribed=True):
         update_mailing_list.delay(email, action='archived')
 
 
+todo: Remove this method
 @shared_task(queue='serial')
 def update_mailing_list(email, action='subscribe'):
     mc_client = get_mc_client()
