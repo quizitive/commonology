@@ -50,20 +50,3 @@ class MailchimpWebhook(View):
             unsubscribe(email)
 
         return HttpResponse("OK")
-
-
-class MassMail(PermissionRequiredMixin, View):
-    permission_required = 'is_staff'
-
-    def get(self, request):
-        m = MassMailMessage.objects.first()
-        form = MassEmailForm(m)
-        return render(request, 'mail/massmaileditor.html', {'form': form})
-
-    def post(self, request):
-        form = MassEmailForm(request.POST)
-        if form.is_valid():
-            pass
-        else:
-            pass
-        return redirect('/')
