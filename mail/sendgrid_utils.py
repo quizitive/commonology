@@ -1,8 +1,8 @@
-
+import time
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
-
+from users.models import Player
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from sendgrid.helpers.mail import To
@@ -44,3 +44,34 @@ def sendgrid_send(subject, msg, email_list,
         print(response.headers)
     except Exception as e:
         print(e)
+
+
+def mass_mail(subject, msg, from_email, email_list=None):
+    if email_list:
+        sendgrid_send(subject, msg, email_list, from_email)
+        print(msg)
+        print(from_email)
+        print(email_list)
+    else:
+        qs = Player.objects.all()
+        send_at = int(time.time()) + 10
+        count = 0
+        email_list = []
+
+        # todo: remove these three lines lines
+        email_list = [('ms@koplon.com', 33), ('popsalooloo@yahoo.com', 72)]
+        sendgrid_send(subject, msg, email_list, from_email, send_at=send_at)
+        return
+
+        for p in qs:
+            count += 1
+            email_list.append((p.email, p.id))
+
+            if 0 == count % 500:
+                sendgrid_send(subject, msg, email_list, from_email, send_at=send_at)
+                send_at += 900
+                count = 0
+                email_list = []
+
+        if email_list:
+            sendgrid_send(subject, msg, email_list, from_email, send_at=send_at)
