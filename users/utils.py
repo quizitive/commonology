@@ -34,3 +34,10 @@ def subscribe(email):
     u.subscribed = True
     u.save()
     logger.info(f"{email} just subscribed.")
+
+
+# used in social_auth pipeline
+def add_display_name(strategy, details, backend, user=None, *args, **kwargs):
+    if not user.display_name:
+        user.display_name = f"{user.first_name} {user.last_name}".strip()
+        user.save()

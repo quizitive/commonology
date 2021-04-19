@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'social_django',
     'fontawesome-free',
     'community',
     'game',
@@ -64,6 +65,28 @@ if DEBUG_TOOLBAR:
     INSTALLED_APPS.append('debug_toolbar')
 
 AUTH_USER_MODEL = 'users.Player'
+
+# configuration for social authentication
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.social_auth.associate_by_email',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+    'users.utils.add_display_name'
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -170,8 +193,7 @@ MAILCHIMP_HOOK_UUID = env.get('MAILCHIMP_HOOK_UUID')
 MAILCHIMP_SERVER = 'us2'
 MAILCHIMP_EMAIL_LIST_ID = env.get("MAILCHIMP_EMAIL_LIST_ID")
 
-# This service file is in ~/.config/gspread/
-GOOGLE_GSPREAD_API_CONFIG = 'commonology_service_account.json'
+GOOGLE_GSPREAD_API_CONFIG = os.path.join(BASE_DIR, '.config/gspread/commonology_service_account.json')
 
 
 LOGGING = {

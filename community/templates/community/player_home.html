@@ -12,7 +12,7 @@
     <div class="w3-row" style="padding: 16pt"></div>
 
     <div class="w3-card w3-round" style="margin:auto;">
-      <header class="w3-container w3-blue">
+      <header class="w3-container cg-blue">
         <h3>Welcome, {{ display_name }}!</h3>
       </header>
       <div class="w3-container w3-padding-16">
@@ -26,7 +26,7 @@
     </div>
     <div class="w3-row" style="padding: 8pt"></div>
     <div class="w3-card w3-round" style="margin:auto;">
-      <header class="w3-container w3-blue">
+      <header class="w3-container cg-blue">
         <h3>My Scores</h3>
       </header>
       <div class="w3-container w3-padding-16">
@@ -34,7 +34,7 @@
         See how you've performed over time.
         </p>
         <div class="w3-dropdown-hover w3-padding-16">
-          <button class="w3-button w3-blue">My Leaderboards</button>
+          <button class="w3-button cg-blue">My Leaderboards</button>
           <div class="w3-dropdown-content w3-bar-block w3-card-4">
             {% for game in games %}
             <a href="{% url 'leaderboard-game' game.game_id %}" class="w3-bar-item w3-button">Week {{ game.game_id }}</a>
@@ -42,7 +42,7 @@
           </div>
         </div>
         <div class="w3-dropdown-hover w3-padding-16">
-          <button class="w3-button w3-blue">My Results</button>
+          <button class="w3-button cg-blue">My Results</button>
           <div class="w3-dropdown-content w3-bar-block w3-card-4">
             {% for game in games %}
             <a href="{% url 'leaderboard-game' game.game_id %}" class="w3-bar-item w3-button">Week {{ game.game_id }}</a>
@@ -53,7 +53,7 @@
     </div>
     <div class="w3-row" style="padding: 8pt"></div>
     <div class="w3-card w3-round" style="margin:auto;">
-      <header class="w3-container w3-blue">
+      <header class="w3-container cg-blue">
         <h3>My Teams</h3>
       </header>
       <div class="w3-container w3-padding-16">
@@ -61,15 +61,15 @@
         Start a team to see how you stack up against your friends, and compete against other teams!
         </p>
         {% for team in teams %}
-          <button class="w3-button w3-blue w3-border w3-border-blue"
+          <button class="w3-button cg-blue w3-border cg-border-blue"
             href="teams.html">Cool Team 1</button>
         {% endfor %}
-          <button class="w3-button w3-border-blue w3-border">Create a team!</button>
+          <button class="w3-button cg-border-blue w3-border">Create a team!</button>
       </div>
     </div>
     <div class="w3-row" style="padding: 8pt"></div>
     <div class="w3-card w3-round" style="margin:auto;">
-      <header class="w3-container w3-blue">
+      <header class="w3-container cg-blue">
         <h3>Invite Friends</h3>
       </header>
       <div class="w3-container w3-padding-16">
@@ -79,7 +79,7 @@
         <form method="post">
           {% csrf_token %}
           <div class="w3-col" style="width:48px">
-            <button class="w3-button w3-blue w3-border w3-border-blue w3-round" type="submit">
+            <button class="w3-button cg-blue w3-border cg-border-blue w3-round" type="submit">
               <i class="fa fa-paper-plane"></i>
             </button>
           </div>
