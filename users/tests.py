@@ -160,7 +160,7 @@ class UsersManagersTests(TestCase):
 
     def test_unsubscribe_link(self):
         user = get_local_user()
-        url = sign_user(user)
+        url = sign_user(user, 1)
         self.assertEqual(url, "1:sfu2_vFpd-AdTuSFyrj8V9xLdgocZsZjNJA9YqSQKow")
 
         self.assertTrue(user.subscribed)
