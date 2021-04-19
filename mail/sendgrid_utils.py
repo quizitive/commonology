@@ -17,7 +17,8 @@ def make_substitutions(e, i):
 
 
 def sendgrid_send(subject, msg, email_list,
-                  from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME)):
+                  from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME),
+                  send_at=None):
 
     to_emails = [To(email=e, substitutions=make_substitutions(e, id)) for e, id in email_list]
 
@@ -30,6 +31,10 @@ def sendgrid_send(subject, msg, email_list,
         plain_text_content='Game is on.',
         html_content=msg,
         is_multiple=True)
+
+    if send_at:
+        message.send_at = send_at
+
     try:
         sendgrid_client = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
 

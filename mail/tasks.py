@@ -1,3 +1,4 @@
+import time
 from django.db import connection
 from celery import shared_task
 from .utils import get_mc_client
@@ -45,3 +46,5 @@ def mass_mail(subject, msg, from_email, email_list=None):
         print(msg)
         print(from_email)
         print(email_list)
+    else:
+        t = int(time.time())
