@@ -12,3 +12,4 @@ pg_dumps
 celerybeat-schedule.bak
 celerybeat-schedule.dat
 celerybeat-schedule.dir
+media
