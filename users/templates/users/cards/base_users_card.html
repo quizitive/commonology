@@ -1,4 +1,4 @@
-<div class="w3-modal-content w3-round w3-card-0 w3-border w3-border-grey" style="max-width:767px; overflow: hidden;">
+<div class="w3-modal-content w3-round w3-card-0 w3-border w3-border-grey" style="overflow: hidden;">
   <header class="w3-container w3-border-bottom w3-center">
 
     {% if is_modal %}
@@ -30,7 +30,7 @@
     <form method="{{ form_method|default:'post' }}" {% if form_action %}action="{{ form_action }}"{% endif %}>
       {% csrf_token %}
       {{ form.as_p }}
-      <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block w3-blue w3-margin-bottom">
+      <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
     </form>
   {% endblock %}
 
