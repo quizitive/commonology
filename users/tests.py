@@ -6,9 +6,9 @@ from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.conf import settings
 from users.models import PendingEmail
-from users.utils import make_unsubscribe_link
-from django.test.client import RequestFactory
+from users.utils import sign_user
 
 
 User = get_user_model()
@@ -159,15 +159,14 @@ class UsersManagersTests(TestCase):
         self.assertIn(response.status_code, [200, 302])
 
     def test_unsubscribe_link(self):
-        request = RequestFactory().get('/')
         user = get_local_user()
-        url = make_unsubscribe_link(request, user)
-        self.assertEqual(url, 'http://testserver/unsubscribe/1:sfu2_vFpd-AdTuSFyrj8V9xLdgocZsZjNJA9YqSQKow')
+        url = sign_user(user)
+        self.assertEqual(url, "1:sfu2_vFpd-AdTuSFyrj8V9xLdgocZsZjNJA9YqSQKow")
 
         self.assertTrue(user.subscribed)
         client = Client()
 
-        token = url.lstrip('http://testserver/unsubscribe/')
+        token = url.lstrip(f'https://{settings.DOMAIN}/unsubscribe/')
         url = reverse('unsubscribe', kwargs={'token': token})
         response = client.get(url)
         self.assertEqual(response.status_code, 200)

@@ -1,6 +1,7 @@
 from django.db import connection
 from celery import shared_task
 from .utils import get_mc_client
+from .sendgrid_utils import sendgrid_send
 import logging
 
 logger = logging.getLogger(__name__)
@@ -35,3 +36,12 @@ def update_mailing_list(email, action='subscribe'):
         logger.info(msg)
     else:
         logger.error(msg)
+
+
+@shared_task(queue='serial')
+def mass_mail(subject, msg, from_email, email_list=None):
+    if email_list:
+        sendgrid_send(subject, msg, email_list, from_email)
+        print(msg)
+        print(from_email)
+        print(email_list)

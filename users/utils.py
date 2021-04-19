@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from .models import PendingEmail
 from django.contrib.auth import get_user_model
 from django.core.signing import Signer
+from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,12 +13,11 @@ def remove_pending_email_invitations(n=7):
     PendingEmail.objects.filter(created__lt=t).delete()
 
 
-def make_unsubscribe_link(request, u):
-    signed_email = Signer().sign(value=u.email)
+def sign_user(email, id):
+    signed_email = Signer().sign(value=email)
     e, x = signed_email.split(':')
-    x = ':'.join([str(u.id), x])
-    url_root = request.build_absolute_uri('unsubscribe')
-    return f"{url_root}/{x}"
+    x = ':'.join([str(id), x])
+    return x
 
 
 def unsubscribe(email):
