@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'users',
     'ckeditor',
     'ckeditor_uploader',
+    'django_object_actions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

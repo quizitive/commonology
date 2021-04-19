@@ -8,4 +8,5 @@ class MassMailMessage(models.Model):
     subject = models.CharField(max_length=150, blank=False)
     message = RichTextUploadingField(blank=True)
     created = models.DateTimeField(default=timezone.now)
+    tested = models.BooleanField(default=False)
     sent = models.BooleanField(default=False)
