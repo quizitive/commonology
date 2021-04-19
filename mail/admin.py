@@ -1,12 +1,12 @@
 from django.contrib import admin
-from .models import MassMailMessage
+from .models import MailMessage
 from django_object_actions import DjangoObjectActions
 
 from .utils import make_absolute_urls
 from .tasks import mass_mail
 
-@admin.register(MassMailMessage)
-class MassMailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
+@admin.register(MailMessage)
+class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     def send_test(self, request, obj):
         message = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
