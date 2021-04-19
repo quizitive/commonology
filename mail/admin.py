@@ -5,6 +5,7 @@ from django_object_actions import DjangoObjectActions
 from .utils import make_absolute_urls
 from .sendgrid_utils import mass_mail
 
+
 @admin.register(MailMessage)
 class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     def send_test(self, request, obj):
