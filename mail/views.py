@@ -3,12 +3,9 @@ from django.shortcuts import render, HttpResponse, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from .forms import MassEmailForm
-from .models import MassMailMessage
 from users.utils import unsubscribe, subscribe
 
 
