@@ -1,9 +1,9 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from .models import MailMessage
 from django_object_actions import DjangoObjectActions
 
 from .utils import make_absolute_urls
-from .tasks import mass_mail
+from .sendgrid_utils import mass_mail
 
 @admin.register(MailMessage)
 class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
@@ -13,16 +13,25 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         mass_mail(obj.subject, message, from_email, email_list=[(obj.test_recipient, 0)])
         obj.tested = True
         obj.save()
+        messages.add_message(request, messages.INFO, 'Test message sent.')
     send_test.label = 'Test'
     send_test.short_description = "Send a test message."
 
     def blast(self, request, obj):
-        if obj.tested:
-            print("Blasting", obj.subject)
+        if obj.sent:
+            messages.add_message(request, messages.WARNING,
+                                 "This blast was already sent.")
+        elif obj.tested:
+            message = make_absolute_urls(obj.message)
+            from_email = (obj.from_email, obj.from_name)
+            mass_mail(obj.subject, message, from_email)
+            obj.sent = True
+            obj.save()
+            messages.add_message(request, messages.INFO, 'Blast message sent.')
         else:
-            print("Cannot send blast until message was tested.")
-        obj.sent = True
-        obj.save()
+            messages.add_message(request, messages.WARNING,
+                                 "Cannot send blast until message is tested.")
+
     blast.label = "Blast"
     blast.short_description = "This will send the message to EVERYONE!"
 
