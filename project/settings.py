@@ -10,7 +10,7 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
 project_name = 'commonology'
-domain = 'commonologygame.com'
+DOMAIN = 'commonologygame.com'
 
 DEBUG = env.get("DEBUG", False)
 DEBUG_TOOLBAR = env.get("DEBUG_TOOLBAR", False)
@@ -21,10 +21,10 @@ SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100
 
-ALLOWED_HOSTS = ['127.0.0.1', domain, 'staging.' + domain, 'staging.quizitive.com']
+ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN, 'staging.quizitive.com']
 INTERNAL_IPS = ()
 if DEBUG:
-    INTERNAL_IPS = ('127.0.0.1', 'staging.' + domain, )
+    INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN,)
 
 TIME_ZONE = 'UTC'
 
@@ -186,8 +186,11 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = env.get('SENDGRID_APIKEY', 'foo')
-DEFAULT_FROM_EMAIL = 'concierge@' + domain
+DEFAULT_FROM_EMAIL = 'concierge@' + DOMAIN
 DEFAULT_FROM_EMAIL_NAME = 'CommonologyGame Concierge'
+
+ALEX_FROM_EMAIL = 'alex@commonologygame.com'
+ALEX_FROM_NAME = 'Alex Fruin'
 
 MAILCHIMP_API_KEY = env.get('MAILCHIMP_APIKEY')
 MAILCHIMP_HOOK_UUID = env.get('MAILCHIMP_HOOK_UUID')
