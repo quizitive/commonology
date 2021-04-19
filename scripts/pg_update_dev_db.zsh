@@ -6,9 +6,8 @@ PROJECT="commonology"
 PROJECT_DEV_DIR="$DEV_DIR/$PROJECT"
 
 if [ -z "$PROJECT_DEV_DIR" ]; then
-  echo "You must set the DJANGO_DEV_DIR env var."
-  echo "Something like this:"
-  echo "export PROJECT_DEV_DIR=\"$HOME/Documents/dev/commonology\""
+  echo "PROJECT_DEV_DIR did not get set properly."
+  echo "Check the vars set at the top of this script."
   exit
 fi
 
