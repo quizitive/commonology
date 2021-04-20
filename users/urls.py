@@ -6,6 +6,7 @@ from users.forms import LoginForm, PwdResetForm, NewPwdForm
 
 
 urlpatterns = [
+    path('email-test', views.email_test_view, name=''),
     path('logout/', views.user_logout, name='logout'),
     path('password_change/', views.PwdChangeView.as_view(
         template_name='users/base.html'
