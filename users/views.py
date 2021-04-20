@@ -1,5 +1,6 @@
 from django.forms import HiddenInput
 from django.urls import reverse, reverse_lazy
+from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -179,18 +180,30 @@ def send_invite(request, pe):
             return 0
 
         if referrer.first_name and referrer.last_name:
-            referrer_str = f'{referrer.first_name} {referrer.last_name}, ' \
-                           f'whose email address is {referrer.email} requested this invitation.'
+            referrer_str = f'{referrer.first_name} {referrer.last_name} has invited you to join Commonology.'
 
         else:
-            referrer_str = f'Your friend whose email address is {referrer.email} requested this invitation.'
+            referrer_str = f'Your friend {referrer.email} has invited you to Commonology.'
 
+        more_info_str = mark_safe(f'Head over to <a href="https://commonologygame.com/about/">'
+                             f'https://commonologygame.com/about/</a> to learn more.')
+
+    else:
+        referrer_str = f"You requested a join link for Commonology."
+        more_info_str = ""
+
+    context = {'referrer_str': referrer_str, 'join_url': join_url, 'more_info_str': more_info_str}
+    msg = render_to_string('emails/invite_email.html', context)
+
+    return send_mail(subject="You're Invited to Commonology", message=msg,
+                     from_email=None, recipient_list=[email], html_message=msg)
+
+
+def email_test_view(request):
+    referrer_str = f'Ted Moore has invited you to join Commonology.'
+    join_url = 'http://127.0.0.1:8000/join/5e8b58bb-51aa-4b66-a84b-e31723ef7a24'
     context = {'referrer_str': referrer_str, 'join_url': join_url}
-    msg = render_to_string('users/invite_email.html', context)
-
-    return send_mail(subject='Join us', message=msg,
-                     from_email=None, recipient_list=[email])
-
+    return render(request, 'emails/invite_email.html', context)
 
 class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
 

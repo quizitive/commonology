@@ -1,0 +1,99 @@
+{% load static %}
+
+{% autoescape off %}
+<html>
+  <head>
+    <style>
+      #email-body {
+        font-family: "Poppins", Verdana, Arial, sans-serif;
+        font-size: 0.9rem;
+        background: #fafbfc;
+        padding: 24px 0;
+      }
+      #email-header-image {
+        {#width: 100%;#}
+        {#width: 540px;#}
+        display: block;
+        max-width: 320px;
+        margin: auto;
+      }
+      #email-content {
+        background: #fff;
+        max-width: 540px;
+        margin: 8px auto;
+        padding:24px;
+        border: 1px solid lightgrey;
+        border-radius: 4px;
+      }
+      #email-content > p {
+        margin: 16px 0 32px 0;
+      }
+      #button-holder {
+        width: 100%;
+      }
+      #button-holder > button {
+        margin: 32px auto;
+      }
+      .w3-button{border:none;display:inline-block;padding:8px 16px;vertical-align:middle;overflow:hidden;text-decoration:none;color:inherit;background-color:inherit;text-align:center;cursor:pointer;white-space:nowrap;border-radius:4px}
+      .w3-button.cg-blue > a {
+        color: white!important;
+        font-family: "Poppins", Verdana, Arial, sans-serif;
+        font-size: 1rem;
+        text-decoration: None;
+      }
+      .w3-button.cg-blue:hover {
+        color: white!important;
+        background: #0090ce!important;
+      }
+      .cg-blue {
+          color: #fff!important;
+          background: #0095da!important;
+      }
+      #footer > p {
+        color: grey;
+        margin-top: 32px;
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="email-body">
+      <img id="email-header-image" src="https://commonologygame.com/static/img/logo.png">
+      <div id="email-content">
+
+
+        <p>Hello!</p>
+
+        <p>{{ referrer_str }} {{ more_info_str }}
+        </p>
+
+        <p>To join, click the button below. The link will expire in 7 days. </p>
+        <div id="button-holder">
+          <button class="w3-button cg-blue" style="display: block;">
+            <a href="{{ join_url }}">Join Commonology</a>
+          </button>
+        </div>
+
+        <p>Welcome, we're excited to have you!</p>
+
+        <p>
+          Cheers,
+          <br/>
+          The Commonology Team
+        </p>
+        <hr>
+        <div id="footer">
+          <p>
+          Button not working? Try pasting the url directly into your browser:
+            <a href="{{ join_url }}">{{ join_url }}</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+{% endautoescape %}
+
+
