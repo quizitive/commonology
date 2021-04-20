@@ -3,6 +3,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -10,12 +11,14 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView, PasswordChangeView
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
+from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
 from users.models import PendingEmail
+from users.utils import unsubscribe
 from mail.tasks import update_mailing_list_subscribed
 
 from .utils import remove_pending_email_invitations
@@ -383,3 +386,17 @@ class PwdChangeView(UserCardFormView, PasswordChangeView):
     def form_valid(self, form):
         messages.info(self.request, "Your password has been successfully updated.")
         return super().form_valid(form)
+
+
+class UnsubscribeView(View):
+    def get(self, request, token):
+        i, t = token.split(':')
+        u = User.objects.filter(id=i).first()
+        email = u.email
+        t = ':'.join([email, t])
+        try:
+            e = Signer().unsign(t)
+            unsubscribe(e)
+            return HttpResponse("You have been unsubscribed.")
+        except BadSignature:
+            return HttpResponse("There is something wrong with your unsubscribe link.")
