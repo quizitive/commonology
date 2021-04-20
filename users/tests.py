@@ -291,7 +291,7 @@ class PendingUsersTests(TestCase):
         self.assertEqual(response.reason_phrase, 'OK')
 
         msg = mail.outbox[0].body
-        url = re.search("(?P<url>https?://[^\s]+)", msg).group("url")
+        url = re.search("https?://.*/join/.*\"", msg).group(0)[:-1]
         base_url, uuid_str = url.rsplit('/', 1)
 
         mail.outbox = []

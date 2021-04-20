@@ -15,8 +15,4 @@
   <a class="w3-block w3-center w3-padding-small"
    href = "{% url 'login' %}">Already have an account?</a>
 
-  {% if not user.is_authenticated %}
-  <link rel="stylesheet" href="{% static 'users/css/login_join.css' %}">
-  {% endif %}
-
 {% endblock %}
