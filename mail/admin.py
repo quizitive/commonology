@@ -39,7 +39,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         elif obj.tested:
             message = make_absolute_urls(obj.message)
             from_email = (obj.from_email, obj.from_name)
-            mass_mail(obj.subject, message, from_email)
+            mass_mail(obj.subject, message, from_email, categories=obj.categories)
             obj.sent = True
             obj.save()
             messages.add_message(request, messages.INFO, 'Blast message sent.')
