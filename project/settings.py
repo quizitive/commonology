@@ -200,7 +200,7 @@ LOGGING = {
 
 if 'SENTRY_KEY' in env:
     SENTRY_KEY = env.get('SENTRY_KEY')
-    sentry_sdk.init(dsn=f"https://{SENTRY_KEY}@o520957.ingest.sentry.io/5631994",
+    sentry_sdk.init(dsn=f"https://{SENTRY_KEY}@o520957.ingest.sentry.io/5726202",
                     integrations=[DjangoIntegration()],
                     traces_sample_rate=0.2,
                     send_default_pii=True)
