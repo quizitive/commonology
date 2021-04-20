@@ -22,7 +22,7 @@ def sendgrid_send(subject, msg, email_list,
 
     to_emails = [To(email=e, substitutions=make_substitutions(e, id)) for e, id in email_list]
 
-    msg = render_to_string('mail/massmail.html', context={'message': mark_safe(msg)})
+    msg = render_to_string('mail/mail_base.html', context={'message': mark_safe(msg)})
 
     message = Mail(
         from_email=from_email,

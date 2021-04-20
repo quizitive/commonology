@@ -6,7 +6,6 @@ from django.urls import path, include
 from django.contrib import admin
 from game import views
 
-
 urlpatterns = [
 
     path('', include('users.urls')),
@@ -19,4 +18,5 @@ urlpatterns = [
     path('', include('social_django.urls', namespace='social')),
     path('__debug__/', include(debug_toolbar.urls)),
     path('', views.index, name='home'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + \
+              static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
