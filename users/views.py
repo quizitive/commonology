@@ -199,12 +199,6 @@ def send_invite(request, pe):
                      from_email=None, recipient_list=[email], html_message=msg)
 
 
-def email_test_view(request):
-    referrer_str = f'Ted Moore has invited you to join Commonology.'
-    join_url = 'http://127.0.0.1:8000/join/5e8b58bb-51aa-4b66-a84b-e31723ef7a24'
-    context = {'referrer_str': referrer_str, 'join_url': join_url}
-    return render(request, 'emails/invite_email.html', context)
-
 class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
 
     header = "Invite Friends"
