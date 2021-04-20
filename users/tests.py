@@ -161,8 +161,10 @@ class UsersManagersTests(TestCase):
     def test_unsubscribe_link(self):
         user = get_local_user()
         id = user.id
+        saved_key = settings.SECRET_KEY
+        settings.SECRET_KEY = 'Test'
         url = sign_user(user, id)
-        self.assertEqual(url, f"{id}:sfu2_vFpd-AdTuSFyrj8V9xLdgocZsZjNJA9YqSQKow")
+        self.assertEqual(url, f"{id}:0s9kU4sbRep-eXx01wMXH7dfp84JlIrkIxEJpAstUnI")
 
         self.assertTrue(user.subscribed)
         client = Client()
@@ -185,7 +187,7 @@ class UsersManagersTests(TestCase):
         user = User.objects.get(email=email)
         self.assertTrue(user.subscribed)
 
-        # try a bad unsubscribe link
+        settings.SECRET_KEY = saved_key
 
 
 class PendingUsersTests(TestCase):
