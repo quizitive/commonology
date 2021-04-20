@@ -1,0 +1,45 @@
+{% extends 'emails/base_email.html' %}
+
+{% autoescape off %}
+
+{% block body %}
+  <body>
+    <div id="email-body">
+      <img id="email-header-image" src="https://commonologygame.com/static/img/logo.png">
+      <div id="email-content">
+
+
+        <p>Hello!</p>
+
+        <p>{{ referrer_str }} {{ more_info_str }}
+        </p>
+
+        <p>To join, click the button below. The link will expire in 7 days. </p>
+        <div id="button-holder">
+          <button class="w3-button cg-blue" style="display: block;">
+            <a href="{{ join_url }}">Join Commonology</a>
+          </button>
+        </div>
+
+        <p>Welcome, we're excited to have you!</p>
+
+        <p>
+          Cheers,
+          <br/>
+          The Commonology Team
+        </p>
+        <hr>
+        <div id="footer">
+          <p>
+          Button not working? Try pasting the url directly into your browser:
+            <a href="{{ join_url }}">{{ join_url }}</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+{% endblock %}
+
+{% endautoescape %}
+
+
