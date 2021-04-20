@@ -6,8 +6,9 @@ from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.conf import settings
 from users.models import PendingEmail
-from users.utils import add_display_name
+from users.utils import sign_user
 
 
 User = get_user_model()
@@ -92,78 +93,6 @@ class UsersManagersTests(TestCase):
         self.assertEqual(user.last_name, data['last_name'])
         self.assertEqual(user.location, data['location'])
 
-    def test_display_name_from_first_and_last(self):
-        # this happens when users join through OAuth
-        new_user = self._mock_oauth_user(
-            email="test1@oauthuser.com",
-            first_name="first",
-            last_name="last"
-        )
-        self.assertEqual("first last", new_user.display_name)
-
-        no_first_name = self._mock_oauth_user(
-            email="test2@oauthuser.com",
-            last_name="last"
-        )
-        self.assertEqual("last", no_first_name.display_name)
-
-        no_last_name = self._mock_oauth_user(
-            email="test3@oauthuser.com",
-            first_name="first"
-        )
-        self.assertEqual("first", no_last_name.display_name)
-
-    def _mock_oauth_user(self, *args, **kwargs):
-        user = User.objects.create_user(**kwargs)
-        add_display_name(None, None, None, user, *args, **kwargs)
-        return user
-
-    def test_first_and_last_from_display_name(self):
-        # this happens when someone plays the game before joining (common)
-        new_user1 = User.objects.create_user(
-            email="test1@avgplayer.com",
-            display_name="notice me 😱 i'm complicated"
-        )
-        self.assertEqual("notice", new_user1.first_name)
-        self.assertEqual("me 😱 i'm complicated", new_user1.last_name)
-
-        new_user2 = User.objects.create_user(
-            email="test2@avgplayer.com",
-            display_name="onewordname"
-        )
-        self.assertEqual("onewordname", new_user2.first_name)
-        self.assertEqual("", new_user2.last_name)
-
-        # test a user that has no first or last name but put a space in display name
-        jerk_user = User.objects.create_user(
-            email="jerkuser@avgplayer.com",
-            display_name=" "
-        )
-        self.assertEqual("", jerk_user.first_name)
-
-    def test_user_name_property(self):
-        # this happens when a player joins before playing, not through OAuth
-        all_names_user = User.objects.create_user(
-            email="test@name.com",
-            display_name="dn",
-            first_name='fn',
-            last_name="ln"
-        )
-        self.assertEqual("fn ln", all_names_user.name)
-        self.assertEqual("fn", all_names_user.first_name)
-        self.assertEqual("ln", all_names_user.last_name)
-        self.assertEqual("dn", all_names_user.display_name)
-
-        # test users without first name show display name
-        all_names_user.first_name = ""
-        all_names_user.save()
-        self.assertEqual(all_names_user.name, all_names_user.display_name)
-
-        # test users without first or display_name show email
-        all_names_user.display_name = ""
-        all_names_user.save()
-        self.assertEqual(all_names_user.name, all_names_user.email)
-
     def test_logout(self):
         # Make sure user exists.
         get_local_user()
@@ -228,6 +157,35 @@ class UsersManagersTests(TestCase):
                        kwargs={'token': token, 'uidb64': uid})
         response = client.post(path, {'new_password1': test_pw, 'new_password2': test_pw})
         self.assertIn(response.status_code, [200, 302])
+
+    def test_unsubscribe_link(self):
+        user = get_local_user()
+        id = user.id
+        url = sign_user(user, id)
+        self.assertEqual(url, f"{id}:sfu2_vFpd-AdTuSFyrj8V9xLdgocZsZjNJA9YqSQKow")
+
+        self.assertTrue(user.subscribed)
+        client = Client()
+
+        token = url.lstrip(f'https://{settings.DOMAIN}/unsubscribe/')
+        url = reverse('unsubscribe', kwargs={'token': token})
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        email = user.email
+        user = User.objects.get(email=email)
+        self.assertFalse(user.subscribed)
+
+        user.subscribed = True
+        user.save()
+
+        # Trying a bad unsubscribe url
+        url += 'foo'
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        user = User.objects.get(email=email)
+        self.assertTrue(user.subscribed)
+
+        # try a bad unsubscribe link
 
 
 class PendingUsersTests(TestCase):

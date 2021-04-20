@@ -6,7 +6,7 @@ fuzzywuzzy==0.18.0
 num2word==1.0.1
 pandas==1.1.4
 psycopg2-binary==2.8.6
-python-Levenshtein==0.12.0
+python-Levenshtein==0.12.1
 gunicorn==20.0.4
 pycodestyle==2.6.0
 redis==3.5.3
@@ -21,3 +21,7 @@ sentry-sdk==0.19.5
 django-sslserver==0.22
 fontawesome-free==5.15.3
 social-auth-app-django==4.0.0
+sendgrid==6.6.0
+django-ckeditor==6.0.0
+Pillow==8.2.0
+django-object-actions==3.0.2
