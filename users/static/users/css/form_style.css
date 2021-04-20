@@ -1,5 +1,5 @@
 div.w3-modal-content {
-  max-width: 778px;
+  max-width: 500px;
 }
 p {
     margin-bottom:24px;
@@ -19,6 +19,7 @@ ul.nonfield {
   color: grey;
   font-size: 12px;
   font-style: italic;
+  display: block;
 }
 #id_location {
   border: 1px solid dimgrey;
