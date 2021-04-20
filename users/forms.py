@@ -31,8 +31,8 @@ class PlayerProfileForm(forms.ModelForm):
 
 
 class PendingEmailForm(forms.ModelForm):
-    email = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'w3-input'}),
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'w3-input'}),
         # help_text="Current players: you're in the right place! Enter your email to claim your account."
     )
 
