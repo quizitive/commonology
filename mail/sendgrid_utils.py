@@ -53,7 +53,7 @@ def mass_mail(subject, msg, from_email, email_list=None):
         print(from_email)
         print(email_list)
     else:
-        qs = Player.objects.all()
+        qs = Player.objects.filter(subscribed=True).all()
         send_at = int(time.time()) + 10
         count = 0
         email_list = []
