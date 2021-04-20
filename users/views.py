@@ -22,6 +22,14 @@ from .utils import remove_pending_email_invitations
 
 User = get_user_model()
 
+def email_test_view(request):
+    referrer_str = f'Ted Moore has invited you to join Commonology.'
+    join_url = 'http://127.0.0.1:8000/join/5e8b58bb-51aa-4b66-a84b-e31723ef7a24'
+    more_info_str = mark_safe(f"Check out our <a href='https://commonologygame.com/about/'>"
+                              f"About Page</a> to learn more.")
+    context = {'referrer_str': referrer_str, 'join_url': join_url, 'more_info_str': more_info_str}
+    return render(request, 'emails/invite_email.html', context)
+
 
 @login_required()
 def user_logout(request):
@@ -185,8 +193,8 @@ def send_invite(request, pe):
         else:
             referrer_str = f'Your friend {referrer.email} has invited you to Commonology.'
 
-        more_info_str = mark_safe(f'Head over to <a href="https://commonologygame.com/about/">'
-                             f'https://commonologygame.com/about/</a> to learn more.')
+        more_info_str = mark_safe(f"Head over to our <a href='https://commonologygame.com/about/'>"
+                                  f"about page</a> to learn more.")
 
     else:
         referrer_str = f"You requested a join link for Commonology."
