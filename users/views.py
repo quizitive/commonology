@@ -188,8 +188,8 @@ def send_invite(request, pe):
         else:
             referrer_str = f'Your friend {referrer.email} has invited you to Commonology.'
 
-        more_info_str = mark_safe(f'Head over to <a href="https://commonologygame.com/about/">'
-                             f'https://commonologygame.com/about/</a> to learn more.')
+        more_info_str = mark_safe(f"Head over to our <a href='https://commonologygame.com/about/'>"
+                                  f"about page</a> to learn more.")
 
     else:
         referrer_str = f"You requested a join link for Commonology."
