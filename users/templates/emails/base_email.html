@@ -7,11 +7,16 @@
         background: #fafbfc;
         padding: 24px 0;
       }
+      #email-header {
+        width: 100%;
+        border-bottom: 1px solid lightgrey;
+      }
       #email-header-image {
         {#width: 100%;#}
         {#width: 540px;#}
         display: block;
-        max-width: 320px;
+          padding: 0px 24px 16px 24px;
+        max-width: 240px;
         margin: auto;
       }
       #email-content {
@@ -53,5 +58,19 @@
       }
     </style>
   </head>
-{% block body %}{% endblock %}
+
+
+  <body>
+    <div id="email-body">
+      <div id="email-content">
+        <div id="email-header">
+          <img id="email-header-image" src="https://commonologygame.com/static/img/logo_2400.png">
+        </div>
+        {% block email-content %}
+        {% endblock %}
+      </div>
+    </div>
+  </body>
+
+
 </html>
