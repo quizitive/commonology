@@ -48,11 +48,6 @@ def mass_mail(subject, msg, from_email, email_list=None):
         count = 0
         email_list = []
 
-        # todo: remove these three lines lines
-        email_list = [('ms@koplon.com', 33), ('popsalooloo@yahoo.com', 72)]
-        sendgrid_send(subject, msg, email_list, from_email, send_at=send_at)
-        return
-
         for p in qs:
             count += 1
             email_list.append((p.email, p.id))
