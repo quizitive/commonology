@@ -1,10 +1,8 @@
 from django import forms
-from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
     AuthenticationForm, PasswordResetForm, SetPasswordForm
-from django.utils.translation import gettext, gettext_lazy as _
 from django.contrib.auth.password_validation import password_validators_help_text_html
-from .models import Player, PendingEmail, LOCATIONS, MAX_LOCATION_LEN
+from .models import Player, PendingEmail, LOCATIONS
 
 
 class PlayerCreationForm(UserCreationForm):
