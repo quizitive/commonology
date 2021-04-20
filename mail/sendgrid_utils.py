@@ -37,6 +37,7 @@ def sendgrid_send(subject, msg, email_list,
 
     if send_at:
         message.send_at = send_at
+    message.category = "Commonology"
 
     sendgrid_client = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
     response = sendgrid_client.send(message)
