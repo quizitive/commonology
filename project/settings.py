@@ -10,7 +10,7 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
 project_name = 'commonology'
-domain = 'commonologygame.com'
+DOMAIN = 'commonologygame.com'
 
 DEBUG = env.get("DEBUG", False)
 DEBUG_TOOLBAR = env.get("DEBUG_TOOLBAR", False)
@@ -18,10 +18,13 @@ DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
-ALLOWED_HOSTS = ['127.0.0.1', domain, 'staging.' + domain, 'staging.quizitive.com']
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100
+
+ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN, 'staging.quizitive.com']
 INTERNAL_IPS = ()
 if DEBUG:
-    INTERNAL_IPS = ('127.0.0.1', 'staging.' + domain, )
+    INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN,)
 
 TIME_ZONE = 'UTC'
 
@@ -42,6 +45,9 @@ if env.get('EAGER_CELERY', False):
 INSTALLED_APPS = [
     'sslserver',
     'users',
+    'ckeditor',
+    'ckeditor_uploader',
+    'django_object_actions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,10 +56,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'social_django',
     'fontawesome-free',
-    'mail',
     'community',
     'game',
     'leaderboard',
+    'mail',
 ]
 
 if DEBUG_TOOLBAR:
@@ -165,6 +171,12 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'project/static')
 ]
 
+CKEDITOR_JQUERY_URL = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
+CKEDITOR_UPLOAD_PATH = "ckeditor_uploads/"
+CKEDITOR_IMAGE_BACKEND = "pillow"
+MEDIA_URL = '/media/'
+MEDIA_ROOT = 'media/'
+
 if env.get("ENABLE_MAIL"):
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
@@ -174,7 +186,11 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = env.get('SENDGRID_APIKEY', 'foo')
-DEFAULT_FROM_EMAIL = 'concierge@' + domain
+DEFAULT_FROM_EMAIL = 'concierge@' + DOMAIN
+DEFAULT_FROM_EMAIL_NAME = 'CommonologyGame Concierge'
+
+ALEX_FROM_EMAIL = 'alex@commonologygame.com'
+ALEX_FROM_NAME = 'Alex Fruin'
 
 MAILCHIMP_API_KEY = env.get('MAILCHIMP_APIKEY')
 MAILCHIMP_HOOK_UUID = env.get('MAILCHIMP_HOOK_UUID')

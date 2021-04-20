@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 
 from .forms import PlayerCreationForm, PlayerChangeForm
 from .models import Player, PendingEmail, Team
+from .actions import subscribe_action, unsubscribe_action
 from mail.tasks import update_mailing_list_subscribed
 
 
@@ -12,7 +13,7 @@ class PlayerUserAdmin(UserAdmin):
     form = PlayerChangeForm
     model = Player
     list_display = ('email', 'date_joined', 'first_name', 'last_name', 'subscribed')
-    list_filter = ('date_joined', 'is_staff', 'is_active', 'is_superuser')
+    list_filter = ('date_joined', 'subscribed', 'is_staff', 'is_active', 'is_superuser')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal', {'fields': ('first_name', 'last_name', 'display_name', 'birth_date', 'is_member', 'subscribed')}),
@@ -29,6 +30,7 @@ class PlayerUserAdmin(UserAdmin):
     )
     search_fields = ('email',)
     ordering = ('email',)
+    actions = [subscribe_action, unsubscribe_action]
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
