@@ -6,8 +6,11 @@ from users.models import Player
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from sendgrid.helpers.mail import To
-
 from users.utils import sign_user
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def make_substitutions(e, i):
@@ -60,3 +63,5 @@ def mass_mail(subject, msg, from_email, email_list=None):
 
         if email_list:
             sendgrid_send(subject, msg, email_list, from_email, send_at=send_at)
+
+        logger.info(f"{count} recipients just received a blast with subject = {subject}.")
