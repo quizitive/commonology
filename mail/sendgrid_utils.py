@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from users.models import Player
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, To, Category
+from sendgrid.helpers.mail import Mail, To, Category, Header
 from users.utils import sign_user
 import logging
 
@@ -23,7 +23,7 @@ def make_substitutions(e, i):
 #
 def sendgrid_send(subject, msg, email_list,
                   from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME),
-                  send_at=None):
+                  send_at=None, categories=None):
 
     to_emails = [To(email=e, substitutions=make_substitutions(e, id)) for e, id in email_list]
 
@@ -39,16 +39,20 @@ def sendgrid_send(subject, msg, email_list,
 
     if send_at:
         message.send_at = send_at
-    #  message.category = [Category("Commonology"), Category("Week 52")]  # Can there be more than one category????
+    message.header = Header("List-Unsubscribe", "<-unsubscribelink->")
+    if categories:
+        message.category = [Category(i) for i in categories]
 
     sendgrid_client = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
     response = sendgrid_client.send(message)
 
 
-def mass_mail(subject, msg, from_email, email_list=None):
+def mass_mail(subject, msg, from_email, email_list=None, categories=None):
     if email_list:
         sendgrid_send(subject, msg, email_list, from_email)
     else:
+        if categories:
+            categories = categories.split(', ')
         qs = Player.objects.filter(subscribed=True).all()
         send_at = int(time.time()) + 10
         count = 0
@@ -59,12 +63,12 @@ def mass_mail(subject, msg, from_email, email_list=None):
             email_list.append((p.email, p.id))
 
             if 0 == count % 500:
-                sendgrid_send(subject, msg, email_list, from_email, send_at=send_at)
+                sendgrid_send(subject, msg, email_list, from_email, send_at=send_at, categories=categories)
                 send_at += 900
                 count = 0
                 email_list = []
 
         if email_list:
-            sendgrid_send(subject, msg, email_list, from_email, send_at=send_at)
+            sendgrid_send(subject, msg, email_list, from_email, send_at=send_at, categories=categories)
 
         logger.info(f"{count} recipients just received a blast with subject = {subject}.")
