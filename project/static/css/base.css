@@ -91,3 +91,16 @@ header.w3-container {
     color: #fff!important;
     background: #f26649!important;
 }
+
+
+/* Login with Google */
+img.login-google {
+  max-height:36px;
+  max-width:36px;
+}
+span.login-google {
+  margin-top: 2px;
+}
+button.login-google:hover {
+  border-radius:4px;
+}

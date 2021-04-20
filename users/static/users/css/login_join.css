@@ -2,17 +2,5 @@
 
 /* Slightly smaller (phone-size) like a door */
 .w3-modal-content {
-  max-width: 380px!important;
-}
-
-/* Login with Google */
-img.login-google {
-  max-height:36px;
-  max-width:36px;
-}
-span.login-google {
-  margin-top: 2px;
-}
-button.login-google:hover {
-  border-radius:4px;
+  max-width: 500px!important;
 }
