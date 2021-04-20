@@ -17,6 +17,7 @@ def make_substitutions(e, i):
     url = mark_safe(f"https://{settings.DOMAIN}/unsubscribe/{x}")
     return {'-email-': e, '-unsubscribelink-': url}
 
+
 #
 # Really good examples: https://github.com/sendgrid/sendgrid-python/blob/main/examples/helpers/mail_example.py
 #
