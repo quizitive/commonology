@@ -25,6 +25,7 @@ urlpatterns = [
     path("accounts/login/", auth_views.LoginView.as_view(template_name="users/login.html")),
     path('password_reset/', auth_views.PasswordResetView.as_view(
         template_name='users/pwd_reset.html',
+        html_email_template_name='emails/password_reset_email.html',
         form_class=PwdResetForm
     ), name='password_reset'),
     path('password_reset_done/', views.PwdResetRequestSentView.as_view(), name='password_reset_done'),
