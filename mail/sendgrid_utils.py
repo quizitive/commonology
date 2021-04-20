@@ -4,8 +4,7 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from users.models import Player
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-from sendgrid.helpers.mail import To
+from sendgrid.helpers.mail import Mail, To, Category
 from users.utils import sign_user
 import logging
 
@@ -18,7 +17,9 @@ def make_substitutions(e, i):
     url = mark_safe(f"https://{settings.DOMAIN}/unsubscribe/{x}")
     return {'-email-': e, '-unsubscribelink-': url}
 
-
+#
+# Really good examples: https://github.com/sendgrid/sendgrid-python/blob/main/examples/helpers/mail_example.py
+#
 def sendgrid_send(subject, msg, email_list,
                   from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME),
                   send_at=None):
@@ -37,7 +38,7 @@ def sendgrid_send(subject, msg, email_list,
 
     if send_at:
         message.send_at = send_at
-    message.category = "Commonology"
+    #  message.category = [Category("Commonology"), Category("Week 52")]  # Can there be more than one category????
 
     sendgrid_client = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
     response = sendgrid_client.send(message)
