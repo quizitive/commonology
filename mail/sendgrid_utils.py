@@ -35,23 +35,13 @@ def sendgrid_send(subject, msg, email_list,
     if send_at:
         message.send_at = send_at
 
-    try:
-        sendgrid_client = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
-
-        response = sendgrid_client.send(message)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-    except Exception as e:
-        print(e)
+    sendgrid_client = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
+    response = sendgrid_client.send(message)
 
 
 def mass_mail(subject, msg, from_email, email_list=None):
     if email_list:
         sendgrid_send(subject, msg, email_list, from_email)
-        print(msg)
-        print(from_email)
-        print(email_list)
     else:
         qs = Player.objects.filter(subscribed=True).all()
         send_at = int(time.time()) + 10
