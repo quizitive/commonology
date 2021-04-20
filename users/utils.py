@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from .models import PendingEmail
 from django.contrib.auth import get_user_model
 from django.core.signing import Signer
-from django.conf import settings
 import logging
 
 logger = logging.getLogger(__name__)

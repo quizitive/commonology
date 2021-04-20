@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
 from .models import MailMessage
+from users.models import Player
 from django_object_actions import DjangoObjectActions
 
 from .utils import make_absolute_urls
@@ -9,9 +10,22 @@ from .sendgrid_utils import mass_mail
 @admin.register(MailMessage)
 class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     def send_test(self, request, obj):
+        email = obj.test_recipient
+        try:
+            p = Player.objects.filter(email=email).get()
+            id = p.id
+        except Player.DoesNotExist:
+            messages.add_message(request, messages.WARNING,
+                                 'Cannot send to a test email address that is not in our Player list.')
+            return
+        if not p.subscribed:
+            messages.add_message(request, messages.WARNING,
+                                 'Cannot send test message to unsubscribed recipient.')
+            return
+
         message = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
-        mass_mail(obj.subject, message, from_email, email_list=[(obj.test_recipient, 0)])
+        mass_mail(obj.subject, message, from_email, email_list=[(email, id)])
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
@@ -42,3 +56,4 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     list_filter = ('created',)
     search_fields = ('subject',)
     ordering = ('-created',)
+    save_on_top = True
