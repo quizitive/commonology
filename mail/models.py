@@ -9,7 +9,7 @@ class MailMessage(models.Model):
     from_email = models.EmailField('from email address', default=settings.ALEX_FROM_EMAIL)
     test_recipient = models.EmailField('test recipient email address')
     categories = models.CharField(max_length=50, blank=True,
-                                  help_text="A comma separated list of categories.")
+                                  help_text="A comma separated list of categories. i.e GameOn|Reminder|Resuts + Week#")
     subject = models.CharField(max_length=150, blank=False)
     message = RichTextUploadingField(blank=True)
     created = models.DateTimeField(default=timezone.now)
