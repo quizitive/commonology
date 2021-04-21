@@ -3,14 +3,12 @@ from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.shortcuts import redirect
-from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView, PasswordChangeView
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
@@ -20,6 +18,7 @@ from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, 
 from users.models import PendingEmail
 from users.utils import unsubscribe
 from mail.tasks import update_mailing_list_subscribed
+from mail.sendgrid_utils import sendgrid_send
 
 from .utils import remove_pending_email_invitations
 
@@ -127,8 +126,7 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
         context = {'confirm_url': confirm_url}
         msg = render_to_string('users/email_change.html', context)
 
-        return send_mail(subject='Email confirmation', from_email=None,
-                         message=msg, recipient_list=[email])
+        return sendgrid_send('Email confirmation', msg, [(email, None)])
 
 
 class JoinView(UserCardFormView):
@@ -198,8 +196,7 @@ def send_invite(request, pe):
     context = {'referrer_str': referrer_str, 'join_url': join_url, 'more_info_str': more_info_str}
     msg = render_to_string('emails/invite_email.html', context)
 
-    return send_mail(subject="You're Invited to Commonology", message=msg,
-                     from_email=None, recipient_list=[email], html_message=msg)
+    return sendgrid_send("You're Invited to Commonology", msg, [(email, None)])
 
 
 class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
@@ -383,14 +380,20 @@ class PwdChangeView(UserCardFormView, PasswordChangeView):
 class UnsubscribeView(View):
     def get(self, request, token):
         i, t = token.split(':')
-        u = User.objects.filter(id=i).first()
+        context = {'header': 'Unsubscribe'}
+        try:
+            u = User.objects.filter(id=i).first()
+        except User.DoesNotExist:
+            context['custom_message'] = "You have been unsubscribed."
+            return render(request, 'users/base.html', context)
+
         email = u.email
         t = ':'.join([email, t])
-        context = {'header': 'Unsubscribe'}
         try:
             e = Signer().unsign(t)
             unsubscribe(e)
-            context['custom_message'] = "You have been unsubscribed."
+            context['custom_message'] = f"You have been unsubscribed. If you did not mean to unsubscribe" \
+                                        f"you can simply login and update your profile."
         except BadSignature:
             context['custom_message'] = "There is something wrong with your unsubscribe link."
         return render(request, 'users/base.html', context)

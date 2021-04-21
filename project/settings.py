@@ -187,7 +187,7 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'apikey'
 EMAIL_HOST_PASSWORD = env.get('SENDGRID_APIKEY', 'foo')
 DEFAULT_FROM_EMAIL = 'concierge@' + DOMAIN
-DEFAULT_FROM_EMAIL_NAME = 'CommonologyGame Concierge'
+DEFAULT_FROM_EMAIL_NAME = 'Commonology'
 
 ALEX_FROM_EMAIL = 'alex@commonologygame.com'
 ALEX_FROM_NAME = 'Alex Fruin'

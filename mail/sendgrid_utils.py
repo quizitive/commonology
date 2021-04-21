@@ -23,11 +23,11 @@ def make_substitutions(e, i):
 #
 def sendgrid_send(subject, msg, email_list,
                   from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME),
-                  send_at=None, categories=None):
+                  send_at=None, categories=None, unsub_link=False):
 
     to_emails = [To(email=e, substitutions=make_substitutions(e, id)) for e, id in email_list]
 
-    msg = render_to_string('mail/mail_base.html', context={'message': mark_safe(msg)})
+    msg = render_to_string('mail/mail_base.html', context={'message': mark_safe(msg), 'unsub_link': unsub_link})
 
     message = Mail(
         from_email=from_email,
@@ -63,12 +63,14 @@ def mass_mail(subject, msg, from_email, email_list=None, categories=None):
             email_list.append((p.email, p.id))
 
             if 0 == count % 500:
-                sendgrid_send(subject, msg, email_list, from_email, send_at=send_at, categories=categories)
+                sendgrid_send(subject, msg, email_list, from_email,
+                              send_at=send_at, categories=categories, unsub_link=True)
                 send_at += 900
                 count = 0
                 email_list = []
 
         if email_list:
-            sendgrid_send(subject, msg, email_list, from_email, send_at=send_at, categories=categories)
+            sendgrid_send(subject, msg, email_list, from_email,
+                          send_at=send_at, categories=categories, unsub_link=True)
 
         logger.info(f"{count} recipients just received a blast with subject = {subject}.")
