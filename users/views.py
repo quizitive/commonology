@@ -386,9 +386,11 @@ class UnsubscribeView(View):
         u = User.objects.filter(id=i).first()
         email = u.email
         t = ':'.join([email, t])
+        context = {'header': 'Unsubscribe'}
         try:
             e = Signer().unsign(t)
             unsubscribe(e)
-            return HttpResponse("You have been unsubscribed.")
+            context['custom_message'] = "You have been unsubscribed."
         except BadSignature:
-            return HttpResponse("There is something wrong with your unsubscribe link.")
+            context['custom_message'] = "There is something wrong with your unsubscribe link."
+        return render(request, 'users/base.html', context)
