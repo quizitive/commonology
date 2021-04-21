@@ -13,15 +13,16 @@
       }
       #email-header-image {
         display: block;
-          padding: 0px 24px 16px 24px;
+        padding: 0 24px 16px 24px;
         max-width: 240px;
         margin: auto;
       }
       #email-content {
         background: #fff;
-        max-width: 580px;
+        max-width: 600px;
+        box-sizing: border-box;
         margin: 8px auto;
-        padding:32px;
+        padding: 24px 32px 0;
         border: 1px solid lightgrey;
         border-radius: 4px;
       }
@@ -79,16 +80,19 @@
           <img id="email-header-image" src="https://commonologygame.com/static/img/logo.png">
         </div>
         {% block email-content %}
-          <p>{{ message }}</p>
+          {{ message }}
         {% endblock %}
-      </div>
-      <div id="email-footer">
-        This email was sent to -email-.<br>
-        <a id="unsubscribe" href="-unsubscribelink-">unsubscribe from this list</a><br>
-        Commonology · 3421 Terrapin Road · Baltimore, MD 21208 · USA
-      </div>
+        </div>
+
+        <div id="email-footer">
+          {% block email-footer-content %}
+            This email was sent to -email-.<br>
+            {% if unsub_link %}
+            <a id="unsubscribe" href="-unsubscribelink-">unsubscribe from this list</a><br>
+            {% endif %}
+          {% endblock %}
+          Commonology · 3421 Terrapin Road · Baltimore, MD 21208 · USA
+        </div>
     </div>
   </body>
-
-
 </html>
