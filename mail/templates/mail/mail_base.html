@@ -87,7 +87,9 @@
         <div id="email-footer">
           {% block email-footer-content %}
             This email was sent to -email-.<br>
+            {% if unsub_link %}
             <a id="unsubscribe" href="-unsubscribelink-">unsubscribe from this list</a><br>
+            {% endif %}
           {% endblock %}
           Commonology · 3421 Terrapin Road · Baltimore, MD 21208 · USA
         </div>
