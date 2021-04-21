@@ -57,3 +57,10 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     search_fields = ('subject',)
     ordering = ('-created',)
     save_on_top = True
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if 'message' in form.changed_data:
+            obj.tested = False
+            obj.sent = False
+            obj.save()
