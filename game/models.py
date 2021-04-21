@@ -59,8 +59,6 @@ class Game(models.Model):
             'question_id', 'raw_string'
         ).filter(
             question__game=self
-        ).exclude(
-            player__in=self.hosts.values_list('id', flat=True)
         ).annotate(count=models.Count('raw_string')).order_by()
 
     @property
