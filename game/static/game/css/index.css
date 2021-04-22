@@ -1,13 +1,39 @@
 h1 {
   vertical-align: middle;
 }
+a {
+  text-decoration: none;
+}
 h1.logo {
     font-size: 12vw;
-  }
+}
+.logo-container {
+  display: block;
+  padding-bottom: 8vh;
+  width: 95%
+}
+.button-container {
+  font-size: 16px;
+  font-weight: 300;
+  width: 100%;
+  margin: auto;
+  height: 10vh;
+  min-height: 42px;
+  padding: 1vh 0;
+  position: absolute;
+  top: 54%;
+  left: 50%;
+  transform: translate(-50%,-50%)
+}
+button.home-buttons {
+  width: 30%;
+  max-width: 180px;
+  margin: 0 2px;
+}
 h3.subheader {
   font-family: "Poppins", "Helvetica Neue", "Verdana", sans-serif;
   font-weight: 200;
-  font-size: 6vw;
+  font-size: 5vw;
   /*padding-bottom: 2vw;*/
 }
 .countdown-container {
@@ -15,6 +41,9 @@ h3.subheader {
   display: block;
   text-align: center;
   padding-bottom: 1rem;
+}
+.countdown-subheader {
+  font-size: 1rem
 }
 .countdown-display {
   font-family: "Poppins", "Helvetica Neue", "Verdana", sans-serif;
@@ -31,8 +60,17 @@ h3.subheader {
   font-size: 4vw;
 }
 .approx {
-  font-size: 2vh;
-  margin-top: 4vh;
+  font-size: 10px;
+  font-weight: 200;
+  margin-top: 0.5vh;
+  max-font-size: 10px;
+}
+
+/* Not tiny phones */
+@media only screen and (min-width: 568px) {
+  .subheader {
+    font-size: 6vw;
+  }
 }
 
 /* Large Screens */
@@ -40,10 +78,21 @@ h3.subheader {
   h1.logo {
     font-size: 7vw;
   }
+  .logo-container {
+    width: 60%;
+  }
+  .button-container {
+    font-size: 18px;
+  }
+  button.home-buttons {
+    width: 30%;
+    max-width: 200px;
+    /*margin: 0 8px;*/
+  }
   h3.subheader {
   font-family: "Poppins", "Helvetica Neue", "Verdana", sans-serif;
   font-weight: 200;
-  font-size: 2rem;
+  font-size: 1.6rem;
   }
   .countdown {
   font-family: "Poppins", "Helvetica Neue", "Verdana", sans-serif;
@@ -62,7 +111,7 @@ h3.subheader {
     font-size: 5rem;
   }
   .countdown-unit-block {
-    margin: 0 4rem;
+    margin: 0 3.5rem;
   }
   .countdown-unit {
     font-size: 2rem;
@@ -89,6 +138,14 @@ h3.subheader {
   }
   h3.subheader {
     font-size: 5vh;
+  }
+  .button-container {
+    font-size: 12px;
+    /*font-weight: normal;*/
+  }
+  button.home-buttons {
+    width: 30%;
+    max-width: 120px;
   }
   .countdown-val {
     font-size: 10vh;
