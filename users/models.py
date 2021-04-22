@@ -2,6 +2,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import CIEmailField
 from django.utils.translation import ugettext_lazy as _
 
 from game.utils import create_key
@@ -13,14 +14,24 @@ LOCATIONS = [(i, i) for i in ["Please Select", "Afghanistan", "Alabama", "Alaska
 MAX_LOCATION_LEN = max([len(i[0]) for i in LOCATIONS]) + 1
 
 
+class CustomCIEmailField(CIEmailField):
+    description = "CIEmailField forcing forms to downcase"
+
+    def __init__(self, *args, **kwargs):
+        super(CustomCIEmailField, self).__init__(*args, **kwargs)
+
+    def get_prep_value(self, value):
+        return str(value).lower()
+
+
 class CustomUser(AbstractUser):
     username = None
-    email = models.EmailField(_('email address'), unique=True)
+    email = CustomCIEmailField(_('email address'), unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     location = models.CharField(max_length=MAX_LOCATION_LEN, choices=LOCATIONS, blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    referrer = models.EmailField(_('Referrer email address'), blank=True, null=True)
+    referrer = CustomCIEmailField(_('Referrer email address'), blank=True, null=True)
     subscribed = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
