@@ -2,6 +2,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import CIEmailField
 from django.utils.translation import ugettext_lazy as _
 
 from game.utils import create_key
@@ -15,7 +16,7 @@ MAX_LOCATION_LEN = max([len(i[0]) for i in LOCATIONS]) + 1
 
 class CustomUser(AbstractUser):
     username = None
-    email = models.EmailField(_('email address'), unique=True)
+    email = CIEmailField(_('email address'), unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     location = models.CharField(max_length=MAX_LOCATION_LEN, choices=LOCATIONS, blank=True)
