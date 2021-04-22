@@ -20,8 +20,7 @@ def index(request):
         'event_time': event_time,
         'event_text': event_text
     }
-    # return render(request, 'game/index.html', context)
-    return redirect('leaderboard')
+    return render(request, 'game/index.html', context)
 
 
 def about_view(request):
