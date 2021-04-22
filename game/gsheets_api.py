@@ -50,6 +50,7 @@ def api_data_to_df(raw_data):
     }, inplace=True)
     responses.sort_values('Timestamp', inplace=True)
     responses.drop_duplicates('Email Address', keep='first', inplace=True)
+    responses['Email Address'] = responses['Email Address'].str.lower()
 
     return responses
 
