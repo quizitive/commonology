@@ -158,7 +158,7 @@ class TestGameTabulation(BaseGameDataTestCase):
         self.assertEqual(answers.count(), 290)
 
     def test_blank_answers(self):
-        new_user_email = "userX@fakeemail.com"
+        new_user_email = "userx@fakeemail.com"
         User = get_user_model()
         p = User.objects.create(email=new_user_email)
         new_answer_with_blanks = pd.DataFrame([[
