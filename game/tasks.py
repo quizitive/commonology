@@ -9,7 +9,6 @@ from django.db import transaction
 
 from game.models import Game, Question, Answer, AnswerCode
 from django.contrib.auth import get_user_model
-from mail.tasks import update_mailing_list_subscribed
 
 
 @shared_task
