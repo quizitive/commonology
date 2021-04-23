@@ -266,8 +266,15 @@ class EmailConfirmedView(View):
             return self._join_fail(request)
 
     def post(self, request, uidb64, *args, **kwargs):
-        form = JoinForm(request.POST)
         email = request.POST.get('email')
+
+        # if the player is already in our database, update that record
+        try:
+            user = User.objects.get(email=email)
+            form = JoinForm(request.POST, instance=user)
+        except User.DoesNotExist:
+            form = JoinForm(request.POST)
+
         if not email:
             return redirect('home')
 

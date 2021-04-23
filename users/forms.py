@@ -77,13 +77,13 @@ class JoinForm(PlayerCreationForm):
                   'password1', 'password2', 'location')
 
     def is_valid(self):
-        # todo: this method can be removed - was used for ad-hoc testing
-        valid = super(JoinForm, self).is_valid()
+        # email must be valid because the join link was sent to it
+        # skipping so form doesn't throw duplicate email validation
+        # that is handled in the view using JoinForm(request.POST, instance=user)
+        self.errors.pop('email', None)
+        valid = super().is_valid()
         return valid
 
-    def save(self, commit=True):
-        player = super(JoinForm, self).save(commit=commit)
-        return player
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
