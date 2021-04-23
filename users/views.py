@@ -136,6 +136,11 @@ class JoinView(UserCardFormView):
     card_template = 'users/cards/join_card.html'
     custom_message = "Enter your email to join the game, follow your friends, and much more coming soon!"
 
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('home')
+        return super().get(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         email = request.POST.get('email')
         if not email:
