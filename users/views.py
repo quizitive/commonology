@@ -287,7 +287,6 @@ class EmailConfirmedView(View):
             user = form.save(commit=False)
             user.referrer = pe.referrer
             user.is_member = True
-
             user.save()
             raw_password = form.clean_password2()
             user = authenticate(email=user.email, password=raw_password)
