@@ -282,6 +282,11 @@ class PendingUsersTests(TestCase):
 
         self.join_test_helper(data)
 
+    def test_join_email_exists(self):
+        data = self.data
+        get_local_user(e=data['email'])
+        self.join_test_helper(data)
+
     def test_email_change(self):
         user = get_local_user()
         client = Client()
