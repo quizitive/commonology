@@ -257,7 +257,7 @@ class EmailConfirmedView(View):
                 display_name = ''
 
             form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer, 'display_name': display_name})
-            messages.info(request, f"Email: {pe.email} (you can change this after signing up)")
+            messages.info(request, mark_safe(f"Email: {pe.email}<br/>(you can change this after signing up)"))
             return render(request, "users/register.html", {"form": self._format_form(form), "email": email})
 
         except PendingEmail.DoesNotExist:
@@ -266,8 +266,15 @@ class EmailConfirmedView(View):
             return self._join_fail(request)
 
     def post(self, request, uidb64, *args, **kwargs):
-        form = JoinForm(request.POST)
         email = request.POST.get('email')
+
+        # if the player is already in our database, update that record
+        try:
+            user = User.objects.get(email=email)
+            form = JoinForm(request.POST, instance=user)
+        except User.DoesNotExist:
+            form = JoinForm(request.POST)
+
         if not email:
             return redirect('home')
 
@@ -288,7 +295,7 @@ class EmailConfirmedView(View):
 
             return redirect('/')
 
-        messages.info(request, f"Email: {email} (you can change this after signing up)")
+        messages.info(request, mark_safe(f"Email: {email}<br/>(you can change this after signing up)"))
         return render(request, "users/register.html", {"form": self._format_form(form)})
 
     @staticmethod

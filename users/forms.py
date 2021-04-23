@@ -76,6 +76,14 @@ class JoinForm(PlayerCreationForm):
         fields = ('email', 'first_name', 'last_name', 'display_name',
                   'password1', 'password2', 'location')
 
+    def is_valid(self):
+        # email must be valid because the join link was sent to it
+        # skipping so form doesn't throw duplicate email validation
+        # that is handled in the view using JoinForm(request.POST, instance=user)
+        self.errors.pop('email', None)
+        valid = super().is_valid()
+        return valid
+
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
