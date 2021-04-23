@@ -76,6 +76,14 @@ class JoinForm(PlayerCreationForm):
         fields = ('email', 'first_name', 'last_name', 'display_name',
                   'password1', 'password2', 'location')
 
+    def is_valid(self):
+        # todo: this method can be removed - was used for ad-hoc testing
+        valid = super(JoinForm, self).is_valid()
+        return valid
+
+    def save(self, commit=True):
+        player = super(JoinForm, self).save(commit=commit)
+        return player
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
