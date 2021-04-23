@@ -4,7 +4,6 @@ from django.contrib.auth.admin import UserAdmin
 from .forms import PlayerCreationForm, PlayerChangeForm
 from .models import Player, PendingEmail, Team
 from .actions import subscribe_action, unsubscribe_action
-from mail.tasks import update_mailing_list_subscribed
 
 
 @admin.register(Player)
@@ -31,11 +30,6 @@ class PlayerUserAdmin(UserAdmin):
     search_fields = ('email',)
     ordering = ('email',)
     actions = [subscribe_action, unsubscribe_action]
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if 'subscribed' in form.changed_data:
-            update_mailing_list_subscribed(obj.email, obj.subscribed)
 
 
 @admin.register(PendingEmail)
