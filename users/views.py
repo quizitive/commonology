@@ -257,7 +257,7 @@ class EmailConfirmedView(View):
                 display_name = ''
 
             form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer, 'display_name': display_name})
-            messages.info(request, f"Email: {pe.email} (you can change this after signing up)")
+            messages.info(request, mark_safe(f"Email: {pe.email}<br/>(you can change this after signing up)"))
             return render(request, "users/register.html", {"form": self._format_form(form), "email": email})
 
         except PendingEmail.DoesNotExist:
@@ -295,7 +295,7 @@ class EmailConfirmedView(View):
 
             return redirect('/')
 
-        messages.info(request, f"Email: {email} (you can change this after signing up)")
+        messages.info(request, mark_safe(f"Email: {email}<br/>(you can change this after signing up)"))
         return render(request, "users/register.html", {"form": self._format_form(form)})
 
     @staticmethod
