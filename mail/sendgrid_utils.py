@@ -57,7 +57,7 @@ def sendgrid_send(subject, msg, email_list,
 
 def mass_mail(subject, msg, from_email, email_list=None, categories=None):
     if email_list:
-        sendgrid_send(subject, msg, email_list, from_email)
+        sendgrid_send(subject, msg, email_list, from_email, unsub_link=True)
     else:
         if categories:
             categories = categories.split(', ')
