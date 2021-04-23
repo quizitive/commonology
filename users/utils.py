@@ -36,7 +36,9 @@ def subscribe(email):
 
 
 # used in social_auth pipeline
-def add_display_name(strategy, details, backend, user=None, *args, **kwargs):
+def add_additional_fields(strategy, details, backend, user=None, *args, **kwargs):
     if not user.display_name:
         user.display_name = f"{user.first_name} {user.last_name}".strip()
-        user.save()
+
+    user.is_member = True
+    user.save()
