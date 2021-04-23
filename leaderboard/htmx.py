@@ -57,8 +57,9 @@ class LeaderboardHTMXView(View):
             # a game has no questions or answers yet
             total_players = 0
 
-        visible_players = min(len(leaderboard), 100)
-        leaderboard = leaderboard[:100].to_dict(orient='records')
+        visible_players = min(len(leaderboard), total_players)
+        # todo: paginate results and restrict functionality to logged in users
+        leaderboard = leaderboard.to_dict(orient='records')
 
         context = {
             'game_id': game_id,
