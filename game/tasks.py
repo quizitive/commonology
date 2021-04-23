@@ -75,8 +75,6 @@ def players_to_db(responses):
             email=e,
             defaults={'display_name': dn[:100]}
         )
-        if created:
-            update_mailing_list_subscribed(e)
 
 
 def answers_to_db(game, responses, update=False):
