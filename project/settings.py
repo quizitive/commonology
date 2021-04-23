@@ -106,7 +106,7 @@ ROOT_URLCONF = 'project.urls'
 
 # These redirects are needed for the users app.
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "leaderboard"
+LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
 
 SESSION_ENGINE = 'redis_sessions.session'
