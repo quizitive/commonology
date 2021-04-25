@@ -7,7 +7,9 @@
     {% endif %}
       <h1 class="leaderboard">Week {{ game_id }} {{ view }}</h1>
 
-      <h3 class="leaderboard">{{ date_range }}</h3>
+      <h3 class="leaderboard">{{ date_range }}
+        <a href="{% url 'results' %}">The Results!</a>
+      </h3>
         <hr/>
     </div>
   </div>

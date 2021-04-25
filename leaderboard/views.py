@@ -94,6 +94,7 @@ class ResultsView(View):
             # 'player': request.user.player.display_name,
             'game_id': game_id,
             'date_range': game.date_range_pretty,
+            'questions': game.game_questions,
             'answer_tally': answer_tally
         }
         return render(request, 'leaderboard/results.html', context)

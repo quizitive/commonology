@@ -1,3 +1,6 @@
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
+
+from django import forms
 from django.contrib import admin
 
 from game.models import Game, Question, Answer, AnswerCode
@@ -9,10 +12,19 @@ class GameAdmin(admin.ModelAdmin):
     ordering = ('-game_id', )
     search_fields = ('game_id', 'name')
 
+#
+# class QuestionAdminForm(forms.ModelForm):
+#     image = forms.ImageField(widget=CKEditorUploadingWidget())
+#
+#     class Meta:
+#         model = Question
+#         fields = '__all__'
+
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ('text', 'game')
+    list_filter = ('game__name',)
     search_fields = ('text', 'game__name')
 
 

@@ -1,4 +1,6 @@
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
+from ckeditor_uploader.fields import RichTextUploadingField
+from django.utils.safestring import mark_safe
 from django.db import models
 from users.models import Player
 
@@ -15,6 +17,7 @@ class Game(models.Model):
         default=False,
         help_text="This game can be published to the dashboard"
     )
+    results_view = RichTextUploadingField(blank=True)
 
     class Meta:
         ordering = ['-game_id']
@@ -108,9 +111,16 @@ class Question(models.Model):
         (op, 'Optional')
     ]
     type = models.CharField(max_length=2, choices=QUESTION_TYPES)
+    image = models.FileField(upload_to='questions/', blank=True, null=True)
+    commentary = RichTextUploadingField(blank=True)
+    hide_default_results = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text
+    #
+    # @property
+    # def results_html(self):
+    #     return mark_safe(self.results_view)
 
 
 class Answer(models.Model):

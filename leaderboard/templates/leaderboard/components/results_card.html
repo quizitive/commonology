@@ -1,17 +1,23 @@
+{% load leadeboard_tags %}
+
 <div class="answer_slides w3-card w3-container w3-padding-large" style="position: relative;">
 
   <button class="w3-button" style="float: left; position: absolute; left:0; top:180px;" onclick="plusDivs(-1)">&#10094;</button>
   <button class="w3-button" style="float: right; position: absolute; right:0; top:180px;" onclick="plusDivs(+1)">&#10095;</button>
 
 
-  <p><b>{{ q }}</b></p>
+  <p><b>{{ q.text }}</b></p>
   <div class="w3-row w3-padding-16 question_content" style="padding: 16px 24px;">
+  {% if q.image %}
     <div class="w3-col w3-padding-small m5">
-      <img class="w3-image" src="https://via.placeholder.com/350" style="display:inline-flex;">
+      <img class="w3-image" src="{{ q.image.url }}" style="display:inline-flex;">
     </div>
-    <div class="w3-col w3-padding-small m7">
+  {% endif %}
+    <div class="w3-col w3-padding-small m12">
+    {{ q.results_html }}
       <ul>
-        {% for res, val in responses.items %}
+        {% question_responses as question_responses %}
+        {% for res, val in question_responses.items %}
         <li>{{ res }}   |    <b>{{ val }}</b></li>
         {% endfor %}
       </ul>
