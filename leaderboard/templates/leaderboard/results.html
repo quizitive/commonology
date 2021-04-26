@@ -13,6 +13,10 @@
 
   {% include 'leaderboard/components/game_header.html' with view="Results" %}
 
+  <div class="answer_slides w3-card-0 w3-round w3-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
+    {{ game_commentary|safe }}
+  </div>
+
   {# Results objs go here #}
   {% for q in questions %}
     {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
@@ -22,9 +26,4 @@
 
 </div>
 
-
-<script src="{% static "game/js/slideshow.js" %}" type="text/javascript"></script>
-<script>
-  showDivs(1);
-</script>
 {% endblock content %}
