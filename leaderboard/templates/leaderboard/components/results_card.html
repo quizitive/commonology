@@ -1,10 +1,10 @@
 {% load leadeboard_tags %}
 
-<div class="answer_slides w3-card-0 w3-round w3-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
+<div class="answer_slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
 
   <p><b>{{ q.text }}</b></p>
   {% if not q.hide_default_results %}
-    <div class="w3-row w3-padding-16 question_content" style="padding: 16px 24px;">
+    <div class="w3-row w3-padding-16 question_content">
         <div class="w3-col w3-padding-small m6">
           <ul>
             {% question_responses as question_responses %}

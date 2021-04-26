@@ -99,7 +99,8 @@ class ResultsView(View):
 
         context = {
             'game_id': game.game_id,
-            'game_commentary': game.commentary,
+            'game_top_commentary': game.top_commentary,
+            'game_bottom_commentary': game.bottom_commentary,
             'date_range': game.date_range_pretty,
             'questions': game.visible_questions,
             'answer_tally': answer_tally

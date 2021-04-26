@@ -17,7 +17,8 @@ class Game(models.Model):
         default=False,
         help_text="This game can be published to the dashboard"
     )
-    commentary = RichTextUploadingField(blank=True)
+    top_commentary = RichTextUploadingField(blank=True)
+    bottom_commentary = RichTextUploadingField(blank=True)
 
     class Meta:
         ordering = ['-game_id']
