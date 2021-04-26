@@ -2,10 +2,13 @@ from django.contrib.auth import get_user_model
 
 
 unsubscribed_members = '''
+
 carlosc205@gmail.com
+chip@kinshipcompany.com
 rladd@bbyo.org
 Alitman723@gmail.com
 edoardocerpelloni@gmail.com
+shir345@gmail.com
 kristenmartin2@gmail.com
 saramulkeen@gmail.com
 valeria.litovchenko@cbrands.com
@@ -58,12 +61,15 @@ jscharfstein@cspace.com
 schwartz.jason@gmail.com
 baecrystal@gmail.com
 alovisa01@gmail.com
+alejandro.nieves777@gmail.com
 rachel.moffat@initiative.com
+kpitcock17@gmail.com
 robin.m.tiberio@gmail.com
 hillrutan@gmail.com
 shravanbhat1990@gmail.com
 jrakas4@gmail.com
 acprisco90@gmail.com
+samhurwitz@aol.com
 zrowe@ibm.com
 aric.linkins@gmail.com
 danielle.monaco88@gmail.com
@@ -77,6 +83,7 @@ karatepro@aol.com
 petravx@gmail.com
 katy@thesiliconalley.com
 mike_tikkanen@outlook.com
+emilyealdana@gmail.com
 monicaesmith@comcast.net
 abbyroehr@gmail.com
 madelinerob8@gmail.com
