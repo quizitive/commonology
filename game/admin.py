@@ -22,7 +22,6 @@ class GameAdmin(admin.ModelAdmin):
     inlines = (QuestionAdmin, )
 
 
-
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
     list_display = ('raw_string', 'question', 'game')
