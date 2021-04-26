@@ -9,6 +9,15 @@ class QuestionAdmin(admin.StackedInline):
     list_filter = ('game__name',)
     search_fields = ('text', 'game__name')
     ordering = ('number', )
+    fieldsets = (
+        (None, {
+            'fields': ()
+        }),
+        ('Question', {
+            'classes': ('collapse',),
+            'fields': ('number', 'text', 'type', 'image', 'hide_default_results', 'commentary'),
+        }),
+    )
 
     def get_extra(self, request, obj=None, **kwargs):
         return 0
@@ -16,6 +25,7 @@ class QuestionAdmin(admin.StackedInline):
 
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
+    save_on_top = True
     list_display = ('name', 'game_id')
     ordering = ('-game_id', )
     search_fields = ('game_id', 'name')
