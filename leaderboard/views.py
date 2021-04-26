@@ -79,11 +79,18 @@ class LeaderboardView(View):
 
 class ResultsView(View):
 
-    def get(self, request, game_id):
-        try:
+    def dispatch(self, request, *args, **kwargs):
+        game_id = kwargs.get('game_id')
+        # todo: maybe change this to is_authenticated to allow access to historical leaderboards
+        if game_id is not None and not request.user.is_staff:
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, game_id=None):
+        if not game_id:
+            # default to most recent game
+            game_id = Game.objects.aggregate(Max('game_id'))['game_id__max']
             game = Game.objects.get(game_id=game_id)
-        except Game.DoesNotExist:
-            raise Http404("Game does not exist")
 
         if not game.publish and not request.user.is_staff:
             raise PermissionDenied("Results for this game have not yet been published!")
@@ -91,10 +98,10 @@ class ResultsView(View):
         answer_tally = build_answer_tally(game)
 
         context = {
-            # 'player': request.user.player.display_name,
-            'game_id': game_id,
+            'game_id': game.game_id,
+            'game_commentary': game.commentary,
             'date_range': game.date_range_pretty,
-            'questions': game.game_questions,
+            'questions': game.visible_questions,
             'answer_tally': answer_tally
         }
         return render(request, 'leaderboard/results.html', context)

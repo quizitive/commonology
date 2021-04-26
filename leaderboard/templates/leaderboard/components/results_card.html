@@ -1,27 +1,29 @@
 {% load leadeboard_tags %}
 
-<div class="answer_slides w3-card w3-container w3-padding-large" style="position: relative;">
-
-  <button class="w3-button" style="float: left; position: absolute; left:0; top:180px;" onclick="plusDivs(-1)">&#10094;</button>
-  <button class="w3-button" style="float: right; position: absolute; right:0; top:180px;" onclick="plusDivs(+1)">&#10095;</button>
-
+<div class="answer_slides w3-card-0 w3-round w3-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
 
   <p><b>{{ q.text }}</b></p>
-  <div class="w3-row w3-padding-16 question_content" style="padding: 16px 24px;">
-  {% if q.image %}
-    <div class="w3-col w3-padding-small m5">
-      <img class="w3-image" src="{{ q.image.url }}" style="display:inline-flex;">
+  {% if not q.hide_default_results %}
+    <div class="w3-row w3-padding-16 question_content" style="padding: 16px 24px;">
+        <div class="w3-col w3-padding-small m6">
+          <ul>
+            {% question_responses as question_responses %}
+            {% for res, val in question_responses.items %}
+            <li>{{ res }}   |    <b>{{ val }}</b></li>
+            {% endfor %}
+          </ul>
+        </div>
+
+    {% if q.image %}
+      <div class="w3-col w3-padding-small m6">
+        <img class="w3-image" src="{{ q.image.url }}" style="display:inline-flex;">
+      </div>
+    {% endif %}
     </div>
   {% endif %}
-    <div class="w3-col w3-padding-small m12">
-    {{ q.results_html }}
-      <ul>
-        {% question_responses as question_responses %}
-        {% for res, val in question_responses.items %}
-        <li>{{ res }}   |    <b>{{ val }}</b></li>
-        {% endfor %}
-      </ul>
-    </div>
+
+  <div class="w3-row w3-padding-16 question_content" style="padding: 16px 24px;">
+    {{ q.commentary|safe }}
   </div>
 
 </div>

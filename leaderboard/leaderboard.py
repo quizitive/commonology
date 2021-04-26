@@ -8,7 +8,7 @@ from django.db.models import Sum, Subquery, OuterRef
 
 from project.utils import REDIS
 from users.models import Team
-from game.models import Game, Answer, AnswerCode, Question
+from game.models import Game, AnswerCode
 
 
 def build_filtered_leaderboard(game, answer_tally, player_ids=None, search_term=None, team_id=None):
@@ -53,7 +53,7 @@ def _build_leaderboard_fromdb_or_cache(game, answer_tally):
 def _build_leaderboard_fromdb(game, answer_tally):
     cpas = deque(game.coded_player_answers)
     lb_cols = [
-        q_text for q_text in game.questions.exclude(type=Question.op).values_list('text', flat=True)
+        q_text for q_text in game.game_questions.values_list('text', flat=True)
     ]
 
     # build list of list to create a dataframe leaderboard
