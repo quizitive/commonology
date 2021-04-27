@@ -108,6 +108,7 @@ ROOT_URLCONF = 'project.urls'
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
+CSRF_FAILURE_VIEW = "users.views.csrf_failure"
 
 SESSION_ENGINE = 'redis_sessions.session'
 SESSION_REDIS = {
