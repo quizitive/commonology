@@ -5,8 +5,20 @@
 h1.leaderboard {
   margin: 0;
 }
-table.leaderboard td {
+
+/* These settings force the leaderboard to render well on mobile */
+table.leaderboard td, table.leaderboard th, table.leaderboard thead {
+  box-sizing: border-box;
   padding: 8px 8px 4px 8px;
+}
+table.leaderboard th:first-child {
+  padding-left: 0;
+}
+table.leaderboard th:last-child {
+  padding: 0 0 4px 0;
+}
+table.leaderboard td:first-child {
+  padding-left: 8px;
 }
 .name {
   width: 65%;
