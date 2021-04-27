@@ -29,7 +29,7 @@ def build_filtered_leaderboard(game, answer_tally, player_ids=None, search_term=
 
     if search_term:
         leaderboard = leaderboard[leaderboard['Name'].str.contains(
-            "|".join(search_term.split(', ')), flags=re.IGNORECASE, regex=True)]
+            "|".join([re.escape(q) for q in search_term.split(', ')]), flags=re.IGNORECASE, regex=True)]
 
     if team_id:
         team = Team.objects.get(id=team_id)

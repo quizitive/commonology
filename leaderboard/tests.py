@@ -3,13 +3,12 @@ import pandas as pd
 
 from django.urls import reverse
 from django.test import Client
-from django.contrib.auth import get_user_model
 
 from project.utils import REDIS
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from game.models import Game, AnswerCode
 from game.tests import BaseGameDataTestCase
-from users.models import Team
+from users.models import Player
 from django.contrib.auth import get_user_model
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -169,3 +168,16 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         self.game.hosts.add(player)
         self.game.save()
         return player
+
+    def test_leaderboard_search(self):
+        # basic leaderboard search
+        filtered_leaderboard = build_filtered_leaderboard(self.game, self.answer_tally, search_term="5")
+        self.assertEqual(len(filtered_leaderboard), 3)
+        REDIS.delete(lb_cache_key(self.game, self.answer_tally))
+
+        # make sure regex is escaped, search for literals
+        user5 = Player.objects.get(display_name="User 5")
+        user5.display_name = "*5*"
+        user5.save()
+        re_filtered_leaderboard = build_filtered_leaderboard(self.game, self.answer_tally, search_term="*5*")
+        self.assertEqual(len(re_filtered_leaderboard), 1)
