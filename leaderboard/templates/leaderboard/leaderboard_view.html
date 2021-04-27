@@ -10,7 +10,7 @@
   {% include 'leaderboard/components/leaderboard_search.html' %}
 
   {# Lazy Leaderboard #}
-  <div class="w3-container w3-center"
+  <div class="w3-center"
        id="component-leaderboard"
        hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
        hx-trigger="load">

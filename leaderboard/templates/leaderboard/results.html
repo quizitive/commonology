@@ -1,15 +1,16 @@
 {% extends 'game/base.html' %}
 {% load static %}
 
-{% block title %}Commonology Answers{% endblock %}
+{% block title %}Commonology | Answers{% endblock %}
 
 {% block page_style %}
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{#  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">#}
+  <link rel="stylesheet" href="{% static 'leaderboard/css/results.css' %}">
 {% endblock %}
 
 {% block content %}
 
-<div class="content">
+<div class="content card-content">
 
   {% include 'leaderboard/components/game_header.html' with view="Results" %}
 

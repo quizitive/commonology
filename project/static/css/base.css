@@ -15,14 +15,17 @@ div.content {
     margin: 64px auto;
     max-width: 778px;
 }
+div.card-content {
+    padding: 0 8px;
+}
 
 /* so cards have rounded corners on top and bottom */
 header.w3-container {
     border-radius: 4px 4px 0 0
 }
-.w3-card-0 {
-    margin: 0 8px;
-}
+/*.w3-card-0 {*/
+/*    border: None!important;*/
+/*}*/
 
 .w3-button.cg-blue {
     color: white!important;
