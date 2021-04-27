@@ -73,7 +73,7 @@ def mass_mail(subject, msg, from_email, email_list=None, categories=None):
             if 0 == count % 500:
                 sendgrid_send(subject, msg, email_list, from_email,
                               send_at=send_at, categories=categories, unsub_link=True)
-                send_at += 900
+                send_at += 100
                 count = 0
                 email_list = []
 
