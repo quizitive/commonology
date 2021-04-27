@@ -1,0 +1,15 @@
+div.mobile-q-img {
+  display: block!important;
+}
+div.desktop-q-img {
+  display: none!important;
+}
+
+@media only screen and (max-width: 767px) {
+  div.mobile-q-img {
+  display: none!important;
+}
+  div.desktop-q-img {
+  display: block!important;
+}
+}

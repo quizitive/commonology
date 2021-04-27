@@ -5,7 +5,16 @@
   <p><b>{{ q.text }}</b></p>
   {% if not q.hide_default_results %}
     <div class="w3-row w3-padding-16 question_content">
-        <div class="w3-col w3-padding-small m6">
+    <div class="w3-col spacer m1">&nbsp</div>
+
+    <!-- image for mobile -->
+    {% if q.image %}
+      <div class="w3-col w3-padding-large m5" style="display: none;">
+        <img class="w3-image" src="{{ q.image.url }}" style="display:inline-flex;">
+      </div>
+    {% endif %}
+
+        <div class="w3-col w3-padding-small m5">
           <ul>
             {% question_responses as question_responses %}
             {% for res, val in question_responses.items %}
@@ -15,12 +24,14 @@
         </div>
 
     {% if q.image %}
-      <div class="w3-col w3-padding-small m6">
+      <div class="w3-col w3-padding-large m5">
         <img class="w3-image" src="{{ q.image.url }}" style="display:inline-flex;">
       </div>
     {% endif %}
     </div>
   {% endif %}
+
+  <div class="w3-col m1"></div>
 
   <div class="w3-row w3-padding-16 question_content" style="padding: 16px 24px;">
     {{ q.commentary|safe }}
