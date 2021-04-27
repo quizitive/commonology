@@ -24,3 +24,4 @@ python-openssl
 git
 python-is-python3
 redis-server
+python3-pip

@@ -12,7 +12,7 @@ Nearly all of this should work for any Ubuntu server.
 We'll use Nginx, Gunicorn, and Django.
 
 Notes: 
-1. Wherever I use angle brackets in a command I mean for you to replace it with the appropriate value.  i.e. `<ip address>`, or `<domain name>` should be replaced with your ip address or domain name.
+1. Angle brackets indicate where you need to use an appropriate value.  i.e. `<ip address>`, or `<domain name>` should be replaced with your ip address or domain name.
 2. As an example I'll use our commonologygame project so you may see commonologygame.com or commonologygame for a database name in this doc.  Replace that with your domain or project.
 3. **DO NOT USE** commonologygame anywhere on your server. 
 
@@ -104,7 +104,7 @@ At this point you can copy the contents of `packages.txt` and add them to a new 
 
 From your local terminal:
 ```
-  $ scp packages.txt staging.commonologygame.com:
+  $ scp packages.txt root@staging.commonologygame.com:~/
 ```
  
 ```
@@ -171,8 +171,8 @@ That command will give you a few lines to add to /home/django/.bashrc` do that.
 Then logout and log back in again.
 
 ```
-  $ pyenv install 3.8.2
-  $ pyenv shell 3.8.2
+  $ pyenv install 3.9.4
+  $ pyenv shell 3.9.4
   $ pyenv virtualenv project
 ```
 
@@ -235,8 +235,9 @@ set +a
   postgres=# ALTER ROLE postgres SET client_encoding TO 'utf8';
   postgres=# ALTER ROLE postgres SET default_transaction_isolation TO 'read committed';
   postgres=# ALTER ROLE postgres SET timezone TO 'UTC';
-  postgres=# GRANT ALL PRIVILEGES ON DATABASE commonology TO postgres;
-  postgres=# ALTER USER postgres with superuser;
+  postgres=# GRANT ALL PRIVILEGES ONALTER USER postgres with superuser; DATABASE commonology TO postgres;
+  postgres=# alter user postgres PASSWORD 'postgres';
+  postgres=# 
   postgres=# \q
   ```
 
@@ -249,7 +250,8 @@ set +a
 
   You can load the dump into postgres like this:
   ```
-  $ pg_restore --verbose --clean --no-acl --no-owner -d commonology ~/pg_dumps/commonology_Mon.tar 
+  $ cd
+  $ sudo -u postgres pg_restore --verbose --clean --no-acl -d commonology ~/pg_dumps/commonology_Mon.tar 
   ```
 
 ## Redis
@@ -260,6 +262,7 @@ This was installed earlier when Ubuntu packages were installed.  There shouldn't
 systemd files for celery
 
 ```
+$ sudo su -
 # cp /home/django/commonology/server_files/etc/systemd/system/celery.service /etc/systemd/system/
 # cp /home/django/commonology/server_files/etc/systemd/system/celeryserial.service /etc/systemd/system/
 # cp /home/django/commonology/server_files/etc/systemd/system/celerybeat.service /etc/systemd/system/
@@ -292,11 +295,42 @@ $ sudo su -
 # systemctl enable gunicorn
 # exit
 $ cd
-$ cd commonologygame
+$ cd commonology
 $ ls
 ```
 
-At this point you should see the `commonologygame.sock` file in the ls listing.
+At this point you should see the `commonology.sock` file in the ls listing.
+
+## Get https certificates
+
+We'll use [letsencrypt](http://letsencrypt.org)
+because it is free and works well.
+
+Reference: [certbot install directions](https://certbot.eff.org/lets-encrypt/ubuntufocal-nginx)
+
+Before we start we need to make sure the server is answering for our domain.
+Make sure to start nginx with default values.  Later we'll change them for Django.
+
+```shell
+$ sudo su 
+# ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+# systemctl restart nginx
+```
+
+
+Install and run letsencrypt certbot:
+
+```shell
+$ sudo snap install core
+$ sudo snap refresh core
+$ sudo apt update
+$ sudo snap install --classic certbot
+$ sudo certbot certonly --nginx
+```
+
+For some reason this command sometimes adds the appropriate references to
+the end of each config file in `/etc/nginx/sites-available/`.  I copied the records
+from the ones in our repo.  We should not have to do this.
 
 
 ## Nginx
@@ -319,25 +353,6 @@ to the lines at the end that configure the letsencrypt certficates.
 # systemctl restart nginx
 # systemctl restart gunicorn.service 
 ```
-
-## Get https certificates 
-
-We'll use [letsencrypt](http://letsencrypt.org)
-because it is free and works well.
-
-Reference: [certbot install directions](https://certbot.eff.org/lets-encrypt/ubuntufocal-nginx)
-
-```shell
-$ sudo snap install core
-$ sudo snap refresh core
-$ sudo apt update
-$ sudo snap install --classic certbot
-$ sudo certbot certonly --nginx
-```
-
-For some reason this command sometimes adds the appropriate references to
-the end of each config file in `/etc/nginx/sites-available/`.  I copied the records
-from the ones in our repo.  We should not have to do this.
 
 ## Set outbound email using sendgrid.net
 
