@@ -21,10 +21,10 @@ SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100
 
-ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN, 'staging.quizitive.com', '192.168.1.152']
+ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN, 'staging.quizitive.com']
 INTERNAL_IPS = ()
 if DEBUG:
-    INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN, '192.168.1.152')
+    INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN)
 
 TIME_ZONE = 'UTC'
 
