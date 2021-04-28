@@ -7,8 +7,8 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView, PasswordChangeView, LoginView
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView, PasswordChangeView
+from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
