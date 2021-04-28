@@ -12,22 +12,20 @@ pyenv activate project
 
 cd /home/django/commonology
 
+BRANCH=master
+if [ -z $1 ]; then
+  BRANCH=$1
+fi
 
-#x=git rev-list --tags --max-count=1 produces the latest tag hash code. And then tag=git describe --tags $x will produce the latest tag.
-#$ hostname on production yields "commonologygame.com"
-#$ hostname on staging yields "staging.commonologygame.com"
-#git fetch
-#git merge
-#git pull
-
-
-
-if [ $1 == "master" ]; then
-  git pull
-else
-  echo "About to use $1 release."
+echo "Using git to get code."
+if [ $HOSTNAME == "commonologygame.com" ]; then
   git fetch
-  git checkout tags/$1
+  tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+  echo "The latest tag is $tag"
+  git checkout tags/$tag -b $BRANCH
+  git merge
+else
+  git pull origin $BRANCH
 fi
 
 echo "About to run pycodestyle."
