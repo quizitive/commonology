@@ -12,6 +12,16 @@ pyenv activate project
 
 cd /home/django/commonology
 
+
+#x=git rev-list --tags --max-count=1 produces the latest tag hash code. And then tag=git describe --tags $x will produce the latest tag.
+#$ hostname on production yields "commonologygame.com"
+#$ hostname on staging yields "staging.commonologygame.com"
+#git fetch
+#git merge
+#git pull
+
+
+
 if [ $1 == "master" ]; then
   git pull
 else
