@@ -7,6 +7,9 @@ h1.leaderboard {
 }
 
 /* These settings force the leaderboard to render well on mobile */
+table.leaderboard {
+  table-layout: fixed;
+}
 table.leaderboard td, table.leaderboard th, table.leaderboard thead {
   box-sizing: border-box;
   padding: 8px 8px 4px 8px;
@@ -23,6 +26,16 @@ table.leaderboard td:first-child {
 .name {
   width: 65%;
   word-wrap: break-word;
+}
+
+/* Small screens */
+@media only screen and (max-width: 560px) {
+  .name {
+    width: 50%;
+  }
+  #following-drp {
+    padding: 8px 12px;
+  }
 }
 
 /* FOLLOWING CHECKBOXES */

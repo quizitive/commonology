@@ -7,8 +7,11 @@
 div.content, div.narrow-content {
   margin-top: 48px;
 }
-.navbar-logo {
+.navbar-logo-large {
   height: 38px;
+}
+.navbar-logo-small {
+  display: None;
 }
 .navbar-dropdown.w3-dropdown-click {
   height: 38px;
@@ -36,6 +39,17 @@ div.content, div.narrow-content {
 }
 #navbar .w3-cell {
   padding: 0 2px;
+}
+
+/* Tiny Screens */
+@media only screen and (max-width: 350px) {
+  .navbar-logo-large {
+    display: None;
+  }
+  .navbar-logo-small {
+    display: block;
+    height: 38px;
+  }
 }
 
 /* Large Screens */
