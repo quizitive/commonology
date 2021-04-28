@@ -123,6 +123,9 @@ class Answer(models.Model):
     def __str__(self):
         return self.raw_string
 
+    class Meta:
+        unique_together = ('player', 'question')
+
     @property
     def coded_answer(self):
         return self.question.coded_answers.get(raw_string=self.raw_string)
