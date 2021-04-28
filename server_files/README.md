@@ -410,6 +410,15 @@ These three lines should be added to /etc/crontab.  That file is in the repo.
 55 15 * * * root /usr/bin/certbot renew --renew-hook 'service nginx reload'
 ```
 
+Sometimes certbot is installed in `/snap/bin` so you may need to do this:
+```shell
+$ sudo su -
+# cd /usr/bin
+# ln -s /snap/bin/certbot
+```
+
+It is not necessary to have `pg_backup.bash` run on a staging server.
+
 ### pg_dumps
 
 Need a pg_dumps dir for the cron'd `pg_backup.bash` script.

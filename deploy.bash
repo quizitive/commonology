@@ -12,18 +12,12 @@ pyenv activate project
 
 cd /home/django/commonology
 
-BRANCH="production"
-if [ $1 != $BRANCH ]; then
-  BRANCH="$1"
-fi
-
-echo "About to git pull origin $BRANCH."
-git pull origin $BRANCH
-if [ $? -eq 0 ]; then
-    echo OK
+if [ $1 == "master" ]; then
+  git pull
 else
-    echo "git pull origin $BRANCH failed."
-    exit;
+  echo "About to use $1 release."
+  git fetch
+  git checkout tags/$1
 fi
 
 echo "About to run pycodestyle."
