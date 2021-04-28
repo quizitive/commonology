@@ -21,10 +21,10 @@ SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100
 
-ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN, 'staging.quizitive.com']
+ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN, 'staging.quizitive.com', '192.168.1.152']
 INTERNAL_IPS = ()
 if DEBUG:
-    INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN,)
+    INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN, '192.168.1.152')
 
 TIME_ZONE = 'UTC'
 
@@ -108,7 +108,6 @@ ROOT_URLCONF = 'project.urls'
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "home"
-CSRF_FAILURE_VIEW = "users.views.csrf_failure"
 
 SESSION_ENGINE = 'redis_sessions.session'
 SESSION_REDIS = {
