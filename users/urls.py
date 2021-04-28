@@ -16,7 +16,7 @@ urlpatterns = [
     path("join/<uidb64>", views.EmailConfirmedView.as_view(), name='join'),
     path("email_change_confirm/<uidb64>", views.EmailChangeConfirmedView.as_view(), name='email_change_confirm'),
     path("invite/", views.InviteFriendsView.as_view(), name='invite'),
-    path("login/", views.LoginView.as_view(
+    path("login/", auth_views.LoginView.as_view(
         template_name="users/login.html",
         form_class=LoginForm,
         extra_context={"header": "Login"}
