@@ -37,11 +37,6 @@
 document.body.addEventListener('htmx:configRequest', (event) => {
   event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
 })
-document.body.addEventListener('htmx:responseError', (event) => {
-  if (event.detail.error.search("Error Code 403") !== -1) {
-    loginPrompt();
-  }
-})
 </script>
 <script src="{% static 'users/js/htmx_config.js' %}" type="text/javascript"></script>
 </body>

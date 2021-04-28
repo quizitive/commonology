@@ -404,8 +404,3 @@ class UnsubscribeView(View):
         except BadSignature:
             context['custom_message'] = "There is something wrong with your unsubscribe link."
         return render(request, 'users/base.html', context)
-
-
-def csrf_failure(request, reason="Login failed due to missing CSRF token"):
-    messages.error(request, "Something went wrong, please try again.")
-    return redirect('login')
