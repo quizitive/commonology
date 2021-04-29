@@ -414,3 +414,6 @@ class UnsubscribeView(View):
         except BadSignature:
             context['custom_message'] = "There is something wrong with your unsubscribe link."
         return render(request, 'users/base.html', context)
+
+    def post(self, request, *args, **kwargs):
+        return redirect(reverse('home'))
