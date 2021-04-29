@@ -19,10 +19,10 @@ fi
 
 echo "Using git to get code."
 if [ $HOSTNAME == "commonologygame.com" ]; then
-  git fetch
+  git fetch --tags
   tag=$(git describe --tags `git rev-list --tags --max-count=1`)
   echo "The latest tag is $tag"
-  git checkout tags/$tag -b $BRANCH
+  git checkout tags/$tag
 else
   git pull origin $BRANCH
 fi
