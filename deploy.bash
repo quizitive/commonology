@@ -13,7 +13,7 @@ pyenv activate project
 cd /home/django/commonology
 
 BRANCH=master
-if [ $1 != '' ]; then
+if [ $# -ge 1 ]; then
   BRANCH=$1
 fi
 
