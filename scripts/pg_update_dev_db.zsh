@@ -16,4 +16,4 @@ rsync -avz -e ssh $SSH_SRC:~/pg_dumps $PROJECT_DEV_DIR/
 cd $PROJECT_DEV_DIR/pg_dumps
 fn=`ls -d *(om[1])`
 echo $fn
-/usr/local/bin/pg_restore --verbose --clean --no-acl --no-owner -d $PROJECT $fn
+/usr/local/bin/pg_restore --verbose --clean --no-acl --no-owner -h 127.0.0.1 -d $PROJECT $fn
