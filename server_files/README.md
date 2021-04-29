@@ -235,7 +235,7 @@ set +a
   postgres=# ALTER ROLE postgres SET client_encoding TO 'utf8';
   postgres=# ALTER ROLE postgres SET default_transaction_isolation TO 'read committed';
   postgres=# ALTER ROLE postgres SET timezone TO 'UTC';
-  postgres=# GRANT ALL PRIVILEGES ONALTER USER postgres with superuser; DATABASE commonology TO postgres;
+  postgres=# GRANT ALL PRIVILEGES ON DATABASE commonology TO postgres;
   postgres=# alter user postgres PASSWORD 'postgres';
   postgres=# 
   postgres=# \q
@@ -251,7 +251,7 @@ set +a
   You can load the dump into postgres like this:
   ```
   $ cd
-  $ sudo -u postgres pg_restore --verbose --clean --no-acl -d commonology ~/pg_dumps/commonology_Mon.tar 
+  $ sudo -u postgres pg_restore --verbose --clean --no-acl -d commonology -h 127.0.0.1 ~/pg_dumps/commonology_Mon.tar 
   ```
 
 ## Redis
@@ -409,6 +409,15 @@ These three lines should be added to /etc/crontab.  That file is in the repo.
 0 21 * * * django /home/django/commonology/scripts/pg_backup.bash
 55 15 * * * root /usr/bin/certbot renew --renew-hook 'service nginx reload'
 ```
+
+Sometimes certbot is installed in `/snap/bin` so you may need to do this:
+```shell
+$ sudo su -
+# cd /usr/bin
+# ln -s /snap/bin/certbot
+```
+
+It is not necessary to have `pg_backup.bash` run on a staging server.
 
 ### pg_dumps
 
