@@ -4,6 +4,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import CIEmailField
 from django.utils.translation import ugettext_lazy as _
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from game.utils import create_key
 from .managers import CustomUserManager
@@ -79,23 +81,25 @@ class Player(CustomUser):
             game_id=models.F('question__game__game_id')).exclude(
             game_id=None).distinct().order_by('-game_id')
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            # we really want all names set for all new users
-            if not self.display_name:
-                self.display_name = f"{self.first_name} {self.last_name}".strip()
-            elif not self.first_name or not self.last_name:
-                # we're going to put the first word of display_name as first_name
-                # and the rest as last_name... if they don't already exist
-                parsed_name = self.display_name.split()
-                try:
-                    possible_first_name = parsed_name.pop(0)[:30]
-                    self.first_name = self.first_name or possible_first_name
-                    self.last_name = self.last_name or " ".join(parsed_name)[:30]
-                except IndexError:
-                    self.first_name = ""
-                    self.last_name = ""
-        super().save(*args, **kwargs)
+
+@receiver(post_save, sender=Player)
+def print_only_after_deal_created(sender, instance, created, **kwargs):
+    if created:
+        # we really want all names set for all new users
+        if not instance.display_name:
+            instance.display_name = f"{instance.first_name} {instance.last_name}".strip()
+        elif not instance.first_name or not instance.last_name:
+            # we're going to put the first word of display_name as first_name
+            # and the rest as last_name... if they don't already exist
+            parsed_name = instance.display_name.split()
+            try:
+                possible_first_name = parsed_name.pop(0)[:30]
+                instance.first_name = instance.first_name or possible_first_name
+                instance.last_name = instance.last_name or " ".join(parsed_name)[:30]
+            except IndexError:
+                instance.first_name = ""
+                instance.last_name = ""
+        instance.following.add(instance)
 
 
 class Team(models.Model):
