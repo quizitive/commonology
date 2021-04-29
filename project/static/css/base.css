@@ -1,5 +1,14 @@
+/*html {*/
+/*  min-height: 100vh;*/
+/*}*/
+/*body {*/
+/*    min-height: 100vh;*/
+/*    !*padding-bottom:-54px;*!*/
+/*    position: relative;*/
+/*    !*box-sizing: border-box;*!*/
+/*}*/
 body, h1, h2, h3, h4, h5, h6 {
-    font-family: "Poppins", Verdana, Arial, sans-serif
+    font-family: "Poppins", Verdana, Arial, sans-serif;
 }
 
 div.spacer {
@@ -12,8 +21,10 @@ label.required::after {
 }
 
 div.content {
-    margin: 64px auto;
+    margin: 0 auto;
     max-width: 778px;
+    min-height: 100vh;
+    padding-bottom: 80px;
 }
 
 /* so cards have rounded corners on top and bottom */
