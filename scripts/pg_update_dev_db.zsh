@@ -11,6 +11,7 @@ if [ -z "$PROJECT_DEV_DIR" ]; then
   exit
 fi
 
+ssh django@commonologygame.com /home/django/commonology/scripts/pg_backup.bash
 
 rsync -avz -e ssh $SSH_SRC:~/pg_dumps $PROJECT_DEV_DIR/
 cd $PROJECT_DEV_DIR/pg_dumps
