@@ -240,6 +240,12 @@ class PendingUsersTests(TestCase):
         mail.outbox = []
 
         client = Client()
+
+        # test unsubscribe from invite
+        path = reverse('unsubscribe', kwargs={'token': 'None:' + str(pe.uuid)})
+        response = client.get(path)
+        self.assertEqual(response.reason_phrase, 'OK')
+
         path = reverse('join') + str(pe.uuid)
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
