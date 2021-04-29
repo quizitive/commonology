@@ -1,0 +1,20 @@
+{% load static %}
+
+<div id="footer-container" class="w3-bottombar">
+    <div id="footer" class="w3-bar w3-medium w3-padding">
+      <div class="w3-cell-row">
+        <div class="w3-cell w3-mobile" style="width:6%;"></div>
+        <div class="w3-cell w3-cell-middle" style="font-size:0.8rem;width:30%">
+          &#169 2021 Quizitive, LLC
+        </div>
+        <div class="w3-cell w3-cell-middle w3-rest w3-center">
+          <img src="{% static 'img/icon.svg' %}" height="38px">
+        </div>
+        <div class="w3-cell w3-cell-middle w3-right-align" style="font-size:0.8rem;width:30%">
+          <a class="bottombar" href="{% url 'about' %}">About</a>
+          <a class="bottombar" href="{% url 'about' %}">Contact</a>
+        </div>
+        <div class="w3-cell w3-mobile" style="width:6%;"></div>
+      </div>
+    </div>
+</div>
