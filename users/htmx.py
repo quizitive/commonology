@@ -1,5 +1,4 @@
 from django.http import HttpResponse, HttpResponseBadRequest
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 from django.views.generic.base import View
 
@@ -8,7 +7,7 @@ class PlayersHTMXView(View):
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
-            raise PermissionDenied("You need to sign in to access this feature")
+            return HttpResponse("You need to sign in to access this feature", status=401)
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request):

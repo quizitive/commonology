@@ -24,7 +24,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100
 ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN]
 INTERNAL_IPS = ()
 if DEBUG:
-    INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN,)
+    INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN)
 
 TIME_ZONE = 'UTC'
 
