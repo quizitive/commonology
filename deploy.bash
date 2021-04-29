@@ -23,7 +23,6 @@ if [ $HOSTNAME == "commonologygame.com" ]; then
   tag=$(git describe --tags `git rev-list --tags --max-count=1`)
   echo "The latest tag is $tag"
   git checkout tags/$tag -b $BRANCH
-  git merge
 else
   git pull origin $BRANCH
 fi
