@@ -13,19 +13,11 @@ pyenv activate project
 cd /home/django/commonology
 
 BRANCH=master
-if [ $1 != '' ]; then
+if [ $# -ge 1 ]; then
   BRANCH=$1
 fi
 
-echo "Using git to get code."
-if [ $HOSTNAME == "commonologygame.com" ]; then
-  git fetch --tags
-  tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-  echo "The latest tag is $tag"
-  git checkout tags/$tag
-else
-  git pull origin $BRANCH
-fi
+git pull origin $BRANCH
 
 echo "About to run pycodestyle."
 pycodestyle --config=./setup.cfg .
