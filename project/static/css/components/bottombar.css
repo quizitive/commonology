@@ -1,0 +1,16 @@
+#footer-container {
+  overflow: hidden;
+  /*position: absolute;*/
+  bottom: 0;
+  width: 100%;
+  margin-top: -60px;
+}
+#footer {
+  background: #fafbfc;
+}
+a.bottombar {
+  padding: 0 16px;
+  text-decoration: None;
+  color: #f26649;
+  display: inline;
+}
