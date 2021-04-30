@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'game',
     'leaderboard',
     'mail',
+    'quizitive',
 ]
 
 if DEBUG_TOOLBAR:
