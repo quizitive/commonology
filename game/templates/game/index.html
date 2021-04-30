@@ -4,7 +4,7 @@
 {% block title %}commonologygame.com{% endblock title %}
 
 {% block page_style %}
-  <link rel="stylesheet" href="{% static "game/css/index.css" %}">
+  <link rel="stylesheet" href="{% static "css/index.css" %}?v=1.1">
 {% endblock %}
 
 {% block scripts %}
@@ -20,16 +20,15 @@
 {% block navbar %}{% endblock %}
 
 {% block content %}
+<div id="home-container">
   <div style="width: 100%; height: 100%; overflow: hidden">
-  <div class="w3-container w3-white w3-border-bottom w3-border-black" style="height: 62vh; display: flex;">
-{#    <div class="top-container">#}
-      <div class="logo-container" style="margin: auto; text-align: center">
-{#      <h1 class="logo" style="margin: auto">Commonology!</h1>#}
+  <div class="w3-container w3-white w3-border-bottom w3-border-black" style="height: 62%; display: flex;">
+    <div id="top-container" class="w3-container w3-cell w3-cell-middle">
+      <div class="logo-container w3-row" style="margin: auto; text-align: center">
         <img class="splash-logo" src="{% static 'img/logo.svg' %}">
         <h3 class="subheader">What we all have in common.</h3>
-    </div>
-{#    #}
-    <div class="button-container w3-center">
+
+    <div class="button-container w3-center w3-row">
       <a href="{% url 'login' %}">
         <button class="home-buttons w3-button cg-dark-purple w3-round-xxlarge">Login</button>
       </a>
@@ -40,10 +39,11 @@
         <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">About</button>
       </a>
     </div>
-{#    </div>#}
+        </div>
+    </div>
 
   </div>
-  <div class="w3-container cg-teal w3-border-bottom w3-border-black" style="height: 38vh; display: flex;">
+  <div class="w3-container cg-teal w3-border-bottom w3-border-black" style="height: 38%; display: flex;">
     <div class="countdown-container">
       <h3 class="subheader countdown-subheader">{{ event_text }}</h3>
       <div class="countdown-display">
@@ -68,4 +68,7 @@
     </div>
   </div>
   </div>
+</div>
 {% endblock %}
+
+{% block footer %}{% endblock %}

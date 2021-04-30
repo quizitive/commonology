@@ -1,5 +1,5 @@
 .cg-card {
-  margin: auto;
+  margin: auto auto 32px auto;
 }
 div.w3-modal-content {
   max-width: 500px;
