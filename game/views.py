@@ -4,7 +4,6 @@ import logging
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required, permission_required
 from game.forms import TabulatorForm
 from game.models import Game
 from game.utils import next_event

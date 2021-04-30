@@ -11,6 +11,7 @@ urlpatterns = [
     path('', include('users.urls')),
     path('', include('game.urls')),
     path('', include('mail.urls')),
+    path('', include('quizitive.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('leaderboard/', include('leaderboard.urls')),
     path('c/', include('community.urls')),
