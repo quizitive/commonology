@@ -4,12 +4,19 @@ h1 {
 a {
   text-decoration: none;
 }
+#home-container {
+  height: 100vh;
+  min-height: 500px;
+}
+#top-container {
+  margin: auto;
+  width: 100%;
+}
 h1.logo {
     font-size: 12vw;
 }
 .logo-container {
   display: block;
-  padding-bottom: 8vh;
   width: 95%
 }
 .button-container {
@@ -19,11 +26,7 @@ h1.logo {
   margin: auto;
   height: 10vh;
   min-height: 42px;
-  padding: 1vh 0;
-  position: absolute;
-  top: 54%;
-  left: 50%;
-  transform: translate(-50%,-50%)
+  padding: 4vh 0;
 }
 button.home-buttons {
   width: 30%;
