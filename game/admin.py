@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from game.models import Game, Question, Answer, AnswerCode
+from game.models import Series, Game, Question, Answer, AnswerCode
+
+
+@admin.register(Series)
+class SeriesAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
+    search_fields = ('name', 'slug')
+    filter_horizontal = ('hosts', )
 
 
 @admin.register(Game)
@@ -8,6 +15,7 @@ class GameAdmin(admin.ModelAdmin):
     list_display = ('name', 'game_id')
     ordering = ('-game_id', )
     search_fields = ('game_id', 'name')
+    filter_horizontal = ('hosts',)
 
 
 @admin.register(Question)
