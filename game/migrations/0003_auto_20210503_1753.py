@@ -7,7 +7,7 @@ import django.db.models.deletion
 
 def create_commonology_series(apps, schema_editor):
     Series = apps.get_model('game', 'Series')
-    commonology = Series.objects.create(name="Commonology", public=True)
+    commonology = Series.objects.create(name="Commonology", slug="commonology", public=True)
     Player = apps.get_model('users', 'Player')
     for p in Player.objects.all():
         commonology.players.add(p)
@@ -40,6 +40,7 @@ class Migration(migrations.Migration):
                 ('hosts', models.ManyToManyField(related_name='hosted_series', to=settings.AUTH_USER_MODEL)),
                 ('players', models.ManyToManyField(related_name='series', to=settings.AUTH_USER_MODEL)),
             ],
+            options={'verbose_name_plural': 'series'},
         ),
         migrations.AddField(
             model_name='game',
