@@ -9,7 +9,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from project.utils import REDIS
-from game.utils import next_wed_noon, next_friday_1159, slug_from_name
+from game.utils import next_wed_noon, next_friday_1159
 from game.models import Question, Answer
 from game.rollups import *
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
