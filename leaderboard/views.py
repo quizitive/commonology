@@ -63,7 +63,7 @@ class LeaderboardView(View):
             raise Http404()
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, game_id=None):
+    def get(self, request, game_id=None, series_slug=None):
         if not game_id:
             # default to most recent game
             game_id = Game.objects.filter(publish=True).aggregate(Max('game_id'))['game_id__max']
