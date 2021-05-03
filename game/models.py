@@ -9,6 +9,10 @@ class Series(models.Model):
     slug = models.SlugField(unique=True)
     hosts = models.ManyToManyField(Player, related_name='hosted_series')
     players = models.ManyToManyField(Player, related_name='series')
+    public = models.BooleanField(
+        default=False,
+        help_text="Anyone can see the games, results, and leaderboards in this series"
+    )
 
     def __str__(self):
         return self.name
