@@ -14,6 +14,9 @@ class Series(models.Model):
         help_text="Anyone can see the games, results, and leaderboards in this series"
     )
 
+    class Meta:
+        verbose_name_plural = "series"
+
     def __str__(self):
         return self.name
 
