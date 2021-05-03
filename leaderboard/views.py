@@ -11,49 +11,6 @@ from game.models import Game
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
 
 
-def _render_leaderboard(request, game_id=None, published=True):
-    user_following = {}
-    if request.user.is_authenticated:
-        User = get_user_model()
-        user = User.objects.get(id=request.user.id)
-        user_following = {
-            p: True
-            for p in user.following.values_list('id', flat=True)
-        }
-
-    if published:
-        games = Game.objects.filter(publish=True).order_by('-game_id')
-    else:
-        games = Game.objects.order_by('-game_id')
-
-    # default to most recent game
-    if not game_id:
-        game_id = games.aggregate(Max('game_id'))['game_id__max']
-
-    current_game = games.get(game_id=game_id)
-    date_range = current_game.date_range_pretty
-    teams = current_game.teams
-    answer_tally = build_answer_tally(current_game)
-    search_term = request.GET.get('q')
-    team_id = request.GET.get('team')
-    leaderboard = build_filtered_leaderboard(current_game, answer_tally, search_term, team_id)
-    team = Team.objects.filter(id=team_id).first() or None
-
-    leaderboard = leaderboard.to_dict(orient='records')
-    context = {
-        'game_id': game_id,
-        'games': games,
-        'teams': teams,
-        'date_range': date_range,
-        'leaderboard': leaderboard,
-        'search_term': search_term,
-        'team': team,
-        'user_following': user_following
-    }
-
-    return render(request, 'leaderboard/leaderboard_view.html', context)
-
-
 class LeaderboardView(View):
 
     def dispatch(self, request, *args, **kwargs):
