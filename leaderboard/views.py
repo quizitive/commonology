@@ -4,14 +4,26 @@ from django.http import Http404
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
+from django.contrib.auth.mixins import UserPassesTestMixin
 
-from users.models import Team
-from django.contrib.auth import get_user_model
-from game.models import Game
-from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
+from game.models import Game, Series
+from leaderboard.leaderboard import build_answer_tally
 
 
-class LeaderboardView(View):
+class SeriesPermissionView(UserPassesTestMixin, View):
+
+    def test_func(self):
+        ss = self.kwargs.get('series_slug') or "commonology"
+        try:
+            series = Series.objects.get(slug=ss)
+        except Series.DoesNotExist:
+            return False
+        if series.public:
+            return True
+        return series.players.filter(id=self.request.user.id).exists()
+
+
+class LeaderboardView(SeriesPermissionView):
 
     def dispatch(self, request, *args, **kwargs):
         game_id = kwargs.get('game_id')
@@ -34,7 +46,7 @@ class LeaderboardView(View):
         return render(request, 'leaderboard/leaderboard_view.html', context)
 
 
-class ResultsView(View):
+class ResultsView(SeriesPermissionView):
 
     def get(self, request, game_id):
         try:
