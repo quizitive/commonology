@@ -7,6 +7,7 @@ from users.models import Player
 class Series(models.Model):
     name = models.CharField(max_length=50)
     slug = models.SlugField(unique=True)
+    owner = models.ForeignKey(Player, related_name='owned_series', on_delete=models.CASCADE)
     hosts = models.ManyToManyField(Player, related_name='hosted_series')
     players = models.ManyToManyField(Player, related_name='series')
     public = models.BooleanField(
@@ -22,6 +23,7 @@ class Series(models.Model):
 
     def save(self, *args, **kwargs):
         self.slug = self.slug or slugify(self.name)
+        self.hosts.add(self.owner)
         super().save(*args, **kwargs)
 
 
@@ -29,7 +31,7 @@ class Game(models.Model):
     game_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(Player, related_name='hosted_games')
-    series = models.ForeignKey(Series, null=True, related_name='games', on_delete=models.CASCADE)
+    series = models.ForeignKey(Series, related_name='games', on_delete=models.CASCADE)
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
