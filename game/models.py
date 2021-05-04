@@ -24,10 +24,13 @@ class Series(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        self.slug = self.slug or slugify(self.name)
+        super().save(*args, **kwargs)
+
 
 @receiver(post_save, sender=Series)
 def add_owner_as_host_and_player(sender, instance, created, **kwargs):
-    instance.slug = instance.slug or slugify(instance.name)
     if created:
         instance.hosts.add(instance.owner)
         instance.players.add(instance.owner)
