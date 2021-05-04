@@ -12,7 +12,14 @@ class TestCommunityViews(BaseGameDataTestCase):
     def setUp(self):
         self.game.publish = True
         self.game.save()
-        self.client = Client()
+        self.user = get_local_user()
+        self.authenticated_client = Client()
+        self.authenticated_client.login(email=self.user.email, password=test_pw)
+
+    def test_player_home(self):
+        url = reverse('player-home')
+        resp = self.authenticated_client.get(url)
+        self.assertEqual(resp.status_code, 200)
 
     def test_series_permissions_leaderboard(self):
         # make a private leaderboard
@@ -24,8 +31,6 @@ class TestCommunityViews(BaseGameDataTestCase):
         self.assertIn(resp.status_code, (403, 302))
 
         # make a user that plays the series
-        user = get_local_user()
-        series.players.add(user)
-        self.client.login(email=user.email, password=test_pw)
-        resp = self.client.get(url)
+        series.players.add(self.user)
+        resp = self.authenticated_client.get(url)
         self.assertEqual(resp.status_code, 200)
