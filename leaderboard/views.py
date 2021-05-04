@@ -44,7 +44,7 @@ class LeaderboardView(SeriesPermissionView):
         series = Series.objects.get(slug=self.ss)
         if not game_id:
             # default to most recent game
-            game_id = Game.objects.filter(publish=True).aggregate(Max('game_id'))['game_id__max']
+            game_id = Game.objects.filter(publish=True, series=series).aggregate(Max('game_id'))['game_id__max']
         current_game = Game.objects.get(game_id=game_id)
         date_range = current_game.date_range_pretty
         context = {
