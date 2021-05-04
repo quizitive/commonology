@@ -13,6 +13,7 @@ def create_commonology_series(apps, schema_editor):
         owner = Player.objects.get(email="alex@commonologygame.com")
         Series = apps.get_model('game', 'Series')
         commonology = Series.objects.create(name="Commonology", slug="commonology", public=True, owner=owner)
+        commonology.hosts.add(owner)
         for g in Game.objects.all():
             g.series = commonology
             g.save()
