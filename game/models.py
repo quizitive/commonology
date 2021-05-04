@@ -1,6 +1,9 @@
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from django.db import models
 from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from users.models import Player
 
 
@@ -21,9 +24,13 @@ class Series(models.Model):
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        self.slug = self.slug or slugify(self.name)
-        super().save(*args, **kwargs)
+
+@receiver(post_save, sender=Series)
+def add_owner_as_host_and_player(sender, instance, created, **kwargs):
+    instance.slug = instance.slug or slugify(instance.name)
+    if created:
+        instance.hosts.add(instance.owner)
+        instance.players.add(instance.owner)
 
 
 class Game(models.Model):
