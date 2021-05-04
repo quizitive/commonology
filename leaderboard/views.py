@@ -12,12 +12,25 @@ from leaderboard.leaderboard import build_answer_tally
 
 class SeriesPermissionView(UserPassesTestMixin, View):
 
+    ss = 'commonology'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.ss = kwargs.get('series_slug') or self.ss
+        if self.ss:
+            try:
+                Series.objects.get(slug=self.ss)
+            except Series.DoesNotExist:
+                raise Http404()
+
+        # todo: maybe change this to is_authenticated to allow access to historical leaderboards
+        game_id = kwargs.get('game_id')
+        if game_id is not None and not request.user.is_staff:
+            raise Http404()
+
+        return super().dispatch(request, *args, **kwargs)
+
     def test_func(self):
-        ss = self.kwargs.get('series_slug') or "commonology"
-        try:
-            series = Series.objects.get(slug=ss)
-        except Series.DoesNotExist:
-            return False
+        series = Series.objects.get(slug=self.ss)
         if series.public:
             return True
         return series.players.filter(id=self.request.user.id).exists()
@@ -25,14 +38,8 @@ class SeriesPermissionView(UserPassesTestMixin, View):
 
 class LeaderboardView(SeriesPermissionView):
 
-    def dispatch(self, request, *args, **kwargs):
-        game_id = kwargs.get('game_id')
-        # todo: maybe change this to is_authenticated to allow access to historical leaderboards
-        if game_id is not None and not request.user.is_staff:
-            raise Http404()
-        return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, game_id=None, series_slug=None):
+    def get(self, request, game_id=None, *args, **kwargs):
+        series = Series.objects.get(slug=self.ss)
         if not game_id:
             # default to most recent game
             game_id = Game.objects.filter(publish=True).aggregate(Max('game_id'))['game_id__max']
