@@ -9,3 +9,4 @@ pg_dump -h localhost -F t -U postgres $DBNAME > $PG_DUMP_DIR/"$DBNAME"_"$DAYOFWE
 
 # To restore:
 # pg_restore --clean --create --no-acl --no-owner -d $DBNAME $DBNAME_$DAYOFWEEK.tar
+#
