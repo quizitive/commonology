@@ -53,4 +53,5 @@ class Migration(migrations.Migration):
             name='series',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='games', to='game.series'),
         ),
+        migrations.RunPython(create_commonology_series, backwards_passthrough)
     ]
