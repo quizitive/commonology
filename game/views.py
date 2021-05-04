@@ -16,7 +16,7 @@ from game.tasks import api_to_db
 
 def index(request):
     if request.user.is_authenticated:
-        return redirect('leaderboard')
+        return redirect('leaderboard:default')
     event_text, event_time = next_event()
     context = {
         'event_time': event_time,
