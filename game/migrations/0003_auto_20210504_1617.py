@@ -12,7 +12,7 @@ def create_commonology_series(apps, schema_editor):
     if Player.objects.count() and Game.objects.count():
         owner = Player.objects.get(email="alex@commonologygame.com")
         Series = apps.get_model('game', 'Series')
-        commonology = Series.objects.create(name="Commonology", public=True, owner=owner)
+        commonology = Series.objects.create(name="Commonology", slug="commonology", public=True, owner=owner)
         for g in Game.objects.all():
             g.series = commonology
             g.save()
@@ -53,4 +53,5 @@ class Migration(migrations.Migration):
             name='series',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='games', to='game.series'),
         ),
+        migrations.RunPython(create_commonology_series, backwards_passthrough),
     ]
