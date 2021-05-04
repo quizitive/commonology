@@ -5,8 +5,8 @@ from django.urls import reverse
 from django.test import Client
 
 from project.utils import REDIS
-from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
-from game.models import Game, AnswerCode
+from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key
+from game.models import Game
 from game.tests import BaseGameDataTestCase
 from users.models import Player
 from django.contrib.auth import get_user_model
@@ -29,17 +29,17 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         self.assertEqual(resp.status_code, code)
 
     def test_leaderboard_view(self):
-        url = reverse('leaderboard')
+        url = reverse('leaderboard:default')
         self._assert_code(url, 200)
 
     def test_leaderboard_game_view(self):
         # non-staff user can't see other weeks directly
-        url = reverse('leaderboard-game', kwargs={'game_id': 1})
+        url = reverse('leaderboard:game', kwargs={'game_id': 1})
         self._assert_code(url, 404)
 
     def test_htmx_leaderboard_resp(self):
         # most recent game is public
-        url = reverse('leaderboard-htmx')
+        url = reverse('leaderboard:htmx')
         pub_resp = self.client.get(url)
         self.assertEqual(pub_resp.status_code, 200)
 
