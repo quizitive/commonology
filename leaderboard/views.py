@@ -30,6 +30,8 @@ class SeriesPermissionView(UserPassesTestMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
+        if self.request.user.is_staff:
+            return True
         series = Series.objects.get(slug=self.ss)
         if series.public:
             return True
