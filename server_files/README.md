@@ -167,8 +167,8 @@ Reference: [pyenv-installer](https://github.com/pyenv/pyenv-installer)
   $ curl https://pyenv.run | bash
 ```
 
-That command will give you a few lines to add to /home/django/.bashrc` do that.
-Then logout and log back in again.
+That command will give you a few lines to add to `/home/django/.bashrc` do that.
+Then logout and log back in again.  It could take a long time, 5-10 minutes, for the `pyenv install` line.
 
 ```
   $ pyenv install 3.9.4
