@@ -60,17 +60,3 @@ class PlayerHomeView(LoginRequiredMixin, View):
             follow_up = "That puts you in the top half!"
 
         return f"Last week you ranked {latest_rank} out of {player_count} players. {follow_up}"
-
-
-class SeriesLeaderboardView(UserPassesTestMixin, LeaderboardView):
-
-    def test_func(self):
-        ss = self.kwargs.get('series_slug')
-        try:
-            series = Series.objects.get(slug=ss)
-        except Series.DoesNotExist:
-            return Http404('Series does not exist.')
-        return series.players.filter(id=self.request.user.id).exists()
-
-    def dispatch(self, request, *args, **kwargs):
-        pass
