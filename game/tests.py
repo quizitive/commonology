@@ -9,10 +9,11 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from project.utils import REDIS
-from game.utils import next_wed_noon, next_friday_1159
-from game.models import Question, Answer
-from game.rollups import *
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
+from users.tests import get_local_user
+from game.utils import next_wed_noon, next_friday_1159
+from game.models import Series, Question, Answer
+from game.rollups import *
 from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
@@ -244,3 +245,17 @@ class TestUtils(TestCase):
         next_game_end = next_friday_1159(a_thursday)
         self.assertEqual(next_game_end.weekday(), 4)
         self.assertEqual(next_game_end.strftime(format="%H:%M:%S"), "23:59:59")
+
+
+class TestModels(TestCase):
+
+    def test_series(self):
+        user = get_local_user()
+        series = Series.objects.create(name="Series 1", owner=user)
+
+        # test slugify on save
+        self.assertEqual(series.slug, "series-1")
+
+        # test owner is host and player
+        self.assertIn(user, series.hosts.all())
+        self.assertIn(user, series.players.all())

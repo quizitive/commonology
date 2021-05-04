@@ -83,7 +83,7 @@ class Player(CustomUser):
 
 
 @receiver(post_save, sender=Player)
-def print_only_after_deal_created(sender, instance, created, **kwargs):
+def add_names_and_follow(sender, instance, created, **kwargs):
     if created:
         # we really want all names set for all new users
         if not instance.display_name:
