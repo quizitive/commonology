@@ -23,14 +23,13 @@ class TestCommunityViews(BaseGameDataTestCase):
 
     def test_series_permissions_leaderboard(self):
         # make a private leaderboard
-        series = Series.objects.create(name="Series 1", slug="series-1")
+        series = Series.objects.create(name="Series 1", slug="series-1", owner=self.user)
         self.game.series = series
         self.game.save()
         url = reverse('series-leaderboard:default', kwargs={'series_slug': series.slug})
         resp = self.client.get(url)
         self.assertIn(resp.status_code, (403, 302))
 
-        # make a user that plays the series
-        series.players.add(self.user)
+        # a user that is a player of the series can view
         resp = self.authenticated_client.get(url)
         self.assertEqual(resp.status_code, 200)
