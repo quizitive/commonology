@@ -23,7 +23,6 @@ class Series(models.Model):
 
     def save(self, *args, **kwargs):
         self.slug = self.slug or slugify(self.name)
-        self.hosts.add(self.owner)
         super().save(*args, **kwargs)
 
 
