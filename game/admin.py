@@ -38,13 +38,7 @@ class GameAdmin(admin.ModelAdmin):
     ordering = ('-game_id', )
     search_fields = ('game_id', 'name')
     filter_horizontal = ('hosts',)
-
-
-@admin.register(Question)
-class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('text', 'game')
-    search_fields = ('text', 'game__name')
-    inlines = (QuestionAdmin, )
+    inlines = (QuestionAdmin,)
 
 
 @admin.register(Answer)
