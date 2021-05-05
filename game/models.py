@@ -58,8 +58,8 @@ class Game(models.Model):
         default=False,
         help_text="This game can be published to the dashboard"
     )
-    top_commentary = RichTextUploadingField(blank=True)
-    bottom_commentary = RichTextUploadingField(blank=True)
+    top_commentary = RichTextUploadingField(null=True, blank=True)
+    bottom_commentary = RichTextUploadingField(null=True, blank=True)
 
     class Meta:
         ordering = ['-game_id']
@@ -159,8 +159,8 @@ class Question(models.Model):
         (ov, 'Optional (visible)')
     ]
     type = models.CharField(max_length=2, choices=QUESTION_TYPES)
-    image = models.FileField(upload_to='questions/', blank=True, null=True)
-    caption = RichTextUploadingField(blank=True)
+    image = models.FileField(upload_to='questions/', null=True, blank=True)
+    caption = RichTextUploadingField(null=True, blank=True)
     hide_default_results = models.BooleanField(default=False)
 
     def __str__(self):
