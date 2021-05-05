@@ -1,12 +1,14 @@
 from django.shortcuts import render
 from django.views.generic.base import View
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Max
+from django.http import Http404, HttpResponse
 
 from django.contrib.auth import get_user_model
-from game.models import Game
+from game.models import Game, Series
 
 from leaderboard.leaderboard import player_rank_and_percentile_in_game
+from leaderboard.views import LeaderboardView
 
 
 class PlayerHomeView(LoginRequiredMixin, View):
