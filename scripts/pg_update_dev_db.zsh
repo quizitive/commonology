@@ -11,9 +11,12 @@ if [ -z "$PROJECT_DEV_DIR" ]; then
   exit
 fi
 
+ssh django@commonologygame.com /home/django/commonology/scripts/pg_backup.bash
 
 rsync -avz -e ssh $SSH_SRC:~/pg_dumps $PROJECT_DEV_DIR/
 cd $PROJECT_DEV_DIR/pg_dumps
 fn=`ls -d *(om[1])`
 echo $fn
-/usr/local/bin/pg_restore --verbose --clean --no-acl --no-owner -d $PROJECT $fn
+psql -U postgres -h localhost -c "DROP DATABASE \"$PROJECT\";"
+psql -U postgres -h localhost -c "CREATE DATABASE \"$PROJECT\";"
+pg_restore --verbose --clean --no-acl --no-owner -h 127.0.0.1 -d $PROJECT $fn
