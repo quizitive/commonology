@@ -14,4 +14,4 @@ celerybeat-schedule.dat
 celerybeat-schedule.dir
 media
 django.ssh
-
+local_settings.py

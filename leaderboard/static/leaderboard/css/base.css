@@ -111,6 +111,9 @@ table.leaderboard td:first-child {
   h1.leaderboard {
     font-size: 6vw;
   }
+  h2.leaderboard {
+    font-size: 5vw;
+  }
   h3.leaderboard {
     font-size: 4vw;
   }

@@ -167,8 +167,8 @@ Reference: [pyenv-installer](https://github.com/pyenv/pyenv-installer)
   $ curl https://pyenv.run | bash
 ```
 
-That command will give you a few lines to add to /home/django/.bashrc` do that.
-Then logout and log back in again.
+That command will give you a few lines to add to `/home/django/.bashrc` do that.
+Then logout and log back in again.  It could take a long time, 5-10 minutes, for the `pyenv install` line.
 
 ```
   $ pyenv install 3.9.4
@@ -217,6 +217,10 @@ That file would define the `DJANGO_SECRET` value used in your Django settings.py
 Add this to the end of `/home/django/.bashrc`.
 
 ```shell
+export PATH="/home/django/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
 set -a
 source /etc/profile.d/django_project.sh
 set +a
