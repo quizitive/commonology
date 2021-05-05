@@ -35,7 +35,7 @@ def tabulator_form_view(request):
         'fn': '',
         'msg': ''
     }
-    form = TabulatorForm()
+    form = TabulatorForm(list(request.user.hosted_series.values_list('slug', 'name')))
     if request.method == "POST":
 
         fn = request.POST.get('sheet_name')
