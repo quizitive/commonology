@@ -15,7 +15,7 @@ from game.tasks import api_to_db
 
 def index(request):
     if request.user.is_authenticated:
-        return redirect('leaderboard')
+        return redirect('leaderboard:default')
     event_text, event_time = next_event()
     context = {
         'event_time': event_time,
@@ -34,9 +34,10 @@ def tabulator_form_view(request):
         'fn': '',
         'msg': ''
     }
-    form = TabulatorForm()
+    form = TabulatorForm(list(request.user.hosted_series.values_list('slug', 'name')))
     if request.method == "POST":
 
+        series = request.POST.get('series')
         fn = request.POST.get('sheet_name')
         context['fn'] = fn
         form.fields['sheet_name'].initial = fn
@@ -44,7 +45,7 @@ def tabulator_form_view(request):
         update = request.POST.get('update_existing') == 'on'
 
         try:
-            tabulate_results(fn, gc, update)
+            tabulate_results(series, fn, gc, update)
             context['msg'] = "The results have been updated, feel free to submit again."
         except gspread.exceptions.SpreadsheetNotFound:
             context['msg'] = "The Google Sheet entered does not exist, no changes were made"
@@ -58,9 +59,10 @@ def tabulator_form_view(request):
     return render(request, 'game/tabulator_form.html', context)
 
 
-def tabulate_results(filename, gc, update=False):
+def tabulate_results(series_slug, filename, gc, update=False):
     """
     Reads from, tabulates, and prints output to the named Google Sheet
+    :param series_slug: The slug of the series to which this game belongs
     :param filename: The name of the spreadsheet in Google Drive
     :param gc: An authenticated instance of gspread
     :param update: Whether or not to update existing answer records in the DB
@@ -76,6 +78,7 @@ def tabulate_results(filename, gc, update=False):
 
     # write to database
     api_to_db(
+        series_slug,
         filename,
         responses.to_json(),
         answer_codes,
@@ -83,7 +86,7 @@ def tabulate_results(filename, gc, update=False):
     )
 
     # calculate the question-by-question data and leaderboard
-    game = Game.objects.get(sheet_name=filename)
+    game = Game.objects.get(sheet_name=filename, series__slug=series_slug)
     answer_tally = build_answer_tally(game)
     leaderboard = build_filtered_leaderboard(game, answer_tally)
 

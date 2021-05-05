@@ -36,6 +36,13 @@ def add_owner_as_host_and_player(sender, instance, created, **kwargs):
         instance.players.add(instance.owner)
 
 
+@receiver(post_save, sender=Series)
+def add_owner_as_host_and_player(sender, instance, created, **kwargs):
+    if created:
+        instance.hosts.add(instance.owner)
+        instance.players.add(instance.owner)
+
+
 class Game(models.Model):
     game_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=100)
