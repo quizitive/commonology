@@ -1,4 +1,4 @@
-{% extends 'game/base.html' %}
+{% extends 'leaderboard/base.html' %}
 {% load static %}
 
 {% block title %}Commonology | Answers{% endblock %}
@@ -10,12 +10,13 @@
 
 {% block content %}
 
-<div class="content card-content">
+<div class="content">
 
-  {% include 'leaderboard/components/game_header.html' with view="Results" %}
+{% include 'leaderboard/components/game_header.html' with view="results" %}
 
+<div class="card-content">
   {% if game_top_commentary %}
-  <div class="answer_slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
+  <div class="answer-slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
     {{ game_top_commentary|safe }}
   </div>
   {% endif %}
@@ -28,7 +29,7 @@
   </div>
 
   {% if game_top_commentary %}
-  <div class="answer_slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
+  <div class="answer-slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
     {{ game_bottom_commentary|safe }}
   </div>
   {% endif %}
@@ -36,5 +37,4 @@
   <div class="w3-row w3-padding-large"></div>
 
 </div>
-
 {% endblock content %}
