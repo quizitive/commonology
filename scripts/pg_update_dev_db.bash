@@ -28,10 +28,11 @@ ssh django@commonologygame.com /home/django/commonology/scripts/pg_backup.bash
 
 rsync -avz -e ssh $SSH_SRC:~/pg_dumps $PROJECT_DEV_DIR/
 cd $PROJECT_DEV_DIR/pg_dumps
-#fn=`ls -d *(om[1])`
+
 fn=`ls -t *.tar | head -1`
 echo $fn
-PGPASSWORD=postgres psql -U postgres -h localhost -c "DROP DATABASE \"$DBNAME\";"
-PGPASSWORD=postgres psql -U postgres -h localhost -c "CREATE DATABASE \"$DBNAME\";"
+DATABASE_URL=postgresql://postgres:postgres@localhost
+psql $DATABASE_URL -c "DROP DATABASE \"$DBNAME\";"
+psql $DATABASE_URL -c "CREATE DATABASE \"$DBNAME\";"
 echo "About to restore database."
-PGPASSWORD=postgres pg_restore -U postgres --verbose --clean --no-acl --no-owner -h 127.0.0.1 -d $DBNAME $fn
+pg_restore -d $DATABASE_URL/$DBNAME --verbose --clean --no-acl --no-owner $fn
