@@ -1,12 +1,46 @@
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from django.db import models
+from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from users.models import Player
+
+
+class Series(models.Model):
+    name = models.CharField(max_length=50)
+    slug = models.SlugField(unique=True)
+    owner = models.ForeignKey(Player, related_name='owned_series', on_delete=models.CASCADE)
+    hosts = models.ManyToManyField(Player, related_name='hosted_series')
+    players = models.ManyToManyField(Player, related_name='series')
+    public = models.BooleanField(
+        default=False,
+        help_text="Anyone can see the games, results, and leaderboards in this series"
+    )
+
+    class Meta:
+        verbose_name_plural = "series"
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = self.slug or slugify(self.name)
+        super().save(*args, **kwargs)
+
+
+@receiver(post_save, sender=Series)
+def add_owner_as_host_and_player(sender, instance, created, **kwargs):
+    if created:
+        instance.hosts.add(instance.owner)
+        instance.players.add(instance.owner)
 
 
 class Game(models.Model):
     game_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(Player, related_name='hosted_games')
+    series = models.ForeignKey(Series, null=True, related_name='games', on_delete=models.CASCADE)
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"

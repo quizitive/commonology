@@ -231,7 +231,7 @@ class TestGSheetsAPI(BaseGameDataTestCase):
         self.assertEqual(rollups_sheet, expected_rollups_sheet)
 
 
-class TestViews(TestCase):
+class TestUtils(TestCase):
 
     def test_next_wed_noon(self):
         a_tuesday = datetime.datetime(year=2021, month=2, day=1)
