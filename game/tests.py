@@ -38,7 +38,7 @@ class BaseGameDataTestCase(TestCase):
     def setUpTestData(cls):
         cls.resp_fp = f'{LOCAL_DIR}/test_data/test_data.csv'
         cls.rollup_fp = f'{LOCAL_DIR}/test_data/test_rollups.csv'
-        cls.sheet_name = "Test FF Game (Responses)"
+        cls.sheet_name = "Test Commonology Game (Responses)"
         with open(cls.resp_fp, 'r') as f:
             raw = reader(f)
             raw_responses = list(raw)
@@ -49,9 +49,12 @@ class BaseGameDataTestCase(TestCase):
             cls.rollups = build_rollups_dict(raw_rollups)
 
         # data is written from api
-        cls.game = game_to_db(cls.sheet_name)
+        cls.series_owner = get_local_user(e='series@owner.com')
+        cls.game_player = get_local_user()
+        cls.series = Series.objects.create(name="Commonology", owner=cls.series_owner, public=True)
+        cls.game = game_to_db(cls.series, cls.sheet_name)
         cls.questions = questions_to_db(cls.game, cls.resp_df)
-        players_to_db(cls.resp_df)
+        players_to_db(cls.series, cls.resp_df)
         answers_to_db(cls.game, cls.resp_df)
         cls.answer_codes = build_answer_codes(cls.resp_df, cls.rollups)
         answers_codes_to_db(cls.game, cls.answer_codes)
@@ -112,14 +115,14 @@ class TestGameTabulation(BaseGameDataTestCase):
 
     def test_game_to_db(self):
         self.assertEqual(self.game.sheet_name, self.sheet_name)
-        self.assertEqual(self.game.name, "Test FF Game")
+        self.assertEqual(self.game.name, "Test Commonology Game")
 
         # test new game of same name is not created on save
-        game2 = game_to_db(self.sheet_name)
+        game2 = game_to_db(self.series, self.sheet_name)
         self.assertEqual(self.game, game2)
 
     def test_game_id_increments(self):
-        game2 = game_to_db('game2')
+        game2 = game_to_db(self.series, 'game2')
         self.assertEqual(game2.game_id, 2)
 
     def test_questions_to_db(self):
@@ -133,7 +136,7 @@ class TestGameTabulation(BaseGameDataTestCase):
             columns=['Email Address', 'Name'],
             data=[['user1@fakeemail.com', 'New Display Name']]
         )
-        players_to_db(new_disply_name_df)
+        players_to_db(self.series, new_disply_name_df)
         User = get_user_model()
         new_display_name = User.objects.get(email='user1@fakeemail.com').display_name
         self.assertEqual(new_display_name, 'New Display Name')
@@ -144,7 +147,7 @@ class TestGameTabulation(BaseGameDataTestCase):
             columns=['Email Address', 'Name'],
             data=[['long_name@fakeemail.com', long_name]]
         )
-        players_to_db(new_disply_name_df)
+        players_to_db(self.series, new_disply_name_df)
         User = get_user_model()
         new_display_name = User.objects.get(email='long_name@fakeemail.com').display_name
         self.assertEqual(new_display_name, long_name[:100])
