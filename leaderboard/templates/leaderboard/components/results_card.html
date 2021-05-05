@@ -2,32 +2,33 @@
 
 <div class="answer_slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
 
-  <p><b>{{ q.text }}</b></p>
+  <p class="question-text" style="font-size:1rem"><b>{{ q.text }}</b></p>
   {% if not q.hide_default_results %}
-    <div class="w3-row w3-padding-16 question_content">
-    <div class="w3-col spacer m1">&nbsp</div>
 
     <!-- image for mobile -->
     {% if q.image %}
-      <div class="w3-col w3-padding-large m5" style="display: none;">
+    <div class="result-card result-img w3-row w3-padding-16">
+      <div class="w3-col spacer m1">&nbsp</div>
+      <div class="w3-col w3-padding-large m10">
         <img class="w3-image" src="{{ q.image.url }}" style="display:inline-flex;">
       </div>
+      <div class="spacer w3-colm1">&nbsp</div>
+    </div>
     {% endif %}
 
-        <div class="w3-col w3-padding-small m5">
-          <ul>
-            {% question_responses as question_responses %}
-            {% for res, val in question_responses.items %}
-            <li>{{ res }}   |    <b>{{ val }}</b></li>
-            {% endfor %}
-          </ul>
-        </div>
+    <div class="result-card results w3-row w3-padding-16">
 
-    {% if q.image %}
-      <div class="w3-col w3-padding-large m5">
-        <img class="w3-image" src="{{ q.image.url }}" style="display:inline-flex;">
+      <div class="space w3-col w3-padding m1">&nbsp</div>
+      <div class="w3-col w3-padding-small m10">
+        <ul>
+          {% question_responses as question_responses %}
+          {% for res, val in question_responses.items %}
+          <li>{{ res }}   |    <b>{{ val }}</b></li>
+          {% endfor %}
+        </ul>
       </div>
-    {% endif %}
+       <div class="spacer w3-colm1">&nbsp</div>
+
     </div>
   {% endif %}
 

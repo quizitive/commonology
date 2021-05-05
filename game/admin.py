@@ -15,7 +15,7 @@ class QuestionAdmin(admin.StackedInline):
         }),
         ('Question', {
             'classes': ('collapse',),
-            'fields': ('number', 'text', 'type', 'image', 'hide_default_results', 'commentary'),
+            'fields': ('number', 'text', 'type', 'image', 'hide_default_results', 'caption'),
         }),
     )
 

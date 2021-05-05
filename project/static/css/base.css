@@ -13,7 +13,7 @@ label.required::after {
 
 div.content {
     margin: 64px auto;
-    max-width: 778px;
+    max-width: 640px;
 }
 div.card-content {
     padding: 0 8px;
