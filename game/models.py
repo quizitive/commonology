@@ -119,7 +119,7 @@ class Question(models.Model):
     ]
     type = models.CharField(max_length=2, choices=QUESTION_TYPES)
     image = models.FileField(upload_to='questions/', blank=True, null=True)
-    commentary = RichTextUploadingField(blank=True)
+    caption = RichTextUploadingField(blank=True)
     hide_default_results = models.BooleanField(default=False)
 
     def __str__(self):
@@ -127,7 +127,7 @@ class Question(models.Model):
 
     @property
     def commentary_html(self):
-        return mark_safe(self.commentary)
+        return mark_safe(self.caption)
 
 
 class Answer(models.Model):
