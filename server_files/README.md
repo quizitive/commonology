@@ -217,6 +217,10 @@ That file would define the `DJANGO_SECRET` value used in your Django settings.py
 Add this to the end of `/home/django/.bashrc`.
 
 ```shell
+export PATH="/home/django/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
 set -a
 source /etc/profile.d/django_project.sh
 set +a
