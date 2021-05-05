@@ -12,4 +12,4 @@ if [ $USER == "ms" ]; then
 else
   PORT=8030
 fi
-DEBUG=True python manage.py runserver localhost:$PORT
+DEBUG=True python manage.py runserver 127.0.0.1:$PORT
