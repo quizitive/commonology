@@ -48,7 +48,7 @@ class LeaderboardView(SeriesPermissionView):
         current_game = Game.objects.get(game_id=game_id)
         date_range = current_game.date_range_pretty
         context = {
-            'game_id': game_id,
+            'game_name': current_game.name,
             'date_range': date_range
         }
         messages.info(request, "Login to follow your friends and much more coming soon!")
@@ -70,7 +70,7 @@ class ResultsView(SeriesPermissionView):
 
         context = {
             # 'player': request.user.player.display_name,
-            'game_id': game_id,
+            'game_name': game.name,
             'date_range': game.date_range_pretty,
             'answer_tally': answer_tally
         }
