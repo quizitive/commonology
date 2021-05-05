@@ -8,6 +8,7 @@ class SeriesAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     search_fields = ('name', 'slug')
     filter_horizontal = ('hosts', )
+    exclude = ('players',)
 
 
 @admin.register(Game)
