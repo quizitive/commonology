@@ -7,30 +7,32 @@ from celery import shared_task
 from django.utils.timezone import make_aware
 from django.db import transaction
 
-from game.models import Game, Question, Answer, AnswerCode
+from game.models import Series, Game, Question, Answer, AnswerCode
 from django.contrib.auth import get_user_model
 
 
 @shared_task
-def api_to_db(filename, responses, answer_codes, update):
+def api_to_db(series_slug, filename, responses, answer_codes, update):
     # convert back to dataframe from json (needed for celery)
     if not isinstance(responses, pd.DataFrame):
         responses = pd.read_json(responses)
         responses['Timestamp'] = responses['Timestamp'].astype('string')
 
     print("starting logging to db")
-    game = game_to_db(filename)
+    series = Series.objects.get(slug=series_slug)
+    game = game_to_db(series, filename)
     questions_to_db(game, responses)
-    players_to_db(responses)
+    players_to_db(series, responses)
     answers_to_db(game, responses, update)
     answers_codes_to_db(game, answer_codes)
     print("finished logging to db")
 
 
 @transaction.atomic
-def game_to_db(filename):
+def game_to_db(series, filename):
     game, _ = Game.objects.get_or_create(
         sheet_name=filename,
+        series=series,
         defaults={
             'name': filename.replace(" (Responses)", ""),
         }
@@ -63,17 +65,18 @@ def questions_to_db(game, responses):
 
 
 @transaction.atomic
-def players_to_db(responses):
+def players_to_db(series, responses):
     player_list = zip(
         responses['Name'].tolist(),
         responses['Email Address'].tolist()
     )
     User = get_user_model()
     for dn, e in player_list:
-        _, created = User.objects.update_or_create(
+        p, created = User.objects.update_or_create(
             email=e,
             defaults={'display_name': dn[:100]}
         )
+        series.players.add(p)
 
 
 def answers_to_db(game, responses, update=False):

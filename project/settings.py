@@ -9,7 +9,7 @@ import platform
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-project_name = 'commonology'
+project_name = env.get("PROJECT_NAME", 'commonology')
 DOMAIN = 'commonologygame.com'
 
 DEBUG = env.get("DEBUG", False)
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'game',
     'leaderboard',
     'mail',
+    'quizitive',
 ]
 
 if DEBUG_TOOLBAR:

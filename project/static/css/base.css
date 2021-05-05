@@ -1,5 +1,5 @@
 body, h1, h2, h3, h4, h5, h6 {
-    font-family: "Poppins", Verdana, Arial, sans-serif
+    font-family: "Poppins", Verdana, Arial, sans-serif;
 }
 
 div.spacer {
@@ -12,20 +12,19 @@ label.required::after {
 }
 
 div.content {
-    margin: 64px auto;
-    max-width: 640px;
+    margin: 0 auto;
+    max-width: 778px;
+    min-height: 100vh;
+    padding-bottom: 80px;
 }
 div.card-content {
-    padding: 0 8px;
+    padding: 0;
 }
 
 /* so cards have rounded corners on top and bottom */
 header.w3-container {
     border-radius: 4px 4px 0 0
 }
-/*.w3-card-0 {*/
-/*    border: None!important;*/
-/*}*/
 
 .w3-button.cg-blue {
     color: white!important;
