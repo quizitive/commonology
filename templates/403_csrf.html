@@ -1,0 +1,13 @@
+{% extends 'game/base.html' %}
+
+{% block title %}Commonology | Error authenticating{% endblock %}
+
+{% block content %}
+  <div class="content">
+    <div class="w3-container w3-padding-64" style="margin: auto">
+      <h1 class="leaderboard w3-padding">There was an error authenticating your request</h1>
+      <h3 class="leaderboard w3-padding">Are you a robot? We do this to protect our site from robots.
+        Try navigating <a href="{% url 'home' %}">back to home</a> to prove you're human.</h3>
+    </div>
+  </div>
+{% endblock %}

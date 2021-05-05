@@ -189,6 +189,14 @@ class UsersManagersTests(TestCase):
 
         settings.SECRET_KEY = saved_key
 
+    def test_following_self(self):
+        user = get_local_user()
+        self.assertEqual(1, user.following.count())
+
+    def test_display_name(self):
+        user = User.objects.create(email="p@test.com", first_name="F", last_name="P")
+        self.assertEqual("F P", user.display_name)
+
 
 class PendingUsersTests(TestCase):
 
@@ -232,6 +240,12 @@ class PendingUsersTests(TestCase):
         mail.outbox = []
 
         client = Client()
+
+        # test unsubscribe from invite
+        path = reverse('unsubscribe', kwargs={'token': 'None:' + str(pe.uuid)})
+        response = client.get(path)
+        self.assertEqual(response.reason_phrase, 'OK')
+
         path = reverse('join') + str(pe.uuid)
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')

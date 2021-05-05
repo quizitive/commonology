@@ -388,6 +388,16 @@ class UnsubscribeView(View):
     def get(self, request, token):
         i, t = token.split(':')
         context = {'header': 'Unsubscribe'}
+
+        if i == 'None':
+            # This means it was an unsubscribe from an invite email.
+            context['custom_message'] = \
+                f"It seems you received an unwanted invite from a friend. " \
+                f"You have not been added to any subscription lists so there is nothing more to do. " \
+                f"However, if this was a mistake and you do want to join please use the Join Commonology button " \
+                f"in the invite email you received.  Or visit our home page and join there.  Thank you!"
+            return render(request, 'users/base.html', context)
+
         try:
             u = User.objects.filter(id=i).first()
         except User.DoesNotExist:
@@ -404,3 +414,6 @@ class UnsubscribeView(View):
         except BadSignature:
             context['custom_message'] = "There is something wrong with your unsubscribe link."
         return render(request, 'users/base.html', context)
+
+    def post(self, request, *args, **kwargs):
+        return redirect(reverse('home'))
