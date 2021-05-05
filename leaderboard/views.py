@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 from django.contrib.auth.mixins import UserPassesTestMixin
 
-from game.models import Game, Series
+from game.models import Game, Series, Question
 from leaderboard.leaderboard import build_answer_tally
 
 
@@ -57,7 +57,8 @@ class LeaderboardView(SeriesPermissionView):
 
 class ResultsView(SeriesPermissionView):
 
-    def get(self, request, game_id):
+    def get(self, request, *args, **kwargs):
+        game_id = 40
         try:
             game = Game.objects.get(game_id=game_id)
         except Game.DoesNotExist:
@@ -72,6 +73,9 @@ class ResultsView(SeriesPermissionView):
             # 'player': request.user.player.display_name,
             'game_name': game.name,
             'date_range': game.date_range_pretty,
-            'answer_tally': answer_tally
+            'answer_tally': answer_tally,
+            'game_top_commentary': game.top_commentary,
+            'game_bottom_commentary': game.bottom_commentary,
+            'questions': game.questions.exclude(type=Question.op)
         }
         return render(request, 'leaderboard/results.html', context)

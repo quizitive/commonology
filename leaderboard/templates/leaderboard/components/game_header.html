@@ -1,23 +1,23 @@
-<div class="w3-row" style="padding: 8pt"></div>
+{% load leadeboard_tags %}
+
+<div class="w3-row" style="padding: 8px 0;"></div>
   <div class="w3-row">
-    <div class="w3-padding-large w3-col">
+
+    <div class="game-header cg-border-grey w3-padding w3-round" style="max-width:640px; margin:auto; margin-bottom:24px!important;border:1px;">
 
     {% if team %}
-      <h1 class="leaderboard"><b>{{ team.name }}</b></h1>
+      <h1 class="w3-padding leaderboard"><b>{{ team.name }}</b></h1>
     {% endif %}
-      <h1 class="leaderboard">Week {{ game_id }} {{ view }}</h1>
-
-      {% if view == 'Leaderboard' %}
-      <h3 class="leaderboard">{{ date_range }}  |
-        <a style="color:#f26649" href="{% url 'results' %}">The Results!</a>
-      </h3>
-      {% else %}
-      <h3 class="leaderboard">{{ date_range }}  |
-        <a style="color:#f26649" href="{% url 'leaderboard' %}">The Leaderboard!</a>
-      </h3>
-      {% endif %}
-
-{#    <p class="w3-padding-small"></p>#}
+      <h1 class="leaderboard">{{ game_name }} </h1>
+      <h3 class="leaderboard">{{ date_range }}</h3>
+      <div class="button-container w3-padding-16">
+        <a class="game-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard" href="{% url 'leaderboard:default' %}">
+        Leaderboard
+        </a>
+        <a class="game-header-button w3-button {% button_highlight 'results' %} w3-round-xxlarge leaderboard" href="{% url 'leaderboard:results' %}">
+        Results
+        </a>
+      </div>
 
     </div>
   </div>
