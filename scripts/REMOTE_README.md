@@ -55,11 +55,11 @@ $ git clone git@github.com:quizitive/commonology.git
 
 Use the `Tools->Deployment->Configuration...` to set up the server.
 
-![Deployment Configuration Image ](../static/img/DeploymentConfig.png)
+![Deployment Configuration Image ](DeploymentConfig.png)
 
 Use the `Tools->Deployment->Options` like this.
 
-![Deployment Options Image ](../static/img/DeploymentOptions.png)
+![Deployment Options Image ](DeploymentOptions.png)
 
 You may then choose to automatically keep files up to
 date by selecting `Tools->Deployment->Automatic Upload (Always)`.
