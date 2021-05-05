@@ -4,80 +4,58 @@ from django.http import Http404
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
+from django.contrib.auth.mixins import UserPassesTestMixin
 
-from users.models import Team
-from django.contrib.auth import get_user_model
-from game.models import Game
-from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
-
-
-def _render_leaderboard(request, game_id=None, published=True):
-    user_following = {}
-    if request.user.is_authenticated:
-        User = get_user_model()
-        user = User.objects.get(id=request.user.id)
-        user_following = {
-            p: True
-            for p in user.following.values_list('id', flat=True)
-        }
-
-    if published:
-        games = Game.objects.filter(publish=True).order_by('-game_id')
-    else:
-        games = Game.objects.order_by('-game_id')
-
-    # default to most recent game
-    if not game_id:
-        game_id = games.aggregate(Max('game_id'))['game_id__max']
-
-    current_game = games.get(game_id=game_id)
-    date_range = current_game.date_range_pretty
-    teams = current_game.teams
-    answer_tally = build_answer_tally(current_game)
-    search_term = request.GET.get('q')
-    team_id = request.GET.get('team')
-    leaderboard = build_filtered_leaderboard(current_game, answer_tally, search_term, team_id)
-    team = Team.objects.filter(id=team_id).first() or None
-
-    leaderboard = leaderboard.to_dict(orient='records')
-    context = {
-        'game_id': game_id,
-        'games': games,
-        'teams': teams,
-        'date_range': date_range,
-        'leaderboard': leaderboard,
-        'search_term': search_term,
-        'team': team,
-        'user_following': user_following
-    }
-
-    return render(request, 'leaderboard/leaderboard_view.html', context)
+from game.models import Game, Series
+from leaderboard.leaderboard import build_answer_tally
 
 
-class LeaderboardView(View):
+class SeriesPermissionView(UserPassesTestMixin, View):
+
+    ss = 'commonology'
 
     def dispatch(self, request, *args, **kwargs):
-        game_id = kwargs.get('game_id')
+        self.ss = kwargs.get('series_slug') or self.ss
+        if self.ss:
+            try:
+                Series.objects.get(slug=self.ss)
+            except Series.DoesNotExist:
+                raise Http404()
+
         # todo: maybe change this to is_authenticated to allow access to historical leaderboards
+        game_id = kwargs.get('game_id')
         if game_id is not None and not request.user.is_staff:
             raise Http404()
+
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, game_id=None):
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        series = Series.objects.get(slug=self.ss)
+        if series.public:
+            return True
+        return series.players.filter(id=self.request.user.id).exists()
+
+
+class LeaderboardView(SeriesPermissionView):
+
+    def get(self, request, game_id=None, *args, **kwargs):
+        series = Series.objects.get(slug=self.ss)
         if not game_id:
             # default to most recent game
-            game_id = Game.objects.filter(publish=True).aggregate(Max('game_id'))['game_id__max']
+            game_id = Game.objects.filter(publish=True, series=series).aggregate(Max('game_id'))['game_id__max']
         current_game = Game.objects.get(game_id=game_id)
         date_range = current_game.date_range_pretty
         context = {
-            'game_id': game_id,
+            'game_name': current_game.name,
             'date_range': date_range
         }
         messages.info(request, "Login to follow your friends and much more coming soon!")
         return render(request, 'leaderboard/leaderboard_view.html', context)
 
 
-class ResultsView(View):
+class ResultsView(SeriesPermissionView):
 
     def get(self, request, game_id):
         try:
@@ -92,7 +70,7 @@ class ResultsView(View):
 
         context = {
             # 'player': request.user.player.display_name,
-            'game_id': game_id,
+            'game_name': game.name,
             'date_range': game.date_range_pretty,
             'answer_tally': answer_tally
         }
