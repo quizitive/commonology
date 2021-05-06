@@ -160,7 +160,7 @@ class Question(models.Model):
     ]
     type = models.CharField(max_length=2, choices=QUESTION_TYPES)
     image = models.FileField(upload_to='questions/', null=True, blank=True)
-    caption = RichTextUploadingField(null=True, blank=True)
+    caption = models.CharField(max_length=255, blank=True, default="")
     hide_default_results = models.BooleanField(default=False)
 
     def __str__(self):
