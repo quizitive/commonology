@@ -11,10 +11,12 @@
       <h1 class="leaderboard">{{ game_name }} </h1>
       <h3 class="leaderboard">{{ date_range }}</h3>
       <div class="button-container w3-padding-16">
-        <a class="game-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard" href="{% url 'leaderboard:default' %}">
+        <a class="game-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard"
+           href="{% series_or_default_url 'default' %}">
         Leaderboard
         </a>
-        <a class="game-header-button w3-button {% button_highlight 'results' %} w3-round-xxlarge leaderboard" href="{% url 'leaderboard:results' %}">
+        <a class="game-header-button w3-button {% button_highlight 'results' %} w3-round-xxlarge leaderboard"
+           href="{% series_or_default_url 'results' %}">
         Results
         </a>
       </div>
