@@ -20,9 +20,12 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     send_test.short_description = "Send a test message."
 
     def blast(self, request, obj):
-        if obj.sent:
+        if not obj.enable_blast:
             messages.add_message(request, messages.WARNING,
-                                 "This blast was already sent.")
+                                 "You must enable blast with the checkbox below.")
+        elif obj.sent:
+            messages.add_message(request, messages.WARNING,
+                                 "This blast was already sent.  You can send again by unchecking the sent box below.")
         elif obj.tested:
             message = make_absolute_urls(obj.message)
             from_email = (obj.from_email, obj.from_name)
