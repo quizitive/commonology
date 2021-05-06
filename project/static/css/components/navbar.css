@@ -5,7 +5,7 @@
   padding: 8px;
 }
 div.content, div.narrow-content {
-  padding-top: 48px;
+  padding-top: 64px;
 }
 .navbar-logo-large {
   height: 38px;
@@ -57,8 +57,5 @@ div.content, div.narrow-content {
   h1.logo {
     font-size: 4rem;
   }
-  div.content, div.narrow-content {
-    padding-top: 64px;
-}
 
 }
