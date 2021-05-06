@@ -76,6 +76,6 @@ class ResultsView(SeriesPermissionView):
             'answer_tally': answer_tally,
             'game_top_commentary': game.top_commentary,
             'game_bottom_commentary': game.bottom_commentary,
-            'questions': game.questions.exclude(type=Question.op)
+            'questions': game.questions.exclude(type=Question.op).order_by('number')
         }
         return render(request, 'leaderboard/results.html', context)
