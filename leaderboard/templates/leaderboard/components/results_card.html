@@ -7,7 +7,7 @@
 
     <!-- image for mobile -->
     {% if q.image %}
-    <div class="result-card result-img w3-row w3-padding-16">
+    <div class="result-card result-img w3-row">
       <div class="w3-col spacer m1">&nbsp</div>
       <div class="w3-col w3-padding-large m10">
         <img class="w3-image" src="{{ q.image.url }}" style="display:inline-flex;">
@@ -18,14 +18,17 @@
 
     <div class="result-card results w3-row w3-padding-16">
 
-      <div class="space w3-col w3-padding m1">&nbsp</div>
+      <div class="spacer w3-col m1">&nbsp</div>
       <div class="w3-col w3-padding-small m10">
-        <ul>
-          {% question_responses as question_responses %}
-          {% for res, val in question_responses.items %}
-          <li>{{ res }}   |    <b>{{ val }}</b></li>
-          {% endfor %}
-        </ul>
+        <div class="response-header response-item w3-card-0 w3-round w3-padding">
+          <b>Answer</b><b style="color:#f26649;float: right;">Points</b></div>
+        {% question_responses as question_responses %}
+        {% for res, val in question_responses.items %}
+{#        <div class="response-item w3-card-0 w3-round w3-padding" style="border-color:#f26649; background: #fafbfc; margin: 4px 0;  ">#}
+{#          {{ res }}&nbsp&nbsp|&nbsp&nbsp<b style="color:#f26649">{{ val }}</b></div>#}
+        <div class="response-item w3-card-0 w3-round w3-padding">
+          {{ res }}<b style="color:#f26649;float: right;">{{ val }}</b></div>
+        {% endfor %}
       </div>
        <div class="spacer w3-colm1">&nbsp</div>
 
