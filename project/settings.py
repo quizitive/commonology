@@ -261,6 +261,7 @@ CKEDITOR_CONFIGS = {
         'toolbar': 'complete',  # put selected toolbar config here
         'tabSpaces': 4,
         'disallowedContent': 'script',
+        'font_names': 'Poppins;Verdana;Roboto;sans-serif',
         'extraPlugins': ','.join([
             'uploadimage',
             'div',
