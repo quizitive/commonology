@@ -77,7 +77,8 @@ class Game(models.Model):
 
     @property
     def players(self):
-        return self.game_questions.first().raw_answers.values(
+        return self.game_questions.exclude(
+            type__in=(Question.op, Question.ov)).first().raw_answers.values(
             'player', 'player__display_name').annotate(
             is_host=models.Case(
                 models.When(player__in=self.hosts.values_list('id', flat=True), then=True),
