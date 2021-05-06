@@ -166,10 +166,6 @@ class Question(models.Model):
     def __str__(self):
         return self.text
 
-    @property
-    def commentary_html(self):
-        return mark_safe(self.caption)
-
 
 class Answer(models.Model):
     timestamp = models.DateTimeField()
