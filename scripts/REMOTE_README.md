@@ -42,7 +42,7 @@ eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
 # This determines the postgres database name used
-export PROJECT_NAME=ms
+export PROJECT_NAME=$USER
 ```
 
 Clone repo.
