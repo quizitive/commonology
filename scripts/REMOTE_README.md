@@ -37,17 +37,18 @@ $ pyenv virtualenv project
 Add these lines to the end of `~/.bashrc`:
 
 ```shell
-export PATH="/home/ms/.pyenv/bin:$PATH"
+export PATH="~/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
+# This determines the postgres database name used
 export PROJECT_NAME=ms
 ```
 
 Clone repo.
 
 ```shell
-$ cd ~ms/
+$ cd ~
 $ git clone git@github.com:quizitive/commonology.git
 ```
 
