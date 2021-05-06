@@ -49,7 +49,8 @@ class LeaderboardView(SeriesPermissionView):
         date_range = current_game.date_range_pretty
         context = {
             'game_name': current_game.name,
-            'date_range': date_range
+            'date_range': date_range,
+            'series_slug': kwargs.get('series_slug')
         }
         messages.info(request, "Login to follow your friends and much more coming soon!")
         return render(request, 'leaderboard/leaderboard_view.html', context)
@@ -76,6 +77,7 @@ class ResultsView(SeriesPermissionView):
             'answer_tally': answer_tally,
             'game_top_commentary': game.top_commentary,
             'game_bottom_commentary': game.bottom_commentary,
-            'questions': game.questions.exclude(type=Question.op).order_by('number')
+            'questions': game.questions.exclude(type=Question.op).order_by('number'),
+            'series_slug': kwargs.get('series_slug')
         }
         return render(request, 'leaderboard/results.html', context)
