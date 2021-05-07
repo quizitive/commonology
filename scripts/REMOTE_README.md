@@ -37,17 +37,18 @@ $ pyenv virtualenv project
 Add these lines to the end of `~/.bashrc`:
 
 ```shell
-export PATH="/home/ms/.pyenv/bin:$PATH"
+export PATH="~/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
-export PROJECT_NAME=ms
+# This determines the postgres database name used
+export PROJECT_NAME=$USER
 ```
 
 Clone repo.
 
 ```shell
-$ cd ~ms/
+$ cd ~
 $ git clone git@github.com:quizitive/commonology.git
 ```
 
@@ -65,19 +66,41 @@ You may then choose to automatically keep files up to
 date by selecting `Tools->Deployment->Automatic Upload (Always)`.
 There are other choices in `Tools->Deployment` for manually uploading files.
 
-## Useful command aliases
+## Useful commands
 
-In these examples the username is "ms".  Obviously that would be
-changed to whatever the users account is.
+All of these would be run from the developers localhost. 
+
+
+### To update database for django account:
+```shell
+ssh django@staging.commonologygame.com bash commonology/scripts/pg_update_dev_db.bash
+```
+
+### To update database for ms account:
+```shell
+ssh ms@staging.commonologygame.com bash commonology/scripts/pg_update_dev_db.bash ms
+```
+
+### To run a staging server in the ms account:
 
 ```shell
-alias csm="ssh staging.commonologygame.com"
-alias c="ssh django@commonologygame.com"
-alias cs="ssh django@staging.commonologygame.com"
-alias deployprod="ssh django@commonologygame.com /home/django/commonology/deploy.bash"
-alias deploy="ssh django@staging.commonologygame.com /home/django/commonology/deploy.bash master"
+ssh -t -L8020:localhost:8020 ms@staging.commonologygame.com bash commonology/scripts/run_user_server.bash
+```
 
-alias staging_update_ms_db="ssh staging.commonologygame.com bash /home/ms/commonology/scripts/pg_update_dev_db.bash ms"
-alias staging_runserver="ssh -t -L8020:localhost:8020 staging.commonologygame.com bash /home/ms/commonology/scripts/run_user_server.bash"
+or for "ted" account with a different port number:
 
+```shell
+ssh -t -L8030:localhost:8030 ted@staging.commonologygame.com bash commonology/scripts/run_user_server.bash
+```
+
+#### To deploy master branch to staging:
+
+```shell
+ssh django@staging.commonologygame.com commonology/deploy.bash master
+```
+
+### To deploy master branch to production:
+
+```shell
+ssh django@commonologygame.com /home/django/commonology/deploy.bash"
 ```
