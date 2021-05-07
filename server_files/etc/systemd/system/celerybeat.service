@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=q
-Group=q
+User=django
+Group=django
 EnvironmentFile=/etc/conf.d/celery
 EnvironmentFile=/etc/profile.d/django_project.sh
 WorkingDirectory=/home/django/commonology/
