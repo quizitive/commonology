@@ -1,0 +1,34 @@
+div.mobile-q-img {
+  display: block!important;
+}
+div.desktop-q-img {
+  display: none!important;
+  color:blue;
+}
+div.response-item {
+  border-color:#f26649;
+  background: #f7f8f9;
+  margin: 4px auto;
+  max-width:420px;
+}
+div.response-header {
+  background: #fff;
+  border: #f1f2f3 solid 1px;
+  padding: 8px 15px!important;
+}
+div.answer-score {
+  width:50px;
+  font-weight:bold;
+  color:#f26649;
+  padding:0 4px;
+  text-align:right;
+}
+
+@media only screen and (max-width: 767px) {
+  div.mobile-q-img {
+  display: none!important;
+}
+  div.desktop-q-img {
+  display: block!important;
+}
+}

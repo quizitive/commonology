@@ -1,21 +1,45 @@
-<div class="answer_slides w3-card w3-container w3-padding-large" style="position: relative;">
+{% load leadeboard_tags %}
 
-  <button class="w3-button" style="float: left; position: absolute; left:0; top:180px;" onclick="plusDivs(-1)">&#10094;</button>
-  <button class="w3-button" style="float: right; position: absolute; right:0; top:180px;" onclick="plusDivs(+1)">&#10095;</button>
+<div class="answer_slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
 
+  <p class="question-text" style="font-size:1rem"><b>{{ q.text }}</b></p>
+  {% if not q.hide_default_results %}
 
-  <p><b>{{ q }}</b></p>
-  <div class="w3-row w3-padding-16 question_content" style="padding: 16px 24px;">
-    <div class="w3-col w3-padding-small m5">
-      <img class="w3-image" src="https://via.placeholder.com/350" style="display:inline-flex;">
+    <!-- image for mobile -->
+    {% if q.image %}
+    <div class="result-card result-img w3-row">
+      <div class="w3-col spacer m1">&nbsp</div>
+      <div class="w3-col w3-padding-large m10">
+        <img class="w3-image" src="{{ q.image.url }}" style="display:inline-flex;">
+      </div>
+      <div class="spacer w3-colm1">&nbsp</div>
     </div>
-    <div class="w3-col w3-padding-small m7">
-      <ul>
-        {% for res, val in responses.items %}
-        <li>{{ res }}   |    <b>{{ val }}</b></li>
+    {% endif %}
+
+    <div class="result-card results w3-row w3-padding-16">
+
+      <div class="spacer w3-col m1">&nbsp</div>
+      <div class="w3-col w3-padding-small m10">
+        <div class="response-header response-item w3-card-0 w3-round w3-padding">
+          <b>Answer</b><b style="color:#f26649;float: right;">Points</b></div>
+        {% question_responses as question_responses %}
+        {% for res, val in question_responses.items %}
+        <div class="w3-cell-row response-item w3-card-0 w3-round w3-padding">
+
+          <div class="w3-cell w3-rest">{{ res }}</div>
+          <div class="answer-score w3-cell w3-cell-middle w3-cell-right">{{ val }}</div>
+        </div>
         {% endfor %}
-      </ul>
+      </div>
+       <div class="spacer w3-colm1">&nbsp</div>
+
     </div>
+  {% endif %}
+
+  <div class="w3-col m1"></div>
+
+  <div class="w3-row w3-padding-16 question_content" style="font-style:italic;margin:auto;">
+    {{ q.caption|safe }}
   </div>
 
 </div>

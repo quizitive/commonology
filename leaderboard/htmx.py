@@ -1,25 +1,44 @@
 from django.shortcuts import render
 from django.views.generic.base import View
-from django.db.models import Max
 from django.http import Http404
-
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth import get_user_model
+
 from game.models import Game
 from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard
 
 
-class LeaderboardHTMXView(View):
+class LeaderboardHTMXView(UserPassesTestMixin, View):
+
+    game_id = None
+    game = None
 
     def dispatch(self, request, *args, **kwargs):
-        game_id = request.GET.get('game_id', False)
-        # return most recent game for any non-staff requests, or requests with not game_id
-        if not request.user.is_staff or not game_id:
-            kwargs['game_id'] = Game.objects.filter(publish=True).aggregate(Max('game_id'))['game_id__max']
-        else:
-            kwargs['game_id'] = game_id
+        try:
+            self.game_id = int(request.GET.get('game_id', None))
+        except TypeError:
+            raise Http404
+
+        try:
+            self.game = Game.objects.get(game_id=self.game_id)
+        except Game.DoesNotExist:
+            raise Http404
+
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, game_id):
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        if not self.game.publish:
+            return False
+        # used while we're only showing most recent game
+        if self.game_id != max(self.game.series.games.filter(publish=True).values_list('game_id', flat=True)):
+            return False
+        if self.game.series.public or self.game.series in self.request.user.series:
+            return True
+        return False
+
+    def get(self, request, *args, **kwargs):
         """
         Accepts a query params following
         """
@@ -33,7 +52,7 @@ class LeaderboardHTMXView(View):
             }
 
         try:
-            current_game = Game.objects.get(game_id=game_id)
+            current_game = Game.objects.get(game_id=self.game_id)
         except Game.DoesNotExist:
             raise Http404("Game does not exist")
 
@@ -62,7 +81,7 @@ class LeaderboardHTMXView(View):
         leaderboard = leaderboard.to_dict(orient='records')
 
         context = {
-            'game_id': game_id,
+            'game_id': self.game_id,
             'leaderboard': leaderboard,
             'search_term': search_term,
             'user_following': user_following,
