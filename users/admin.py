@@ -27,7 +27,7 @@ class PlayerUserAdmin(UserAdmin):
                        'is_staff', 'is_active', 'is_superuser', 'groups')}
         ),
     )
-    search_fields = ('email',)
+    search_fields = ('email', 'first_name', 'last_name', 'display_name')
     ordering = ('email',)
     actions = [subscribe_action, unsubscribe_action]
 
