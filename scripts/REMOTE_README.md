@@ -52,6 +52,28 @@ $ cd ~
 $ git clone git@github.com:quizitive/commonology.git
 ```
 
+## Optional: set up gunicorn for ted.commonologygame.com
+
+The `/etc/nginx/sites_available/django.nginx already works for this.`
+
+```shell
+$ sudo su -
+# cd /etc/systemd/system/
+# cp /home/django/commonology/server_files/etc/systemd/system/ted.gunicorn.service ./
+# sudo systemctl daemon-reload
+# systemctl start ted.gunicorn
+# systemctl enable ted.gunicorn
+```
+
+You'll need to create an apache htpassword file for ted.
+
+```shell
+$ cd ~ted/
+$ htpasswd -c .htpasswd ted
+```
+
+Now you can visit `https://ted.commonologygame.com`.
+
 ## Set up Pycharm to sync files
 
 Use the `Tools->Deployment->Configuration...` to set up the server.
@@ -87,7 +109,7 @@ ssh ms@staging.commonologygame.com bash commonology/scripts/pg_update_dev_db.bas
 ssh -t -L8020:localhost:8020 ms@staging.commonologygame.com bash commonology/scripts/run_user_server.bash
 ```
 
-or for "ted" account with a different port number:
+or for "ted" account with a different port number (don't do this if gunicorn is set up for ted):
 
 ```shell
 ssh -t -L8030:localhost:8030 ted@staging.commonologygame.com bash commonology/scripts/run_user_server.bash
@@ -103,4 +125,10 @@ ssh django@staging.commonologygame.com commonology/deploy.bash master
 
 ```shell
 ssh django@commonologygame.com /home/django/commonology/deploy.bash"
+```
+
+### To restart gunicorn for ted staging server:
+
+```shell
+ssh django@staging.commonologygame.com sudo systemctl restart ted.gunicorn
 ```
