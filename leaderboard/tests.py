@@ -29,12 +29,12 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         self.assertEqual(resp.status_code, code)
 
     def test_leaderboard_view(self):
-        url = reverse('leaderboard:default')
+        url = reverse('leaderboard:current-leaderboard')
         self._assert_code(url, 200)
 
     def test_leaderboard_game_view(self):
         # non-staff user can't see other weeks directly
-        url = reverse('leaderboard:game', kwargs={'game_id': 1})
+        url = reverse('leaderboard:game-id-leaderboard', kwargs={'game_id': 1})
         self._assert_code(url, 404)
 
     def test_htmx_leaderboard_resp(self):

@@ -24,7 +24,7 @@ class TestCommunityViews(BaseGameDataTestCase):
         # make the series private
         self.series.public = False
         self.series.save()
-        url = reverse('series-leaderboard:default', kwargs={'series_slug': self.series.slug})
+        url = reverse('series-leaderboard:current-leaderboard', kwargs={'series_slug': self.series.slug})
         resp = self.client.get(url)
         self.assertIn(resp.status_code, (403, 302))
 
