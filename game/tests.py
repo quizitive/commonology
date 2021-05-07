@@ -2,6 +2,7 @@ import datetime
 import string
 import random
 import json
+import logging
 from copy import deepcopy
 from csv import reader
 
@@ -22,6 +23,18 @@ from django.contrib.auth import get_user_model
 
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+def suppress_hidden_error_logs(func):
+    # PermissionDenied, Http404, SystemExit and Suspicious operation errors
+    # are not visible because they're handled by Django internally.
+    # This method prevents writing to logs that clog up test output
+    # See https://docs.djangoproject.com/en/dev/topics/testing/tools/#exceptions
+    def wrapper(*args, **kwargs):
+        logging.disable(logging.CRITICAL)
+        func(*args, **kwargs)
+        logging.disable(logging.NOTSET)
+    return wrapper
 
 
 class HomePage(TestCase):

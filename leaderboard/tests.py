@@ -7,7 +7,7 @@ from django.test import Client
 from project.utils import REDIS
 from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key
 from game.models import Game
-from game.tests import BaseGameDataTestCase
+from game.tests import BaseGameDataTestCase, suppress_hidden_error_logs
 from users.models import Player
 from django.contrib.auth import get_user_model
 
@@ -32,21 +32,24 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         url = reverse('leaderboard:current-leaderboard')
         self._assert_code(url, 200)
 
+    @suppress_hidden_error_logs
     def test_leaderboard_game_view(self):
         # non-staff user can't see other weeks directly
         url = reverse('leaderboard:game-id-leaderboard', kwargs={'game_id': 1})
         self._assert_code(url, 404)
 
     def test_htmx_leaderboard_resp(self):
+        game_id = max(Game.objects.values_list('game_id'))[0]
+
         # most recent game is public
         url = reverse('leaderboard:htmx')
-        pub_resp = self.client.get(url)
+        pub_resp = self.client.get(url, {'game_id': game_id})
         self.assertEqual(pub_resp.status_code, 200)
 
-        # non-staff always get most recent leaderboard via htmx
+        # non-staff can't see unpublished games, redirect to login
         new_game = Game.objects.create(publish=False)
         resp = self.client.get(url, {'game_id': new_game.game_id})
-        self.assertEqual(pub_resp.content, resp.content)
+        self.assertEqual(resp.status_code, 302)
 
         # staff users can access games if they exist
         self.client.login(email=self.su_email, password='foo')
