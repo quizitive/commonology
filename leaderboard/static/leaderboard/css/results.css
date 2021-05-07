@@ -16,6 +16,13 @@ div.response-header {
   border: #f1f2f3 solid 1px;
   padding: 8px 15px!important;
 }
+div.answer-score {
+  width:50px;
+  font-weight:bold;
+  color:#f26649;
+  padding:0 4px;
+  text-align:right;
+}
 
 @media only screen and (max-width: 767px) {
   div.mobile-q-img {
