@@ -15,6 +15,7 @@ DOMAIN = 'commonologygame.com'
 DEBUG = env.get("DEBUG", False)
 DEBUG_TOOLBAR = env.get("DEBUG_TOOLBAR", False)
 DEBUG_TOOLBAR_CONFIG = {'PRETTIFY_SQL': False}
+EXTRA_ALLOWED_HOST = env.get('EXTRA_ALLOWED_HOST')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_6d1eb(is7()m7')
@@ -22,6 +23,9 @@ SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100
 
 ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN]
+if EXTRA_ALLOWED_HOST:
+    ALLOWED_HOSTS.append(EXTRA_ALLOWED_HOST)
+
 INTERNAL_IPS = ()
 if DEBUG:
     INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN)
