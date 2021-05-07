@@ -35,6 +35,9 @@ header.w3-container {
 .cg-border-blue {
     border-color: #0095da!important;
 }
+.cg-border-grey {
+    border-color: #cecece!important;
+}
 
 /* --- Colors --- */
 .cg-blue {

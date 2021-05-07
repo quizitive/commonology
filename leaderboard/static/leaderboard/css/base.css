@@ -1,9 +1,15 @@
 /* Leaderboard, Results, Dashboard Style */
+div.content {
+  max-width: 640px;
+}
 .leaderboard {
   font-family: "Poppins", "Verdana", sans-serif;
 }
 h1.leaderboard {
   margin: 0;
+}
+.game-header-button {
+  min-width: 135px;
 }
 
 /* These settings force the leaderboard to render well on mobile */
@@ -26,6 +32,19 @@ table.leaderboard td:first-child {
 .name {
   width: 65%;
   word-wrap: break-word;
+}
+
+/* Medium screens */
+@media only screen and (max-width: 767px) {
+  h1.leaderboard {
+    font-size: 1.8rem;
+  }
+  h2.leaderboard {
+    font-size: 1.6rem;
+  }
+  h3.leaderboard {
+    font-size: 1.4rem;
+  }
 }
 
 /* Small screens */
@@ -105,16 +124,4 @@ table.leaderboard td:first-child {
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
-}
-
-@media only screen and (max-width: 767px) {
-  h1.leaderboard {
-    font-size: 6vw;
-  }
-  h2.leaderboard {
-    font-size: 5vw;
-  }
-  h3.leaderboard {
-    font-size: 4vw;
-  }
 }

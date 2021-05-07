@@ -1,4 +1,6 @@
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
+from ckeditor_uploader.fields import RichTextUploadingField
+from django.utils.safestring import mark_safe
 from django.db import models
 from django.utils.text import slugify
 from django.db.models.signals import post_save
@@ -56,6 +58,8 @@ class Game(models.Model):
         default=False,
         help_text="This game can be published to the dashboard"
     )
+    top_commentary = RichTextUploadingField(null=True, blank=True)
+    bottom_commentary = RichTextUploadingField(null=True, blank=True)
 
     class Meta:
         ordering = ['-game_id']
@@ -73,8 +77,7 @@ class Game(models.Model):
 
     @property
     def players(self):
-        return self.questions.exclude(
-            type=Question.op).first().raw_answers.values(
+        return self.game_questions.first().raw_answers.values(
             'player', 'player__display_name').annotate(
             is_host=models.Case(
                 models.When(player__in=self.hosts.values_list('id', flat=True), then=True),
@@ -92,7 +95,11 @@ class Game(models.Model):
 
     @property
     def game_questions(self):
-        return self.questions.exclude(type=Question.op)
+        return self.questions.exclude(type__in=(Question.op, Question.ov)).order_by('number')
+
+    @property
+    def visible_questions(self):
+        return self.questions.exclude(type=Question.op).order_by('number')
 
     @property
     def valid_raw_string_counts(self):
@@ -111,7 +118,7 @@ class Game(models.Model):
         ).values('question', 'coded_answer')
         return Answer.objects.filter(
             question__game=self).exclude(
-            question__type=Question.op
+            question__type__in=(Question.op, Question.ov)
         ).values_list('player', 'player__display_name', 'question__text').annotate(
             coded_answer=models.Subquery(answer_code_subquery.values('coded_answer')),
             is_host=models.Case(
@@ -139,16 +146,22 @@ class Game(models.Model):
 class Question(models.Model):
     game = models.ForeignKey(Game, null=True, on_delete=models.SET_NULL,
                              related_name='questions', db_index=True)
+    number = models.PositiveIntegerField(default=1)
     text = models.CharField(max_length=10000)
     mc = 'MC'
     fr = 'FR'
     op = 'OP'
+    ov = 'OV'
     QUESTION_TYPES = [
         (mc, 'Multiple Choice'),
         (fr, 'Free Response'),
-        (op, 'Optional')
+        (op, 'Optional'),
+        (ov, 'Optional (visible)')
     ]
     type = models.CharField(max_length=2, choices=QUESTION_TYPES)
+    image = models.FileField(upload_to='questions/', null=True, blank=True)
+    caption = models.CharField(max_length=255, blank=True, default="")
+    hide_default_results = models.BooleanField(default=False)
 
     def __str__(self):
         return self.text

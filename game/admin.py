@@ -11,18 +11,34 @@ class SeriesAdmin(admin.ModelAdmin):
     exclude = ('players',)
 
 
+class QuestionAdmin(admin.StackedInline):
+    model = Question
+    list_display = ('text', 'game')
+    list_filter = ('game__name',)
+    search_fields = ('text', 'game__name')
+    ordering = ('number', )
+    fieldsets = (
+        (None, {
+            'fields': ()
+        }),
+        ('Question', {
+            'classes': ('collapse',),
+            'fields': ('number', 'text', 'type', 'image', 'hide_default_results', 'caption'),
+        }),
+    )
+
+    def get_extra(self, request, obj=None, **kwargs):
+        return 0
+
+
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
+    save_on_top = True
     list_display = ('name', 'game_id')
     ordering = ('-game_id', )
     search_fields = ('game_id', 'name')
     filter_horizontal = ('hosts',)
-
-
-@admin.register(Question)
-class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('text', 'game')
-    search_fields = ('text', 'game__name')
+    inlines = (QuestionAdmin,)
 
 
 @admin.register(Answer)
