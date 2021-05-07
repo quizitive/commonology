@@ -48,6 +48,7 @@ class LeaderboardView(SeriesPermissionView):
         current_game = Game.objects.get(game_id=game_id)
         date_range = current_game.date_range_pretty
         context = {
+            'game_id': current_game.game_id,
             'game_name': current_game.name,
             'date_range': date_range,
             'series_slug': kwargs.get('series_slug')
