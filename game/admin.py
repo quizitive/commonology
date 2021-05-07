@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.forms import Textarea
+from django.db import models
 
 from game.models import Series, Game, Question, Answer, AnswerCode
 
@@ -26,6 +28,7 @@ class QuestionAdmin(admin.StackedInline):
             'fields': ('number', 'text', 'type', 'image', 'hide_default_results', 'caption'),
         }),
     )
+    formfield_overrides = {models.CharField: {'widget': Textarea(attrs={'size': '200'})}}
 
     def get_extra(self, request, obj=None, **kwargs):
         return 0
@@ -36,8 +39,9 @@ class GameAdmin(admin.ModelAdmin):
     save_on_top = True
     list_display = ('name', 'game_id')
     ordering = ('-game_id', )
-    search_fields = ('game_id', 'name')
+    search_fields = ('game_id', 'name', 'series')
     filter_horizontal = ('hosts',)
+    list_filter = ('series',)
     inlines = (QuestionAdmin,)
 
 
