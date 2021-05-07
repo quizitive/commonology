@@ -34,7 +34,8 @@ class CustomUser(AbstractUser):
     location = models.CharField(max_length=MAX_LOCATION_LEN, choices=LOCATIONS, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     referrer = CustomCIEmailField(_('Referrer email address'), blank=True, null=True)
-    subscribed = models.BooleanField(default=True)
+    subscribed = models.BooleanField(default=True,
+                                     help_text="If email address is bad then unsubscribe and deactivate them.")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
