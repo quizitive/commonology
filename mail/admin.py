@@ -12,7 +12,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         email = obj.test_recipient
         message = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
-        mass_mail(obj.subject, message, from_email, email_list=[(email, id)])
+        mass_mail(obj.subject, message, from_email, series=None, email_list=[(email, id)])
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
@@ -29,7 +29,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         elif obj.tested:
             message = make_absolute_urls(obj.message)
             from_email = (obj.from_email, obj.from_name)
-            mass_mail(obj.subject, message, from_email, categories=obj.categories)
+            mass_mail(obj.subject, message, from_email, series=obj.series, categories=obj.categories)
             obj.sent = True
             obj.save()
             messages.add_message(request, messages.INFO, 'Blast message sent.')
@@ -43,7 +43,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     change_actions = ('send_test', 'blast')
 
     list_display = ('created', 'subject', 'test_recipient')
-    list_filter = ('created',)
+    list_filter = ('created','series__slug')
     search_fields = ('subject',)
     ordering = ('-created',)
     save_on_top = True
