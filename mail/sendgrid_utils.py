@@ -7,6 +7,7 @@ from users.models import Player
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, To, Category, Header
 from users.utils import sign_user
+from game.models import Series
 import logging
 
 
@@ -55,13 +56,13 @@ def sendgrid_send(subject, msg, email_list,
     response = sendgrid_client.send(message)
 
 
-def mass_mail(subject, msg, from_email, email_list=None, categories=None):
+def mass_mail(subject, msg, from_email, series, email_list=None, categories=None):
     if email_list:
         sendgrid_send(subject, msg, email_list, from_email, unsub_link=True)
     else:
         if categories:
             categories = categories.split(', ')
-        qs = Player.objects.filter(subscribed=True).all()
+        qs = Player.objects.filter(subscribed=True).filter(this==Series.players, ser).all()
         send_at = int(time.time()) + 10
         count = 0
         email_list = []
