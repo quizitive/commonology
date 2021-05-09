@@ -9,7 +9,6 @@
 # }
 
 
-
 server {
     	server_name friendshipfeud.com;
 
