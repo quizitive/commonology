@@ -24,7 +24,7 @@ class Series(models.Model):
         verbose_name_plural = "series"
 
     def __str__(self):
-        return self.name
+        return self.slug
 
     def save(self, *args, **kwargs):
         self.slug = self.slug or slugify(self.name)

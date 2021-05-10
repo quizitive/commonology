@@ -11,7 +11,7 @@ class PlayerUserAdmin(UserAdmin):
     add_form = PlayerCreationForm
     form = PlayerChangeForm
     model = Player
-    list_display = ('email', 'date_joined', 'first_name', 'last_name', 'subscribed')
+    list_display = ('email', 'date_joined', 'display_name', 'first_name', 'last_name', 'subscribed')
     list_filter = ('date_joined', 'subscribed', 'is_member', 'is_staff', 'is_active', 'is_superuser')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
