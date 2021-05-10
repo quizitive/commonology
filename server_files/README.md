@@ -339,19 +339,34 @@ from the ones in our repo.  We should not have to do this.
 
 ## Nginx
 
+### Staging Server
+
 Copy site config files from repo.
 
 ```shell
 $ sudo su 
-# cp /home/django/commonology/server_files/etc/nginx/nginx.conf /etc/nginx/
-# cp /home/django/commonology/server_files/etc/nginx/sites-available/django.nginx /etc/nginx/sites-available/
-# ln -s /etc/nginx/sites-available/django.nginx /etc/nginx/sites-enabled/
+# cp /home/django/commonology/server_files/etc/nginx/ted.conf /etc/nginx/
+# ln -s /etc/nginx/sites-available/ted.nginx /etc/nginx/sites-enabled/
+# cp /home/django/commonology/server_files/etc/nginx/sites-available/staging.commonologygame.com /etc/nginx/sites-available/
+# ln -s /etc/nginx/sites-available/staging.commonologygame.nginx /etc/nginx/sites-enabled/
 # rm /etc/nginx/sites-enabled/default
 ```
 
-If this is a staging server and the domain name is `staging.commonologygame.com` rather than just `commonologygame.com`
-then edit `/etc/nginix/sites-available/django.nginx` and prefix the domain names with `staging`.  Pay attention
-to the lines at the end that configure the letsencrypt certficates.
+You can do the same with other nginx files for other appropriate domains you find in
+`/home/django/commonology/server_files/etc/nginx/sites-available`
+
+### Production Server
+
+Copy site config files from repo.
+
+```shell
+$ sudo su
+# cp /home/django/commonology/server_files/etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-available/
+# ln -s /etc/nginx/sites-available/commonologygame.nginx /etc/nginx/sites-enabled/
+# cp /home/django/commonology/server_files/etc/nginx/sites-available/quzitive.com /etc/nginx/sites-available/
+# ln -s /etc/nginx/sites-available/quizitive.nginx /etc/nginx/sites-enabled/
+# rm /etc/nginx/sites-enabled/default
+```
 
 ```shell
 # systemctl restart nginx
@@ -382,17 +397,6 @@ Note this can be used for Django, described in the next subsection, or most mail
 
 See `project/settings.py`
 
-### Mailchimp
-
-You need to logon to Mailchimp and set the Webhook URLs for the Audiences as follows.
-
-You need to create a UUID and put it in the `/etc/profile.d/djang_project.sh` file and use it in the webhook URL.
-
-Set the Mailchimp webhook for production:
-`https://commonologygame.com/mailchimp_hook/<UUID>`
-
-Set the Mailchimp webhook for staging:
-`https://staging.commonologygame.com/mailchimp_hook/<UUID>`
 
 ## Google API config
 
