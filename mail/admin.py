@@ -1,18 +1,18 @@
 from django.contrib import admin, messages
 from .models import MailMessage
 from django_object_actions import DjangoObjectActions
-
+from users.models import Player
 from .utils import make_absolute_urls
-from .sendgrid_utils import mass_mail
+from .sendgrid_utils import mass_mail, sendgrid_send
 
 
 @admin.register(MailMessage)
 class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     def send_test(self, request, obj):
         email = obj.test_recipient
-        message = make_absolute_urls(obj.message)
+        msg = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
-        mass_mail(obj.subject, message, from_email, series=None, email_list=[(email, id)])
+        sendgrid_send(obj.subject, msg=msg, email_list=[(email, -1)], from_email=from_email, unsub_link=True)
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
@@ -29,10 +29,22 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         elif obj.tested:
             message = make_absolute_urls(obj.message)
             from_email = (obj.from_email, obj.from_name)
-            mass_mail(obj.subject, message, from_email, series=obj.series, categories=obj.categories)
+            if obj.series is None:
+                messages.add_message(request, messages.WARNING, 'You must choose a series.')
+                return
+
+            if obj.series.slug == 'everyone':
+                players = Player.objects
+            else:
+                players = obj.series.players
+
+            n = mass_mail(obj.subject, message, from_email, players=players, categories=obj.categories)
             obj.sent = True
             obj.save()
-            messages.add_message(request, messages.INFO, 'Blast message sent.')
+            if n:
+                messages.add_message(request, messages.INFO, f'Blast message sent to {n} players.')
+            else:
+                messages.add_message(request, messages.WARNING, 'No players found in that series.')
         else:
             messages.add_message(request, messages.WARNING,
                                  "Cannot send blast until message is tested.")
@@ -43,7 +55,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     change_actions = ('send_test', 'blast')
 
     list_display = ('created', 'subject', 'test_recipient')
-    list_filter = ('created','series__slug')
+    list_filter = ('created',)
     search_fields = ('subject',)
     ordering = ('-created',)
     save_on_top = True
