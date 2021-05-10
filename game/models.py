@@ -163,7 +163,7 @@ class Question(models.Model):
     image = models.FileField(upload_to='questions/', null=True, blank=True)
     caption = models.CharField(max_length=255, blank=True, default="")
     hide_default_results = models.BooleanField(default=False)
-    comments = models.ForeignKey(Thread, related_name='object', null=True, on_delete=models.CASCADE)
+    thread = models.ForeignKey(Thread, related_name='object', null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.text
