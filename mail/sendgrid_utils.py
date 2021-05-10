@@ -3,7 +3,6 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.core.mail import send_mail
-from users.models import Player
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, To, Category, Header
 from users.utils import sign_user
@@ -27,11 +26,10 @@ def sendgrid_send(subject, msg, email_list,
                   send_at=None, categories=None, unsub_link=False):
 
     # don't use sendgrid backend for tests
-    # todo: this pattern can be made less hacky
     if 'console' in settings.EMAIL_BACKEND or 'locmem' in settings.EMAIL_BACKEND:
         to_emails = [e for e, _ in email_list]
         send_mail(subject, msg, None, to_emails, html_message=msg)
-        return
+        return(len(to_emails))
 
     to_emails = [To(email=e, substitutions=make_substitutions(e, id)) for e, id in email_list]
 
@@ -52,33 +50,35 @@ def sendgrid_send(subject, msg, email_list,
         message.category = [Category(i) for i in categories]
 
     sendgrid_client = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
-    response = sendgrid_client.send(message)
+    sendgrid_client.send(message)
+    return len(to_emails)
 
 
-def mass_mail(subject, msg, from_email, email_list=None, categories=None):
-    if email_list:
-        sendgrid_send(subject, msg, email_list, from_email, unsub_link=True)
-    else:
-        if categories:
-            categories = categories.split(', ')
-        qs = Player.objects.filter(subscribed=True).all()
-        send_at = int(time.time()) + 10
-        count = 0
-        email_list = []
+def mass_mail(subject, msg, from_email, players, categories=None):
+    if categories:
+        categories = categories.split(', ')
 
-        for p in qs:
-            count += 1
-            email_list.append((p.email, p.id))
+    qs = players.filter(subscribed=True).all()
 
-            if 0 == count % 500:
-                sendgrid_send(subject, msg, email_list, from_email,
-                              send_at=send_at, categories=categories, unsub_link=True)
-                send_at += 100
-                count = 0
-                email_list = []
+    # First batch in 10 seconds to be sure api call is received before that time.
+    send_at = int(time.time()) + 10
+    count = 0
+    email_list = []
 
-        if email_list:
+    for p in qs:
+        count += 1
+        email_list.append((p.email, p.id))
+
+        if 0 == count % 500:
             sendgrid_send(subject, msg, email_list, from_email,
                           send_at=send_at, categories=categories, unsub_link=True)
+            send_at += 100
+            count = 0
+            email_list = []
 
-        logger.info(f"{count} recipients just received a blast with subject = {subject}.")
+    if email_list:
+        sendgrid_send(subject, msg, email_list, from_email,
+                      send_at=send_at, categories=categories, unsub_link=True)
+
+    logger.info(f"{count} recipients were just sent a blast with subject = {subject}.")
+    return count
