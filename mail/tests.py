@@ -4,6 +4,7 @@ from users.tests import get_local_user
 from game.models import Series
 from mail.sendgrid_utils import mass_mail
 
+
 class MassMailTests(TestCase):
 
     @classmethod
@@ -21,5 +22,3 @@ class MassMailTests(TestCase):
         n = mass_mail('test', 'hello', 'ms@quizitive.com', players=self.series.players)
         self.assertEqual(n, 2)
         self.assertEqual(len(mail.outbox), 1)
-
-
