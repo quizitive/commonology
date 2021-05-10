@@ -90,5 +90,6 @@ class ResultsView(SeriesPermissionView):
             'game_top_commentary': game.top_commentary,
             'game_bottom_commentary': game.bottom_commentary,
             'questions': game.questions.exclude(type=Question.op).order_by('number'),
+            'host': game.hosts.first()
         })
         return render(request, 'leaderboard/results.html', context)
