@@ -26,4 +26,3 @@ class Comment(models.Model):
             return f"{self.player.display_name}"
         else:
             return "anonymous"
-
