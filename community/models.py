@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from django.utils.html import escape
 from users.models import Player
 
 
