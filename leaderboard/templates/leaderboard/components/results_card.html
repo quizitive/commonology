@@ -38,8 +38,26 @@
 
   <div class="w3-col m1"></div>
 
-  <div class="w3-row w3-padding-16 question_content" style="font-style:italic;margin:auto;">
-    {{ q.caption|safe }}
+  <div class="question-comments w3-padding-16">
+
+  {% if q.caption %}
+  <div class="w3-row w3-padding-small" style="margin:auto;font-size:14px">
+    <b>{{ host }}</b> {{ q.caption|safe }}
+  </div>
+  {% endif %}
+
+  {% for comment in q.comments.comments.all  %}
+  <div class="w3-row w3-padding-small" style="margin:auto;font-size:14px">
+    <b>{{ comment.commenter }}</b>  {{ comment.comment }}
+  </div>
+  {% endfor %}
+
+  <div class="w3-row cg-blue w3-border cg-border-grey" style="padding: 8px -8px;margin:auto;font-size:14px">
+    <form>
+      <input class="w3-input" type="text" >
+    </form>
+  </div>
+
   </div>
 
 </div>
