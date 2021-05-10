@@ -5,6 +5,12 @@ from .forms import PlayerCreationForm, PlayerChangeForm
 from .models import Player, PendingEmail, Team
 from .actions import subscribe_action, unsubscribe_action
 
+from game.models import Series
+
+
+class SeriesInLine(admin.TabularInline):
+    model = Series.players.through
+
 
 @admin.register(Player)
 class PlayerUserAdmin(UserAdmin):
@@ -30,6 +36,7 @@ class PlayerUserAdmin(UserAdmin):
     search_fields = ('email', 'first_name', 'last_name', 'display_name')
     ordering = ('email',)
     actions = [subscribe_action, unsubscribe_action]
+    inlines = [SeriesInLine]
 
 
 @admin.register(PendingEmail)
