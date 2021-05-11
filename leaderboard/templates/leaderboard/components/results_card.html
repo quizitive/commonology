@@ -42,35 +42,15 @@
 </div>
 
 <!-- Comments -->
-<div class="question-comment-container">
+<div id="thread_{{ q.thread.id }}" class="question-comment-container">
+{#    {% if q.caption %}#}
+{#      <div class="question-comment w3-row">#}
+{#        <b>{{ host }}&nbsp&nbsp</b>{{ q.caption|safe }}#}
+{#      </div>#}
+{#    {% endif %}#}
 
-  <div class="question-comments w3-padding-large">
-    {% if q.caption %}
-      <div class="question-comment w3-row">
-        <b>{{ host }}&nbsp&nbsp</b>{{ q.caption|safe }}
-      </div>
-  {% endif %}
-
-  {% for comment in q.thread.comments.all  %}
-    <div class="question-comment w3-row">
-      <b>{{ comment.commenter }}&nbsp&nbsp</b>{{ comment.comment }}
-    </div>
-  {% endfor %}
-
-  </div>
-
-  <div class="w3-row w3-border-top cg-border-grey w3-padding-large" style="margin:auto;">
-    <form method="post">
-      <div class="w3-cell-row">
-        <div class="w3-cell w3-rest">
-          <textarea class="" placeholder="Add comment..."></textarea>
-        </div>
-        <div class="w3-cell w3-cell-middle" style="width:45px">
-          <button class="w3-button w3-round cg-blue cg-border-blue" type="submit" style="display:inline-block;">Post</button>
-        </div>
-      </div>
-    </form>
+  {% include 'community/components/thread.html' with thread=q.thread %}
 </div>
-</div>
+
 
 </div>

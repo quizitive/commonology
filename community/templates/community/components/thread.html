@@ -1,0 +1,26 @@
+<div class="question-comments w3-padding-large">
+
+  {% for comment in thread.comments.all  %}
+    <div class="question-comment w3-row">
+      <b>{{ comment.commenter }}&nbsp&nbsp</b>{{ comment.comment }}
+    </div>
+  {% endfor %}
+
+  </div>
+
+  <div class="question-comment-form w3-row w3-border-top cg-border-grey w3-padding-large" style="margin:auto;font-size:14px">
+    <form method="post"
+          hx-post="/c/htmx/?thread_id={{ thread.id }}"
+          hx-target="#thread_{{ thread.id }}">
+      {% csrf_token %}
+      <input type="hidden" name="method" value="add_comment">
+      <div class="w3-cell-row">
+        <div class="w3-cell w3-rest">
+          <textarea name="comment" class="" placeholder="Add comment..."></textarea>
+        </div>
+        <div class="w3-cell w3-cell-middle" style="width:45px">
+          <button class="w3-button w3-round cg-blue cg-border-blue" type="submit" style="display:inline-block;">Post</button>
+        </div>
+      </div>
+    </form>
+  </div>
