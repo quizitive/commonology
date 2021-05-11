@@ -10,7 +10,21 @@ from game.models import Game, Series, Question
 from leaderboard.leaderboard import build_answer_tally
 
 
-class SeriesPermissionView(UserPassesTestMixin, View):
+class SeriesPermissionMixin(UserPassesTestMixin):
+    """
+    A mixin to validate that a user can access series assets.
+    Will return true for players of that series or for any public series.
+    """
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        series = Series.objects.get(slug=self.slug)
+        if series.public:
+            return True
+        return series.players.filter(id=self.request.user.id).exists()
+
+
+class SeriesPermissionView(SeriesPermissionMixin, View):
 
     slug = 'commonology'
     game_id = None
@@ -39,14 +53,6 @@ class SeriesPermissionView(UserPassesTestMixin, View):
                 publish=True, series__slug=self.slug).aggregate(Max('game_id'))['game_id__max']
 
         return super().dispatch(request, *args, **kwargs)
-
-    def test_func(self):
-        if self.request.user.is_staff:
-            return True
-        series = Series.objects.get(slug=self.slug)
-        if series.public:
-            return True
-        return series.players.filter(id=self.request.user.id).exists()
 
     def get_context(self, game):
         date_range = game.date_range_pretty
@@ -90,5 +96,6 @@ class ResultsView(SeriesPermissionView):
             'game_top_commentary': game.top_commentary,
             'game_bottom_commentary': game.bottom_commentary,
             'questions': game.questions.exclude(type=Question.op).order_by('number'),
+            'host': game.hosts.first()
         })
         return render(request, 'leaderboard/results.html', context)
