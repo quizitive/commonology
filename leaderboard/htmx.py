@@ -5,10 +5,11 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth import get_user_model
 
 from game.models import Game
+from leaderboard.views import SeriesPermissionMixin
 from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard
 
 
-class LeaderboardHTMXView(UserPassesTestMixin, View):
+class LeaderboardHTMXView(SeriesPermissionMixin, View):
 
     game_id = None
     game = None
@@ -24,6 +25,9 @@ class LeaderboardHTMXView(UserPassesTestMixin, View):
         except Game.DoesNotExist:
             raise Http404
 
+        if self.game.series:
+            self.slug = self.game.series.slug
+
         return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
@@ -31,12 +35,13 @@ class LeaderboardHTMXView(UserPassesTestMixin, View):
             return True
         if not self.game.publish:
             return False
+
         # used while we're only showing most recent game
         if self.game_id != max(self.game.series.games.filter(publish=True).values_list('game_id', flat=True)):
             return False
-        if self.game.series.public or self.game.series in self.request.user.series:
-            return True
-        return False
+
+        # super() will test if the user has access to this series
+        return super().test_func()
 
     def get(self, request, *args, **kwargs):
         """
