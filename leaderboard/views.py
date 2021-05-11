@@ -18,6 +18,10 @@ class SeriesPermissionMixin(UserPassesTestMixin):
 
     slug = 'commonology'
 
+    def dispatch(self, request, *args, **kwargs):
+        self.slug = self.kwargs.get('slug') or self.slug
+        return super().dispatch(request, *args, **kwargs)
+
     def test_func(self):
         if self.request.user.is_staff:
             return True
