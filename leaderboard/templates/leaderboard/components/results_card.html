@@ -1,6 +1,9 @@
 {% load leadeboard_tags %}
 
-<div class="answer_slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
+<div class="answers-comments-container w3-card-0 w3-round cg-border-grey w3-border"
+     style="margin:16px 0;">
+
+<div class="answer_slides w3-container w3-padding-top" style="position: relative;">
 
   <p class="question-text" style="font-size:1rem"><b>{{ q.text }}</b></p>
   {% if not q.hide_default_results %}
@@ -16,7 +19,7 @@
     </div>
     {% endif %}
 
-    <div class="result-card results w3-row w3-padding-16">
+    <div class="result-card results w3-row w3-padding-top">
 
       <div class="spacer w3-col m1">&nbsp</div>
       <div class="w3-col w3-padding-small m10">
@@ -36,28 +39,38 @@
     </div>
   {% endif %}
 
-  <div class="w3-col m1"></div>
+</div>
 
-  <div class="question-comments w3-padding-16">
+<!-- Comments -->
+<div class="question-comment-container">
 
-  {% if q.caption %}
-  <div class="w3-row w3-padding-small" style="margin:auto;font-size:14px">
-    <b>{{ host }}</b> {{ q.caption|safe }}
-  </div>
+  <div class="question-comments w3-padding-large">
+    {% if q.caption %}
+      <div class="question-comment w3-row">
+        <b>{{ host }}&nbsp&nbsp</b>{{ q.caption|safe }}
+      </div>
   {% endif %}
 
-  {% for comment in q.comments.comments.all  %}
-  <div class="w3-row w3-padding-small" style="margin:auto;font-size:14px">
-    <b>{{ comment.commenter }}</b>  {{ comment.comment }}
-  </div>
+  {% for comment in q.thread.comments.all  %}
+    <div class="question-comment w3-row">
+      <b>{{ comment.commenter }}&nbsp&nbsp</b>{{ comment.comment }}
+    </div>
   {% endfor %}
 
-  <div class="w3-row cg-blue w3-border cg-border-grey" style="padding: 8px -8px;margin:auto;font-size:14px">
-    <form>
-      <input class="w3-input" type="text" >
-    </form>
   </div>
 
-  </div>
+  <div class="w3-row w3-border-top cg-border-grey w3-padding-large" style="margin:auto;">
+    <form method="post">
+      <div class="w3-cell-row">
+        <div class="w3-cell w3-rest">
+          <textarea class="" placeholder="Add comment..."></textarea>
+        </div>
+        <div class="w3-cell w3-cell-middle" style="width:45px">
+          <button class="w3-button w3-round cg-blue cg-border-blue" type="submit" style="display:inline-block;">Post</button>
+        </div>
+      </div>
+    </form>
+</div>
+</div>
 
 </div>
