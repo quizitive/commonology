@@ -15,6 +15,9 @@ class SeriesPermissionMixin(UserPassesTestMixin):
     A mixin to validate that a user can access series assets.
     Will return true for players of that series or for any public series.
     """
+
+    slug = 'commonology'
+
     def test_func(self):
         if self.request.user.is_staff:
             return True
@@ -26,7 +29,6 @@ class SeriesPermissionMixin(UserPassesTestMixin):
 
 class SeriesPermissionView(SeriesPermissionMixin, View):
 
-    slug = 'commonology'
     game_id = None
 
     # these preserve the original request and are used for url routing
