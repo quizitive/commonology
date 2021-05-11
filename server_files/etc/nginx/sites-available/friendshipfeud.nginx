@@ -1,0 +1,23 @@
+server {
+    	server_name friendshipfeud.com;
+
+
+	listen 80;
+	listen [::]:80;
+
+	listen 443 ssl;
+	listen [::]:443 ssl;
+
+	location / {
+		rewrite ^ https://commonologygame.com$request_uri? permanent; 
+		# try_files $uri $uri/ =404;
+	}
+
+
+        # listen [::]:443 ssl ipv6only=on; # managed by Certbot
+        # listen 443 ssl; # managed by Certbot
+        ssl_certificate /etc/letsencrypt/live/friendshipfeud.com/fullchain.pem; # managed by Certbot
+        ssl_certificate_key /etc/letsencrypt/live/friendshipfeud.com/privkey.pem; # managed by Certbot
+        include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
