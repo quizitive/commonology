@@ -42,3 +42,12 @@ def add_additional_fields(strategy, details, backend, user=None, *args, **kwargs
 
     user.is_member = True
     user.save()
+
+
+def is_validated(email):
+    User = get_user_model()
+    try:
+        u = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return False
+    return u.is_active

@@ -33,7 +33,7 @@ def user_logout(request):
 class UserCardFormView(CardFormView):
     """
     A base class with sensible defaults for our basic user form-in-card
-    See template users/cards/base_users_card.html for additional template
+    See template cards/base_card.html for additional template
     variables that can be set to customize form further.
 
     Common use case would be to define a form_class and override post()
@@ -43,7 +43,7 @@ class UserCardFormView(CardFormView):
     header = "Welcome To Commonology"
     custom_message = None
     button_label = "Ok"
-    card_template = 'users/cards/base_users_card.html'
+    card_template = 'cards/base_card.html'
     page_template = 'users/base.html'
 
 
@@ -124,10 +124,7 @@ class JoinView(UserCardFormView):
         except User.DoesNotExist:
             pass
 
-        remove_pending_email_invitations()
-        pe = PendingEmail(email=email)
-        pe.save()
-        send_invite(request, pe)
+        send_invite(request, email)
 
         self.custom_message = f"We sent your unique join link to {email}. " \
                               f"Don't forget to check your spam or junk folder if need be. " \
@@ -137,14 +134,21 @@ class JoinView(UserCardFormView):
         return self.render(request, form=None, button_label='Ok')
 
 
-def make_uuid_url(request, uuid=None, name='/join/'):
-    url = request.build_absolute_uri(name)
+def make_uuid_url(request, uuid=None, name='/join/', slug=None):
+    if slug:
+        return request.build_absolute_uri(f'c/{slug}/{name}/{uuid}')
+    else:
+        url = request.build_absolute_uri(name)
     if uuid:
         url += str(uuid)
     return url
 
 
-def send_invite(request, pe):
+def send_invite(request, email, referrer=None):
+    remove_pending_email_invitations()
+    pe = PendingEmail(email=email, referrer=referrer)
+    pe.save()
+
     email = pe.email
     join_url = make_uuid_url(request, uuid=pe.uuid)
     referrer_str = ""
@@ -198,10 +202,7 @@ class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
                 # can't join if user exists
                 messages.warning(request, f"User {email} already exists")
             except User.DoesNotExist:
-                remove_pending_email_invitations()
-                pe = PendingEmail(email=email, referrer=request.user.email)
-                pe.save()
-                send_invite(request, pe)
+                send_invite(request, email, request.user.email)
                 messages.info(request, f"Invite successfully sent to {email}.")
 
         return redirect('invite')

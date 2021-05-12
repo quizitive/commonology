@@ -1,0 +1,35 @@
+
+{% autoescape off %}
+
+{% block email-content %}
+
+  <p>Hello!</p>
+
+
+
+  <p>To confirm your email, click the button below. The link will expire in 7 days. </p>
+  <div id="button-holder">
+    <button class="w3-button cg-blue" style="display: block;">
+      <a href="{{ join_url }}">Confirm</a>
+    </button>
+  </div>
+
+  <p>Welcome, we're excited for you to play!</p>
+
+  <p>
+    Cheers,
+    <br/>
+    The Commonology Team
+  </p>
+  <div id="footer" style="margin-bottom:-24px">
+    <p>
+    Button not working? Try pasting the url directly into your browser:
+      <a href="{{ join_url }}">{{ join_url }}</a>
+    </p>
+  </div>
+
+{% endblock %}
+
+{% endautoescape %}
+
+
