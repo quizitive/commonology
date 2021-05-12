@@ -37,7 +37,7 @@ class QuestionAdmin(admin.StackedInline):
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_display = ('name', 'game_id')
+    list_display = ('name', 'game_id', 'series', 'start', 'end')
     ordering = ('-game_id', )
     search_fields = ('game_id', 'name', 'series')
     filter_horizontal = ('hosts',)

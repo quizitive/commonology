@@ -13,7 +13,7 @@ from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
 from django.views.generic.base import View
-from django.views.generic.edit import FormMixin
+from project.views import CardFormView
 from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
 from users.models import PendingEmail
 from users.utils import unsubscribe
@@ -30,7 +30,7 @@ def user_logout(request):
     return redirect(reverse('home'))
 
 
-class UserCardFormView(FormMixin, View):
+class UserCardFormView(CardFormView):
     """
     A base class with sensible defaults for our basic user form-in-card
     See template users/cards/base_users_card.html for additional template
@@ -45,36 +45,6 @@ class UserCardFormView(FormMixin, View):
     button_label = "Ok"
     card_template = 'users/cards/base_users_card.html'
     page_template = 'users/base.html'
-
-    def get(self, request, *args, **kwargs):
-        return self.render(request, *args, **kwargs)
-
-    def render(self, request, *args, **kwargs):
-        return render(request, self.page_template, self.get_context_data(**kwargs))
-
-    def get_context_data(self, *args, **kwargs):
-        context = {
-            'header': self.header,
-            'form': self.format_form(self.get_form()),
-            'card_template': self.card_template,
-            'button_label': self.button_label,
-            'custom_message': self.custom_message
-            }
-        context.update(kwargs)
-        return super().get_context_data(**context)
-
-    def get_form(self, form_class=None):
-        form = super().get_form()
-        return self.format_form(form)
-
-    @staticmethod
-    def format_form(form):
-        for key, field in form.fields.items():
-            if field.widget.__class__.__name__ == 'CheckboxInput':
-                field.widget.attrs['class'] = 'w3-check'
-            else:
-                field.widget.attrs['class'] = 'w3-input'
-        return form
 
 
 class ProfileView(LoginRequiredMixin, UserCardFormView):
