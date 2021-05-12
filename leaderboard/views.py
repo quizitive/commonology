@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 from django.contrib.auth.mixins import UserPassesTestMixin
 
@@ -35,7 +34,8 @@ class SeriesPermissionView(SeriesPermissionMixin, View):
 
     game_id = None
 
-    # these preserve the original request and are used for url routing
+    # these preserve the original request and are used for top level url handling
+    # in order to preserve commonologygame.com/leaderboard/ for the main game
     requested_slug = None
     requested_game_id = None
 
@@ -82,7 +82,7 @@ class LeaderboardView(SeriesPermissionView):
 
         context = self.get_context(game)
 
-        messages.info(request, "Login to follow your friends and much more coming soon!")
+        messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, 'leaderboard/leaderboard_view.html', context)
 
 
@@ -104,4 +104,5 @@ class ResultsView(SeriesPermissionView):
             'questions': game.questions.exclude(type=Question.op).order_by('number'),
             'host': game.hosts.first()
         })
+        messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, 'leaderboard/results.html', context)
