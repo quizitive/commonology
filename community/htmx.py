@@ -1,23 +1,24 @@
 from django.views import View
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 
+from leaderboard.views import SeriesPermissionMixin
 from community.models import Thread, Comment
 
 
-class ThreadHTMXView(UserPassesTestMixin, View):
+class ThreadHTMXView(SeriesPermissionMixin, View):
 
     thread = None
     player = None
 
-    @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
+        # we're not using @login_required for HTMX views so we can return a
+        # 401 error in order to handle in the view based on this error code
+        # see
         if not request.user.is_authenticated:
             return HttpResponse("You need to sign in to access this feature", status=401)
 
-        self.thread = Thread.objects.get(id=int(request.GET.get('thread_id')))
+        self.thread = Thread.objects.get(id=int(request.GET.get('thread-id')))
         self.player = request.user
 
         req_method = request.POST.get('method')

@@ -171,7 +171,7 @@ class Question(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             thread = Thread.objects.create()
-            self.comments = thread
+            self.thread = thread
         super().save(*args, **kwargs)
 
 
