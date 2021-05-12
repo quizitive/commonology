@@ -3,6 +3,8 @@ import logging
 
 from django.conf import settings
 from django.shortcuts import render, redirect
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic.base import View
 from project.views import CardFormView
@@ -14,7 +16,11 @@ from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tal
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
+from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
+from users.utils import is_validated
+from users.views import remove_pending_email_invitations, make_uuid_url
+from mail.sendgrid_utils import sendgrid_send
 
 
 def index(request):
@@ -112,33 +118,87 @@ def game_url(g, email):
     return url
 
 
+def send_confirm(request, slug, email):
+    remove_pending_email_invitations()
+    pe = PendingEmail(email=email)
+    pe.save()
+
+    domain = get_current_site(request)
+    url = (f'https://{domain}/c/{slug}/play/{pe.uuid}')
+
+    context = {'join_url': url}
+    msg = render_to_string('game/validate_email.html', context)
+
+    return sendgrid_send("You're Invited to Commonology", msg, [(email, None)])
+
+
 # commonologygame.com/play
 # commonologygame.com/c/<slug>/play
 class GameEntryView(CardFormView):
     form_class = PendingEmailForm
     header = "Validating email address"
     button_label = "Next"
-    card_template = 'users/cards/join_card.html'
+    # card_template = 'game/cards/join_card.html'
     custom_message = "Enter your email to play the game!"
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
         g = find_latest_active_game(slug)
-        if g is None:
-            return HTTPCardResponse(request, "Sorry the next game has not started yet.")
+        if not g:
+            return self.warning(request, 'Sorry the next game has not started yet.')
 
         if request.user.is_authenticated:
-            url = game_url(request.user.email)
-            if url:
-                return redirect(url)
-            else:
-                return HTTPCardResponse(request, "Could not find a active game at this time.")
+            url = game_url(g, request.user.email)
+            return redirect(url)
+
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        pass
+        if 'email' not in request.POST:
+            # There was no form probably game is not active.
+            return redirect('home')
+
+        slug = kwargs.get('series_slug') or 'commonology'
+        email = request.POST['email']
+        if is_validated(email):
+            g = find_latest_active_game(slug)
+            if not g:
+                return self.warning(request, 'Sorry the next game has not started yet.')
+            url = game_url(g, email)
+            return redirect(url)
+
+        send_confirm(request, slug, email)
+        self.custom_message = f"We sent your email confirm link to {email}. " \
+                              f"Don't forget to check your spam or junk folder if need be."
+
+        self.header = "Confirmation Sent!"
+        return self.render(request, form=None, button_label='Ok')
 
 
 class GameEntryValidationView(View):
+    # c/<slug>/play/<uuid>
     def get(self, request, *args, **kwargs):
-        pass
+        slug = kwargs['series_slug']
+        uuid = kwargs['uidb64']
+        pe = PendingEmail.objects.filter(uuid__exact=uuid).get()
+        if pe is None:
+            gc = GameEntryView()
+            return gc.warning(request, 'Seems like there was a problem with the validation link. Please try again.')
+
+        email = pe.email
+        try:
+            p = Player.objects.get(email=email)
+            if not p.is_active:
+                p.is_active = True
+                p.save()
+        except Player.DoesNotExist:
+            p = Player(email=email)
+            p.save()
+
+        g = find_latest_active_game(slug)
+        if not g:
+            gc = GameEntryView()
+            return gc.warning(request, 'Sorry the next game has not started yet.')
+
+        url = game_url(g, email)
+        return redirect(url)
