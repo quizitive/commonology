@@ -104,18 +104,14 @@ def tabulate_results(series_slug, filename, gc, update=False):
     write_all_to_gdrive(sheet_doc, answer_tally, answer_codes, leaderboard)
 
 
-#######################################################################
 def find_latest_active_game(slug):
     t = our_now()
     g = Game.objects.filter(series__slug=slug, end__gte=t, start__lte=t).reverse().first()
     return g
 
 
-def game_url(g, email):
-    url = g.google_form_url
-    if url:
-        url = url.replace('alex@commonologygame.com', email)
-    return url
+def game_url(google_form_url, email):
+    return google_form_url.replace('alex@commonologygame.com', email)
 
 
 def send_confirm(request, slug, email):
@@ -132,23 +128,23 @@ def send_confirm(request, slug, email):
     return sendgrid_send("You're Invited to Commonology", msg, [(email, None)])
 
 
-# commonologygame.com/play
-# commonologygame.com/c/<slug>/play
 class GameEntryView(CardFormView):
     form_class = PendingEmailForm
-    header = "Validating email address"
+    header = "Game starts here!"
     button_label = "Next"
     # card_template = 'game/cards/join_card.html'
-    custom_message = "Enter your email to play the game!"
+    custom_message = "Enter your email to play the game!  We'll send the results to you."
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
         g = find_latest_active_game(slug)
         if not g:
-            return self.warning(request, 'Sorry the next game has not started yet.')
+            return self.warning(request, 'Sorry the next game has not started yet.  ' \
+                                          'Join our list so we can let you know when it does.',
+                                keep_form=False)
 
         if request.user.is_authenticated:
-            url = game_url(g, request.user.email)
+            url = game_url(g.google_form_url, request.user.email)
             return redirect(url)
 
         return super().get(request, *args, **kwargs)
@@ -163,16 +159,16 @@ class GameEntryView(CardFormView):
         if is_validated(email):
             g = find_latest_active_game(slug)
             if not g:
-                return self.warning(request, 'Sorry the next game has not started yet.')
-            url = game_url(g, email)
+                return self.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
+            url = game_url(g.google_form_url, email)
             return redirect(url)
 
         send_confirm(request, slug, email)
-        self.custom_message = f"We sent your email confirm link to {email}. " \
+        self.custom_message = f"We sent the game link to {email}. " \
                               f"Don't forget to check your spam or junk folder if need be."
 
-        self.header = "Confirmation Sent!"
-        return self.render(request, form=None, button_label='Ok')
+        self.header = "Game link sent!"
+        return self.render(request, form=None, button_label='OK')
 
 
 class GameEntryValidationView(View):
@@ -198,7 +194,7 @@ class GameEntryValidationView(View):
         g = find_latest_active_game(slug)
         if not g:
             gc = GameEntryView()
-            return gc.warning(request, 'Sorry the next game has not started yet.')
+            return gc.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
 
-        url = game_url(g, email)
+        url = game_url(g.google_form_url, email)
         return redirect(url)

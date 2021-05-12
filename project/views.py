@@ -2,6 +2,7 @@ from django.views.generic.base import View
 from django.shortcuts import render
 from django.views.generic.edit import FormMixin
 from django.contrib import messages
+from django.forms import Form
 
 
 class CardFormView(FormMixin, View):
@@ -36,14 +37,9 @@ class CardFormView(FormMixin, View):
         context.update(kwargs)
         return super().get_context_data(**context)
 
-    # def get_form(self, form_class=None):
-    #     if form_class:
-    #         form = super().get_form()
-    #         return self.format_form(form)
-    #     else:
-    #         return
-
     def get_form(self, form_class=None):
+        if not self.form_class:
+            return
         form = super().get_form()
         return self.format_form(form)
 
@@ -56,8 +52,9 @@ class CardFormView(FormMixin, View):
                 field.widget.attrs['class'] = 'w3-input'
         return form
 
-    def warning(self, request, message):
+    def warning(self, request, message, keep_form=True):
         self.custom_message = ''
         messages.warning(request, message)
-        self.form_class = None
+        if not keep_form:
+            self.form_class = None # Form
         return self.render(request)
