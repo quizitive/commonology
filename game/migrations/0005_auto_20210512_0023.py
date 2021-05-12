@@ -2,6 +2,7 @@
 
 import datetime
 from django.db import migrations, models
+import game.models
 
 
 class Migration(migrations.Migration):
@@ -19,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='game',
             name='google_form_url',
-            field=models.CharField(blank=True, help_text='Enter the form url with prefilled email', max_length=255),
+            field=models.CharField(blank=True, help_text='Enter the form url with prefilled email', max_length=255, validators=[game.models.validate_google_url]),
         ),
         migrations.AddField(
             model_name='game',
