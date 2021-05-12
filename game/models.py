@@ -1,5 +1,7 @@
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
+from django.forms import CharField, ValidationError
+from django.core import validators
 from django.utils.safestring import mark_safe
 from django.db import models
 from django.utils.text import slugify
@@ -7,7 +9,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from users.models import Player
-import datetime
 
 
 class Series(models.Model):
@@ -46,6 +47,13 @@ def add_owner_as_host_and_player(sender, instance, created, **kwargs):
         instance.players.add(instance.owner)
 
 
+def validate_google_url(value):
+    if value and ('alex@commonologygame.com' not in value):
+        raise ValidationError('The google URL must have alex@commonologygame.com in it.')
+    else:
+        return value
+
+
 class Game(models.Model):
     game_id = models.IntegerField(unique=True)
     name = models.CharField(max_length=100)
@@ -53,7 +61,7 @@ class Game(models.Model):
     series = models.ForeignKey(Series, null=True, related_name='games', on_delete=models.CASCADE)
     start = models.DateTimeField(verbose_name="When the game starts:", null=False, blank=False)
     end = models.DateTimeField(verbose_name="When the game ends:", null=False, blank=False)
-    google_form_url = models.CharField(max_length=255, blank=True,
+    google_form_url = models.CharField(max_length=255, blank=True, validators=[validate_google_url],
                                        help_text="Enter the form url with prefilled email")
     sheet_name = models.CharField(
         max_length=10000,
