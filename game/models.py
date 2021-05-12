@@ -7,6 +7,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from users.models import Player
+import datetime
 
 
 class Series(models.Model):
@@ -50,6 +51,10 @@ class Game(models.Model):
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(Player, related_name='hosted_games')
     series = models.ForeignKey(Series, null=True, related_name='games', on_delete=models.CASCADE)
+    start = models.DateTimeField(verbose_name="When the game starts:", null=False, blank=False)
+    end = models.DateTimeField(verbose_name="When the game ends:", null=False, blank=False)
+    google_form_url = models.CharField(max_length=255, blank=True,
+                                       help_text="Enter the form url with prefilled email")
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
