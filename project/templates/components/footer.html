@@ -12,6 +12,9 @@
           <img src="{% static 'img/icon.svg' %}" height="38px">
         </div>
         <div class="w3-cell w3-cell-middle w3-right-align" style="font-size:0.8rem;width:30%">
+
+            {% include "components/social.html" %}
+
           <a class="bottombar" href="{% url 'about' %}">About</a>
           <a class="bottombar" href="mailto:concierge@commonologygame.com">Contact</a>
         </div>
