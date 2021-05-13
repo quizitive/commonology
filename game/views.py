@@ -122,10 +122,9 @@ def send_confirm(request, slug, email):
     domain = get_current_site(request)
     url = (f'https://{domain}/c/{slug}/play/{pe.uuid}')
 
-    context = {'join_url': url}
-    msg = render_to_string('game/validate_email.html', context)
+    msg = render_to_string('game/validate_email.html', {'join_url': url})
 
-    return sendgrid_send("You're Invited to Commonology", msg, [(email, None)])
+    return sendgrid_send("Let's play Commonology", msg, [(email, None)])
 
 
 class GameEntryView(CardFormView):
