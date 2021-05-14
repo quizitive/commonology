@@ -5,15 +5,17 @@ import json
 import logging
 from copy import deepcopy
 from csv import reader
+from dateutil.relativedelta import relativedelta
 
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from project.utils import REDIS
+from project.utils import REDIS, our_now
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from users.tests import get_local_user
 from game.utils import next_wed_noon, next_friday_1159
 from game.models import Series, Question, Answer
+from game.views import find_latest_active_game
 from game.rollups import *
 from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
@@ -275,3 +277,28 @@ class TestModels(TestCase):
         # test owner is host and player
         self.assertIn(user, series.hosts.all())
         self.assertIn(user, series.players.all())
+
+
+class TestUtils(TestCase):
+
+    def setUp(self):
+        self.sheet_name = "Test Commonology Game (Responses)"
+        self.series_owner = get_local_user(e='series@owner.com')
+        self.game_player = get_local_user()
+        self.series = Series.objects.create(name="Commonology", owner=self.series_owner, public=True)
+        self.t = our_now()
+        self.game = game_to_db(self.series, self.sheet_name, start=self.t, end=self.t)
+
+    def tearDown(self):
+        pass
+
+    def test_find_latest_active_game(self):
+        slug = 'commonology'
+        game = find_latest_active_game(slug)
+        self.assertIsNone(game)
+
+        self.game.end=self.t + relativedelta(months=1)
+        self.game.save()
+        game = find_latest_active_game(slug)
+        self.assertIsNotNone(game)
+
