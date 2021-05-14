@@ -297,8 +297,7 @@ class TestUtils(TestCase):
         game = find_latest_active_game(slug)
         self.assertIsNone(game)
 
-        self.game.end=self.t + relativedelta(months=1)
+        self.game.end = self.t + relativedelta(months=1)
         self.game.save()
         game = find_latest_active_game(slug)
         self.assertIsNotNone(game)
-
