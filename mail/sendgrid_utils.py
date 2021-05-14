@@ -64,12 +64,13 @@ def mass_mail(subject, msg, from_email, players, categories=None):
     send_at = int(time.time()) + 10
     count = 0
     email_list = []
-
+    total_count = 0
     for p in qs:
         count += 1
         email_list.append((p.email, p.id))
 
         if 0 == count % 500:
+            total_count += 500
             sendgrid_send(subject, msg, email_list, from_email,
                           send_at=send_at, categories=categories, unsub_link=True)
             send_at += 100
@@ -77,8 +78,9 @@ def mass_mail(subject, msg, from_email, players, categories=None):
             email_list = []
 
     if email_list:
+        total_count += len(email_list)
         sendgrid_send(subject, msg, email_list, from_email,
                       send_at=send_at, categories=categories, unsub_link=True)
 
-    logger.info(f"{count} recipients were just sent a blast with subject = {subject}.")
-    return count
+    logger.info(f"{total_count} recipients were just sent a blast with subject = {subject}.")
+    return total_count
