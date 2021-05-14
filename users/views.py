@@ -1,4 +1,4 @@
-from django.forms import HiddenInput
+from django.forms import HiddenInput, Form
 from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
@@ -64,8 +64,8 @@ class UserCardFormView(FormMixin, View):
         return super().get_context_data(**context)
 
     def get_form(self, form_class=None):
-        if not form_class:
-            return
+        if not self.form_class:
+            return Form
         form = super().get_form()
         return self.format_form(form)
 
@@ -138,7 +138,6 @@ class JoinView(UserCardFormView):
     custom_message = "Enter your email to join the game, follow your friends, and much more coming soon!"
 
     def get(self, request, *args, **kwargs):
-        self.form_class = None
         if request.user.is_authenticated:
             return redirect('home')
         return super().get(request, *args, **kwargs)
