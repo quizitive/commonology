@@ -139,8 +139,9 @@ class GameEntryView(CardFormView):
         slug = kwargs.get('series_slug') or 'commonology'
         g = find_latest_active_game(slug)
         if not g:
-            return self.warning(request, 'Sorry the next game has not started yet.  ' \
-                                          'Join our list so we can let you know when it does.',
+            return self.warning(request,
+                                ('Sorry the next game has not started yet.  '
+                                 'Join our list so we can let you know when it does.'),
                                 keep_form=False)
 
         if request.user.is_authenticated:
