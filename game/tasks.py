@@ -6,7 +6,7 @@ from celery import shared_task
 
 from django.utils.timezone import make_aware
 from django.db import transaction
-
+from project.utils import our_now
 from game.models import Series, Game, Question, Answer, AnswerCode
 from django.contrib.auth import get_user_model
 
@@ -29,13 +29,19 @@ def api_to_db(series_slug, filename, responses, answer_codes, update):
 
 
 @transaction.atomic
-def game_to_db(series, filename):
+def game_to_db(series, filename, start=None, end=None):
+    if start is None:
+        start = our_now()
+    if end is None:
+        end = our_now()
     game, _ = Game.objects.get_or_create(
         sheet_name=filename,
         series=series,
         defaults={
             'name': filename.replace(" (Responses)", ""),
-        }
+        },
+        start=start,
+        end=end
     )
     User = get_user_model()
     staff = User.objects.filter(is_staff=True)
