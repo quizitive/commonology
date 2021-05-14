@@ -13,7 +13,7 @@ FROM_ADDRS = [(i, i) for i in [
 
 
 class MailMessage(models.Model):
-    series = models.ForeignKey(Series, models.SET_NULL, null=True, blank=True,
+    series = models.ForeignKey(Series, blank=False, on_delete=models.SET_NULL, null=True, default=2,
                                help_text="Only subscribed players will receive the email.")
     from_name = models.CharField(max_length=150, blank=False, default=settings.ALEX_FROM_NAME)
     from_email = models.EmailField('from email address', choices=FROM_ADDRS, default=settings.ALEX_FROM_EMAIL)
