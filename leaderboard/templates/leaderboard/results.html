@@ -17,27 +17,30 @@
 
 {% include 'leaderboard/components/game_header.html' with view="results" %}
 
-<div class="card-content">
-  {% if game_top_commentary %}
-  <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
-    {{ game_top_commentary|safe }}
+<div id="comment-connection" hx-sse="connect:/c/htmx/comment-stream/?game_id={{ game_id }}">
+
+  <div class="card-content">
+    {% if game_top_commentary %}
+    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+      {{ game_top_commentary|safe }}
+    </div>
+    {% endif %}
+
+    {# Results objs go here #}
+  {#  <div class="card-stream" style="max-width:640px;margin:auto;">#}
+    {% for q in questions %}
+      {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
+    {% endfor %}
+    </div>
+
+    {% if game_top_commentary %}
+    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+      {{ game_bottom_commentary|safe }}
+    </div>
+    {% endif %}
+
+    <div class="w3-row w3-padding-large"></div>
+
   </div>
-  {% endif %}
-
-  {# Results objs go here #}
-{#  <div class="card-stream" style="max-width:640px;margin:auto;">#}
-  {% for q in questions %}
-    {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
-  {% endfor %}
-  </div>
-
-  {% if game_top_commentary %}
-  <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
-    {{ game_bottom_commentary|safe }}
-  </div>
-  {% endif %}
-
-  <div class="w3-row w3-padding-large"></div>
-
 </div>
 {% endblock content %}

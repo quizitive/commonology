@@ -1,5 +1,5 @@
 $('.comment-text').bind('change keyup paste testing', (e) => {
-  const button_id = '#post-'.concat(e.target.id.split('-')[1])
+  const button_id = '#post_'.concat(e.target.id.split('_')[1])
   console.log('received testing')
   if ($(e.target).val() === "") {
     $(button_id).attr('disabled', true);
