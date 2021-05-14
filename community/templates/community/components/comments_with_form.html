@@ -1,0 +1,23 @@
+{% load static %}
+
+{#<div hx-trigger="sse:thread_{{ thread.id }}" hx-get="/c/htmx/?thread_id={{ thread.id }}"></div>#}
+
+{% include 'community/components/comment_thread.html' %}
+
+  <div class="question-comment-form w3-row w3-border-top cg-border-grey w3-padding-large" style="margin:auto;font-size:14px">
+    <form method="post"
+          hx-post="/c/htmx/?thread_id={{ thread.id }}"
+          hx-target="#text_{{ thread.id }}"
+          hx-swap="outerHTML">
+      {% csrf_token %}
+      <input type="hidden" name="method" value="add_comment">
+      <div class="w3-cell-row">
+        <div class="w3-cell w3-rest">
+          <textarea id="text_{{ thread.id }}" name="comment" class="comment-text" placeholder="Add comment..."></textarea>
+        </div>
+        <div class="w3-cell w3-cell-middle" style="width:45px">
+          <button id="post_{{ thread.id }}" class="w3-button w3-round cg-blue cg-border-blue" disabled type="submit" style="display:inline-block;">Post</button>
+        </div>
+      </div>
+    </form>
+  </div>
