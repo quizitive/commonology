@@ -27,7 +27,7 @@
     {% endif %}
 
     {# Results objs go here #}
-  {#  <div class="card-stream" style="max-width:640px;margin:auto;">#}
+    {#  <div class="card-stream" style="max-width:640px;margin:auto;">#}
     {% for q in questions %}
       {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
     {% endfor %}

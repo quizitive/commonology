@@ -55,7 +55,6 @@ class ThreadHTMXView(SeriesPermissionMixin, View):
         return HttpResponse(resp)
 
 
-# @sync_to_async
 def comment_stream(request):
 
     def _get_comments():
@@ -73,6 +72,6 @@ def comment_stream(request):
                 event_data = f"event: thread_{tid}\n"
                 comment_html = "data: " + REDIS.get(threads_last_comment[tid]).replace('\n', '') + "\n\n"
                 yield event_data + comment_html
-            sleep(0.1)
+            sleep(0.5)
 
     return StreamingHttpResponse(_get_comments(), content_type='text/event-stream')
