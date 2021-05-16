@@ -1,5 +1,6 @@
 from asgiref.sync import sync_to_async
 from celery import shared_task
+import threading
 
 from django.views import View
 from django.http import HttpResponse, StreamingHttpResponse
@@ -57,10 +58,10 @@ class ThreadHTMXView(SeriesPermissionMixin, View):
 
 def comment_stream(request):
 
-    def _get_comments():
-        game = Game.objects.get(game_id=request.GET.get('game_id'))
-        thread_ids = game.questions.values_list('thread_id', flat=True)
-        threads_last_comment = {t: None for t in thread_ids}  # seed dict with no last comment seq num
+    sse_event_data = None
+    result_available = threading.Event()
+
+    def _get_comments(threads_last_comment):
         while True:
             for tid, lc in threads_last_comment.items():
                 keys = sorted(REDIS.keys(f'thread_{tid}_*'))
@@ -71,7 +72,26 @@ def comment_stream(request):
                 threads_last_comment[tid] = keys[-1]  # update the dictionary
                 event_data = f"event: thread_{tid}\n"
                 comment_html = "data: " + REDIS.get(threads_last_comment[tid]).replace('\n', '') + "\n\n"
-                yield event_data + comment_html
+
+                # when the calculation is done, the result is stored in a global variable
+                nonlocal sse_event_data
+                sse_event_data = event_data + comment_html
+                result_available.set()
+
             sleep(0.2)
 
-    return StreamingHttpResponse(_get_comments(), content_type='text/event-stream')
+    def _get_threaded_comments():
+        thread.start()
+        while True:
+            # wait here for the result to be available before continuing
+            result_available.wait()
+            yield sse_event_data
+            result_available.clear()
+
+    game = Game.objects.get(game_id=request.GET.get('game_id'))
+    thread_ids = game.questions.values_list('thread_id', flat=True)
+    threads_last_comment = {t: None for t in thread_ids}  # seed dict with no last comment seq num
+
+    thread = threading.Thread(target=_get_comments, kwargs={'threads_last_comment': threads_last_comment})
+
+    return StreamingHttpResponse(_get_threaded_comments(), content_type='text/event-stream')
