@@ -72,6 +72,6 @@ def comment_stream(request):
                 event_data = f"event: thread_{tid}\n"
                 comment_html = "data: " + REDIS.get(threads_last_comment[tid]).replace('\n', '') + "\n\n"
                 yield event_data + comment_html
-            sleep(0.5)
+            sleep(0.2)
 
     return StreamingHttpResponse(_get_comments(), content_type='text/event-stream')
