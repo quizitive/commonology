@@ -78,7 +78,7 @@ def comment_stream(request):
                 sse_event_data = event_data + comment_html
                 result_available.set()
 
-            sleep(0.2)
+            sleep(2.0)
 
     def _get_threaded_comments():
         thread.start()
