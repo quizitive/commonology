@@ -8,6 +8,7 @@ app_name = 'leaderboard'
 
 
 urlpatterns = [
+    path('', views.LeaderboardView.as_view(), name='series-home'),
     path('leaderboard/', views.LeaderboardView.as_view(), name='current-leaderboard'),
     path('leaderboard/<int:game_id>/', views.LeaderboardView.as_view(), name='game-id-leaderboard'),
     path('results/', views.ResultsView.as_view(), name='current-results'),
