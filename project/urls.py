@@ -15,6 +15,7 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('leaderboard/', include('leaderboard.urls')),
     path('c/', include('community.urls')),
+    path('chat/', include('chat.urls')),
     path('admin/', admin.site.urls),
     path('', include('social_django.urls', namespace='social')),
     path('__debug__/', include(debug_toolbar.urls)),
