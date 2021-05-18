@@ -14,6 +14,7 @@ urlpatterns = [
     path('', include('quizitive.urls')),
     path('', include('leaderboard.urls')),
     path('c/<slug:series_slug>/', include('leaderboard.urls', namespace='series-leaderboard')),
+    path('chat/', include('chat.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('admin/', admin.site.urls),
     path('', include('social_django.urls', namespace='social')),
