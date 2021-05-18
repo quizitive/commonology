@@ -42,14 +42,14 @@
 </div>
 
 <!-- Comments -->
-<div id="thread_{{ q.thread.id }}" class="question-comment-container">
+<div id="thread-{{ q.thread.id }}" class="question-comment-container">
 {#    {% if q.caption %}#}
 {#      <div class="question-comment w3-row">#}
 {#        <b>{{ host }}&nbsp&nbsp</b>{{ q.caption|safe }}#}
 {#      </div>#}
 {#    {% endif %}#}
 
-  {% include 'community/components/comments_with_form.html' with thread=q.thread %}
+  {% include 'leaderboard/components/comments_with_form.html' with thread=q.thread %}
 </div>
 
 
