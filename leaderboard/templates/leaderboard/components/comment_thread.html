@@ -1,0 +1,8 @@
+<div class="question-comments w3-padding-large">
+<p id="simp_test" hx-swap="beforebegin">fsjwekjr</p>
+  {% for comment in thread.comments.all  %}
+    <div class="question-comment w3-row">
+      <b>{{ comment.commenter }}&nbsp&nbsp</b>{{ comment.comment }}
+    </div>
+  {% endfor %}
+</div>
