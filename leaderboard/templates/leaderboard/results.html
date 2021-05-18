@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block scripts %}
-    <script src="{% static 'community/js/comments.js' %}"></script>
+    <script src="{% static 'chat/js/comments.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,8 @@
 
 {% include 'leaderboard/components/game_header.html' with view="results" %}
 
-<div id="comment-connection" hx-ws="connect:/c/htmx/comment-stream/?game_id={{ game_id }}">
+{{ room_name|json_script:"room-name" }}
+<div id="comment-connection" hx-ws="connect:/ws/chat/{{ game_id }}/">
 
   <div class="card-content">
     {% if game_top_commentary %}
