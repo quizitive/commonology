@@ -46,7 +46,8 @@ def api_data_to_df(raw_data):
         'Name (First & Last!)': 'Name',
         'Name (First & Last)': 'Name',
         'Leaderboard Name': 'Name',
-        'Name (First & Last - this appears on results leaderboard!)': 'Name'
+        'Name (First & Last - this appears on results leaderboard!)': 'Name',
+        'Email': 'Email Address'
     }, inplace=True)
     responses.sort_values('Timestamp', inplace=True)
     responses.drop_duplicates('Email Address', keep='first', inplace=True)
