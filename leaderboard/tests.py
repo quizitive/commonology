@@ -9,6 +9,7 @@ from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key
 from game.models import Game
 from game.tests import BaseGameDataTestCase, suppress_hidden_error_logs
 from users.models import Player
+from users.tests import test_pw
 from django.contrib.auth import get_user_model
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -21,8 +22,9 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         self.game.save()
         self.client = Client()
         self.su_email = "super@user.com"
-        User = get_user_model()
-        self.admin_user = User.objects.create_superuser(self.su_email, 'foo')
+        self.admin_user = Player.objects.create_superuser(self.su_email, 'foo')
+        self.authenticated_client = Client(raise_request_exception=False)
+        self.authenticated_client.login(email=self.game_player.email, password=test_pw)
 
     def _assert_code(self, url, code):
         resp = self.client.get(url)
@@ -56,6 +58,30 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         staff_resp = self.client.get(url, {'game_id': new_game.game_id})
         self.assertEqual(staff_resp.status_code, 200)
         self.assertNotEqual(staff_resp.content, pub_resp.content)
+
+    # ---- removed from urls.py until finished ---- #
+    # def test_player_home(self):
+    #     url = reverse('leaderboard:player-home')
+    #     resp = self.authenticated_client.get(url)
+    #     self.assertEqual(resp.status_code, 200)
+
+    @suppress_hidden_error_logs
+    def test_series_permissions_leaderboard(self):
+        # make the series private
+        self.series.public = False
+        self.series.save()
+        url = reverse('series-leaderboard:current-leaderboard', kwargs={'series_slug': self.series.slug})
+        resp = self.client.get(url)
+        self.assertIn(resp.status_code, (403, 302))
+
+        # a logged in user that is not a player of the series cannot view
+        resp = self.authenticated_client.get(url)
+        self.assertEqual(resp.status_code, 403)
+
+        # but if they're a player, they can view
+        self.series.players.add(self.game_player)
+        resp = self.authenticated_client.get(url)
+        self.assertEqual(resp.status_code, 200)
 
 
 class TestLeaderboardEngine(BaseGameDataTestCase):
