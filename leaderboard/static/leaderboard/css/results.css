@@ -23,6 +23,13 @@ div.answer-score {
   padding:0 4px;
   text-align:right;
 }
+a.more-button {
+  text-decoration: None;
+  color: #f26649;
+}
+a:hover {
+  cursor:pointer;
+}
 
 @media only screen and (max-width: 767px) {
   div.mobile-q-img {
