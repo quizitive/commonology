@@ -24,11 +24,19 @@
           <b>Answer</b><b style="color:#f26649;float: right;">Points</b></div>
         {% question_responses as question_responses %}
         {% for res, val in question_responses.items %}
-        <div class="w3-cell-row response-item w3-card-0 w3-round w3-padding">
-
+        <div class="w3-cell-row response-item w3-card-0 w3-round w3-padding
+              {% if forloop.counter > 10 %}q-{{ q.id }} hideable" style="display:none;{% endif %}">
           <div class="w3-cell w3-rest">{{ res }}</div>
           <div class="answer-score w3-cell w3-cell-middle w3-cell-right">{{ val }}</div>
         </div>
+          {% with total=forloop.counter %}
+            {% if forloop.last and total > 10 %}
+              {{ count }}
+              <div class="w3-cell-row">
+                  <a id="more-button-{{ q.id }}" class="more-button w3-cell w3-center">see {{ total|add:"-10" }} more</a>
+              </div>
+            {% endif %}
+          {% endwith %}
         {% endfor %}
       </div>
        <div class="spacer w3-colm1">&nbsp</div>
