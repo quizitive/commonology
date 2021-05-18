@@ -7,17 +7,16 @@ from django.contrib import admin
 from game import views
 
 urlpatterns = [
-
+    path('', views.index, name='home'),
     path('', include('users.urls')),
     path('', include('game.urls')),
     path('', include('mail.urls')),
     path('', include('quizitive.urls')),
+    path('', include('leaderboard.urls')),
+    path('c/<slug:series_slug>/', include('leaderboard.urls', namespace='series-leaderboard')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
-    path('leaderboard/', include('leaderboard.urls')),
-    path('c/', include('community.urls')),
     path('admin/', admin.site.urls),
     path('', include('social_django.urls', namespace='social')),
     path('__debug__/', include(debug_toolbar.urls)),
-    path('', views.index, name='home'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
