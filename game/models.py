@@ -7,7 +7,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from users.models import Player
-from community.models import Thread
+from chat.models import Thread
 
 
 class Series(models.Model):
