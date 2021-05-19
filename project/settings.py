@@ -30,9 +30,9 @@ INTERNAL_IPS = ()
 if DEBUG:
     INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN)
 
-TIME_ZONE = 'America/New_York'
+TIME_ZONE = 'UTC'
 
-CELERY_TIMEZONE = TIME_ZONE
+CELERY_TIMEZONE = 'America/New_York'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 BROKER_URL = 'redis://localhost:6379'
@@ -59,8 +59,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'social_django',
-    'fontawesome-free',
-    'community',
     'game',
     'leaderboard',
     'mail',
@@ -137,7 +135,7 @@ CACHES = {
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'project', 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'project/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
