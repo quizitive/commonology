@@ -30,6 +30,18 @@ a.more-button {
 a:hover {
   cursor:pointer;
 }
+div.player-answer {
+  border: #2a9fbc 1px solid;
+}
+span.player-answer {
+  color: #2a9fbc;
+  font-style: italic;
+  font-size: 13px;
+  max-width: 400px;
+  margin: -4px auto 2px;
+  padding: 0 8px;
+  text-align: right;
+}
 
 @media only screen and (max-width: 767px) {
   div.mobile-q-img {
