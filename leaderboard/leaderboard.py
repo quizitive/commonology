@@ -83,7 +83,7 @@ def build_leaderboard_fromdb(game, answer_tally):
     )
     leaderboard = _score_and_rank(leaderboard, lb_cols)
     leaderboard = leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + lb_cols]
-    REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 10 * 60)
+    REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 60 * 60)
     return leaderboard
 
 
@@ -132,7 +132,7 @@ def build_answer_tally_fromdb(game):
     for q, tally in answer_tally.items():
         answer_tally[q] = OrderedDict(sorted(tally.items(), key=lambda x: -x[1]))
 
-    REDIS.set(f'answertally_{game.series}_{game.game_id}', json.dumps(answer_tally), 10 * 60)
+    REDIS.set(f'answertally_{game.series}_{game.game_id}', json.dumps(answer_tally), 60 * 60)
     return answer_tally
 
 
