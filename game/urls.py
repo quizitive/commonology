@@ -5,5 +5,5 @@ from game import views
 urlpatterns = [
     path('score/', views.tabulator_form_view, name='tabulator_form'),
     path('about/', views.about_view, name='about'),
-    path('play/', RedirectView.as_view(url='https://docs.google.com/forms/d/1ZOnEcI5I8zay9tOk5KoUT69yss0wk3eHKb0K2MfInSY/viewform?edit_requested=true'))
+    path('play/', RedirectView.as_view(url='https://docs.google.com/forms/d/1TXefnbcYngb43Xq5z_1IvRdke1QVVCKf_Qs-RcjsrOc/viewform?edit_requested=true'))
 ]
