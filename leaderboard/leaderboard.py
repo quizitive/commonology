@@ -46,11 +46,11 @@ def build_filtered_leaderboard(game, answer_tally, player_ids=None, search_term=
 def _build_leaderboard_fromdb_or_cache(game, answer_tally):
     lb = _leaderboard_from_cache(game, answer_tally)
     if lb is None:
-        lb = _build_leaderboard_fromdb(game, answer_tally)
+        lb = build_leaderboard_fromdb(game, answer_tally)
     return lb
 
 
-def _build_leaderboard_fromdb(game, answer_tally):
+def build_leaderboard_fromdb(game, answer_tally):
     cpas = deque(game.coded_player_answers)
     lb_cols = [
         q_text for q_text in game.game_questions.values_list('text', flat=True)
@@ -83,7 +83,7 @@ def _build_leaderboard_fromdb(game, answer_tally):
     )
     leaderboard = _score_and_rank(leaderboard, lb_cols)
     leaderboard = leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + lb_cols]
-    REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 3600)
+    REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 10 * 60)
     return leaderboard
 
 
@@ -106,6 +106,13 @@ def _score_and_rank(leaderboard, lb_cols):
 
 
 def build_answer_tally(game):
+    at = _answer_tally_from_cache(game)
+    if at is None:
+        at = build_answer_tally_fromdb(game)
+    return at
+
+
+def build_answer_tally_fromdb(game):
     raw_string_counts = game.valid_raw_string_counts
     answer_subquery = raw_string_counts.filter(raw_string=OuterRef('raw_string')).filter(question=OuterRef('question'))
     answer_counts = AnswerCode.objects.filter(
@@ -125,7 +132,15 @@ def build_answer_tally(game):
     for q, tally in answer_tally.items():
         answer_tally[q] = OrderedDict(sorted(tally.items(), key=lambda x: -x[1]))
 
+    REDIS.set(f'answertally_{game.series}_{game.game_id}', json.dumps(answer_tally), 10 * 60)
     return answer_tally
+
+
+def _answer_tally_from_cache(game):
+    at_json = REDIS.get(f'answertally_{game.series}_{game.game_id}')
+    if not at_json:
+        return None
+    return json.loads(at_json)
 
 
 def player_rank_and_percentile_in_game(player_id, game_id):
