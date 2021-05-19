@@ -7,7 +7,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from game.forms import TabulatorForm
 from game.models import Game
 from game.utils import next_event
-from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
+from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally_fromdb
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
@@ -87,7 +87,7 @@ def tabulate_results(series_slug, filename, gc, update=False):
 
     # calculate the question-by-question data and leaderboard
     game = Game.objects.get(sheet_name=filename, series__slug=series_slug)
-    answer_tally = build_answer_tally(game)
+    answer_tally = build_answer_tally_fromdb(game)
     leaderboard = build_filtered_leaderboard(game, answer_tally)
 
     # write to google
