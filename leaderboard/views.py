@@ -6,7 +6,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 
-from game.models import Game, Series, Question
+from game.models import Game, Series, Question, Answer, AnswerCode
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_rank_and_percentile_in_game
 
@@ -33,7 +33,6 @@ class SeriesPermissionMixin(UserPassesTestMixin):
 
 
 class SeriesPermissionView(SeriesPermissionMixin, View):
-
     game_id = None
 
     # these preserve the original request and are used for url routing
@@ -97,19 +96,23 @@ class ResultsView(SeriesPermissionView):
 
         answer_tally = build_answer_tally(game)
         context = self.get_context(game)
+        questions = game.questions.exclude(type=Question.op).order_by('number')
+        player_answers = []
+        if request.user.is_authenticated:
+            player_answers = game.coded_player_answers.filter(player=request.user)
 
         context.update({
             'answer_tally': answer_tally,
+            'player_answers': player_answers,
             'game_top_commentary': game.top_commentary,
             'game_bottom_commentary': game.bottom_commentary,
-            'questions': game.questions.exclude(type=Question.op).order_by('number'),
+            'questions': questions,
             'host': game.hosts.first()
         })
         return render(request, 'leaderboard/results.html', context)
 
 
 class PlayerHomeView(LoginRequiredMixin, View):
-
     template = 'leaderboard/player_home.html'
 
     def get(self, request):
