@@ -1,8 +1,6 @@
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.forms import CharField, ValidationError
-from django.core import validators
-from django.utils.safestring import mark_safe
 from django.db import models
 from django.utils.text import slugify
 from django.db.models.signals import post_save
