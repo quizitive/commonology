@@ -320,7 +320,6 @@ class TestPlayRequest(TestCase):
 
         path = reverse('game:play')
         response = client.get(path)
-        print(response.url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
 
@@ -367,6 +366,7 @@ class TestPlayRequest(TestCase):
         client = Client()
 
         game = self.game
+        start_save = game.start
         game.start = game.end
         game.save()
 
@@ -374,3 +374,6 @@ class TestPlayRequest(TestCase):
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Sorry the next game has not started yet.')
+
+        game.start = start_save
+        game.save()
