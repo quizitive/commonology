@@ -23,6 +23,12 @@ def get_local_user(e=NORMAL, subscribed=True):
     return User.objects.create_user(email=e, password=test_pw, subscribed=subscribed, display_name='dn')
 
 
+def get_local_client(e=NORMAL, pw=test_pw):
+    c = Client()
+    c.login(email=e, password=pw)
+    return c
+
+
 def remove_abinormal():
     User.objects.filter(email=ABINORMAL).delete()
 
@@ -77,8 +83,7 @@ class UsersManagersTests(TestCase):
 
     def test_profile(self):
         user = get_local_user()
-        client = Client()
-        client.login(email=NORMAL, password=test_pw)
+        client = get_local_client()
         path = reverse('profile')
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
@@ -109,8 +114,7 @@ class UsersManagersTests(TestCase):
 
         mail.outbox = []
 
-        client = Client()
-        client.login(email=NORMAL, password=test_pw)
+        client = get_local_client()
         path = reverse('password_change')
         response = client.get(path)
         self.assertIn(response.status_code, [200, 302])

@@ -5,6 +5,10 @@ from django.contrib import messages
 from django.forms import Form
 
 
+def about_view(request, *args, **kwargs):
+    return render(request, 'about.html', {})
+
+
 class CardFormView(FormMixin, View):
     """
     A base class with sensible defaults for our basic user form-in-card

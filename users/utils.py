@@ -49,5 +49,9 @@ def is_validated(email):
     try:
         u = User.objects.get(email=email)
     except User.DoesNotExist:
-        return False
-    return u.is_active
+        return None
+
+    if u.is_active:
+        return u
+
+    return None
