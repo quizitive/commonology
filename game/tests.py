@@ -135,7 +135,8 @@ class TestGameTabulation(BaseGameDataTestCase):
         self.assertEqual(self.game.name, "Test Commonology Game")
 
         # test new game of same name is not created on save
-        game2 = game_to_db(self.series, self.sheet_name)
+        game = self.game
+        game2 = game_to_db(self.series, self.sheet_name, start=game.start, end=game.end)
         self.assertEqual(self.game, game2)
 
     def test_game_id_increments(self):
