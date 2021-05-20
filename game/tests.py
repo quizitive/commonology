@@ -320,6 +320,7 @@ class TestPlayRequest(TestCase):
 
         path = reverse('game:play')
         response = client.get(path)
+        print(response.url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
 
