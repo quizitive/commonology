@@ -12,7 +12,7 @@ from django.urls import reverse
 from project.utils import REDIS
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from users.tests import get_local_user
-from game.utils import next_wed_noon, next_friday_1159
+from game.utils import next_wed_noon, next_friday_1159, clear_redis_trailing_wildcard
 from game.models import Series, Question, Answer
 from game.rollups import *
 from game.gsheets_api import *
@@ -261,6 +261,15 @@ class TestUtils(TestCase):
         next_game_end = next_friday_1159(a_thursday)
         self.assertEqual(next_game_end.weekday(), 4)
         self.assertEqual(next_game_end.strftime(format="%H:%M:%S"), "23:59:59")
+
+    def test_clear_redis_trailing_wildcard(self):
+        key1 = 'leaderboard_3_@crAzyS+r!ng'
+        key2 = 'leaderboard_3_$0H!pSoHODL'
+        REDIS.set(key1, "a value")
+        REDIS.set(key2, "a value")
+        clear_redis_trailing_wildcard(('leaderboard', '3'))
+        self.assertIsNone(REDIS.get(key1))
+        self.assertIsNone(REDIS.get(key2))
 
 
 class TestModels(TestCase):

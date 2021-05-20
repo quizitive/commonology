@@ -18,6 +18,7 @@ from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, 
 from users.models import PendingEmail
 from users.utils import unsubscribe
 from mail.sendgrid_utils import sendgrid_send
+from game.utils import clear_redis_trailing_wildcard
 
 from .utils import remove_pending_email_invitations
 
@@ -85,30 +86,36 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
-        if form.is_valid():
-            if 'email' in form.changed_data:
-                email = request.user.email
-                user = form.save(commit=False)
-                new_email = user.email
-                user.email = email
-                user.save()
-                form.email = email
 
-                messages.info(request,
-                              f"We sent an email confirmation to {new_email} and will "
-                              f"updated your profile once you have followed the confirmation link.")
-
-                remove_pending_email_invitations()
-                pe = PendingEmail(email=new_email, referrer=email)
-                pe.save()
-                self.send_change_confirm(request, pe)
-            else:
-                form.save()
-
-            messages.info(request, "Your changes have been saved!")
-        else:
+        if not form.is_valid():
             messages.error(request, "There was a problem saving your changes. Please try again.")
+            return self.render(request)
 
+        user = form.save(commit=False)
+        if 'email' in form.changed_data:
+            email = request.user.email
+            new_email = user.email
+            user.email = email
+            user.save()
+            form.email = email
+
+            messages.info(request,
+                          f"We sent an email confirmation to {new_email} and will "
+                          f"updated your profile once you have followed the confirmation link.")
+
+            remove_pending_email_invitations()
+            pe = PendingEmail(email=new_email, referrer=email)
+            pe.save()
+            self.send_change_confirm(request, pe)
+            return self.render(request)
+
+        if 'display_name' in form.changed_date:
+            # we need to clear leaderboards this person appears on from cache to propagate change
+            played_game_ids = user.games
+            clear_redis_trailing_wildcard(*[('leaderboard', g['game_id']) for g in played_game_ids])
+
+        form.save()
+        messages.info(request, "Your changes have been saved!")
         return self.render(request)
 
     def get_form(self, form_class=None):

@@ -5,6 +5,8 @@ import datetime
 import string
 import random
 
+from project.utils import REDIS
+
 
 # Get next game start or game end
 def next_event():
@@ -30,3 +32,15 @@ def next_friday_1159(now):
 
 def create_key(k=7):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=k))
+
+
+def clear_redis_trailing_wildcard(*patterns):
+    """
+    Accepts positional arguments of tuples, constructs a prefix with underscores,
+    and deletes all matching keys with trailing wildcard
+    e.g. clear_with_trailing_wildcard(('leaderboard', '32'), ('leaderboard','commonology','33'))
+        => leaderboard_32*, leaderboard_commonology_33*
+    """
+    for p in patterns:
+        prefix = "_".join(p)
+        REDIS.delete(*REDIS.keys(f'{prefix}*'))
