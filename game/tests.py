@@ -350,18 +350,16 @@ class TestPlayRequest(TestCase):
 
         client = get_local_client()
 
-
         path = reverse('series-game:play', kwargs={'series_slug': slug})
         response = client.get(path)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
 
-        game_player = get_local_user(e=ABINORMAL)
+        get_local_user(e=ABINORMAL)
         client = get_local_client(e=ABINORMAL)
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
-
 
     def test_game_not_started(self):
         client = Client()
