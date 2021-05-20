@@ -10,7 +10,7 @@ from game.models import Game
 from game.tests import BaseGameDataTestCase, suppress_hidden_error_logs
 from users.models import Player
 from users.tests import test_pw
-from django.contrib.auth import get_user_model
+from leaderboard.templatetags.leadeboard_tags import formatted_answer_cell
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -83,6 +83,36 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         resp = self.authenticated_client.get(url)
         self.assertEqual(resp.status_code, 200)
 
+    # ---- Template Tag Tests ---- #
+    def test_formatted_answer_cell(self):
+        player_answers = self.game.coded_player_answers.filter(player__email='user1@fakeemail.com')
+
+        # this is just to mock the for loop in the template
+        resvals = [{'res': res, 'val': val} for res, val in self.answer_tally[self.questions[0].text].items()]
+        context = {
+            'answer_tally': self.answer_tally,
+            'player_answers': player_answers,
+            'game_top_commentary': self.game.top_commentary,
+            'game_bottom_commentary': self.game.bottom_commentary,
+            'questions': self.questions,
+            'host': self.game.hosts.first(),
+            'q': self.questions[0],
+        }
+
+        # make sure we're evaluating player-answer class correctly
+        context.update(resvals[0])
+        player_answer = formatted_answer_cell(context, 1)
+        self.assertIn('player-answer', player_answer)
+
+        # make sure player-answer is not on a non-answer
+        context.update(resvals[1])
+        not_player_answer = formatted_answer_cell(context, 1)
+        self.assertNotIn('player-answer', not_player_answer)
+
+        # make sure we're hiding the long tail
+        hidden_after_ten = formatted_answer_cell(context, 11)
+        self.assertIn('style="display:none;"', hidden_after_ten)
+
 
 class TestLeaderboardEngine(BaseGameDataTestCase):
 
@@ -120,9 +150,8 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         expected_leaderboard = pd.read_csv(lb_data_fp, index_col=0)
         expected_leaderboard['Rank'] = expected_leaderboard['Rank'].astype('int32')
         expected_leaderboard['Score'] = expected_leaderboard['Score'].astype('int32')
-        User = get_user_model()
         expected_leaderboard['id'] = expected_leaderboard.apply(
-            lambda x: User.objects.get(display_name=x['Name']).id,
+            lambda x: Player.objects.get(display_name=x['Name']).id,
             axis=1
         ).astype('int64')
         expected_leaderboard['is_host'] = expected_leaderboard.apply(
@@ -192,8 +221,7 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
 
     def _add_host(self, email="user1@fakeemail.com"):
         # make user a game host
-        User = get_user_model()
-        player = User.objects.get(email=email)
+        player = Player.objects.get(email=email)
         self.game.hosts.add(player)
         self.game.save()
         return player
