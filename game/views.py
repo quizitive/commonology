@@ -159,7 +159,13 @@ class GameEntryView(CardFormView):
         email = request.POST['email']
         player = is_validated(email)
 
-        if player is None:
+        if player and player.series.filter(slug=slug).exists():
+            g = find_latest_active_game(slug)
+            if not g:
+                return self.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
+            url = game_url(g.google_form_url, email)
+            return redirect(url)
+        else:
             if slug == 'commonology':
                 send_confirm(request, slug, email)
                 self.custom_message = f"We sent the game link to {email}. " \
@@ -167,16 +173,10 @@ class GameEntryView(CardFormView):
 
                 self.header = "Game link sent!"
                 return self.render(request, form=None, button_label='OK')
-            else:
-                return self.warning(request,
-                                    'Sorry the game you requested is not available without an invitation.',
-                                    keep_form=False)
 
-        g = find_latest_active_game(slug)
-        if not g:
-            return self.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
-        url = game_url(g.google_form_url, email)
-        return redirect(url)
+        return self.warning(request,
+                            'Sorry the game you requested is not available without an invitation.',
+                            keep_form=False)
 
 
 class GameEntryValidationView(View):

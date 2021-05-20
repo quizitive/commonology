@@ -348,10 +348,16 @@ class TestPlayRequest(TestCase):
         game.save()
         game_player = get_local_user()
 
-        # email address in db but not in rambus series
+        # email address in db, logged in, but not in rambus series
         client = get_local_client()
         path = reverse('series-game:play', kwargs={'series_slug': slug})
         response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
+
+        # # email address in db, not logged in, not in rabmus series
+        get_local_user(e=ABINORMAL)
+        response = Client().post(path, data={"email": ABINORMAL})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
 
@@ -362,7 +368,6 @@ class TestPlayRequest(TestCase):
         self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
 
         # anonymous user not in any series
-        get_local_user(e=ABINORMAL)
         client = get_local_client(e=ABINORMAL)
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
