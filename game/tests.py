@@ -305,8 +305,8 @@ class TestPlayRequest(TestCase):
         game = find_latest_active_game(slug)
         self.assertIsNone(game)
 
-        game.end = game.start + relativedelta(months=1)
-        game.save()
+        self.game.end = self.game.start + relativedelta(months=1)
+        self.game.save()
 
         game = find_latest_active_game(slug)
         self.assertIsNotNone(game)

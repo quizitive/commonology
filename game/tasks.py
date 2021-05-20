@@ -39,9 +39,8 @@ def game_to_db(series, filename, start=None, end=None):
         series=series,
         defaults={
             'name': filename.replace(" (Responses)", ""),
+            'start': start, 'end': end
         },
-        start=start,
-        end=end
     )
     User = get_user_model()
     staff = User.objects.filter(is_staff=True)
