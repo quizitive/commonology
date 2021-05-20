@@ -44,6 +44,8 @@ class GameAdmin(admin.ModelAdmin):
     list_filter = ('series',)
     inlines = (QuestionAdmin,)
 
+    # todo: add a method to clear leaderboard cache for a game
+
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):

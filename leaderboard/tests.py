@@ -210,3 +210,7 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         user5.save()
         re_filtered_leaderboard = build_filtered_leaderboard(self.game, self.answer_tally, search_term="*5*")
         self.assertEqual(len(re_filtered_leaderboard), 1)
+
+    def test_cache_key(self):
+        # fake redis
+        pass
