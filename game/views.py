@@ -12,7 +12,7 @@ from project.utils import our_now
 from game.forms import TabulatorForm
 from game.models import Game
 from game.utils import next_event
-from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally_fromdb
+from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
@@ -92,9 +92,10 @@ def tabulate_results(series_slug, filename, gc, update=False):
     )
 
     # calculate the question-by-question data and leaderboard
+    # NOTE: both of these call the method that rebuilds themself from db and clears the cache
     game = Game.objects.get(sheet_name=filename, series__slug=series_slug)
     answer_tally = build_answer_tally_fromdb(game)
-    leaderboard = build_filtered_leaderboard(game, answer_tally)
+    leaderboard = build_leaderboard_fromdb(game, answer_tally)
 
     # write to google
     write_all_to_gdrive(sheet_doc, answer_tally, answer_codes, leaderboard)

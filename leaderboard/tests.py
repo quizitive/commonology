@@ -50,7 +50,7 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         self.assertEqual(pub_resp.status_code, 200)
 
         # non-staff can't see unpublished games, redirect to login
-        new_game = Game.objects.create(publish=False, start=our_now(), end=our_now())
+        new_game = Game.objects.create(publish=False, series=self.series, start=our_now(), end=our_now())
         resp = self.client.get(url, {'game_id': new_game.game_id})
         self.assertEqual(resp.status_code, 302)
 
