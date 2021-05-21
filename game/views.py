@@ -103,6 +103,8 @@ def tabulate_results(series_slug, filename, gc, update=False):
 def find_latest_active_game(slug):
     t = our_now()
     g = Game.objects.filter(series__slug=slug, end__gte=t, start__lte=t).reverse().first()
+    if g and not g.google_form_url:
+        return None
     return g
 
 
