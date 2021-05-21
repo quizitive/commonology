@@ -282,12 +282,14 @@ class TestModels(TestCase):
         self.assertIn(user, series.players.all())
 
 
-def make_test_series(series_name='Commonology'):
+def make_test_series(series_name='Commonology', hour_window=False):
     sheet_name = "Test Commonology Game (Responses)"
     series_owner = get_local_user(e='series@owner.com')
     series = Series.objects.create(name=series_name, owner=series_owner, public=True)
-    t = our_now()
-    game = game_to_db(series, sheet_name, start=t, end=t)
+    t = et = our_now()
+    if hour_window:
+        et = t + relativedelta(hour=1)
+    game = game_to_db(series, sheet_name, start=t, end=et)
     game.google_form_url = 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true'
     game.save()
     return series, game
@@ -310,6 +312,13 @@ class TestPlayRequest(TestCase):
 
         game = find_latest_active_game(slug)
         self.assertIsNotNone(game)
+
+        slug = 'nourl'
+        _, game = make_test_series(slug, hour_window=True)
+        game.google_form_url = ''
+        game.save()
+        game = find_latest_active_game(slug)
+        self.assertIsNone(game)
 
     def test_play_as_common_member(self):
         game = self.game
@@ -396,3 +405,23 @@ class TestPlayRequest(TestCase):
 
         game.start = start_save
         game.save()
+
+    def test_game_without_url(self):
+        slug = 'nourl'
+        series, game = make_test_series(slug)
+        game.end = game.start + relativedelta(months=1)
+        game.save()
+        player = get_local_user()
+        series.players.add(player)
+        client = get_local_client()
+        path = reverse('series-game:play', kwargs={'series_slug': slug})
+
+        response = client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
+
+        game.google_form_url = ''
+        game.save()
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Sorry the next game has not started yet.')
