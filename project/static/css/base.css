@@ -32,6 +32,13 @@ header.w3-container {
     background: #0090ce!important;
 }
 
+
+/* For Django messages */
+.warning {
+    color: #ec1c24!important
+}
+
+
 .cg-border-blue {
     border-color: #0095da!important;
 }
