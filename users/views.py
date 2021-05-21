@@ -18,7 +18,7 @@ from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, 
 from users.models import PendingEmail
 from users.utils import unsubscribe
 from mail.sendgrid_utils import sendgrid_send
-from game.utils import clear_redis_trailing_wildcard
+from project.utils import clear_redis_trailing_wildcard
 
 from .utils import remove_pending_email_invitations
 

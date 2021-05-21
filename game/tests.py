@@ -12,10 +12,10 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
 
-from project.utils import REDIS, our_now
+from project.utils import REDIS, our_now, clear_redis_trailing_wildcard
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from users.tests import get_local_user, get_local_client, ABINORMAL
-from game.utils import next_wed_noon, next_friday_1159, clear_redis_trailing_wildcard
+from game.utils import next_wed_noon, next_friday_1159
 from game.models import Series, Question, Answer
 from game.views import find_latest_active_game
 from game.rollups import *

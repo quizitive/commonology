@@ -95,7 +95,7 @@ def _leaderboard_from_cache(game, answer_tally):
 
 
 def lb_cache_key(game, answer_tally):
-    return '_'.join(('leaderboard', str(game.game_id), str(hash(json.dumps(answer_tally)))))
+    return '_'.join(('leaderboard', game.series.slug, str(game.game_id), str(hash(json.dumps(answer_tally)))))
 
 
 def _score_and_rank(leaderboard, lb_cols):
