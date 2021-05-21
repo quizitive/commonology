@@ -43,7 +43,7 @@ def formatted_answer_cell(context, counter):
 
     if context['player_answers'] and context['player_answers'].get(question_id=qid)[3] == res:
         addl_classes += 'player-answer'
-        addl_div = f'<span class="w3-cell-row player-answer">** my answer</span>'
+        addl_div = f'<span class="w3-cell-row player-answer">my answer</span>'
 
     result = f'<div class="w3-cell-row response-item w3-card-0 ' \
              f'w3-round w3-padding {addl_classes}" {addl_style}>' \
