@@ -3,6 +3,7 @@ from django.forms import Textarea
 from django.db import models
 
 from game.models import Series, Game, Question, Answer, AnswerCode
+from project.utils import clear_redis_trailing_wildcard
 
 
 @admin.register(Series)
@@ -43,8 +44,15 @@ class GameAdmin(admin.ModelAdmin):
     filter_horizontal = ('hosts',)
     list_filter = ('series',)
     inlines = (QuestionAdmin,)
+    actions = ('clear_cache', )
 
-    # todo: add a method to clear leaderboard cache for a game
+    def clear_cache(self, request, queryset):
+        lb_prefixes = [('leaderboard', q[0], q[1]) for q in queryset.values_list('series__slug', 'game_id')]
+        lbs_deleted = clear_redis_trailing_wildcard(*lb_prefixes)
+        at_prefixes = [('answer_tally', q[0], q[1]) for q in queryset.values_list('series__slug', 'game_id')]
+        ats_deleted = clear_redis_trailing_wildcard(*at_prefixes)
+        self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
+        self.message_user(request, f"{ats_deleted} cached answer_tallies were deleted")
 
 
 @admin.register(Answer)

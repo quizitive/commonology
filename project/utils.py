@@ -12,3 +12,20 @@ def our_now():
     # even if saved by a human entering wall clock time into an admin field.
     # This is in the time zone specified in settings, for us it is 'America/New_York'.
     return datetime.datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
+
+
+def clear_redis_trailing_wildcard(*patterns):
+    """
+    Accepts positional arguments of tuples, constructs a prefix with underscores,
+    and deletes all matching keys with trailing wildcard
+    e.g. clear_with_trailing_wildcard(('leaderboard', '32'), ('leaderboard','commonology','33'))
+        => leaderboard_32*, leaderboard_commonology_33*
+    """
+    total_keys_deleted = 0
+    for p in patterns:
+        prefix = "_".join([str(s) for s in p])
+        keys = REDIS.keys(f'{prefix}*')
+        if keys:
+            REDIS.delete(*keys)
+            total_keys_deleted += len(keys)
+    return total_keys_deleted
