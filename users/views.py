@@ -79,7 +79,7 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
             self.send_change_confirm(request, pe)
             return self.render(request)
 
-        if 'display_name' in form.changed_date:
+        if 'display_name' in form.changed_data:
             # we need to clear leaderboards this person appears on from cache to propagate change
             played_game_ids = user.games
             clear_redis_trailing_wildcard(*[('leaderboard', g['game_id']) for g in played_game_ids])
