@@ -4,10 +4,11 @@ import pandas as pd
 from django.urls import reverse
 from django.test import Client
 
-from project.utils import REDIS
+from project.utils import REDIS, our_now
 from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key
 from game.models import Game
 from game.tests import BaseGameDataTestCase, suppress_hidden_error_logs
+
 from users.models import Player
 from users.tests import test_pw
 from leaderboard.templatetags.leadeboard_tags import formatted_answer_cell
@@ -49,7 +50,7 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         self.assertEqual(pub_resp.status_code, 200)
 
         # non-staff can't see unpublished games, redirect to login
-        new_game = Game.objects.create(publish=False)
+        new_game = Game.objects.create(publish=False, start=our_now(), end=our_now())
         resp = self.client.get(url, {'game_id': new_game.game_id})
         self.assertEqual(resp.status_code, 302)
 
