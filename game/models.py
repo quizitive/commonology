@@ -53,7 +53,7 @@ def validate_google_url(value):
 
 
 class Game(models.Model):
-    game_id = models.IntegerField(unique=True)
+    game_id = models.IntegerField()
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(Player, related_name='hosted_games')
     series = models.ForeignKey(Series, null=True, related_name='games', on_delete=models.CASCADE)
@@ -73,6 +73,7 @@ class Game(models.Model):
     bottom_commentary = RichTextUploadingField(null=True, blank=True)
 
     class Meta:
+        unique_together = ('series', 'game_id')
         ordering = ['-game_id']
 
     def __str__(self):
