@@ -61,11 +61,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         except Game.DoesNotExist:
             raise Http404("Game does not exist")
 
-        # todo: answer_tally is still a bit expensive to calculate every time
-        import time
-        start_time = time.time()
         answer_tally = build_answer_tally(current_game)
-        print("--- %s seconds ---" % (time.time() - start_time))
 
         # leaderboard filters
         search_term = request.GET.get('q')
