@@ -20,7 +20,7 @@ test_pw = 'foo'
 
 def get_local_user(e=NORMAL, subscribed=True, pw=test_pw):
     User.objects.filter(email=e).delete()
-    u = User.objects.create_user(email=e,subscribed=subscribed, display_name='dn')
+    u = User.objects.create_user(email=e, subscribed=subscribed, display_name='dn')
     if pw:
         u.set_password(pw)
         u.save()
@@ -269,7 +269,7 @@ class PendingUsersTests(TestCase):
 
     def join_test_helper(self, data, taint_uuid_flag=False):
         client = Client()
-        response = client.post(reverse('join'), data={"email": data['email']}) #...ABINORMAL})
+        response = client.post(reverse('join'), data={"email": data['email']})
         self.assertEqual(response.reason_phrase, 'OK')
 
         msg = mail.outbox[0].body
@@ -312,7 +312,6 @@ class PendingUsersTests(TestCase):
 
         get_local_user(e=email, pw=None)
         self.join_test_helper(data)
-
 
     def test_email_change(self):
         user = get_local_user()
