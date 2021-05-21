@@ -1,14 +1,12 @@
-import pickle
-import os
-import pytz
-import datetime
+from project.utils import our_now
 import string
 import random
+import datetime
 
 
 # Get next game start or game end
 def next_event():
-    now = datetime.datetime.now(tz=pytz.timezone('US/Eastern'))
+    now = our_now()
     if now.weekday() in (3, 4) or (now.weekday() == 2 and now.hour >= 12):
         return 'The game ends in...', next_friday_1159(now).strftime("%Y-%m-%dT%H:%M:%S")
     return 'The next game begins in...', next_wed_noon(now).strftime("%Y-%m-%dT%H:%M:%S")
