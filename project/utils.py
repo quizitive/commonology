@@ -3,8 +3,13 @@ import pytz
 from django.conf import settings
 
 import redis
+import fakeredis
 
-REDIS = redis.Redis(host='localhost', port=6379, db=0)
+
+if settings.IS_TEST:
+    REDIS = fakeredis.FakeStrictRedis()
+else:
+    REDIS = redis.Redis(host='localhost', port=6379, db=0)
 
 
 def our_now():
