@@ -327,7 +327,7 @@ class TestPlayRequest(TestCase):
         path = reverse('game:play')
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Enter your email to play the game!")
+        self.assertContains(response, "Enter your email to play the game so we can send the results to you.")
 
         mail.outbox = []
         response = client.post(reverse('game:play'), data={"email": ABINORMAL})
@@ -375,7 +375,7 @@ class TestPlayRequest(TestCase):
 
         response = Client().get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Enter your email to play the game!")
+        self.assertContains(response, "Enter your email to play the game so we can send the results to you.")
 
         response = Client().post(path, data={"email": 'never@beenusedhere.com'})
         self.assertEqual(response.status_code, 200)

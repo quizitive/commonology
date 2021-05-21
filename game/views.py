@@ -128,7 +128,7 @@ class GameEntryView(CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
     button_label = "Next"
-    custom_message = "Enter your email to play the game!  We'll send the results to you."
+    custom_message = "Enter your email to play the game so we can send the results to you."
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
