@@ -18,9 +18,19 @@ ABINORMAL = 'abinormal@user.com'
 test_pw = 'foo'
 
 
-def get_local_user(e=NORMAL, subscribed=True):
+def get_local_user(e=NORMAL, subscribed=True, pw=test_pw):
     User.objects.filter(email=e).delete()
-    return User.objects.create_user(email=e, password=test_pw, subscribed=subscribed, display_name='dn')
+    u = User.objects.create_user(email=e, subscribed=subscribed, display_name='dn')
+    if pw:
+        u.set_password(pw)
+        u.save()
+    return u
+
+
+def get_local_client(e=NORMAL, pw=test_pw):
+    c = Client()
+    c.login(email=e, password=pw)
+    return c
 
 
 def remove_abinormal():
@@ -77,8 +87,7 @@ class UsersManagersTests(TestCase):
 
     def test_profile(self):
         user = get_local_user()
-        client = Client()
-        client.login(email=NORMAL, password=test_pw)
+        client = get_local_client()
         path = reverse('profile')
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
@@ -109,8 +118,7 @@ class UsersManagersTests(TestCase):
 
         mail.outbox = []
 
-        client = Client()
-        client.login(email=NORMAL, password=test_pw)
+        client = get_local_client()
         path = reverse('password_change')
         response = client.get(path)
         self.assertIn(response.status_code, [200, 302])
@@ -261,7 +269,7 @@ class PendingUsersTests(TestCase):
 
     def join_test_helper(self, data, taint_uuid_flag=False):
         client = Client()
-        response = client.post(reverse('join'), data={"email": ABINORMAL})
+        response = client.post(reverse('join'), data={"email": data['email']})
         self.assertEqual(response.reason_phrase, 'OK')
 
         msg = mail.outbox[0].body
@@ -298,7 +306,11 @@ class PendingUsersTests(TestCase):
 
     def test_join_email_exists(self):
         data = self.data
-        get_local_user(e=data['email'])
+        email = data['email']
+        get_local_user(e=email)
+        self.join_test_helper(data)
+
+        get_local_user(e=email, pw=None)
         self.join_test_helper(data)
 
     def test_email_change(self):
