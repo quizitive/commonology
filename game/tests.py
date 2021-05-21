@@ -1,3 +1,4 @@
+import re
 import datetime
 import string
 import random
@@ -5,15 +6,18 @@ import json
 import logging
 from copy import deepcopy
 from csv import reader
+from dateutil.relativedelta import relativedelta
 
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.core import mail
 
-from project.utils import REDIS
+from project.utils import REDIS, our_now
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
-from users.tests import get_local_user
+from users.tests import get_local_user, get_local_client, ABINORMAL
 from game.utils import next_wed_noon, next_friday_1159, clear_redis_trailing_wildcard
 from game.models import Series, Question, Answer
+from game.views import find_latest_active_game
 from game.rollups import *
 from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
@@ -131,7 +135,8 @@ class TestGameTabulation(BaseGameDataTestCase):
         self.assertEqual(self.game.name, "Test Commonology Game")
 
         # test new game of same name is not created on save
-        game2 = game_to_db(self.series, self.sheet_name)
+        game = self.game
+        game2 = game_to_db(self.series, self.sheet_name, start=game.start, end=game.end)
         self.assertEqual(self.game, game2)
 
     def test_game_id_increments(self):
@@ -284,3 +289,119 @@ class TestModels(TestCase):
         # test owner is host and player
         self.assertIn(user, series.hosts.all())
         self.assertIn(user, series.players.all())
+
+
+def make_test_series(series_name='Commonology'):
+    sheet_name = "Test Commonology Game (Responses)"
+    series_owner = get_local_user(e='series@owner.com')
+    series = Series.objects.create(name=series_name, owner=series_owner, public=True)
+    t = our_now()
+    game = game_to_db(series, sheet_name, start=t, end=t)
+    game.google_form_url = 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true'
+    game.save()
+    return series, game
+
+
+class TestPlayRequest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.series, cls.game = make_test_series(series_name='Commonology')
+        game_player = get_local_user()
+        cls.series.players.add(game_player)
+
+    def test_find_latest_active_game(self):
+        slug = 'commonology'
+        game = find_latest_active_game(slug)
+        self.assertIsNone(game)
+
+        self.game.end = self.game.start + relativedelta(months=1)
+        self.game.save()
+
+        game = find_latest_active_game(slug)
+        self.assertIsNotNone(game)
+
+    def test_play_as_common_member(self):
+        game = self.game
+        game.end = game.start + relativedelta(months=1)
+        game.save()
+
+        client = get_local_client()
+
+        path = reverse('game:play')
+        response = client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
+
+        client = Client()
+        path = reverse('game:play')
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Enter your email to play the game so we can send the results to you.")
+
+        mail.outbox = []
+        response = client.post(reverse('game:play'), data={"email": ABINORMAL})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "forget to check your spam or junk folder if need be.")
+        msg = mail.outbox[0].body
+        url = re.search("(?P<url>https?://[^\s]+)\"\>Click", msg).group("url")
+        mail.outbox = []
+
+        response = client.get(url)
+        self.assertIn(response.status_code, [302, 404])
+        self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
+
+    def test_play_rambus(self):
+        series, game = make_test_series(series_name='Rambus')
+        slug = series.slug
+        game.end = game.start + relativedelta(months=1)
+        game.save()
+        game_player = get_local_user()
+
+        # email address in db, logged in, but not in rambus series
+        client = get_local_client()
+        path = reverse('series-game:play', kwargs={'series_slug': slug})
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
+
+        # # email address in db, not logged in, not in rabmus series
+        get_local_user(e=ABINORMAL)
+        response = Client().post(path, data={"email": ABINORMAL})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
+
+        # email address in db and in rambus series
+        series.players.add(game_player)
+        response = client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
+
+        # anonymous user not in any series
+        client = get_local_client(e=ABINORMAL)
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
+
+        response = Client().get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Enter your email to play the game so we can send the results to you.")
+
+        response = Client().post(path, data={"email": 'never@beenusedhere.com'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
+
+    def test_game_not_started(self):
+        client = Client()
+
+        game = self.game
+        start_save = game.start
+        game.start = game.end
+        game.save()
+
+        path = reverse('game:play')
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Sorry the next game has not started yet.')
+
+        game.start = start_save
+        game.save()
