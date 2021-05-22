@@ -240,6 +240,21 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         re_filtered_leaderboard = build_filtered_leaderboard(self.game, self.answer_tally, search_term="*5*")
         self.assertEqual(len(re_filtered_leaderboard), 1)
 
-    def test_cache_key(self):
-        # fake redis
-        pass
+    def test_display_name_clears_cache(self):
+        player = Player.objects.get(display_name="User 5")
+        user5_pass = 'iamuser5'
+        player.password = user5_pass
+        player.save()
+        client = Client()
+        client.login(email=player.email, password=user5_pass)
+        path = reverse('profile')
+
+        # the player has played self.game
+        self.assertTrue({'game_id': self.game.game_id} in player.games)
+        # there is a leaderboard cached for the game
+        self.assertIsNotNone(REDIS.keys(f'leaderboard*{self.game.game_id}'))
+
+        # posting a new display name empties the cache
+        data = {'display_name': 'new_display_name'}
+        client.post(path, data=data)
+        self.assertEqual(REDIS.keys(f'leaderboard*{self.game.game_id}'), [])

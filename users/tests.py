@@ -9,6 +9,8 @@ from django.core import mail
 from django.conf import settings
 from users.models import PendingEmail
 from users.utils import sign_user
+from project.utils import REDIS, redis_delete_patterns
+from game.models import Game
 
 
 User = get_user_model()

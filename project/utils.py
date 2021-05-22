@@ -19,17 +19,13 @@ def our_now():
     return datetime.datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
 
 
-def clear_redis_trailing_wildcard(*patterns):
+def redis_delete_patterns(*patterns):
     """
-    Accepts positional arguments of tuples, constructs a prefix with underscores,
-    and deletes all matching keys with trailing wildcard
-    e.g. clear_with_trailing_wildcard(('leaderboard', '32'), ('leaderboard','commonology','33'))
-        => leaderboard_32*, leaderboard_commonology_33*
+    Accepts positional arguments of patterns and deletes all matching keys with trailing wildcard
     """
     total_keys_deleted = 0
     for p in patterns:
-        prefix = "_".join([str(s) for s in p])
-        keys = REDIS.keys(f'{prefix}*')
+        keys = REDIS.keys(f'{p}*')
         if keys:
             REDIS.delete(*keys)
             total_keys_deleted += len(keys)

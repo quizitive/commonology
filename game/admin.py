@@ -3,7 +3,7 @@ from django.forms import Textarea
 from django.db import models
 
 from game.models import Series, Game, Question, Answer, AnswerCode
-from project.utils import clear_redis_trailing_wildcard
+from project.utils import redis_delete_patterns
 
 
 @admin.register(Series)
@@ -47,12 +47,12 @@ class GameAdmin(admin.ModelAdmin):
     actions = ('clear_cache', )
 
     def clear_cache(self, request, queryset):
-        lb_prefixes = [('leaderboard', q[0], q[1]) for q in queryset.values_list('series__slug', 'game_id')]
-        lbs_deleted = clear_redis_trailing_wildcard(*lb_prefixes)
-        at_prefixes = [('answer_tally', q[0], q[1]) for q in queryset.values_list('series__slug', 'game_id')]
-        ats_deleted = clear_redis_trailing_wildcard(*at_prefixes)
+        lb_prefixes = [f'leaderboard_{q[0]}_{q[1]}' for q in queryset.values_list('series__slug', 'game_id')]
+        lbs_deleted = redis_delete_patterns(*lb_prefixes)
+        at_prefixes = [f'answertally_{q[0]}_{q[1]}' for q in queryset.values_list('series__slug', 'game_id')]
+        ats_deleted = redis_delete_patterns(*at_prefixes)
         self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
-        self.message_user(request, f"{ats_deleted} cached answer_tallies were deleted")
+        self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
 
 
 @admin.register(Answer)
