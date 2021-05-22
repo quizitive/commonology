@@ -18,7 +18,7 @@ from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, 
 from users.models import PendingEmail
 from users.utils import unsubscribe
 from mail.sendgrid_utils import sendgrid_send
-from project.utils import clear_redis_trailing_wildcard
+from project.utils import redis_delete_patterns
 
 from .utils import remove_pending_email_invitations
 
@@ -82,7 +82,7 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
         if 'display_name' in form.changed_data:
             # we need to clear leaderboards this person appears on from cache to propagate change
             played_game_ids = user.games
-            clear_redis_trailing_wildcard(*[('leaderboard', g['game_id']) for g in played_game_ids])
+            redis_delete_patterns(*[f'leaderboard_{g["game_id"]}' for g in played_game_ids])
 
         form.save()
         messages.info(request, "Your changes have been saved!")
