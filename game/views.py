@@ -11,7 +11,6 @@ from project.views import CardFormView
 from project.utils import our_now
 from game.forms import TabulatorForm
 from game.models import Game
-from game.utils import next_event
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
@@ -21,17 +20,6 @@ from users.forms import PendingEmailForm
 from users.utils import is_validated
 from users.views import remove_pending_email_invitations
 from mail.sendgrid_utils import sendgrid_send
-
-
-def index(request):
-    if request.user.is_authenticated:
-        return redirect('leaderboard:current-leaderboard')
-    event_text, event_time = next_event()
-    context = {
-        'event_time': event_time,
-        'event_text': event_text
-    }
-    return render(request, 'game/index.html', context)
 
 
 @staff_member_required
