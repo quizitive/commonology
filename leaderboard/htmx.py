@@ -17,11 +17,12 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
     def dispatch(self, request, *args, **kwargs):
         try:
             self.game_id = int(request.GET.get('game_id', None))
+            self.slug = request.GET.get('slug', None)
         except TypeError:
             raise Http404
 
         try:
-            self.game = Game.objects.get(game_id=self.game_id)
+            self.game = Game.objects.get(game_id=self.game_id, series__slug=self.slug)
         except Game.DoesNotExist:
             raise Http404
 
@@ -57,7 +58,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             }
 
         try:
-            current_game = Game.objects.get(game_id=self.game_id)
+            current_game = Game.objects.get(game_id=self.game_id, series=self.game.series)
         except Game.DoesNotExist:
             raise Http404("Game does not exist")
 
