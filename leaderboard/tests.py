@@ -250,11 +250,11 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         path = reverse('profile')
 
         # the player has played self.game
-        self.assertTrue({'game_id': self.game.game_id} in player.games)
+        self.assertTrue({'game_id': self.game.game_id, 'series': self.game.series.slug} in player.game_ids)
         # there is a leaderboard cached for the game
-        self.assertIsNotNone(REDIS.keys(f'leaderboard*{self.game.game_id}'))
+        self.assertIsNotNone(REDIS.keys(f'leaderboard_{self.game.series.slug}_{self.game.game_id}*'))
 
         # posting a new display name empties the cache
         data = {'display_name': 'new_display_name'}
         client.post(path, data=data)
-        self.assertEqual(REDIS.keys(f'leaderboard*{self.game.game_id}'), [])
+        self.assertEqual(REDIS.keys(f'leaderboard_{self.game.series.slug}_{self.game.game_id}'), [])
