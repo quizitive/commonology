@@ -81,7 +81,7 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
 
         if 'display_name' in form.changed_data:
             # we need to clear leaderboards this person appears on from cache to propagate change
-            played_game_ids = user.games
+            played_game_ids = user.game_ids
             redis_delete_patterns(*[f'leaderboard_{g["game_id"]}' for g in played_game_ids])
 
         form.save()

@@ -143,8 +143,8 @@ def _answer_tally_from_cache(game):
     return json.loads(at_json)
 
 
-def player_rank_and_percentile_in_game(player_id, game_id):
-    game = Game.objects.get(game_id=game_id)
+def player_rank_and_percentile_in_game(player_id, series_slug, game_id):
+    game = Game.objects.get(game_id=game_id, series__slug=series_slug)
     answer_tally = build_answer_tally(game)
     try:
         rank = build_filtered_leaderboard(game, answer_tally, player_ids=[player_id])['Rank'].values[0]

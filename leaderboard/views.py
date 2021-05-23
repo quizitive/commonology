@@ -76,7 +76,7 @@ class LeaderboardView(SeriesPermissionView):
 
     def get(self, request, *args, **kwargs):
         try:
-            game = Game.objects.get(game_id=self.game_id)
+            game = Game.objects.get(game_id=self.game_id, series__slug=self.slug)
         except Game.DoesNotExist:
             raise Http404("Game does not exist")
 
@@ -90,7 +90,7 @@ class ResultsView(SeriesPermissionView):
 
     def get(self, request, *args, **kwargs):
         try:
-            game = Game.objects.get(game_id=self.game_id)
+            game = Game.objects.get(game_id=self.game_id, series__slug=self.slug)
         except Game.DoesNotExist:
             raise Http404("Game does not exist")
 
@@ -128,27 +128,28 @@ class PlayerHomeView(LoginRequiredMixin, View):
     def _get_context(self, request):
         user = request.user
         player, _ = Player.objects.get_or_create(id=user.id)
-        games = Game.objects.filter(publish=True).order_by('-game_id')
+        # todo: hardcoding commonology as series for now for now
+        games = Game.objects.filter(publish=True, series__slug='commonology').order_by('-game_id')
         latest_game_id = games.aggregate(Max('game_id'))['game_id__max']
 
         context = {
             'display_name': user.first_name or user.email,
-            'message': self._dashboard_message(player, latest_game_id),
+            'message': self._dashboard_message(player, 'commonology', latest_game_id),
             'latest_game_id': latest_game_id,
-            'games': player.games,
+            'games': player.game_ids,
             'teams': player.teams.all(),
             'invite_message': "Enter your friends' emails to invite them to Commonology!"
         }
         return context
 
     @staticmethod
-    def _dashboard_message(player, latest_game_id):
+    def _dashboard_message(player, series_slug, latest_game_id):
 
-        if latest_game_id not in player.games.values_list('game_id', flat=True):
+        if latest_game_id not in player.game_ids.values_list('game_id', flat=True):
             return "Looks like you missed last weeks game... You'll get 'em this week!"
 
         latest_rank, percentile = player_rank_and_percentile_in_game(player.id, latest_game_id)
-        player_count = Game.objects.get(game_id=latest_game_id).players.count()
+        player_count = Game.objects.get(game_id=latest_game_id, series__slug=series_slug).players.count()
 
         follow_up = "This is gonna be your week!"
         if percentile <= 0.1:
