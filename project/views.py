@@ -1,12 +1,24 @@
 from django.views.generic.base import View
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django import forms
 from django.views.generic.edit import FormMixin
 from django.contrib import messages
-from django.forms import Form
+from game.utils import next_event
 
 
 def about_view(request, *args, **kwargs):
     return render(request, 'about.html', {})
+
+
+def index(request):
+    if request.user.is_authenticated:
+        return redirect('leaderboard:current-leaderboard')
+    event_text, event_time = next_event()
+    context = {
+        'event_time': event_time,
+        'event_text': event_text
+    }
+    return render(request, 'game/index.html', context)
 
 
 class CardFormView(FormMixin, View):
@@ -62,3 +74,23 @@ class CardFormView(FormMixin, View):
         if not keep_form:
             self.form_class = None
         return self.render(request)
+
+
+class ContactForm(forms.Form):
+    from_email = forms.EmailField(required=True)
+    destination = forms.ChoiceField(choices=(("1", "Game Host"), ("2", "Investor Relations")))
+    message = forms.CharField(widget=forms.Textarea, max_length=750)
+
+
+class ContactView(CardFormView):
+    form_class = ContactForm
+    header = "Establishing Contact"
+    button_label = "Next"
+    custom_message = "Enter a message and we WILL read it."
+
+    def get(self, request, *args, **kwargs):
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.warning(request, 'Thank you.', keep_form=False)
