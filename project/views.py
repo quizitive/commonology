@@ -95,7 +95,7 @@ class ContactView(CardFormView):
     button_label = "Next"
     custom_message = "Enter a message and we WILL read it."
 
-   def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         form = self.get_form()
         if form.is_valid():
             from_email = form.data['from_email']
