@@ -46,17 +46,17 @@ class TestLeaderboardViews(BaseGameDataTestCase):
 
         # most recent game is public
         url = reverse('leaderboard:htmx')
-        pub_resp = self.client.get(url, {'game_id': game_id})
+        pub_resp = self.client.get(url, {'game_id': game_id, 'series': self.series.slug})
         self.assertEqual(pub_resp.status_code, 200)
 
         # non-staff can't see unpublished games, redirect to login
         new_game = Game.objects.create(publish=False, series=self.series, start=our_now(), end=our_now())
-        resp = self.client.get(url, {'game_id': new_game.game_id})
+        resp = self.client.get(url, {'game_id': new_game.game_id, 'series': self.series.slug})
         self.assertEqual(resp.status_code, 302)
 
         # staff users can access games if they exist
         self.client.login(email=self.su_email, password='foo')
-        staff_resp = self.client.get(url, {'game_id': new_game.game_id})
+        staff_resp = self.client.get(url, {'game_id': new_game.game_id, 'series': self.series.slug})
         self.assertEqual(staff_resp.status_code, 200)
         self.assertNotEqual(staff_resp.content, pub_resp.content)
 

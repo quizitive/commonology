@@ -17,7 +17,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
     def dispatch(self, request, *args, **kwargs):
         try:
             self.game_id = int(request.GET.get('game_id', None))
-            self.slug = request.GET.get('slug', None)
+            self.slug = request.GET.get('series', None)
         except TypeError:
             raise Http404
 
