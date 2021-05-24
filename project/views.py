@@ -3,7 +3,12 @@ from django.shortcuts import render, redirect
 from django import forms
 from django.views.generic.edit import FormMixin
 from django.contrib import messages
+from django.core.mail import send_mail
 from game.utils import next_event
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def about_view(request, *args, **kwargs):
@@ -77,9 +82,11 @@ class CardFormView(FormMixin, View):
 
 
 class ContactForm(forms.Form):
+    choices = (("1", "Game Host"), ("2", "Investor Relations"))
+    to_email = ['concierge@commonologygame.com', 'ms@quizitive.com']
     from_email = forms.EmailField(required=True)
-    destination = forms.ChoiceField(choices=(("1", "Game Host"), ("2", "Investor Relations")))
-    message = forms.CharField(widget=forms.Textarea, max_length=750)
+    destination = forms.ChoiceField(choices=choices)
+    message = forms.CharField(widget=forms.Textarea, max_length=750, min_length=2)
 
 
 class ContactView(CardFormView):
@@ -89,8 +96,24 @@ class ContactView(CardFormView):
     custom_message = "Enter a message and we WILL read it."
 
     def get(self, request, *args, **kwargs):
-
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        return self.warning(request, 'Thank you.', keep_form=False)
+        form = self.get_form()
+        if form.is_valid():
+            from_email = form.data['from_email']
+            destination = int(form.data['destination'])
+            email = form.to_email[destination - 1]
+            msg = form.data['message']
+
+            subject = form.choices[destination - 1][1]
+            msg = f"Contact Form -- {from_email} sent this message with subject: {subject}\n{msg}"
+
+            logger.info(msg)
+            send_mail(subject=subject, message=msg,
+                      from_email=None, recipient_list=[email])
+
+            return self.warning(request,
+                                'Thank you, we hope to reply today or early tomorrow.',
+                                keep_form=False)
+        return self.render(request)
