@@ -1,9 +1,11 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
+from game.tests import suppress_hidden_error_logs
 
 
 class TestContact(TestCase):
+    @suppress_hidden_error_logs
     def test_contact(self):
         c = Client()
         path = reverse('contact')
