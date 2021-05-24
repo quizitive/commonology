@@ -1,0 +1,27 @@
+{% load static %}
+
+<div id="footer-container" class="w3-bottombar">
+    <div id="footer" class="w3-bar w3-medium w3-padding">
+      <div class="w3-cell-row">
+        <div class="w3-cell w3-mobile" style="width:6%;"></div>
+        <div class="w3-cell w3-cell-middle" style="font-size:0.8rem;width:20%">
+          &#169 2021 Quizitive, LLC
+        </div>
+        <div class="w3-cell w3-cell-middle w3-rest w3-center">
+          &nbsp
+          <img src="{% static 'img/icon.svg' %}" height="38px">
+        </div>
+        <div class="w3-cell w3-cell-middle w3-right-align" style="font-size:0.8rem;width:20%">
+
+          <div class="w3-cell-row w3-mobile">
+
+         <a href="https://twitter.com/commonologygame?ref_src=twsrc%5Etfw" class="bottombar w3-cell w3-mobile" data-show-screen-name="false" data-show-count="false">Twitter</a>
+         <a class="bottombar w3-cell w3-mobile" href="{% url 'about' %}">About</a>
+         <a class="bottombar w3-cell w3-mobile" href="/contact">Contact</a>
+
+          </div>
+        </div>
+        <div class="w3-cell w3-mobile" style="width:6%;"></div>
+      </div>
+    </div>
+</div>
