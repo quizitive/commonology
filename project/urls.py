@@ -4,12 +4,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib import admin
-from game import views
-from .views import about_view
+from .views import index, about_view, ContactView
+
 
 urlpatterns = [
-    path('', views.index, name='home'),
+    path('', index, name='home'),
     path('about/', about_view, name='about'),
+    path('contact/', ContactView.as_view(), name='contact'),
     path('', include('users.urls')),
     path('', include('game.urls')),
     path('', include('mail.urls')),
