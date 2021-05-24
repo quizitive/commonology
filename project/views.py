@@ -110,7 +110,8 @@ class ContactView(CardFormView):
             send_mail(subject=subject, message=msg,
                       from_email=None, recipient_list=[email])
 
-            return self.warning(request,
-                                'Thank you, we hope to reply today or early tomorrow.',
-                                keep_form=False)
+            self.custom_message = 'Thank you, we hope to reply today or early tomorrow.'
+            return self.render(request, form=None, button_label='OK',
+                           form_method="get", form_action='/')
+
         return self.render(request)
