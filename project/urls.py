@@ -4,16 +4,20 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib import admin
-from game import views
+from .views import index, about_view, ContactView
+
 
 urlpatterns = [
-    path('', views.index, name='home'),
+    path('', index, name='home'),
+    path('about/', about_view, name='about'),
+    path('contact/', ContactView.as_view(), name='contact'),
     path('', include('users.urls')),
     path('', include('game.urls')),
     path('', include('mail.urls')),
     path('', include('quizitive.urls')),
     path('', include('leaderboard.urls')),
     path('c/<slug:series_slug>/', include('leaderboard.urls', namespace='series-leaderboard')),
+    path('c/<slug:series_slug>/', include('game.urls', namespace='series-game')),
     path('chat/', include('chat.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('admin/', admin.site.urls),
