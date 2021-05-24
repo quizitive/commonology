@@ -14,7 +14,7 @@
   {% if messages %}
     <div style="margin-bottom:24px;">
     {% for msg in messages %}
-      <p class="user-msg w3-padding-top w3-margin-bottom">{{ msg }}</p>
+      <p class="user-msg {{ msg.level_tag }} w3-padding-top w3-margin-bottom">{{ msg }}</p>
     {% endfor %}
     </div>
   {% endif %}

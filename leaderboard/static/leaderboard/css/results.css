@@ -23,6 +23,25 @@ div.answer-score {
   padding:0 4px;
   text-align:right;
 }
+a.more-button {
+  text-decoration: None;
+  color: #f26649;
+}
+a:hover {
+  cursor:pointer;
+}
+div.player-answer {
+  border: #2a9fbc 1px solid;
+}
+span.player-answer {
+  color: #2a9fbc;
+  font-style: italic;
+  font-size: 13px;
+  max-width: 400px;
+  margin: -4px auto 2px;
+  padding: 0 8px;
+  text-align: right;
+}
 div.question-comment-container {
   font-size:14px
 }

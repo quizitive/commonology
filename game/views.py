@@ -3,29 +3,23 @@ import logging
 
 from django.conf import settings
 from django.shortcuts import render, redirect
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
+from django.views.generic.base import View
+from project.views import CardFormView
+from project.utils import our_now
 from game.forms import TabulatorForm
 from game.models import Game
-from game.utils import next_event
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
-
-
-def index(request):
-    if request.user.is_authenticated:
-        return redirect('leaderboard:current-leaderboard')
-    event_text, event_time = next_event()
-    context = {
-        'event_time': event_time,
-        'event_text': event_text
-    }
-    return render(request, 'game/index.html', context)
-
-
-def about_view(request):
-    return render(request, 'game/about.html', {})
+from users.models import PendingEmail, Player
+from users.forms import PendingEmailForm
+from users.utils import is_validated
+from users.views import remove_pending_email_invitations
+from mail.sendgrid_utils import sendgrid_send
 
 
 @staff_member_required
@@ -92,3 +86,113 @@ def tabulate_results(series_slug, filename, gc, update=False):
 
     # write to google
     write_all_to_gdrive(sheet_doc, answer_tally, answer_codes, leaderboard)
+
+
+def find_latest_active_game(slug):
+    t = our_now()
+    g = Game.objects.filter(series__slug=slug, end__gte=t, start__lte=t).reverse().first()
+    if g and not g.google_form_url:
+        return None
+    return g
+
+
+# Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
+def game_url(google_form_url, email):
+    return google_form_url.replace('alex@commonologygame.com', email)
+
+
+def send_confirm(request, slug, email):
+    remove_pending_email_invitations()
+    pe = PendingEmail(email=email)
+    pe.save()
+
+    domain = get_current_site(request)
+    url = (f'https://{domain}/c/{slug}/play/{pe.uuid}')
+
+    msg = render_to_string('game/validate_email.html', {'join_url': url})
+
+    return sendgrid_send("Let's play Commonology", msg, [(email, None)])
+
+
+class GameEntryView(CardFormView):
+    form_class = PendingEmailForm
+    header = "Game starts here!"
+    button_label = "Next"
+    custom_message = "Enter your email to play the game so we can send the results to you."
+
+    def get(self, request, *args, **kwargs):
+        slug = kwargs.get('series_slug') or 'commonology'
+        g = find_latest_active_game(slug)
+        if not g:
+            return self.warning(request,
+                                ('Sorry the next game has not started yet.  '
+                                 'Join our list so we can let you know when it does.'),
+                                keep_form=False)
+
+        if request.user.is_authenticated:
+            player = is_validated(request.user.email)
+            if not (slug == 'commonology' or player.series.filter(slug=slug).exists()):
+                return self.warning(request, 'Sorry the game you requested is not available without an invitation.',
+                                    keep_form=False)
+
+            url = game_url(g.google_form_url, request.user.email)
+            return redirect(url)
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if 'email' not in request.POST:
+            # There was no form probably game is not active.
+            return redirect('home')
+
+        slug = kwargs.get('series_slug') or 'commonology'
+        email = request.POST['email']
+        player = is_validated(email)
+
+        if player and player.series.filter(slug=slug).exists():
+            g = find_latest_active_game(slug)
+            if not g:
+                return self.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
+            url = game_url(g.google_form_url, email)
+            return redirect(url)
+        else:
+            if slug == 'commonology':
+                send_confirm(request, slug, email)
+                self.custom_message = f"We sent the game link to {email}. " \
+                                      f"Don't forget to check your spam or junk folder if need be."
+
+                self.header = "Game link sent!"
+                return self.render(request, form=None, button_label='OK')
+
+        return self.warning(request,
+                            'Sorry the game you requested is not available without an invitation.',
+                            keep_form=False)
+
+
+class GameEntryValidationView(View):
+    # c/<slug>/play/<uuid>
+    def get(self, request, *args, **kwargs):
+        slug = kwargs['series_slug']
+        uuid = kwargs['uidb64']
+        pe = PendingEmail.objects.filter(uuid__exact=uuid).get()
+        if pe is None:
+            gc = GameEntryView()
+            return gc.warning(request, 'Seems like there was a problem with the validation link. Please try again.')
+
+        email = pe.email
+        try:
+            p = Player.objects.get(email=email)
+            if not p.is_active:
+                p.is_active = True
+                p.save()
+        except Player.DoesNotExist:
+            p = Player(email=email)
+            p.save()
+
+        g = find_latest_active_game(slug)
+        if not g:
+            gc = GameEntryView()
+            return gc.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
+
+        url = game_url(g.google_form_url, email)
+        return redirect(url)
