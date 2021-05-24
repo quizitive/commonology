@@ -1,12 +1,29 @@
 from django.views.generic.base import View
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django import forms
 from django.views.generic.edit import FormMixin
 from django.contrib import messages
-from django.forms import Form
+from django.core.mail import send_mail
+from game.utils import next_event
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def about_view(request, *args, **kwargs):
     return render(request, 'about.html', {})
+
+
+def index(request):
+    if request.user.is_authenticated:
+        return redirect('leaderboard:current-leaderboard')
+    event_text, event_time = next_event()
+    context = {
+        'event_time': event_time,
+        'event_text': event_text
+    }
+    return render(request, 'game/index.html', context)
 
 
 class CardFormView(FormMixin, View):
@@ -61,4 +78,39 @@ class CardFormView(FormMixin, View):
         messages.warning(request, message)
         if not keep_form:
             self.form_class = None
+        return self.render(request)
+
+
+class ContactForm(forms.Form):
+    choices = (("1", "Game Host"), ("2", "Investor Relations"))
+    to_email = ['concierge@commonologygame.com', 'ms@quizitive.com']
+    from_email = forms.EmailField(required=True)
+    destination = forms.ChoiceField(choices=choices)
+    message = forms.CharField(widget=forms.Textarea, max_length=750, min_length=2)
+
+
+class ContactView(CardFormView):
+    form_class = ContactForm
+    header = "Establishing Contact"
+    button_label = "Next"
+    custom_message = "Enter a message and we WILL read it."
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            from_email = form.data['from_email']
+            destination = int(form.data['destination'])
+            email = form.to_email[destination - 1]
+            msg = form.data['message']
+
+            subject = form.choices[destination - 1][1]
+            msg = f"Contact Form -- {from_email} sent this message with subject: {subject}\n{msg}"
+
+            logger.info(msg)
+            send_mail(subject=subject, message=msg,
+                      from_email=None, recipient_list=[email])
+
+            return self.warning(request,
+                                'Thank you, we hope to reply today or early tomorrow.',
+                                keep_form=False)
         return self.render(request)
