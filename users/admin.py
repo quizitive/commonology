@@ -17,7 +17,7 @@ class PlayerUserAdmin(UserAdmin):
     add_form = PlayerCreationForm
     form = PlayerChangeForm
     model = Player
-    list_display = ('email', 'date_joined', 'display_name', 'first_name', 'last_name', 'subscribed', 'series')
+    list_display = ('email', 'date_joined', 'display_name', 'first_name', 'last_name', 'subscribed', 'get_series')
     list_filter = ('date_joined', 'subscribed', 'is_member', 'is_staff', 'is_active', 'is_superuser',
                    'series')
     fieldsets = (
@@ -39,8 +39,9 @@ class PlayerUserAdmin(UserAdmin):
     actions = [subscribe_action, unsubscribe_action]
     inlines = [SeriesInLine]
 
-    def series(self, obj):
+    def get_series(self, obj):
         return "\n".join([s.slug for s in obj.series.all()])
+    get_series.short_description = 'Series'
 
 
 @admin.register(PendingEmail)
