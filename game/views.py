@@ -115,6 +115,48 @@ def send_confirm(request, slug, email):
     return sendgrid_send("Let's play Commonology", msg, [(email, None)])
 
 
+# THIS SHOULD BE TEMPORARY UNTIL WE HOST OUR OWN FORMS
+# The following GameEntryView class works and should be used instead.
+# See https://github.com/quizitive/commonology/issues/288
+# Also enable tests.TestPlayRequest and remove tests.TestPlayRequestWithoutValidation
+class GameEntryWithoutValidationView(CardFormView):
+    form_class = PendingEmailForm
+    header = "Game starts here!"
+    button_label = "Next"
+
+    def message(self, request, msg):
+        self.custom_message = msg
+        return self.render(request, form=None, button_label='Next',
+                           form_method="get", form_action='/')
+
+    def get(self, request, *args, **kwargs):
+        slug = kwargs.get('series_slug') or 'commonology'
+
+        g = find_latest_active_game(slug)
+        if slug == 'commonology':
+            if not g:
+                return self.message(request,
+                                    'Sorry the next game has not started yet.  Join our list so we can let you know when it does.')
+            else:
+                return redirect(g.google_form_url)
+
+        if not g:
+            return self.message(request,
+                                'Sorry the next game has not started yet. You should receive an email reminder when it is ready')
+
+        if request.user.is_anonymous:
+            return self.message(request,
+                                'You must be logged in to play this version of the game.')
+        else:
+            player = is_validated(request.user.email)
+
+        if player and player.series.filter(slug=slug).exists():
+            return redirect(g.google_form_url)
+
+        return self.message(request,
+                            'Sorry the game you requested is not available without an invitation.')
+
+
 class GameEntryView(CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
