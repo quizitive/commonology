@@ -17,6 +17,7 @@ for i in response.body:
 
     print(i['email'], i['reason'])
 exit()
+# only test those sent on a given date, say today.
 
 fn = 'suppression_blocks.csv'
 with open(fn) as csvfile:
