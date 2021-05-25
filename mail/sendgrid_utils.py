@@ -84,3 +84,10 @@ def mass_mail(subject, msg, from_email, players, categories=None):
 
     logger.info(f"{total_count} recipients were just sent a blast with subject = {subject}.")
     return total_count
+
+
+def suppressions():
+    # https://github.com/sendgrid/sendgrid-python/blob/main/examples/suppression/suppression.py
+    sg = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
+    response = sg.client.suppression.blocks.get()
+    return(response)
