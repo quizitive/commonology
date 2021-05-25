@@ -86,4 +86,6 @@ class CommentConsumer(AsyncWebsocketConsumer):
 
         # Send message to WebSocket
         # todo: output simple html
-        await self.send(f"<div id='simp_test' hx-swap-oob='beforebegin'>{comment}</div>")
+        await self.send(f"<div id='simp_test' hx-swap-oob='innerHTML'>"
+                        f"<div class='foo'>{comment}</div>"
+                        f"</div>")
