@@ -42,10 +42,6 @@ def game_to_db(series, filename, start=None, end=None):
             'start': start, 'end': end
         },
     )
-    User = get_user_model()
-    staff = User.objects.filter(is_staff=True)
-    game.hosts.add(*staff)
-    game.save()
     return game
 
 
