@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.core import mail
 from users.tests import get_local_user
 from game.models import Series
-from mail.sendgrid_utils import mass_mail
+from mail.sendgrid_utils import mass_mail, suppressions
 
 
 class MassMailTests(TestCase):
@@ -22,3 +22,10 @@ class MassMailTests(TestCase):
         n = mass_mail('test', 'hello', 'ms@quizitive.com', players=self.series.players)
         self.assertEqual(n, 2)
         self.assertEqual(len(mail.outbox), 1)
+
+
+class SendgridSupressionTests(TestCase):
+    def test_supression_api(self):
+        results = suppressions()
+        self.assertEqual(results.status_code, 200)
+        print(results)
