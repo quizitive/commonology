@@ -506,7 +506,7 @@ class TestPlayRequestWithoutValidation(TestCase):
         client = get_local_client(e=ABINORMAL)
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
+        self.assertContains(response, 'You must be logged in to play this version of the game.')
 
     def test_game_not_started(self):
         client = Client()
