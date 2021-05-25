@@ -46,17 +46,17 @@ class TestLeaderboardViews(BaseGameDataTestCase):
 
         # most recent game is public
         url = reverse('leaderboard:htmx')
-        pub_resp = self.client.get(url, {'game_id': game_id})
+        pub_resp = self.client.get(url, {'game_id': game_id, 'series': self.series.slug})
         self.assertEqual(pub_resp.status_code, 200)
 
         # non-staff can't see unpublished games, redirect to login
-        new_game = Game.objects.create(publish=False, start=our_now(), end=our_now())
-        resp = self.client.get(url, {'game_id': new_game.game_id})
+        new_game = Game.objects.create(publish=False, series=self.series, start=our_now(), end=our_now())
+        resp = self.client.get(url, {'game_id': new_game.game_id, 'series': self.series.slug})
         self.assertEqual(resp.status_code, 302)
 
         # staff users can access games if they exist
         self.client.login(email=self.su_email, password='foo')
-        staff_resp = self.client.get(url, {'game_id': new_game.game_id})
+        staff_resp = self.client.get(url, {'game_id': new_game.game_id, 'series': self.series.slug})
         self.assertEqual(staff_resp.status_code, 200)
         self.assertNotEqual(staff_resp.content, pub_resp.content)
 
@@ -239,3 +239,22 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         user5.save()
         re_filtered_leaderboard = build_filtered_leaderboard(self.game, self.answer_tally, search_term="*5*")
         self.assertEqual(len(re_filtered_leaderboard), 1)
+
+    def test_display_name_clears_cache(self):
+        player = Player.objects.get(display_name="User 5")
+        user5_pass = 'iamuser5'
+        player.password = user5_pass
+        player.save()
+        client = Client()
+        client.login(email=player.email, password=user5_pass)
+        path = reverse('profile')
+
+        # the player has played self.game
+        self.assertTrue({'game_id': self.game.game_id, 'series': self.game.series.slug} in player.game_ids)
+        # there is a leaderboard cached for the game
+        self.assertIsNotNone(REDIS.keys(f'leaderboard_{self.game.series.slug}_{self.game.game_id}*'))
+
+        # posting a new display name empties the cache
+        data = {'display_name': 'new_display_name'}
+        client.post(path, data=data)
+        self.assertEqual(REDIS.keys(f'leaderboard_{self.game.series.slug}_{self.game.game_id}'), [])
