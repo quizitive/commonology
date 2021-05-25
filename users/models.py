@@ -77,9 +77,9 @@ class Player(CustomUser):
             return self.email
 
     @property
-    def games(self):
+    def game_ids(self):
         return self.answers.values(
-            game_id=models.F('question__game__game_id')).exclude(
+            game_id=models.F('question__game__game_id'), series=models.F('question__game__series__slug')).exclude(
             game_id=None).distinct().order_by('-game_id')
 
 

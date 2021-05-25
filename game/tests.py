@@ -12,7 +12,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
 
-from project.utils import REDIS, our_now
+from project.utils import REDIS, our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from game.utils import next_wed_noon, next_friday_1159
@@ -30,10 +30,12 @@ LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def suppress_hidden_error_logs(func):
-    # PermissionDenied, Http404, SystemExit and Suspicious operation errors
-    # are not visible because they're handled by Django internally.
-    # This method prevents writing to logs that clog up test output
-    # See https://docs.djangoproject.com/en/dev/topics/testing/tools/#exceptions
+    """
+    PermissionDenied, Http404, SystemExit and Suspicious operation errors
+    are not visible because they're handled by Django internally.
+    This decorator prevents writing to logs that clog up test output
+    See https://docs.djangoproject.com/en/dev/topics/testing/tools/#exceptions
+    """
     def wrapper(*args, **kwargs):
         logging.disable(logging.CRITICAL)
         func(*args, **kwargs)
@@ -266,6 +268,15 @@ class TestUtils(TestCase):
         next_game_end = next_friday_1159(a_thursday)
         self.assertEqual(next_game_end.weekday(), 4)
         self.assertEqual(next_game_end.strftime(format="%H:%M:%S"), "23:59:59")
+
+    def test_clear_redis_trailing_wildcard(self):
+        key1 = 'leaderboard_3_@crAzyS+r!ng'
+        key2 = 'leaderboard_3_$0H!pSoHODL'
+        REDIS.set(key1, "a value")
+        REDIS.set(key2, "a value")
+        redis_delete_patterns(['leaderboard_3'])
+        self.assertIsNone(REDIS.get(key1))
+        self.assertIsNone(REDIS.get(key2))
 
 
 class TestModels(TestCase):
