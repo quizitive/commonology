@@ -9,7 +9,7 @@ import fakeredis
 if settings.IS_TEST:
     REDIS = fakeredis.FakeStrictRedis()
 else:
-    REDIS = redis.Redis(host='localhost', port=6379, db=0)
+    REDIS = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
 
 def our_now():
