@@ -51,6 +51,7 @@ if env.get('EAGER_CELERY', False):
     BROKER_BACKEND = 'memory'
 
 INSTALLED_APPS = [
+    'channels',
     'sslserver',
     'users',
     'ckeditor',
@@ -63,6 +64,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'social_django',
+    'chat',
     'game',
     'leaderboard',
     'mail',
@@ -153,6 +155,17 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'project.wsgi.application'
+
+# Django channels settings
+ASGI_APPLICATION = 'project.asgi.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 DATABASES = {
     'default': {
