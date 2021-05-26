@@ -2,6 +2,8 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
+from chat.models import Comment
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -69,13 +71,18 @@ class CommentConsumer(AsyncWebsocketConsumer):
 
     # Receive message from WebSocket
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        comment = text_data_json['comment']
+        # make sure use is authenticated
         try:
-            user = await self.get_user()
+            user_dn = await self.get_user_dn()
         except AttributeError:
             await self.send("You need to log in to join the conversation!")
             return
+
+        # parse payload and save to database
+        text_data_json = json.loads(text_data)
+        comment = text_data_json['comment']
+        thread_id = int(text_data_json['thread-id'].split("-")[1])
+        await self.post_comment_to_db(self.scope["user"], comment, thread_id)
 
         # Send message to thread
         await self.channel_layer.group_send(
@@ -83,23 +90,29 @@ class CommentConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'thread_comment',
                 'comment': comment,
-                'user': user
+                'user_dn': user_dn,
+                'thread_id': thread_id
             }
         )
 
     @database_sync_to_async
-    def get_user(self):
+    def get_user_dn(self):
         return self.scope["user"].display_name
+
+    @database_sync_to_async
+    def post_comment_to_db(self, user, comment, thread_id):
+        Comment.objects.create(player=user, comment=comment, thread_id=thread_id)
+        return
 
     # Receive message from thread
     async def thread_comment(self, event):
         comment = event['comment']
-        user = event['user']
+        user_dn = event['user_dn']
+        thread_id = event['thread_id']
 
         # Send message to WebSocket
         # todo: output simple html
-        await self.send(f'<div id="simp_test" hx-swap-oob="beforeend">'
+        await self.send(f'<div id="thread-{thread_id}" hx-swap-oob="beforeend">'
                         f'<div class="question-comment w3-row">'
-                        f'<b>{user}</b>&nbsp&nbsp{comment}</div>'
-                        f'</div>'
-                        f'</div>')
+                        f'<b>{user_dn}</b>&nbsp&nbsp{comment}</div>'
+                        f'</div></div>')
