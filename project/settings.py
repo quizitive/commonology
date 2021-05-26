@@ -34,9 +34,9 @@ INTERNAL_IPS = ()
 if DEBUG:
     INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN)
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/New_York'
 
-CELERY_TIMEZONE = 'America/New_York'
+CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 BROKER_URL = 'redis://localhost:6379'
