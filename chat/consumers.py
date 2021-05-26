@@ -70,22 +70,25 @@ class CommentConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         comment = text_data_json['comment']
+        user = self.scope["user"]
 
         # Send message to thread
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'thread_comment',
-                'comment': comment
+                'comment': comment,
+                'user': user
             }
         )
 
     # Receive message from thread
     async def thread_comment(self, event):
         comment = event['comment']
+        user = event['user']
 
         # Send message to WebSocket
         # todo: output simple html
-        await self.send(f"<div id='simp_test' hx-swap-oob='innerHTML'>"
+        await self.send(f"<div id='simp_test' hx-swap-oob='beforeend'>"
                         f"<div class='foo'>{comment}</div>"
                         f"</div>")
