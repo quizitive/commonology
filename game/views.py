@@ -11,7 +11,7 @@ from project.views import CardFormView
 from project.utils import our_now
 from game.forms import TabulatorForm
 from game.models import Game
-from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally
+from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
@@ -80,9 +80,10 @@ def tabulate_results(series_slug, filename, gc, update=False):
     )
 
     # calculate the question-by-question data and leaderboard
+    # NOTE: both of these call the method that rebuilds themself from db and clears the cache
     game = Game.objects.get(sheet_name=filename, series__slug=series_slug)
-    answer_tally = build_answer_tally(game)
-    leaderboard = build_filtered_leaderboard(game, answer_tally)
+    answer_tally = build_answer_tally_fromdb(game)
+    leaderboard = build_leaderboard_fromdb(game, answer_tally)
 
     # write to google
     write_all_to_gdrive(sheet_doc, answer_tally, answer_codes, leaderboard)
@@ -112,6 +113,48 @@ def send_confirm(request, slug, email):
     msg = render_to_string('game/validate_email.html', {'join_url': url})
 
     return sendgrid_send("Let's play Commonology", msg, [(email, None)])
+
+
+# THIS SHOULD BE TEMPORARY UNTIL WE HOST OUR OWN FORMS
+# The following GameEntryView class works and should be used instead.
+# See https://github.com/quizitive/commonology/issues/288
+# Also enable tests.TestPlayRequest and remove tests.TestPlayRequestWithoutValidation
+class GameEntryWithoutValidationView(CardFormView):
+    form_class = PendingEmailForm
+    header = "Game starts here!"
+    button_label = "Next"
+
+    def message(self, request, msg):
+        self.custom_message = msg
+        return self.render(request, form=None, button_label='Next',
+                           form_method="get", form_action='/')
+
+    def get(self, request, *args, **kwargs):
+        slug = kwargs.get('series_slug') or 'commonology'
+
+        g = find_latest_active_game(slug)
+        if slug == 'commonology':
+            if not g:
+                return self.message(request,
+                                    'Sorry the next game has not started yet.  Join our list so we can let you know when it does.')
+            else:
+                return redirect(g.google_form_url)
+
+        if not g:
+            return self.message(request,
+                                'Sorry the next game has not started yet. You should receive an email reminder when it is ready')
+
+        if request.user.is_anonymous:
+            return self.message(request,
+                                'You must be logged in to play this version of the game.')
+        else:
+            player = is_validated(request.user.email)
+
+        if player and player.series.filter(slug=slug).exists():
+            return redirect(g.google_form_url)
+
+        return self.message(request,
+                            'Sorry the game you requested is not available without an invitation.')
 
 
 class GameEntryView(CardFormView):
