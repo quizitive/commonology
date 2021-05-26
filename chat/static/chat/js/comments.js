@@ -13,4 +13,3 @@ $('.question-comments').on("htmx:beforeProcessNode", (e) => {
   const text_area_id = '#text-'.concat(e.target.id.split('-')[1])
   $(text_area_id).val('');
 });
-htmx.logAll();
