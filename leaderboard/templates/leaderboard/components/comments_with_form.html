@@ -1,8 +1,8 @@
 {% load static %}
 
-{#<div hx-trigger="sse:thread_{{ thread.id }}" hx-get="/c/htmx/?thread_id={{ thread.id }}"></div>#}
-
-{% include 'leaderboard/components/comment_thread.html' %}
+<div class="w3-row">
+    {% include 'leaderboard/components/comment_thread.html' %}
+</div>
 
   <div class="question-comment-form w3-row w3-border-top cg-border-grey w3-padding-large" style="margin:auto;font-size:14px">
     <form hx-ws="send">

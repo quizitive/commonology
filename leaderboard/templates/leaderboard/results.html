@@ -4,19 +4,11 @@
 {% block title %}Commonology | Results{% endblock %}
 
 {% block page_style %}
-  <link rel="stylesheet" href="{% static 'leaderboard/css/results.css' %}?v=1.0">
+  <link rel="stylesheet" href="{% static 'leaderboard/css/results.css' %}?v=1.1">
 {% endblock %}
 
 {% block scripts %}
-  <script>
-    $(".more-button").click((event) => {
-    const qId = event.target.id.split("-")[2]
-    const tgtClass = ".q-" + qId + ".hideable"
-    $(tgtClass).toggle();
-    $(event.target).text("")
-  })
-  </script>
-  <link rel="stylesheet" href="{% static 'leaderboard/css/results.css' %}?v=1.1">
+  <script src="{% static 'leaderboard/js/results.js' %}"></script>
   <script src="{% static 'chat/js/comments.js' %}"></script>
 {% endblock %}
 
