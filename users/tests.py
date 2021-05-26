@@ -9,8 +9,7 @@ from django.core import mail
 from django.conf import settings
 from users.models import PendingEmail
 from users.utils import sign_user
-from project.utils import REDIS, redis_delete_patterns
-from game.models import Game
+from game.models import Series
 
 
 User = get_user_model()
@@ -209,6 +208,10 @@ class UsersManagersTests(TestCase):
 
 
 class PendingUsersTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        owner = get_local_user(e='series@owner.com')
+        Series.objects.create(name="Commonology", owner=owner, public=True)
 
     def setUp(self):
         pw = '3CgAQCHzyv5x5yhN'
@@ -227,6 +230,9 @@ class PendingUsersTests(TestCase):
         self.assertIn(response.status_code, [200, 302])
         x = User.objects.filter(email__exact=data['email']).exists()
         self.assertEqual(x, flag)
+        if flag:
+            p = User.objects.get(email=data['email'])
+            self.assertTrue(p.series.filter(slug='commonology').exists())
 
     def test_invite(self):
         user = get_local_user()
