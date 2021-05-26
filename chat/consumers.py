@@ -1,5 +1,6 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -70,7 +71,11 @@ class CommentConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         comment = text_data_json['comment']
-        user = self.scope["user"].display_name
+        try:
+            user = await self.get_user()
+        except AttributeError:
+            await self.send("You need to log in to join the conversation!")
+            return
 
         # Send message to thread
         await self.channel_layer.group_send(
@@ -81,6 +86,10 @@ class CommentConsumer(AsyncWebsocketConsumer):
                 'user': user
             }
         )
+
+    @database_sync_to_async
+    def get_user(self):
+        return self.scope["user"].display_name
 
     # Receive message from thread
     async def thread_comment(self, event):
