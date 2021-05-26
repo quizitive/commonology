@@ -107,7 +107,7 @@ class ResultsView(SeriesPermissionView):
             'game_top_commentary': game.top_commentary,
             'game_bottom_commentary': game.bottom_commentary,
             'questions': questions,
-            'host': game.hosts.first()
+            'host': game.hosts.filter(email="alex@commonologygame.com").first() or game.hosts.first()
         })
         messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, 'leaderboard/results.html', context)
