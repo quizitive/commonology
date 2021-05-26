@@ -1,7 +1,6 @@
-<div class="question-comments w3-padding-large">
-<p id="simp_test"></p>
+<div id="thread-{{ q.thread.id }}" class="question-comments w3-padding-large">
   {% for comment in thread.comments.all  %}
-    <div class="question-comment w3-row">
+    <div id="thread-{{ thread.id }}" class="question-comment w3-row">
       <b>{{ comment.commenter }}&nbsp&nbsp</b>{{ comment.comment }}
     </div>
   {% endfor %}
