@@ -45,7 +45,11 @@ span.player-answer {
 div.question-comment-container {
   font-size:14px
 }
-div.question-comment {
+a.show-comments {
+  font-size:13px;
+  color: #aaa
+}
+div.question-comment, div.question-caption {
   margin:8px auto;
 }
 textarea {

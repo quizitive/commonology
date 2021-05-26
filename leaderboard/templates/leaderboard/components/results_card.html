@@ -32,7 +32,7 @@
             {% if forloop.last and total > 10 %}
               {{ count }}
               <div class="w3-cell-row">
-                  <a id="more-button-{{ q.id }}" class="more-button w3-cell w3-center">see {{ total|add:"-10" }} more</a>
+                  <a id="more-button question-{{ q.id }}" class="more-button w3-cell w3-center">see {{ total|add:"-10" }} more</a>
               </div>
             {% endif %}
           {% endwith %}
@@ -47,13 +47,7 @@
 
 <!-- Comments -->
 <div class="question-comment-container">
-{#    {% if q.caption %}#}
-{#      <div class="question-comment w3-row">#}
-{#        <b>{{ host }}&nbsp&nbsp</b>{{ q.caption|safe }}#}
-{#      </div>#}
-{#    {% endif %}#}
-
-  {% include 'leaderboard/components/comments_with_form.html' with thread=q.thread %}
+  {% include 'leaderboard/components/comments_with_form.html' with q=q thread=q.thread %}
 </div>
 
 
