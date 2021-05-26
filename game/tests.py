@@ -12,7 +12,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
 
-from project.utils import REDIS, our_now
+from project.utils import REDIS, our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from game.utils import next_wed_noon, next_friday_1159
@@ -30,10 +30,12 @@ LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def suppress_hidden_error_logs(func):
-    # PermissionDenied, Http404, SystemExit and Suspicious operation errors
-    # are not visible because they're handled by Django internally.
-    # This method prevents writing to logs that clog up test output
-    # See https://docs.djangoproject.com/en/dev/topics/testing/tools/#exceptions
+    """
+    PermissionDenied, Http404, SystemExit and Suspicious operation errors
+    are not visible because they're handled by Django internally.
+    This decorator prevents writing to logs that clog up test output
+    See https://docs.djangoproject.com/en/dev/topics/testing/tools/#exceptions
+    """
     def wrapper(*args, **kwargs):
         logging.disable(logging.CRITICAL)
         func(*args, **kwargs)
@@ -267,6 +269,15 @@ class TestUtils(TestCase):
         self.assertEqual(next_game_end.weekday(), 4)
         self.assertEqual(next_game_end.strftime(format="%H:%M:%S"), "23:59:59")
 
+    def test_clear_redis_trailing_wildcard(self):
+        key1 = 'leaderboard_3_@crAzyS+r!ng'
+        key2 = 'leaderboard_3_$0H!pSoHODL'
+        REDIS.set(key1, "a value")
+        REDIS.set(key2, "a value")
+        redis_delete_patterns(['leaderboard_3'])
+        self.assertIsNone(REDIS.get(key1))
+        self.assertIsNone(REDIS.get(key2))
+
 
 class TestModels(TestCase):
 
@@ -295,6 +306,8 @@ def make_test_series(series_name='Commonology', hour_window=False):
     return series, game
 
 
+# Add that back in according to the notes in views.GameEntryWithoutValidationView
+'''
 class TestPlayRequest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -389,6 +402,111 @@ class TestPlayRequest(TestCase):
         response = Client().post(path, data={"email": 'never@beenusedhere.com'})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
+
+    def test_game_not_started(self):
+        client = Client()
+
+        game = self.game
+        start_save = game.start
+        game.start = game.end
+        game.save()
+
+        path = reverse('game:play')
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Sorry the next game has not started yet.')
+
+        game.start = start_save
+        game.save()
+
+    def test_game_without_url(self):
+        slug = 'nourl'
+        series, game = make_test_series(slug)
+        game.end = game.start + relativedelta(months=1)
+        game.save()
+        player = get_local_user()
+        series.players.add(player)
+        client = get_local_client()
+        path = reverse('series-game:play', kwargs={'series_slug': slug})
+
+        response = client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
+
+        game.google_form_url = ''
+        game.save()
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Sorry the next game has not started yet.')
+'''
+
+
+class TestPlayRequestWithoutValidation(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.series, cls.game = make_test_series(series_name='Commonology')
+
+    def test_find_latest_active_game(self):
+        slug = 'commonology'
+        game = find_latest_active_game(slug)
+        self.assertIsNone(game)
+
+        self.game.end = self.game.start + relativedelta(months=1)
+        self.game.save()
+
+        game = find_latest_active_game(slug)
+        self.assertIsNotNone(game)
+
+        slug = 'nourl'
+        _, game = make_test_series(slug, hour_window=True)
+        game.google_form_url = ''
+        game.save()
+        game = find_latest_active_game(slug)
+        self.assertIsNone(game)
+
+    def test_play_as_common_member(self):
+        game = self.game
+        game.end = game.start + relativedelta(months=1)
+        game.save()
+
+        client = get_local_client()
+
+        path = reverse('game:play')
+        response = client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
+
+        client = Client()
+        path = reverse('game:play')
+        response = client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
+
+    def test_play_rambus(self):
+        series, game = make_test_series(series_name='Rambus')
+        slug = series.slug
+        game.end = game.start + relativedelta(months=1)
+        game.save()
+        game_player = get_local_user()
+
+        # email address in db, logged in, but not in rambus series
+        client = get_local_client()
+        path = reverse('series-game:play', kwargs={'series_slug': slug})
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
+
+        # email address in db and in rambus series
+        series.players.add(game_player)
+        response = client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
+
+        # anonymous user not in any series
+        client = get_local_client(e=ABINORMAL)
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'You must be logged in to play this version of the game.')
 
     def test_game_not_started(self):
         client = Client()
