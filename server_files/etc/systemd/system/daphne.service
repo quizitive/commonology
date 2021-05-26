@@ -1,0 +1,14 @@
+[Unit]
+Description=WebSocket Daphne Service
+After=network.target
+
+[Service]
+Type=simple
+User=django
+WorkingDirectory=/home/django/commonology/
+EnvironmentFile=/etc/profile.d/django_project.sh
+ExecStart=/home/django/.pyenv/versions/project/bin/daphne -b 0.0.0.0 -p 8001 project.asgi:application
+#Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
