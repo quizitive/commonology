@@ -92,16 +92,18 @@ def deactivate_blocked_addresses():
     # https://github.com/sendgrid/sendgrid-python/blob/main/USAGE.md#suppression
     # https://sendgrid.api-docs.io/v3.0/bounces-api/retrieve-all-bounces
 
-    t = int((datetime.datetime.now() - datetime.timedelta(days=10)).timestamp())
-    params = {'start_time': t}
-
     sg = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
 
-    response = sg.client.suppression.blocks.get(query_params=params)
+    response = sg.client.suppression.blocks.get()
     assert(response.status_code == 200)
 
     for i in response.to_dict:
         unsubscribe(i['email'], i['reason'])
+
+    response = sg.client.suppression.spam_reports.get()
+    assert (response.status_code == 200)
+    for i in response.to_dict:
+        unsubscribe(i['email'], 'our mail was reported as spam')
 
     return
     # only do this in production --- doing this manually for now
