@@ -3,6 +3,7 @@ from django.forms import Textarea
 from django.db import models
 
 from game.models import Series, Game, Question, Answer, AnswerCode
+from project.utils import redis_delete_patterns
 
 
 @admin.register(Series)
@@ -39,10 +40,19 @@ class GameAdmin(admin.ModelAdmin):
     save_on_top = True
     list_display = ('name', 'game_id', 'series', 'start', 'end')
     ordering = ('-game_id', )
-    search_fields = ('game_id', 'name', 'series')
+    search_fields = ('game_id', 'name', 'series__slug')
     filter_horizontal = ('hosts',)
     list_filter = ('series',)
     inlines = (QuestionAdmin,)
+    actions = ('clear_cache', )
+
+    def clear_cache(self, request, queryset):
+        lb_prefixes = [f'leaderboard_{q[0]}_{q[1]}' for q in queryset.values_list('series__slug', 'game_id')]
+        lbs_deleted = redis_delete_patterns(*lb_prefixes)
+        at_prefixes = [f'answertally_{q[0]}_{q[1]}' for q in queryset.values_list('series__slug', 'game_id')]
+        ats_deleted = redis_delete_patterns(*at_prefixes)
+        self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
+        self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
 
 
 @admin.register(Answer)

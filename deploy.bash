@@ -80,3 +80,11 @@ if [ $? -eq 0 ]; then
 else
     echo "failed to restart celerybeat."
 fi
+
+echo "About to restart daphne."
+sudo systemctl restart daphne
+if [ $? -eq 0 ]; then
+    echo OK
+else
+    echo "failed to restart daphne"
+fi
