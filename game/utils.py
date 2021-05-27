@@ -3,6 +3,8 @@ import string
 import random
 import datetime
 
+from project.utils import REDIS
+
 
 # Get next game start or game end
 def next_event():
