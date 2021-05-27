@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.core import mail
 from users.tests import get_local_user
 from game.models import Series
-from mail.sendgrid_utils import mass_mail
+from mail.sendgrid_utils import mass_mail, deactivate_blocked_addresses
 
 
 class MassMailTests(TestCase):
