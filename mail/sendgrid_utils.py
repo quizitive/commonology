@@ -1,11 +1,12 @@
 import time
+import datetime
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.core.mail import send_mail
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, To, Category, Header
-from users.utils import sign_user
+from users.utils import sign_user, unsubscribe
 import logging
 
 
@@ -86,8 +87,24 @@ def mass_mail(subject, msg, from_email, players, categories=None):
     return total_count
 
 
-def suppressions():
+def deactivate_blocked_addresses():
     # https://github.com/sendgrid/sendgrid-python/blob/main/examples/suppression/suppression.py
+    # https://github.com/sendgrid/sendgrid-python/blob/main/USAGE.md#suppression
+    # https://sendgrid.api-docs.io/v3.0/bounces-api/retrieve-all-bounces
+
+    t = int((datetime.datetime.now() - datetime.timedelta(days=10)).timestamp())
+    params = {'start_time': t}
+
     sg = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
-    response = sg.client.suppression.blocks.get()
-    return(response)
+
+    response = sg.client.suppression.blocks.get(query_params=params)
+    assert(response.status_code == 200)
+
+    for i in response.to_dict:
+        unsubscribe(i['email'], i['reason'])
+
+    return
+    # only do this in production --- doing this manually for now
+    data = {'delete_all': False, 'emails': bad_emails}
+    response = sg.client.supression.blocks.delete(request_body=data)
+    assert(response.status_code == 200)
