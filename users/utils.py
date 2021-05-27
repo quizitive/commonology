@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 from .models import PendingEmail
 from django.contrib.auth import get_user_model
 from django.core.signing import Signer
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.admin.models import LogEntry, CHANGE
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,12 +21,16 @@ def sign_user(email, id):
     return x
 
 
-def unsubscribe(email):
+def unsubscribe(email, reason='user asked'):
     User = get_user_model()
-    u = User.objects.get(email=email)
-    u.subscribed = False
-    u.save()
-    logger.info(f"{email} just unsubscribed.")
+    try:
+        u = User.objects.get(email=email)
+        if u.subscribed:
+            u.subscribed = False
+            u.save()
+            player_log_entry(u, f"{email} unsubscribed because {reason}.")
+    except User.DoesNotExist:
+        print(f"Trying to unsubscribe but {email} does not exit.")
 
 
 def subscribe(email):
@@ -32,7 +38,7 @@ def subscribe(email):
     u = User.objects.get(email=email)
     u.subscribed = True
     u.save()
-    logger.info(f"{email} just subscribed.")
+    player_log_entry(u, f"{email} just subscribed.")
 
 
 # used in social_auth pipeline
@@ -55,3 +61,12 @@ def is_validated(email):
         return u
 
     return None
+
+
+def player_log_entry(player, message):
+    LogEntry.objects.log_action(user_id=player.id,
+                                content_type_id=ContentType.objects.get_for_model(player).pk,
+                                object_id=player.id,
+                                object_repr=str(player.email),
+                                action_flag=CHANGE,
+                                change_message=message)
