@@ -105,8 +105,20 @@ def deactivate_blocked_addresses():
     for i in response.to_dict:
         unsubscribe(i['email'], 'our mail was reported as spam')
 
+    response = sg.client.suppression.invalid_emails.get()
+    assert (response.status_code == 200)
+    for i in response.to_dict:
+        unsubscribe(i['email'], 'invalid address')
+
+    response = sg.client.suppression.bounces.get()
+    assert (response.status_code == 200)
+    for i in response.to_dict:
+        unsubscribe(i['email'], i['reason'])
+
     return
     # only do this in production --- doing this manually for now
     data = {'delete_all': False, 'emails': bad_emails}
     response = sg.client.supression.blocks.delete(request_body=data)
     assert(response.status_code == 200)
+
+    # Need to repeat for spam_reports, invalid_emails, and bounces
