@@ -6,18 +6,23 @@
     </div>
   {% endif %}
 
-  {% if thread.comments.count > 3 %}
-{#    <a id="more-button-{{ thread.id }}" class="more-button w3-cell w3-center">see {{ total|add:"-10" }} more</a>#}
-    <a id="show-comments thread-{{ thread.id }}" class="show-comments">Show all {{ thread.comments.count }} comments</a>
-  {% endif %}
-
+  {% with visible_comments=3 %}
+    {{ visible_comments|json_script:"visible-comments" }}
+    <a id="show-comments thread-{{ thread.id }}"
+       class="show-comments"
+       {% if thread.comments.count <= visible_comments %}
+       style="display:None;"
+       {% endif %}
+    >Show all {{ thread.comments.count }} comments</a>
 
   {% for comment in thread.comments.all  %}
     <div id="thread-{{ thread.id }}" class="question-comment thread-{{ thread.id }}
-         {% if forloop.counter < thread.comments.count|add:-2  %} hideable" style="display:none;{% endif %}">
+         {% if forloop.counter|add:visible_comments <= thread.comments.count %} hideable" style="display:none;{% endif %}">
 
       <b>{{ comment.commenter }}&nbsp&nbsp</b>{{ comment.comment }}
     </div>
   {% endfor %}
+
+  {% endwith %}
 
 </div>
