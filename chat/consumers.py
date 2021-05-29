@@ -113,6 +113,6 @@ class CommentConsumer(AsyncWebsocketConsumer):
         # Send message to WebSocket
         # todo: output simple html
         await self.send(f'<div id="thread-{thread_id}" hx-swap-oob="beforeend">'
-                        f'<div id="thread-{thread_id}" class="question-comment w3-row">'
+                        f'<div class="thread-{thread_id} question-comment w3-row">'
                         f'<b>{user_dn}</b>&nbsp&nbsp{comment}</div>'
                         f'</div></div>')
