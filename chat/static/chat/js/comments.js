@@ -1,14 +1,25 @@
 const visibleComments = JSON.parse(document.getElementById('visible-comments').textContent);
+const userName = JSON.parse(document.getElementById('user-name').textContent);
 
 // enable post button when content is entered
-$('.comment-text').on('change keyup paste testing', (e) => {
+$('.comment-text').on('change keypress keyup paste', (e) => {
+
   togglePostButton(e)
+
+  // submit on enter
+  if (e.which === 13) {
+    e.preventDefault()
+    const button_id = '#post-'.concat(e.target.id.split('-')[1])
+    $(button_id).click();
+  }
 });
 
 // clear textarea value when post button is clicked
-$('.question-comments').on("htmx:beforeProcessNode", (e) => {
-  const text_area_id = '#text-'.concat(e.target.id.split('-')[1])
-  $(text_area_id).val('');
+$('.question-comment-form').submit((e) => {
+  // show login prompt if user isn't logged in
+  if (userName === "") {loginPrompt();return;}
+  $(e.target).find("textarea").val("")
+  togglePostButton(e)
 });
 
 // show and hide extra answers/comments (hide may not work)
@@ -22,13 +33,11 @@ $(".more-button, .show-comments").click((event) => {
 // actions when comment is propagated to browser
 $(".question-comments").on("htmx:load", (e) => {
 
-  togglePostButton(e)
-
   if ($(e.target).siblings(".question-comment").length < visibleComments) {
     return;
   }
 
-  // old comment hide logic
+  // hide oldest comment
   $(e.target).siblings(".show-comments").show()
   const $commentToHide = $(e.target).siblings(".question-comment").not(".hideable").first()
   $commentToHide.addClass("hideable").toggle()
