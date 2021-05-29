@@ -6,7 +6,6 @@
     </div>
   {% endif %}
 
-  {% with visible_comments=3 %}
     {{ visible_comments|json_script:"visible-comments" }}
     <a id="show-comments thread-{{ thread.id }}"
        class="show-comments"
@@ -22,7 +21,5 @@
       <b>{{ comment.commenter }}&nbsp&nbsp</b>{{ comment.comment }}
     </div>
   {% endfor %}
-
-  {% endwith %}
 
 </div>
