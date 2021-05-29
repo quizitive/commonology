@@ -27,15 +27,14 @@ $(".more-button, .show-comments").click((event) => {
   const objTypeId = event.target.id.split(" ")[1].split("-")
   const tgtClass = "." + objTypeId[0] + "-" + objTypeId[1] + ".hideable"
   $(tgtClass).toggle().toggleClass("is_hidden");
-  $(event.target).text("")
+  $(event.target).text("").addClass("expanded")
 })
 
 // actions when comment is propagated to browser
 $(".question-comments").on("htmx:load", (e) => {
 
-  if ($(e.target).siblings(".question-comment").length < visibleComments) {
-    return;
-  }
+  if ($(e.target).siblings(".show-comments").hasClass("expanded")) {return;}
+  if ($(e.target).hasClass("expanded")){return;}
 
   // hide oldest comment
   $(e.target).siblings(".show-comments").show()
