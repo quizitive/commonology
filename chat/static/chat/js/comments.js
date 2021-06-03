@@ -33,8 +33,11 @@ $(".more-button, .show-comments").click((event) => {
 // actions when comment is propagated to browser
 $(".question-comments").on("htmx:load", (e) => {
 
+  // don't toggle if view is already expanded
   if ($(e.target).siblings(".show-comments").hasClass("expanded")) {return;}
-  if ($(e.target).hasClass("expanded")){return;}
+
+  // there aren't enough comments to do any hiding
+  if ($(e.target).siblings(".question-comment").length < visibleComments) {return;}
 
   // hide oldest comment
   $(e.target).siblings(".show-comments").show()
