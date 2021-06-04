@@ -40,7 +40,7 @@ class GameAdmin(admin.ModelAdmin):
     save_on_top = True
     list_display = ('name', 'game_id', 'series', 'start', 'end')
     ordering = ('-game_id', )
-    search_fields = ('game_id', 'name', 'series')
+    search_fields = ('game_id', 'name', 'series__slug')
     filter_horizontal = ('hosts',)
     list_filter = ('series',)
     inlines = (QuestionAdmin,)

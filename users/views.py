@@ -19,7 +19,7 @@ from users.models import PendingEmail
 from users.utils import unsubscribe
 from mail.sendgrid_utils import sendgrid_send
 from project.utils import redis_delete_patterns
-
+from game.models import Series
 from .utils import remove_pending_email_invitations
 
 User = get_user_model()
@@ -266,6 +266,7 @@ class EmailConfirmedView(View):
             user.referrer = pe.referrer
             user.is_member = True
             user.save()
+            Series.objects.get(slug='commonology').players.add(user)
             raw_password = form.clean_password2()
             user = authenticate(email=user.email, password=raw_password)
             login(request, user)

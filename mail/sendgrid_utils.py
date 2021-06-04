@@ -1,11 +1,12 @@
 import time
+import datetime
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.core.mail import send_mail
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, To, Category, Header
-from users.utils import sign_user
+from users.utils import sign_user, unsubscribe
 import logging
 
 
@@ -84,3 +85,40 @@ def mass_mail(subject, msg, from_email, players, categories=None):
 
     logger.info(f"{total_count} recipients were just sent a blast with subject = {subject}.")
     return total_count
+
+
+def deactivate_blocked_addresses():
+    # https://github.com/sendgrid/sendgrid-python/blob/main/examples/suppression/suppression.py
+    # https://github.com/sendgrid/sendgrid-python/blob/main/USAGE.md#suppression
+    # https://sendgrid.api-docs.io/v3.0/bounces-api/retrieve-all-bounces
+
+    sg = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
+
+    response = sg.client.suppression.blocks.get()
+    assert(response.status_code == 200)
+
+    for i in response.to_dict:
+        unsubscribe(i['email'], i['reason'])
+
+    response = sg.client.suppression.spam_reports.get()
+    assert (response.status_code == 200)
+    for i in response.to_dict:
+        unsubscribe(i['email'], 'our mail was reported as spam')
+
+    response = sg.client.suppression.invalid_emails.get()
+    assert (response.status_code == 200)
+    for i in response.to_dict:
+        unsubscribe(i['email'], 'invalid address')
+
+    response = sg.client.suppression.bounces.get()
+    assert (response.status_code == 200)
+    for i in response.to_dict:
+        unsubscribe(i['email'], i['reason'])
+
+    return
+    # only do this in production --- doing this manually for now
+    data = {'delete_all': False, 'emails': bad_emails}
+    response = sg.client.supression.blocks.delete(request_body=data)
+    assert(response.status_code == 200)
+
+    # Need to repeat for spam_reports, invalid_emails, and bounces
