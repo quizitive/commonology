@@ -12,20 +12,25 @@ logger = logging.getLogger(__name__)
 
 
 def about_view(request, *args, **kwargs):
-    return render(request, 'about.html', {})
+    context = next_game_context()
+    return render(request, 'about.html', context)
 
 
 def index(request):
     if request.user.is_authenticated:
         return redirect('leaderboard:current-leaderboard')
+    context = next_game_context()
+    return render(request, 'index.html', context)
+
+
+def next_game_context():
     event_text, event_time = next_event()
     game_is_on = find_latest_active_game('commonology') is not None
-    context = {
+    return {
         'event_time': event_time,
         'event_text': event_text,
-        'game_is_on': game_is_on
+        'game_is_on': game_is_on,
     }
-    return render(request, 'index.html', context)
 
 
 class CardFormView(FormMixin, View):
