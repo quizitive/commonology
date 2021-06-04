@@ -18,7 +18,7 @@
     <div id="thread-{{ thread.id }}" class="question-comment thread-{{ thread.id }}
          {% if forloop.counter|add:visible_comments <= thread.comments.count %} hideable" style="display:none;{% endif %}">
 
-      <b>{{ comment.commenter }}&nbsp&nbsp</b>{{ comment.comment }}
+      <b>{{ comment.commenter }}&nbsp&nbsp</b>{{ comment.clean_comment }}
     </div>
   {% endfor %}
 
