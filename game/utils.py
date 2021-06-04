@@ -1,9 +1,15 @@
-from project.utils import our_now
-import string
-import random
 import datetime
 
-from project.utils import REDIS
+from project.utils import our_now
+from game.models import Game
+
+
+def find_latest_active_game(slug):
+    t = our_now()
+    g = Game.objects.filter(series__slug=slug, end__gte=t, start__lte=t).reverse().first()
+    if g and not g.google_form_url:
+        return None
+    return g
 
 
 # Get next game start or game end
@@ -26,7 +32,3 @@ def next_friday_1159(now):
     while next_fri.weekday() != 4:
         next_fri = next_fri + datetime.timedelta(1)
     return next_fri.replace(hour=23, minute=59, second=59)
-
-
-def create_key(k=7):
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=k))

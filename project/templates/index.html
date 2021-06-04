@@ -28,21 +28,40 @@
         <img class="splash-logo" src="{% static 'img/logo.svg' %}">
         <h3 class="subheader">What we all have in common.</h3>
 
-    <div class="button-container w3-center w3-row">
-      <a href="{% url 'login' %}">
-        <button class="home-buttons w3-button cg-dark-purple w3-round-xxlarge">Login</button>
-      </a>
-      <a href="{% url 'join' %}">
-        <button class="home-buttons w3-button cg-robins-egg-blue w3-round-xxlarge">Join</button>
-      </a>
-      <a href="{% url 'about' %}">
-        <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">About</button>
-      </a>
-    </div>
+        <div class="button-container w3-center w3-row">
+          {% if game_is_on %}
+          <a href="{% url 'game:play' %}">
+            <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">Play Now!</button>
+          </a>
+          {% else %}
+          <a href="{% url 'leaderboard:current-results' %}">
+            <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">Results!</button>
+          </a>
+          {% endif %}
+          <a href="{% url 'login' %}">
+            <button class="home-buttons w3-button cg-robins-egg-blue w3-round-xxlarge">Login</button>
+          </a>
+          <a href="{% url 'about' %}">
+            <button class="home-buttons w3-button cg-dark-purple w3-round-xxlarge">About</button>
+          </a>
         </div>
-    </div>
 
+{#        <div class="button-container w3-center w3-row">#}
+{#          <a href="{% url 'login' %}">#}
+{#            <button class="w3-button cg-blue w3-round-xxlarge" style="width:60%">Play Now!</button>#}
+{#          </a>#}
+{#          <a href="{% url 'join' %}">#}
+{#            <button class="home-buttons w3-button cg-robins-egg-blue w3-round-xxlarge">Join</button>#}
+{#          </a>#}
+{#          <a href="{% url 'about' %}">#}
+{#            <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">About</button>#}
+{#          </a>#}
+{#        </div>#}
+
+      </div>
+    </div>
   </div>
+
   <div class="w3-container cg-teal w3-border-bottom w3-border-black" style="height: 38%; display: flex;">
     <div class="countdown-container">
       <h3 class="subheader countdown-subheader">{{ event_text }}</h3>
