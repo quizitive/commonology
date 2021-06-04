@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block scripts %}
-  <script src="{% static "game/js/countdown.js" %}" type="text/javascript"></script>
+  <script src="{% static "js/countdown.js" %}" type="text/javascript"></script>
   <script>
   window.onload = function() {
     let event_time = "{{ event_time }}";
@@ -27,11 +27,12 @@
       <div class="logo-container w3-row" style="margin: auto; text-align: center">
         <img class="splash-logo" src="{% static 'img/logo.svg' %}">
         <h3 class="subheader">What we all have in common.</h3>
+      </div>
 
         <div class="button-container w3-center w3-row">
           {% if game_is_on %}
           <a href="{% url 'game:play' %}">
-            <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">Play Now!</button>
+            <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">Play!</button>
           </a>
           {% else %}
           <a href="{% url 'leaderboard:current-results' %}">
@@ -46,19 +47,6 @@
           </a>
         </div>
 
-{#        <div class="button-container w3-center w3-row">#}
-{#          <a href="{% url 'login' %}">#}
-{#            <button class="w3-button cg-blue w3-round-xxlarge" style="width:60%">Play Now!</button>#}
-{#          </a>#}
-{#          <a href="{% url 'join' %}">#}
-{#            <button class="home-buttons w3-button cg-robins-egg-blue w3-round-xxlarge">Join</button>#}
-{#          </a>#}
-{#          <a href="{% url 'about' %}">#}
-{#            <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">About</button>#}
-{#          </a>#}
-{#        </div>#}
-
-      </div>
     </div>
   </div>
 
