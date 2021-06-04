@@ -71,15 +71,16 @@
       </div>
     </div>
 
-    <div class="w3-cell-row w3-padding-large" style="width:100%;margin-top:48px;">
+    <div class="w3-cell-row w3-padding-large w3-center" style="width:100%;margin-top:48px;">
     {% if game_is_on %}
-    <a class="w3-cell w3-center" style="text-decoration:none;" href="{% url 'game:play' %}">
-      <button class="w3-button w3-cell cg-salmon w3-round-xxlarge" style="width:60%">Play Now!</button>
+    <a style="text-decoration:none;" href="{% url 'game:play' %}">
+      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Play Now!</button>
     </a>
     {% else %}
-    <a class="w3-cell w3-center" style="text-decoration:none;" href="{% url 'leaderboard:current-results' %}">
-      <button class="w3-button w3-cell cg-salmon w3-round-xxlarge" style="width:60%">Latest Results!</button>
+    <a style="text-decoration:none;" href="{% url 'leaderboard:current-results' %}">
+      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Latest Results</button>
     </a>
+      <p>The next game begins on Wednesday!</p>
     {% endif %}
     </div>
 
