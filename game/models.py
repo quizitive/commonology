@@ -38,13 +38,6 @@ def add_owner_as_host_and_player(sender, instance, created, **kwargs):
         instance.players.add(instance.owner)
 
 
-@receiver(post_save, sender=Series)
-def add_owner_as_host_and_player(sender, instance, created, **kwargs):
-    if created:
-        instance.hosts.add(instance.owner)
-        instance.players.add(instance.owner)
-
-
 def validate_google_url(value):
     if value and ('alex@commonologygame.com' not in value):
         raise ValidationError('The google URL must have alex@commonologygame.com in it.')
