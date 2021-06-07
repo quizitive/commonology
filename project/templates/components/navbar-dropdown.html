@@ -10,6 +10,10 @@
     <a href="{% url 'profile' %}">
       <div class="w3-bar-item w3-button w3-border-bottom" style="padding:12px 16px"><b>{{ user.name }}</b></div>
     </a>
+    {% game_is_on as game_is_on %}
+    {% if game_is_on is True %}
+    <a href="{% url 'game:play' %}" class="w3-bar-item w3-button" style="color:#f26649"><b><i>Play Now!</i></b></a>
+    {% endif %}
     <a href="{% url 'invite' %}" class="w3-bar-item w3-button">Invite Friends</a>
     <a href="{% login_logout_url %}" class="w3-bar-item w3-button">Logout</a>
   </div>
