@@ -15,7 +15,7 @@
                 <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&following=true"
                    hx-target="#component-leaderboard"
                    class="w3-bar-item w3-button">Following</a>
-                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
+                <a hx-get="/leaderboard/htmx/?game_id={{ me_id }}"
                    hx-target="#component-leaderboard"
                    class="w3-bar-item w3-button">All Players</a>
               </div>
@@ -55,17 +55,33 @@
           {% endfor %}
         </tbody>
       </table>
-    <div class="w3-container w3-center w3-padding-16">
-      {% if visible_players == 0 and not user.is_authenticated %}
-        <a href="{% url 'login' %}">Login</a>
-        or
-        <a href="{% url 'join' %}">Join</a>
-        to follow your friends!
-      {% elif visible_players == 0 and user.is_authenticated %}
-        Follow your friends by checking the bubble next to their name.
-      {% else %}
-        Showing {{ visible_players }} out of {{ total_players }} total players.
-      {% endif %}
-    </div>
+      <div class="w3-container w3-cell-row w3-center w3-padding-16">
+
+        <a class="w3-cell"
+           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}&page={{ page|add:-1 }}"
+           hx-target="#component-leaderboard">
+          <i class="fas fa-chevron-left" style="color:#0095da"></i>
+        </a>
+
+        <div class="w3-cell">
+        {% if visible_players == 0 and not user.is_authenticated %}
+          <a href="{% url 'login' %}">Login</a>
+          or
+          <a href="{% url 'join' %}">Join</a>
+          to follow your friends!
+        {% elif visible_players == 0 and user.is_authenticated %}
+          Follow your friends by checking the bubble next to their name.
+        {% else %}
+          Showing {{ visible_players }} out of {{ total_players }} total players.
+        {% endif %}
+        </div>
+
+        <a class="w3-cell"
+           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}&page={{ page|add:1 }}"
+           hx-target="#component-leaderboard">
+          <i class="fas fa-chevron-right" style="color:#0095da"></i>
+        </a>
+
+      </div>
     </div>
   </div>
