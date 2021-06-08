@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 
 from users.forms import LoginForm
+from game.utils import find_latest_active_game
 
 
 register = template.Library()
@@ -28,3 +29,8 @@ def login_modal(request):
     if not request:
         return
     return render_to_string('users/modals/login_modal.html', {'form': LoginForm}, request=request)
+
+
+@register.simple_tag
+def game_is_on():
+    return find_latest_active_game('commonology') is not None
