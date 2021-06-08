@@ -8,13 +8,13 @@ from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic.base import View
 from project.views import CardFormView
-from project.utils import our_now
 from game.forms import TabulatorForm
 from game.models import Game
-from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
+from game.utils import find_latest_active_game
+from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.utils import is_validated
@@ -87,14 +87,6 @@ def tabulate_results(series_slug, filename, gc, update=False):
 
     # write to google
     write_all_to_gdrive(sheet_doc, answer_tally, answer_codes, leaderboard)
-
-
-def find_latest_active_game(slug):
-    t = our_now()
-    g = Game.objects.filter(series__slug=slug, end__gte=t, start__lte=t).reverse().first()
-    if g and not g.google_form_url:
-        return None
-    return g
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
