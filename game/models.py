@@ -7,6 +7,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from users.models import Player
+from chat.models import Thread
 
 
 class Series(models.Model):
@@ -168,9 +169,16 @@ class Question(models.Model):
     image = models.FileField(upload_to='questions/', null=True, blank=True)
     caption = models.CharField(max_length=255, blank=True, default="")
     hide_default_results = models.BooleanField(default=False)
+    thread = models.ForeignKey(Thread, related_name='object', null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.text
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            thread = Thread.objects.create()
+            self.thread = thread
+        super().save(*args, **kwargs)
 
 
 class Answer(models.Model):

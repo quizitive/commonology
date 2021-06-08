@@ -1,6 +1,9 @@
 {% load leadeboard_tags %}
 
-<div class="answer_slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
+<div class="answers-comments-container w3-card-0 w3-round cg-border-grey w3-border"
+     style="margin:16px 0;">
+
+<div class="answer_slides w3-container w3-padding-top" style="position: relative;">
 
   <p class="question-text" style="font-size:1rem"><b>{{ q.text }}</b></p>
   {% if not q.hide_default_results %}
@@ -16,7 +19,7 @@
     </div>
     {% endif %}
 
-    <div class="result-card results w3-row w3-padding-16">
+    <div class="result-card results w3-row w3-padding-top">
 
       <div class="spacer w3-col m1">&nbsp</div>
       <div class="w3-col w3-padding-small m10">
@@ -29,7 +32,7 @@
             {% if forloop.last and total > 10 %}
               {{ count }}
               <div class="w3-cell-row">
-                  <a id="more-button-{{ q.id }}" class="more-button w3-cell w3-center">see {{ total|add:"-10" }} more</a>
+                  <a id="more-button question-{{ q.id }}" class="more-button w3-cell w3-center">see {{ total|add:"-10" }} more</a>
               </div>
             {% endif %}
           {% endwith %}
@@ -40,10 +43,12 @@
     </div>
   {% endif %}
 
-  <div class="w3-col m1"></div>
+</div>
 
-  <div class="w3-row w3-padding-16 question_content" style="font-style:italic;margin:auto;">
-    {{ q.caption|safe }}
-  </div>
+<!-- Comments -->
+<div class="question-comment-container">
+  {% include 'leaderboard/components/comments_with_form.html' with q=q thread=q.thread %}
+</div>
+
 
 </div>
