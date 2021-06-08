@@ -43,7 +43,11 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
 
     def get(self, request, *args, **kwargs):
         """
-        Accepts a query params following
+        Accepts the following query params:
+        q: a comma separated case-insensitive search term to search display names
+        team: a team id (not currently being used)
+        following: a boolean that filters on players the logged-in users follows
+        page: pagination page, defaults to 1, page_size is 100
         """
         user_following = {}
         if request.user.is_authenticated:
@@ -78,8 +82,15 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             # a game has no questions or answers yet
             total_players = 0
 
-        visible_players = min(len(leaderboard), total_players)
-        # todo: paginate results and restrict functionality to logged in users
+        try:
+            page = int(request.GET.get('page'))
+        except (TypeError, ValueError):
+            page = 1
+
+        lb_page_start = (page - 1) * 100
+        lb_page_end = min(len(leaderboard), page * 100)
+        leaderboard = leaderboard[lb_page_start:lb_page_end]
+        visible_players = f"{lb_page_start + 1}-{lb_page_end}"
         leaderboard = leaderboard.to_dict(orient='records')
 
         context = {
@@ -89,7 +100,8 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             'user_following': user_following,
             'follow_filter': follow_filter,
             'visible_players': visible_players,
-            'total_players': total_players
+            'total_players': total_players,
+            'page': page
         }
 
         return render(request, 'leaderboard/components/leaderboard.html', context)
