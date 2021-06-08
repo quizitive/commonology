@@ -45,13 +45,6 @@ def add_owner_as_host_and_player(sender, instance, created, **kwargs):
         instance.players.add(instance.owner)
 
 
-def validate_google_url(value):
-    if value and ('alex@commonologygame.com' not in value):
-        raise ValidationError('The google URL must have alex@commonologygame.com in it.')
-    else:
-        return value
-
-
 class Game(models.Model):
     game_id = models.IntegerField()
     name = models.CharField(max_length=100)
@@ -59,8 +52,8 @@ class Game(models.Model):
     series = models.ForeignKey(Series, null=True, related_name='games', on_delete=models.CASCADE)
     start = models.DateTimeField(verbose_name="When the game starts:", null=False, blank=False)
     end = models.DateTimeField(verbose_name="When the game ends:", null=False, blank=False)
-    google_form_url = models.CharField(max_length=255, blank=True, validators=[validate_google_url],
-                                       help_text="Enter the form url with prefilled email")
+    google_form_url = models.CharField(max_length=255, blank=True,
+                                       help_text="Enter the form url")
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
