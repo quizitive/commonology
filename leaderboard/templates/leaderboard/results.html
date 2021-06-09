@@ -4,18 +4,12 @@
 {% block title %}Commonology | Results{% endblock %}
 
 {% block page_style %}
-  <link rel="stylesheet" href="{% static 'leaderboard/css/results.css' %}?v=1.0">
+  <link rel="stylesheet" href="{% static 'leaderboard/css/results.css' %}?v=1.1">
 {% endblock %}
 
 {% block scripts %}
-  <script>
-    $(".more-button").click((event) => {
-    const qId = event.target.id.split("-")[2]
-    const tgtClass = ".q-" + qId + ".hideable"
-    $(tgtClass).toggle();
-    $(event.target).text("")
-  })
-  </script>
+  <script src="{% static 'leaderboard/js/results.js' %}"></script>
+  <script src="{% static 'chat/js/comments.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -24,27 +18,31 @@
 
 {% include 'leaderboard/components/game_header.html' with view="results" %}
 
-<div class="card-content">
-  {% if game_top_commentary %}
-  <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
-    {{ game_top_commentary|safe }}
+{{ room_name|json_script:"room-name" }}
+{{ user.get_username|json_script:"user-name" }}
+<div id="comment-connection" hx-ws="connect:/ws/chat/{{ game_id }}/">
+
+  <div class="card-content">
+    {% if game_top_commentary %}
+    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+      {{ game_top_commentary|safe }}
+    </div>
+    {% endif %}
+
+    {# Results objs go here #}
+    {% for q in questions %}
+      {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
+    {% endfor %}
+    </div>
+
+    {% if game_top_commentary %}
+    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+      {{ game_bottom_commentary|safe }}
+    </div>
+    {% endif %}
+
+    <div class="w3-row w3-padding-large"></div>
+
   </div>
-  {% endif %}
-
-  {# Results objs go here #}
-{#  <div class="card-stream" style="max-width:640px;margin:auto;">#}
-  {% for q in questions %}
-    {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
-  {% endfor %}
-  </div>
-
-  {% if game_top_commentary %}
-  <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
-    {{ game_bottom_commentary|safe }}
-  </div>
-  {% endif %}
-
-  <div class="w3-row w3-padding-large"></div>
-
 </div>
 {% endblock content %}

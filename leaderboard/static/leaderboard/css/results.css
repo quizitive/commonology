@@ -42,6 +42,28 @@ span.player-answer {
   padding: 0 8px;
   text-align: right;
 }
+div.question-comment-container {
+  font-size:14px
+}
+a.show-comments {
+  font-size:13px;
+  color: #aaa
+}
+div.question-comment, div.question-caption {
+  margin:8px auto;
+}
+textarea {
+  height:40px!important;
+  padding-top:12px;
+  border:none;
+  width:90%;
+  resize:none;
+  display:inline-block;
+}
+textarea:focus, input:focus{
+  outline: none;
+}
+
 
 @media only screen and (max-width: 767px) {
   div.mobile-q-img {
