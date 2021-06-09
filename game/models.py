@@ -2,6 +2,7 @@ from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.forms import CharField, ValidationError
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -156,15 +157,16 @@ class Question(models.Model):
     text = models.CharField(max_length=10000)
     mc = 'MC'
     fr = 'FR'
+    ga = 'GA'
     op = 'OP'
     ov = 'OV'
     QUESTION_TYPES = [
-        (mc, 'Multiple Choice'),
-        (fr, 'Free Response'),
+        (ga, 'Game'),
         (op, 'Optional'),
         (ov, 'Optional (visible)')
     ]
     type = models.CharField(max_length=2, choices=QUESTION_TYPES)
+    choices = ArrayField(models.CharField(max_length=100, null=True), null=True, blank=True)
     image = models.FileField(upload_to='questions/', null=True, blank=True)
     caption = models.CharField(max_length=255, blank=True, default="")
     hide_default_results = models.BooleanField(default=False)
