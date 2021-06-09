@@ -1,0 +1,27 @@
+{% load leadeboard_tags %}
+
+<div class="answer_slides w3-card-0 w3-round cg-border-grey w3-border w3-container w3-padding-large w3-margin-bottom" style="position: relative;">
+
+  <p class="question-text" style="font-size:1rem"><b>{{ q.text }}</b></p>
+{#  {% if not q.hide_default_results %}#}
+
+    <!-- image -->
+    {% if q.image %}
+    <div class="result-card result-img w3-row">
+      <div class="w3-col spacer m1">&nbsp</div>
+      <div class="w3-col w3-padding-large m10">
+        <img class="w3-image" src="{{ q.image.url }}" style="display:block;margin:auto;">
+      </div>
+      <div class="spacer w3-colm1">&nbsp</div>
+    </div>
+    {% endif %}
+
+    <!-- the question form with choices or the results -->
+    {% block form_or_results %}{% endblock %}
+{#  {% endif %}#}
+
+  <div class="w3-row w3-padding-16 question_content" style="font-style:italic;margin:auto;">
+    {{ q.caption|safe }}
+  </div>
+
+</div>
