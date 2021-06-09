@@ -1,5 +1,7 @@
 # Michael Herman gets all the credit for this: https://testdriven.io/blog/django-custom-user-model/
 import uuid
+import random
+import string
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import CIEmailField
@@ -7,7 +9,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from game.utils import create_key
 from .managers import CustomUserManager
 from django.utils import timezone
 
@@ -101,6 +102,10 @@ def add_names_and_follow(sender, instance, created, **kwargs):
                 instance.first_name = ""
                 instance.last_name = ""
         instance.following.add(instance)
+
+
+def create_key(k=7):
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=k))
 
 
 class Team(models.Model):

@@ -70,6 +70,20 @@
         <i class="far fa-comments fa-6x" style="color:#237073;"></i>
       </div>
     </div>
+
+    <div class="w3-cell-row w3-padding-large w3-center" style="width:100%;margin-top:48px;">
+    {% if game_is_on %}
+    <a style="text-decoration:none;" href="{% url 'game:play' %}">
+      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Play Now!</button>
+    </a>
+    {% else %}
+    <a style="text-decoration:none;" href="{% url 'leaderboard:current-results' %}">
+      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Latest Results</button>
+    </a>
+      <p>The next game begins on Wednesday!</p>
+    {% endif %}
+    </div>
+
   </div>
   <div class="w3-row" style="padding: 24px"></div>
 {% endblock content %}

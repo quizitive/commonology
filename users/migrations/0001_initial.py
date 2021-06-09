@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.utils.timezone
-import game.utils
+from users.models import create_key
 import uuid
 
 
@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
             name='Team',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('team_code', models.CharField(db_index=True, default=game.utils.create_key, max_length=7, unique=True)),
+                ('team_code', models.CharField(db_index=True, default=create_key, max_length=7, unique=True)),
                 ('name', models.CharField(max_length=100)),
                 ('captains', models.ManyToManyField(related_name='captain_teams', to=settings.AUTH_USER_MODEL)),
                 ('players', models.ManyToManyField(related_name='teams', to=settings.AUTH_USER_MODEL)),

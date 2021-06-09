@@ -4,7 +4,7 @@ from django import forms
 from django.views.generic.edit import FormMixin
 from django.contrib import messages
 from django.core.mail import send_mail
-from game.utils import next_event
+from game.utils import next_event, find_latest_active_game
 
 import logging
 
@@ -12,18 +12,25 @@ logger = logging.getLogger(__name__)
 
 
 def about_view(request, *args, **kwargs):
-    return render(request, 'about.html', {})
+    context = next_game_context()
+    return render(request, 'about.html', context)
 
 
 def index(request):
     if request.user.is_authenticated:
         return redirect('leaderboard:current-leaderboard')
+    context = next_game_context()
+    return render(request, 'index.html', context)
+
+
+def next_game_context():
     event_text, event_time = next_event()
-    context = {
+    game_is_on = find_latest_active_game('commonology') is not None
+    return {
         'event_time': event_time,
-        'event_text': event_text
+        'event_text': event_text,
+        'game_is_on': game_is_on,
     }
-    return render(request, 'game/index.html', context)
 
 
 class CardFormView(FormMixin, View):

@@ -38,7 +38,7 @@ def formatted_answer_cell(context, counter):
     res = context['res']
     val = context['val']
     if counter > 10:
-        addl_classes = f'q-{qid} hideable'
+        addl_classes = f'question-{qid} hideable'
         addl_style = 'style="display:none;"'
 
     if context['player_answers'] and context['player_answers'].get(question_id=qid)[3] == res:

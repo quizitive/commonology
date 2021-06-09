@@ -8,6 +8,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from users.models import Player
+from chat.models import Thread
 
 
 class Series(models.Model):
@@ -46,6 +47,13 @@ def validate_google_url(value):
         return value
 
 
+@receiver(post_save, sender=Series)
+def add_owner_as_host_and_player(sender, instance, created, **kwargs):
+    if created:
+        instance.hosts.add(instance.owner)
+        instance.players.add(instance.owner)
+
+
 class Game(models.Model):
     game_id = models.IntegerField()
     name = models.CharField(max_length=100)
@@ -53,8 +61,8 @@ class Game(models.Model):
     series = models.ForeignKey(Series, null=True, related_name='games', on_delete=models.CASCADE)
     start = models.DateTimeField(verbose_name="When the game starts:", null=False, blank=False)
     end = models.DateTimeField(verbose_name="When the game ends:", null=False, blank=False)
-    google_form_url = models.CharField(max_length=255, blank=True, validators=[validate_google_url],
-                                       help_text="Enter the form url with prefilled email")
+    google_form_url = models.CharField(max_length=255, blank=True,
+                                       help_text="Enter the form url")
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
@@ -170,9 +178,16 @@ class Question(models.Model):
     image = models.FileField(upload_to='questions/', null=True, blank=True)
     caption = models.CharField(max_length=255, blank=True, default="")
     hide_default_results = models.BooleanField(default=False)
+    thread = models.ForeignKey(Thread, related_name='object', null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.text
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            thread = Thread.objects.create()
+            self.thread = thread
+        super().save(*args, **kwargs)
 
 
 class Answer(models.Model):
