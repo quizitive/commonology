@@ -1,4 +1,5 @@
 from django import forms
+from game.models import Answer
 
 
 class TabulatorForm(forms.Form):
@@ -18,3 +19,12 @@ class TabulatorForm(forms.Form):
             'style': "margin-left: 8px"
         })
     )
+
+
+class QuestionAnswerForm(forms.ModelForm):
+    question = forms.HiddenInput()
+    raw_string = forms.HiddenInput()
+
+    class Meta:
+        model = Answer
+        fields = ('question', 'raw_string')

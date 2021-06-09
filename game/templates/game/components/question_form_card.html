@@ -1,0 +1,27 @@
+{% extends 'game/components/base_question_card.html' %}
+{% load static %}
+
+{% block form_or_results %}
+
+  <link rel=stylesheet href="{% static 'leaderboard/css/results.css' %}">
+
+  <div class="result-card results w3-row w3-padding-16">
+
+      <div class="spacer w3-col m1">&nbsp</div>
+      <div class="w3-col w3-padding-small m10">
+
+      <form>
+        <input type="hidden" value="foo">
+      </form>
+
+        {% for choice in q.choices %}
+          <div class="w3-row response-item w3-padding w3-round">
+          {{ choice }}
+          </div>
+        {% endfor %}
+
+      </div>
+       <div class="spacer w3-col m1">&nbsp</div>
+    </div>
+
+{% endblock %}
