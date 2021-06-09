@@ -1,5 +1,7 @@
 from django.contrib import admin
-from django.forms import Textarea
+from django.forms.fields import CharField
+from django.contrib.postgres.forms import SimpleArrayField
+from django.forms import Textarea, ModelForm
 from django.db import models
 
 from game.models import Series, Game, Question, Answer, AnswerCode
@@ -14,22 +16,31 @@ class SeriesAdmin(admin.ModelAdmin):
     exclude = ('players',)
 
 
+class QuestionAdminForm(ModelForm):
+    choices = SimpleArrayField(CharField(), delimiter='\r\n', widget=Textarea(attrs={'cols': '30', 'rows': '5'}),
+        required=False, help_text="Enter each choice on a new line")
+
+    class Meta:
+        fields = '__all__'
+
+
 class QuestionAdmin(admin.StackedInline):
     model = Question
     list_display = ('text', 'game')
     list_filter = ('game__name',)
     search_fields = ('text', 'game__name')
     ordering = ('number', )
+    form = QuestionAdminForm
     fieldsets = (
         (None, {
             'fields': ()
         }),
         ('Question', {
             'classes': ('collapse',),
-            'fields': ('number', 'text', 'type', 'image', 'hide_default_results', 'caption'),
+            'fields': ('number', 'text', 'image', 'choices', 'type', 'caption'),
         }),
     )
-    formfield_overrides = {models.CharField: {'widget': Textarea(attrs={'size': '200'})}}
+    formfield_overrides = {models.CharField: {'widget': Textarea(attrs={'cols': '100', 'rows': '2'})}}
 
     def get_extra(self, request, obj=None, **kwargs):
         return 0
