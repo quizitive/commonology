@@ -1,0 +1,13 @@
+{% extends 'game/base.html' %}
+
+{% block content %}
+  <div class="content">
+
+    {% include 'leaderboard/components/game_header.html' with view="results" %}
+
+    {% for q in questions %}
+      {% include 'game/components/question_form_card.html' with text=q.text q=q responses=q.choices%}
+    {% endfor %}
+
+  </div>
+{% endblock %}

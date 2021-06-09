@@ -5,21 +5,24 @@
 
     <div class="game-header cg-border-grey w3-padding w3-round" style="max-width:640px; margin:auto;">
 
+    <!-- header text -->
     {% if team %}
       <h1 class="w3-padding leaderboard"><b>{{ team.name }}</b></h1>
     {% endif %}
       <h1 class="leaderboard">{{ game_name }} </h1>
       <h3 class="leaderboard">{{ date_range }}</h3>
-      <div class="button-container w3-padding-16">
-        <a class="game-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard"
-           href="{% series_or_default_url 'current-leaderboard' %}{{ requested_game_id|default:'' }}">
-        Leaderboard
-        </a>
-        <a class="game-header-button w3-button {% button_highlight 'results' %} w3-round-xxlarge leaderboard"
-           href="{% series_or_default_url 'current-results' %}{{ requested_game_id|default:'' }}">
-        Results
-        </a>
-      </div>
+
+      <!-- header buttons -->
+{#      <div class="button-container w3-padding-16">#}
+{#        <a class="game-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard"#}
+{#           href="{% series_or_default_url 'current-leaderboard' %}{{ requested_game_id|default:'' }}">#}
+{#        Leaderboard#}
+{#        </a>#}
+{#        <a class="game-header-button w3-button {% button_highlight 'results' %} w3-round-xxlarge leaderboard"#}
+{#           href="{% series_or_default_url 'current-results' %}{{ requested_game_id|default:'' }}">#}
+{#        Results#}
+{#        </a>#}
+{#      </div>#}
 
     </div>
   </div>

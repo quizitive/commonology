@@ -9,7 +9,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic.base import View
 from project.views import CardFormView
 from project.utils import our_now
-from game.forms import TabulatorForm
+from game.forms import TabulatorForm, QuestionAnswerForm
 from game.models import Game
 from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
@@ -239,3 +239,13 @@ class GameEntryValidationView(View):
 
         url = game_url(g.google_form_url, email)
         return redirect(url)
+
+
+class GameFormView(View):
+
+    def get(self, request):
+        game = Game.objects.get(series__slug='commonology', game_id=44)
+        context = {
+            'questions': game.questions.order_by('number')
+        }
+        return render(request, 'game/game_form.html', context)
