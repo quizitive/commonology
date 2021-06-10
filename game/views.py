@@ -7,9 +7,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic.base import View
+from django.views.generic.edit import FormMixin
 from project.views import CardFormView
-from game.forms import TabulatorForm
-from project.utils import our_now
 from game.forms import TabulatorForm, QuestionAnswerForm
 from game.models import Game
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
@@ -235,11 +234,22 @@ class GameEntryValidationView(View):
         return redirect(url)
 
 
-class GameFormView(View):
+class GameFormView(View, FormMixin):
 
     def get(self, request):
         game = Game.objects.get(series__slug='commonology', game_id=44)
+        questions_with_form = [(q, QuestionAnswerForm(q.id, auto_id=f'%s_{q.id}')) for q in game.questions.order_by('number')]
         context = {
-            'questions': game.questions.order_by('number')
+            'questions': questions_with_form,
         }
         return render(request, 'game/game_form.html', context)
+
+    def post(self, request):
+        inputs = zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))
+        for qid, answer in inputs:
+            form = QuestionAnswerForm(qid, data={'question_id': qid, 'raw_string': answer})
+            if form.is_valid():
+                print("valid")
+            else:
+                print("not valid")
+        return self.get(request)
