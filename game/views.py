@@ -15,6 +15,7 @@ from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
 from game.utils import find_latest_active_game
+from leaderboard.views import SeriesPermissionView
 from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
@@ -234,11 +235,13 @@ class GameEntryValidationView(View):
         return redirect(url)
 
 
-class GameFormView(View, FormMixin):
+class GameFormView(FormMixin, SeriesPermissionView):
 
     def get(self, request):
         game = Game.objects.get(series__slug='commonology', game_id=44)
-        questions_with_form = [(q, QuestionAnswerForm(q.id, auto_id=f'%s_{q.id}')) for q in game.questions.order_by('number')]
+        questions_with_form = [
+            (q, QuestionAnswerForm(q.id, auto_id=f'%s_{q.id}')) for q in game.questions.order_by('number')
+        ]
         context = {
             'questions': questions_with_form,
         }
@@ -246,10 +249,18 @@ class GameFormView(View, FormMixin):
 
     def post(self, request):
         inputs = zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))
-        for qid, answer in inputs:
-            form = QuestionAnswerForm(qid, data={'question_id': qid, 'raw_string': answer})
-            if form.is_valid():
-                print("valid")
-            else:
-                print("not valid")
-        return self.get(request)
+        forms = {
+            qid: QuestionAnswerForm(qid, data={'question_id': qid, 'raw_string': answer})
+            for qid, answer in inputs
+        }
+        if any([f.errors for f in forms.values()]):
+            game = Game.objects.get(series__slug='commonology', game_id=44)
+            questions_with_forms = [
+                (q, forms[str(q.id)]) for q in game.questions.order_by('number')
+            ]
+            return render(request, 'game/game_form.html', {'questions': questions_with_forms})
+
+        # todo: save form data
+        print("success!")
+
+        return redirect('home')
