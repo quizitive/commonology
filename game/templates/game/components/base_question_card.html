@@ -3,7 +3,7 @@
 {% load leadeboard_tags %}
 
 <div class="answers-comments-container w3-card-0 w3-round cg-border-grey w3-border"
-     style="margin:16px 0;">
+     style="margin:16px 0;{% if form.errors %}border-color:#ec1c24!important;{% endif %}">
 
 <div class="answer_slides w3-container w3-padding-top" style="position: relative;">
 
