@@ -3,21 +3,26 @@
 
 {% block form_or_results %}
 
-  <link rel=stylesheet href="{% static 'leaderboard/css/results.css' %}">
-
   <div class="result-card results w3-row w3-padding-16">
 
       <div class="spacer w3-col m1">&nbsp</div>
       <div class="w3-col m10" {% if q.choices %}style="padding-bottom:16px;"{% endif %}>
-
-        {{ form.as_p }}
-        <input type="hidden" value="foo">
 
         {% for choice in q.choices %}
           <div class="w3-row response-item w3-padding w3-round">
           {{ choice }}
           </div>
         {% endfor %}
+
+        <div class="field-wrapper">
+        {{ form.question_id }}
+        {{ form.raw_string }}
+          <div class="errors" style="font-size:14px;{% if q.choices %}max-width:420px;margin:auto;{% endif %}">
+            {{ form.raw_string.errors }}
+            {{ form.non_field_errors }}
+          </div>
+        </div>
+
 
       </div>
        <div class="spacer w3-col m1">&nbsp</div>
