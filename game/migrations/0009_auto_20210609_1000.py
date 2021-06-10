@@ -4,6 +4,21 @@ import django.contrib.postgres.fields
 from django.db import migrations, models
 
 
+def forwards(apps, schema_editor):
+    Question = apps.get_model('game', 'Question')
+    for q in Question.objects.all():
+        if q.type == 'MC':
+            q.type = 'GA'
+        q.save()
+
+
+def backwards(apps, schema_editor):
+    Question = apps.get_model('game', 'Question')
+    for q in Question.objects.all():
+        if q.type == 'GA':
+            q.type = 'MC'
+        q.save()
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -21,4 +36,5 @@ class Migration(migrations.Migration):
             name='type',
             field=models.CharField(choices=[('GA', 'Game'), ('OP', 'Optional'), ('OV', 'Optional (visible)')], max_length=2),
         ),
+        migrations.RunPython(forwards, backwards)
     ]
