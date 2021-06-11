@@ -60,7 +60,14 @@ class SeriesPermissionView(SeriesPermissionMixin, View):
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context(self, game):
+    def get_game(self):
+        try:
+            return Game.objects.get(game_id=self.game_id, series__slug=self.slug)
+        except Game.DoesNotExist:
+            raise Http404("Game does not exist")
+
+    def get_context(self, *args, **kwargs):
+        game = self.get_game()
         date_range = game.date_range_pretty
         context = {
             'game_id': game.game_id,
@@ -75,13 +82,7 @@ class SeriesPermissionView(SeriesPermissionMixin, View):
 class LeaderboardView(SeriesPermissionView):
 
     def get(self, request, *args, **kwargs):
-        try:
-            game = Game.objects.get(game_id=self.game_id, series__slug=self.slug)
-        except Game.DoesNotExist:
-            raise Http404("Game does not exist")
-
-        context = self.get_context(game)
-
+        context = self.get_context()
         messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, 'leaderboard/leaderboard_view.html', context)
 
@@ -89,13 +90,9 @@ class LeaderboardView(SeriesPermissionView):
 class ResultsView(SeriesPermissionView):
 
     def get(self, request, *args, **kwargs):
-        try:
-            game = Game.objects.get(game_id=self.game_id, series__slug=self.slug)
-        except Game.DoesNotExist:
-            raise Http404("Game does not exist")
-
+        game = self.get_game()
         answer_tally = build_answer_tally(game)
-        context = self.get_context(game)
+        context = self.get_context()
         questions = game.questions.exclude(type=Question.op).order_by('number')
         player_answers = []
         if request.user.is_authenticated:

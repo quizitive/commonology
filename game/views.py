@@ -237,30 +237,54 @@ class GameEntryValidationView(View):
 
 class GameFormView(FormMixin, SeriesPermissionView):
 
-    def get(self, request):
-        game = Game.objects.get(series__slug='commonology', game_id=44)
-        questions_with_form = [
-            (q, QuestionAnswerForm(q.id, auto_id=f'%s_{q.id}')) for q in game.questions.order_by('number')
-        ]
-        context = {
-            'questions': questions_with_form,
-        }
-        return render(request, 'game/game_form.html', context)
+    def get(self, request, *args, **kwargs):
+        game = self.get_game()
+        return render(request, 'game/game_form.html', self.get_context(game))
 
-    def post(self, request):
-        inputs = zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))
-        forms = {
-            qid: QuestionAnswerForm(qid, data={'question_id': qid, 'raw_string': answer})
-            for qid, answer in inputs
-        }
+    def post(self, request, *args, **kwargs):
+        game = self.get_game()
+
+        # build a dict with the form inputs
+        form_data = {qid: answer
+                  for qid, answer in
+                  zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))}
+
+        forms = self.get_forms(game, form_data)
         if any([f.errors for f in forms.values()]):
-            game = Game.objects.get(series__slug='commonology', game_id=44)
-            questions_with_forms = [
-                (q, forms[str(q.id)]) for q in game.questions.order_by('number')
-            ]
+            questions_with_forms = self.questions_with_forms(game, forms)
             return render(request, 'game/game_form.html', {'questions': questions_with_forms})
 
         # todo: save form data
         print("success!")
 
         return redirect('home')
+
+    def get_context(self, game, forms=None):
+        return {'questions': self.questions_with_forms(game, forms)}
+
+    def get_forms(self, game, form_data=()):
+        """Get all the game question forms, empty or populated with form_data from post"""
+        form_data = form_data or {}
+        if form_data:
+            forms = {q.id: QuestionAnswerForm(
+                question_id=q.id,
+                auto_id=f'%s_{q.id}',
+                data={'question_id': q.id, 'raw_string': form_data.get(str(q.id))}
+            )
+                for q in game.questions.order_by('number')
+            }
+        else:
+            forms = {q.id: QuestionAnswerForm(
+                question_id=q.id,
+                auto_id=f'%s_{q.id}'
+            )
+                for q in game.questions.order_by('number')
+            }
+        return forms
+
+    def questions_with_forms(self, game, forms=None):
+        forms = forms or self.get_forms(game)
+        questions_with_forms = [
+            (q, forms[q.id]) for q in game.questions.order_by('number')
+        ]
+        return questions_with_forms
