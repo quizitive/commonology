@@ -254,7 +254,12 @@ class GameFormView(FormMixin, SeriesPermissionView):
             questions_with_forms = self.questions_with_forms(game, forms)
             return render(request, 'game/game_form.html', {'questions': questions_with_forms})
 
+        # todo: make sure game is open
+
+        # todo: make sure this player hasn't submitted a form already
+
         # todo: save form data
+
         print("success!")
 
         return redirect('home')
