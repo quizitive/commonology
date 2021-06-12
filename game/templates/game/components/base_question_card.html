@@ -2,10 +2,10 @@
 
 {% load leadeboard_tags %}
 
-<div class="answers-comments-container w3-card-0 w3-round cg-border-grey w3-border"
-     style="margin:16px 0;{% if form.errors %}border-color:#ec1c24!important;{% endif %}">
+<div class="question-container w3-margin-top w3-margin-bottom w3-card-0 w3-round cg-border-grey"
+     {% if form.errors %}style="border-color:#ec1c24!important;"{% endif %}>
 
-  <div class="answer_slides w3-container w3-padding-top" style="position: relative;">
+  <div class="w3-container w3-padding-top" style="position: relative;">
 
     <p class="question-text" style="font-size:1rem"><b>{{ q.text }}</b></p>
     {% if not q.hide_default_results %}
