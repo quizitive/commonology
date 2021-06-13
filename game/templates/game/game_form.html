@@ -1,7 +1,7 @@
 {% extends 'game/base.html' %}
 {% load static %}
 
-{% block app_style %}
+{% block page_style %}
   <link rel=stylesheet href="{% static 'leaderboard/css/results.css' %}">
   <style>
   ul {
@@ -20,21 +20,24 @@
 {% block content %}
   <div class="content">
 
-    {% include 'leaderboard/components/game_header.html' with view="results" %}
+    {% include 'leaderboard/components/game_header.html' with hide_navigation=True %}
 
-    <form method="post" novalidate>
-     {% csrf_token %}
-      {% for q, form in questions %}
-        {% include 'game/components/question_form_card.html' with text=q.text q=q responses=q.choices%}
-      {% endfor %}
+    <div class="cg-border-blue w3-padding-16">
 
-      <div class="w3-container w3-padding-48" style="max-width:480px;margin:auto;">
-        <button type="submit" class="w3-button w3-round cg-blue" style="width:100%" >Submit</button>
-        <p class="w3-container w3-center w3-margin-top" style="color:#9e9e9e;margin:auto;font-style:italic">
-          A copy of your responses will be emailed to you
-        </p>
-      </div>
+      <form method="post" novalidate>
+       {% csrf_token %}
+        {% for q, form in questions %}
+          {% include 'game/components/question_form_card.html' with text=q.text q=q responses=q.choices%}
+        {% endfor %}
 
-    </form>
+        <div class="w3-container w3-padding-48" style="max-width:480px;margin:auto;">
+          <button type="submit" class="w3-button w3-round cg-blue" style="width:100%" >Submit</button>
+          <p class="w3-container w3-center w3-margin-top" style="color:#9e9e9e;margin:auto;font-style:italic">
+            A copy of your responses will be emailed to you
+          </p>
+        </div>
+
+      </form>
+    </div>
   </div>
 {% endblock %}
