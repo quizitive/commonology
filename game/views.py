@@ -265,7 +265,9 @@ class GameFormView(FormMixin, SeriesPermissionView):
         return redirect('home')
 
     def get_context(self, game, forms=None):
-        return {'questions': self.questions_with_forms(game, forms)}
+        context = super().get_context()
+        context.update({'questions': self.questions_with_forms(game, forms)})
+        return context
 
     def get_forms(self, game, form_data=()):
         """Get all the game question forms, empty or populated with form_data from post"""
