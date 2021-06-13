@@ -87,10 +87,17 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         except (TypeError, ValueError):
             page = 1
 
+        # leaderboard pagination logic
         lb_page_start = (page - 1) * 100
         lb_page_end = min(len(leaderboard), page * 100)
-        leaderboard = leaderboard[lb_page_start:lb_page_end]
+        prev_page = page - 1 or None
+        if lb_page_end >= len(leaderboard):
+            next_page = None
+        else:
+            next_page = page + 1
+
         visible_players = f"{lb_page_start + 1}-{lb_page_end}"
+        leaderboard = leaderboard[lb_page_start:lb_page_end]
         leaderboard = leaderboard.to_dict(orient='records')
 
         context = {
@@ -101,7 +108,9 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             'follow_filter': follow_filter,
             'visible_players': visible_players,
             'total_players': total_players,
-            'page': page
+            'page': page,
+            'next': next_page,
+            'prev': prev_page
         }
 
         return render(request, 'leaderboard/components/leaderboard.html', context)
