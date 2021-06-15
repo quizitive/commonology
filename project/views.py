@@ -16,9 +16,9 @@ def about_view(request, *args, **kwargs):
     return render(request, 'about.html', context)
 
 
-def tos_view(request, *args, **kwargs):
+def product_description_view(request, *args, **kwargs):
     context = next_game_context()
-    return render(request, 'tos.html', context)
+    return render(request, 'product_description.html', context)
 
 
 def index(request):
