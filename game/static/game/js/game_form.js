@@ -1,5 +1,24 @@
 // --- Click Choices --- //
-// todo: this
+$('.w3-cell-row.response-item').click((e) => {
+  // add the value of the selection to the hidden input
+  $(e.currentTarget).siblings('input[name=raw_string]').val($(e.currentTarget).val().replaceAll("\t", ""))
+  // add border from player-answer formatting
+  $(e.currentTarget).addClass('player-answer').siblings('.player-answer').removeClass('player-answer').find('i').css('display', 'none')
+  // add checkmark
+  $(e.currentTarget).find("i").css('display', 'block')
+
+  removeErrors(e)
+})
+
+// Enter text in text box removes errors
+$('input[name=raw_string]').on('change keypress keyup paste', (e) => {
+  removeErrors(e)
+})
+
+function removeErrors(e) {
+  $(e.currentTarget).closest(".question-container").css("border-color", "#cecece")
+  $(e.currentTarget).siblings(".errors").html('')
+}
 
 // --- Question Validation --- //
 $('button[type=submit]').click((e) => {
@@ -15,9 +34,7 @@ $('button[type=submit]').click((e) => {
       errors = true
     }
   })
-
   if (!errors) {
     $("form").submit();
   }
-
 })
