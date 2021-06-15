@@ -16,6 +16,11 @@ def about_view(request, *args, **kwargs):
     return render(request, 'about.html', context)
 
 
+def tos_view(request, *args, **kwargs):
+    context = next_game_context()
+    return render(request, 'tos.html', context)
+
+
 def index(request):
     if request.user.is_authenticated:
         return redirect('leaderboard:current-leaderboard')
