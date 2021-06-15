@@ -7,6 +7,7 @@ from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from project.utils import our_now
 from users.models import Player
 from chat.models import Thread
 
@@ -155,7 +156,12 @@ class Game(models.Model):
 
     @property
     def date_range_pretty(self):
-        return f'{self.min_date:%m/%d} - {self.max_date:%m/%d/%Y}'
+        return f'{self.start:%m/%d} - {self.end:%m/%d/%Y}'
+
+    @property
+    def is_active(self):
+        now = our_now()
+        return self.start <= now <= self.end
 
 
 class Question(models.Model):
