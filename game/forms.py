@@ -35,14 +35,22 @@ class QuestionAnswerForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['question_id'].initial = question_id
 
-        q = Question.objects.get(id=question_id)
-        if q.choices:
+        self.q = Question.objects.get(id=question_id)
+        if self.q.choices:
             self.fields['raw_string'].widget = forms.HiddenInput(attrs={'required': True})
             self.fields['raw_string'].initial = None
 
-        if q.type in (Question.op, Question.ov):
+        if self.q.type in (Question.op, Question.ov):
             self.fields['raw_string'].required = False
+
+    def clean_raw_string(self):
+        value = self.cleaned_data['raw_string']
+        if self.q.choices:
+            if value not in self.q.choices:
+                raise forms.ValidationError(f"{value} isn't a valid choice for this question")
+        return
 
     def as_p(self):
         as_p = super().as_p()
+        # a hack to remove standard error formatting, easier than rewriting as_p from scratch
         return mark_safe(as_p.replace("(Hidden field raw_string)", ""))
