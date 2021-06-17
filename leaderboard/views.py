@@ -58,7 +58,16 @@ class SeriesPermissionView(SeriesPermissionMixin, View):
             self.game_id = Game.objects.filter(
                 publish=True, series__slug=self.slug).aggregate(Max('game_id'))['game_id__max']
 
+        if child_dest := self._child_dispatch(request, *args, **kwargs):
+            return child_dest
+
         return super().dispatch(request, *args, **kwargs)
+
+    def _child_dispatch(self, request, *args, **kwargs):
+        # implement this in views that inherit from this class if you need
+        # a place to add additional dispatch logic after class variables
+        # are instantiated but before the dispatch work is done
+        pass
 
     def get_game(self):
         try:

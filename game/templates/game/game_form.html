@@ -3,6 +3,7 @@
 
 {% block page_style %}
   <link rel=stylesheet href="{% static 'leaderboard/css/results.css' %}">
+{#  todo: move this to css  #}
   <style>
   ul {
     color: red;
@@ -25,6 +26,7 @@
     <div class="cg-border-blue w3-padding-16">
 
       <form method="post" novalidate>
+        <input type="hidden" id="email" name="email" value="{{ email }}">
        {% csrf_token %}
         {% for q, form in questions %}
           {% include 'game/components/question_form_card.html' with text=q.text q=q responses=q.choices%}

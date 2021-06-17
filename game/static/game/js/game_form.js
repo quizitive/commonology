@@ -33,6 +33,7 @@ $('button[type=submit]').click((e) => {
       $(elm).closest(".question-container").css("border-color", "#ec1c24")
       $(elm).next(".errors").html('<ul class="errorlist"><li>This is a required question</li></ul>')
       errors = true
+    //  todo: scroll to first error
     }
   })
   if (!errors) {
