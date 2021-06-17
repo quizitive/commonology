@@ -12,6 +12,13 @@ def find_latest_active_game(slug):
     return g
 
 
+def find_hosted_game(slug, game_id, user):
+    g = Game.objects.filter(series__slug=slug, game_id=game_id, hosts=user).first()
+    if g and not g.google_form_url:
+        return None
+    return g
+
+
 # Get next game start or game end
 def next_event():
     now = our_now()
