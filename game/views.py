@@ -13,7 +13,7 @@ from game.models import Game
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
-from game.utils import find_latest_active_game
+from game.utils import find_latest_active_game, find_hosted_game
 from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
@@ -123,8 +123,17 @@ class GameEntryWithoutValidationView(CardFormView):
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
+        game_id = request.GET.get('game_id')
 
-        g = find_latest_active_game(slug)
+        if game_id:
+            if request.user.is_anonymous:
+                return self.message(request,
+                                    'I think you are a game host trying to preview a game.  You must login first')
+            # /c/rambus/play?game_id=2
+            g = find_hosted_game(slug, game_id, request.user)
+        else:
+            g = find_latest_active_game(slug)
+
         if slug == 'commonology':
             if not g:
                 return self.message(request,
