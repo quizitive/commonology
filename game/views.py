@@ -2,10 +2,13 @@ import gspread
 import logging
 
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
+from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
+from django.urls import reverse
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from project.views import CardFormView
@@ -236,6 +239,35 @@ class GameEntryValidationView(View):
 
 
 class GameFormView(FormMixin, SeriesPermissionView):
+    signer = Signer()
+
+    def _child_dispatch(self, request, *args, **kwargs):
+        game = self.get_game()
+
+        # make sure game is still open, and handle various scenarios
+        if not game.is_active:
+
+            # 1: This game has already been published, send all traffic to leaderboard
+            if game.publish:
+                header = "Game Over"
+                msg = "This game is already scored, head on over to the results and join the conversation!"
+                button_label = "The Results"
+                return self._game_form_fail_card(request, header, msg, button_label)
+
+            # 2: This user has already submitted answers for this game, send them to their answers
+            # todo: need a static form view for players that have already answered
+            if request.user.is_authenticated:
+                # todo: REMOVE NOT BELOW
+                if request.user.id not in game.players.values_list('player', flat=True):
+                    header = "Game Played"
+                    msg = "You've already played this game! Your answers have been emailed to you."
+                    form_action = reverse('home')
+                    return self._game_form_fail_card(request, header, msg, None)
+
+            # 3: This user isn't logged in and/or didn't play this game, send them home
+            header = "Game Not Active"
+            msg = "This game is no longer active, please try a different game."
+            return self._game_form_fail_card(request, header, msg, None)
 
     def get(self, request, *args, **kwargs):
         game = self.get_game()
@@ -244,33 +276,49 @@ class GameFormView(FormMixin, SeriesPermissionView):
     def post(self, request, *args, **kwargs):
         game = self.get_game()
 
+        # Make sure this is a real email that hasn't been tampered with
+        signed_email = self.request.POST.get('email')
+        if signed_email:
+            try:
+                email = self.signer.unsign(signed_email)
+            except BadSignature:
+                raise PermissionDenied
+            try:
+                player = Player.objects.get(email=email)
+            except Player.DoesNotExist:
+                raise PermissionDenied
+            if player.id in game.players.values_list('player', flat=True):
+                header = "Game Played"
+                msg = "You've already played this game! Your answers have been emailed to you."
+                return self._game_form_fail_card(request, header, msg, None)
+
         # build a dict with the form inputs
         form_data = {qid: answer
-                  for qid, answer in
-                  zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))}
+                     for qid, answer in
+                     zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))}
 
         forms = self.get_forms(game, form_data)
         if any([f.errors for f in forms.values()]):
             questions_with_forms = self.questions_with_forms(game, forms)
             return render(request, 'game/game_form.html', {'questions': questions_with_forms})
 
-        # todo: make sure game is open
-
-        # todo: make sure this player hasn't submitted a form already
-
         # todo: save form data
-
         print("success!")
 
         return redirect('home')
 
     def get_context(self, game, forms=None):
         context = super().get_context()
-        context.update({'questions': self.questions_with_forms(game, forms)})
+        context.update({
+            'questions': self.questions_with_forms(game, forms),
+            'email': self.signer.sign('tedsmoore@gmail.com')
+        })
         return context
 
     def get_forms(self, game, form_data=()):
-        """Get all the game question forms, empty or populated with form_data from post"""
+        """Get all the game question forms, empty or populated with form_data from post.
+           Any form data submitted with question_id not in this game will be ignored,
+           likewise any question without data (e.g. incomplete forms) will be handled"""
         form_data = form_data or {}
         if form_data:
             forms = {q.id: QuestionAnswerForm(
@@ -295,3 +343,20 @@ class GameFormView(FormMixin, SeriesPermissionView):
             (q, forms[q.id]) for q in game.questions.order_by('number')
         ]
         return questions_with_forms
+
+    def _game_form_fail_card(self, request, header, msg, button_label, form_action=None):
+
+        if form_action is None:
+            form_action = reverse('leaderboard:current-leaderboard') if self.slug == "commonology" \
+                else reverse('series-leaderboard:current-leaderboard')
+
+        gc = GameEntryView()
+        return gc.warning(
+            request,
+            header=header,
+            message=msg,
+            button_label=button_label,
+            keep_form=False,
+            form_method='get',
+            form_action=form_action
+        )

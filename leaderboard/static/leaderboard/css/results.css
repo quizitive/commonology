@@ -6,10 +6,10 @@ div.desktop-q-img {
   color:blue;
 }
 div.response-item {
-  border-color:#f26649;
   background: #f7f8f9;
   margin: 4px auto;
   max-width:420px;
+  box-sizing: border-box;
 }
 div.response-header {
   background: #fff;
