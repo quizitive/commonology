@@ -271,7 +271,11 @@ class GameFormView(FormMixin, SeriesPermissionView):
 
     def get(self, request, *args, **kwargs):
         game = self.get_game()
-        return render(request, 'game/game_form.html', self.get_context(game))
+        if request.user.is_authenticated:
+            signed_email = self.signer.sign(request.user.email)
+        else:
+            signed_email = self.signer.sign(request.GET.get('email'))
+        return render(request, 'game/game_form.html', self.get_context(game, signed_email))
 
     def post(self, request, *args, **kwargs):
         game = self.get_game()
@@ -299,19 +303,20 @@ class GameFormView(FormMixin, SeriesPermissionView):
 
         forms = self.get_forms(game, form_data)
         if any([f.errors for f in forms.values()]):
-            questions_with_forms = self.questions_with_forms(game, forms)
-            return render(request, 'game/game_form.html', {'questions': questions_with_forms})
+            # questions_with_forms = self.questions_with_forms(game, forms)
+            context = self.get_context(game, signed_email, forms)
+            return render(request, 'game/game_form.html', context)
 
         # todo: save form data
         print("success!")
 
         return redirect('home')
 
-    def get_context(self, game, forms=None):
+    def get_context(self, game, signed_email, forms=None):
         context = super().get_context()
         context.update({
             'questions': self.questions_with_forms(game, forms),
-            'email': self.signer.sign('tedsmoore@gmail.com')
+            'email': signed_email
         })
         return context
 
