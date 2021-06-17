@@ -1,7 +1,7 @@
-// --- Click Choices --- //
+// --- Clickable Choices --- //
 $('.w3-cell-row.response-item').click((e) => {
   // add the value of the selection to the hidden input
-  $(e.currentTarget).siblings('input[name=raw_string]').val($(e.currentTarget).val().replaceAll("\t", ""))
+  $(e.currentTarget).siblings('input[name=raw_string]').val($(e.currentTarget).find('.choice').text())
   // add border from player-answer formatting
   $(e.currentTarget).addClass('player-answer').siblings('.player-answer').removeClass('player-answer').find('i').css('display', 'none')
   // add checkmark
@@ -9,6 +9,7 @@ $('.w3-cell-row.response-item').click((e) => {
 
   removeErrors(e)
 })
+// todo:
 
 // Enter text in text box removes errors
 $('input[name=raw_string]').on('change keypress keyup paste', (e) => {
