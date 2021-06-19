@@ -28,15 +28,22 @@ $('button[type=submit]').click((e) => {
 
   // check all inputs for a value
   var errors = false
+  var scrollTop = 0
   $("input[name=raw_string][required]").not("[value]").each((i, elm) => {
     if ($(elm).val() === "") {
       $(elm).closest(".question-container").css("border-color", "#ec1c24")
       $(elm).next(".errors").html('<ul class="errorlist"><li>This is a required question</li></ul>')
       errors = true
-    //  todo: scroll to first error
+      if (scrollTop === 0) {
+        scrollTop = $(elm).closest('.question-container').offset().top
+      }
     }
   })
   if (!errors) {
     $("form").submit();
+  } else {
+    // scroll to topmost element with some buffer for the navbar
+    $([document.documentElement, document.body]).animate({scrollTop: scrollTop - 75}, 500);
   }
+
 })
