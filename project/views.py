@@ -21,6 +21,16 @@ def product_description_view(request, *args, **kwargs):
     return render(request, 'product_description.html', context)
 
 
+def tos_view(request, *args, **kwargs):
+    context = next_game_context()
+    return render(request, 'tos.html', context)
+
+
+def privacy_view(request, *args, **kwargs):
+    context = next_game_context()
+    return render(request, 'privacy.html', context)
+
+
 def index(request):
     if request.user.is_authenticated:
         return redirect('leaderboard:current-leaderboard')

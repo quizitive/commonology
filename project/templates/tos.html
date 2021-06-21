@@ -10,8 +10,6 @@
       <img src="{% static 'img/logo.svg' %}" class="w3-padding-24">
     </h2>
 
-  <a href="{% url 'about' %}">About</a> <a href="{% url 'about' %}">Description</a> <a href="{% url 'tos' %}">TOS</a>
-
 
 <h1 id="terms-of-service">Terms of Service</h1>
 <p>June 15, 2021</p>
@@ -131,7 +129,10 @@ We always appreciate your feedback and other suggestions about our products and 
     restriction or obligation to compensate you, and we are under no obligation to keep them confidential.
 We reserve all rights not expressly granted to you.</li>
 </ol>
-
+<p>
+      <h2>Related Documentation</h2>
+      <a href="{% url 'privacy' %}">Privacy Policy</a>
+</p>
     <div class="w3-cell-row w3-padding-large w3-center" style="width:100%;margin-top:48px;">
     {% if game_is_on %}
     <a style="text-decoration:none;" href="{% url 'game:play' %}">
