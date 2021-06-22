@@ -1,16 +1,3 @@
-{% extends 'game/base.html' %}
-{% load static %}
-
-{% block title %}Commonology | Terms of Service{% endblock %}
-
-{% block content %}
-<div class="w3-row" style="padding: 8pt"></div>
-  <div class="content">
-    <h3 class="w3-margin-bottom w3-margin-top w3-padding" style="vertical-align:bottom;">
-      <img src="{% static 'img/logo.svg' %}" class="w3-padding-24">
-    </h3>
-
-<div style="padding: 0 10px">
 <h1 id="terms-of-service">Terms of Service</h1>
 <p>June 15, 2021</p>
 <h3 id="welcome-to-commonology-">Welcome to Commonology!</h3>
@@ -117,20 +104,3 @@ We reserve all rights not expressly granted to you.</li>
       <h3>Related Documentation</h3>
       <a href="{% url 'privacy' %}">Privacy Policy</a>
 </p>
-</div>
-    <div class="w3-cell-row w3-padding-large w3-center" style="width:100%;margin-top:48px;">
-    {% if game_is_on %}
-    <a style="text-decoration:none;" href="{% url 'game:play' %}">
-      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Play Now!</button>
-    </a>
-    {% else %}
-    <a style="text-decoration:none;" href="{% url 'leaderboard:current-results' %}">
-      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Latest Results</button>
-    </a>
-      <p>The next game begins on Wednesday!</p>
-    {% endif %}
-    </div>
-
-  </div>
-  <div class="w3-row" style="padding: 24px"></div>
-{% endblock content %}
