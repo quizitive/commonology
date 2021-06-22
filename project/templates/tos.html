@@ -10,7 +10,7 @@
       <img src="{% static 'img/logo.svg' %}" class="w3-padding-24">
     </h3>
 
-
+<div style="padding: 0 10px">
 <h1 id="terms-of-service">Terms of Service</h1>
 <p>June 15, 2021</p>
 <h3 id="welcome-to-commonology-">Welcome to Commonology!</h3>
@@ -117,6 +117,7 @@ We reserve all rights not expressly granted to you.</li>
       <h3>Related Documentation</h3>
       <a href="{% url 'privacy' %}">Privacy Policy</a>
 </p>
+</div>
     <div class="w3-cell-row w3-padding-large w3-center" style="width:100%;margin-top:48px;">
     {% if game_is_on %}
     <a style="text-decoration:none;" href="{% url 'game:play' %}">
