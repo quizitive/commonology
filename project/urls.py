@@ -10,7 +10,7 @@ from .views import index, about_view, product_view, tos_view, privacy_view, Cont
 urlpatterns = [
     path('', index, name='home'),
     path('about/', about_view, name='about'),
-    path('product_description/', product_view, name='product'),
+    path('product/', product_view, name='product'),
     path('tos/', tos_view, name='tos'),
     path('privacy/', privacy_view, name='privacy'),
     path('contact/', ContactView.as_view(), name='contact'),
