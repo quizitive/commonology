@@ -1,0 +1,57 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block title %}Commonology | Terms of Service{% endblock %}
+
+{% block content %}
+<div class="w3-row" style="padding: 8pt"></div>
+  <div class="content">
+    <h2 class="w3-margin-bottom w3-margin-top w3-padding" style="vertical-align:bottom;">
+      <img src="{% static 'img/logo.svg' %}" class="w3-padding-24">
+    </h2>
+
+<div style="padding: 0 10px">
+<h1>Collected and Possibly Shared Information</h1><br>
+      <i>A privacy policy</i>
+<p>
+The obvious information we collect is answers to game questions.  Also obvious is player profile information
+including email address, name, location, and birthday.
+</p>
+<p>
+Information may be extracted by third party services we use.  Our pages are tracked by Google Analytics
+and on some forms we use Google Captcha services as an attempt to limit unwanted internet robots from interacting
+with our site. You would have to read Google privacy documenation to better understand how they may use information.
+Other third party hosting and infrastructure service providers are used and have access to our data but are not
+expected to share it.
+</p>
+<p>
+We share public game players' names, or designated screen names, with the public on our leaderboards.
+Our results page lists all responses without indicating who entered them. You can enter
+a silly response and expect that only you will know that you
+entered it.
+
+</p>
+<p>
+We have not shared email addresses with any other entity and do not have plans to at this time.  This document
+shall be updated should those plans change.
+</p>
+<p>
+All conversation messages are shared with anyone who can see game results pages.
+</p>
+</div>
+    <div class="w3-cell-row w3-padding-large w3-center" style="width:100%;margin-top:48px;">
+    {% if game_is_on %}
+    <a style="text-decoration:none;" href="{% url 'game:play' %}">
+      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Play Now!</button>
+    </a>
+    {% else %}
+    <a style="text-decoration:none;" href="{% url 'leaderboard:current-results' %}">
+      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Latest Results</button>
+    </a>
+      <p>The next game begins on Wednesday!</p>
+    {% endif %}
+    </div>
+
+  </div>
+  <div class="w3-row" style="padding: 24px"></div>
+{% endblock content %}
