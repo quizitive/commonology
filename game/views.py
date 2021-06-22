@@ -111,8 +111,8 @@ class GameFormView(FormMixin, BaseGameView):
         otherwise sets uses signed game request to get """
 
         # if no id is specified get the most recent published game for this series
-        if not self.requested_game_id:
-            return find_latest_active_game(self.slug)
+        # if not self.requested_game_id:
+        #     return find_latest_active_game(self.slug)
 
         try:
             game = Game.objects.get(game_id=self.requested_game_id, series__slug=self.slug)
@@ -349,12 +349,12 @@ class GameEntryView(CardFormView):
 
         if request.user.is_authenticated:
             player = is_validated(request.user.email)
-            if not (slug == 'commonology' or player.series.filter(slug=slug).exists()):
-                return self.warning(request, 'Sorry the game you requested is not available without an invitation.',
-                                    keep_form=False)
+            # if not (slug == 'commonology' or player.series.filter(slug=slug).exists()):
+            #     return self.warning(request, 'Sorry the game you requested is not available without an invitation.',
+            #                         keep_form=False)
 
-            url = game_url(g.google_form_url, request.user.email)
-            return redirect(url)
+            # url = game_url(g.google_form_url, request.user.email)
+            return GameFormView(request=request).dispatch(request, *args, **kwargs)
 
         return super().get(request, *args, **kwargs)
 
@@ -402,10 +402,10 @@ class GameEntryValidationView(View):
             p = Player.objects.get(email=email)
             if not p.is_active:
                 p.is_active = True
-                p.save()
         except Player.DoesNotExist:
             p = Player(email=email)
-            p.save()
+        p.series.add(Series.objects.get(slug=slug))
+        p.save()
 
         g = find_latest_active_game(slug)
         if not g:
