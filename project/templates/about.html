@@ -1,14 +1,3 @@
-{% extends 'game/base.html' %}
-{% load static %}
-
-{% block title %}Commonology | About{% endblock %}
-
-{% block content %}
-  <div class="w3-row" style="padding: 8pt"></div>
-  <div class="content">
-    <h2 class="w3-margin-bottom w3-margin-top w3-padding" style="vertical-align:bottom;">
-      <img src="{% static 'img/logo.svg' %}" class="w3-padding-24"> is a <span style="font-weight:bold;font-style:italic;font-size:1.2em;">fun</span> and <span style="font-weight:bold;font-style:italic;font-size:1.2em;">simple</span> battle of the minds that only takes 2 minutes to play.
-    </h2>
     <div class="w3-row" style="padding: 16pt"></div>
     <div class="w3-cell-row w3-border-teal w3-round w3-padding w3-margin-bottom">
       <div class="w3-cell w3-padding-16 w3-container w3-center">
@@ -70,20 +59,3 @@
         <i class="far fa-comments fa-6x" style="color:#237073;"></i>
       </div>
     </div>
-
-    <div class="w3-cell-row w3-padding-large w3-center" style="width:100%;margin-top:48px;">
-    {% if game_is_on %}
-    <a style="text-decoration:none;" href="{% url 'game:play' %}">
-      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Play Now!</button>
-    </a>
-    {% else %}
-    <a style="text-decoration:none;" href="{% url 'leaderboard:current-results' %}">
-      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Latest Results</button>
-    </a>
-      <p>The next game begins on Wednesday!</p>
-    {% endif %}
-    </div>
-
-  </div>
-  <div class="w3-row" style="padding: 24px"></div>
-{% endblock content %}
