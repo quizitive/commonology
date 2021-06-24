@@ -1,3 +1,5 @@
+import uuid
+
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.forms import CharField, ValidationError
@@ -55,6 +57,7 @@ class Game(models.Model):
     end = models.DateTimeField(verbose_name="When the game ends:", null=False, blank=False)
     google_form_url = models.CharField(max_length=255, blank=True,
                                        help_text="Enter the form url")
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
