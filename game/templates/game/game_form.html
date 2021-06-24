@@ -25,7 +25,7 @@
 
     <div class="cg-border-blue w3-padding-16">
 
-      <form method="post" action="{% url 'game:game-id-form' game_id %}" novalidate>
+      <form method="post" action="{% url 'game:game-form' game_id %}" novalidate>
         <input type="hidden" id="email" name="email" value="{{ email }}">
        {% csrf_token %}
         {% for q, form in questions %}

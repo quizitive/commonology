@@ -69,9 +69,6 @@ class BaseGameView(SeriesPermissionMixin, View):
         self.requested_game_id = kwargs.get('game_id')
         self.game = self.get_game()
 
-        if child_dest := self._child_dispatch(request, *args, **kwargs):
-            return child_dest
-
         return super().dispatch(request, *args, **kwargs)
 
     def _child_dispatch(self, request, *args, **kwargs):
@@ -80,20 +77,15 @@ class BaseGameView(SeriesPermissionMixin, View):
         # are instantiated but before the dispatch work is done
         pass
 
-    # def validated_game_id(self, user, game_id):
-    #     """Implement this method to define game permission logic"""
-    #     raise NotImplementedError
-
     def get_game(self):
         """Implement this method to define game permission logic"""
         raise NotImplementedError
 
     def get_context(self, *args, **kwargs):
-        game = self.get_game()
-        date_range = game.date_range_pretty
+        date_range = self.game.date_range_pretty
         context = {
-            'game_id': game.game_id,
-            'game_name': game.name,
+            'game_id': self.game.game_id,
+            'game_name': self.game.name,
             'date_range': date_range,
             'series_slug': self.requested_slug,
             'requested_game_id': self.requested_game_id,
@@ -105,33 +97,33 @@ class GameFormView(FormMixin, BaseGameView):
     signer = Signer()
     request = None
     player = None
+    uuid = None
 
-    def get_game(self):
-        """Only allows staff to view historical or future games,
-        otherwise sets uses signed game request to get """
+    def __call__(self, *args, **kwargs):
+        pass
 
-        # if no id is specified get the most recent published game for this series
-        # if not self.requested_game_id:
-        #     return find_latest_active_game(self.slug)
+    def dispatch(self, request, *args, **kwargs):
+        self.uuid = self.kwargs.get('uuid')
+        return super().dispatch(request, *args, **kwargs)
 
-        try:
-            game = Game.objects.get(game_id=self.requested_game_id, series__slug=self.slug)
-        except Game.DoesNotExist:
-            raise Http404("Game does not exist")
+    def render_game(self, request, player_email):
+        # used to load a clean game form for a validated player
+        signed_email = self.signer.sign(player_email)
+        return render(request, 'game/game_form.html', self.get_context(self.game, signed_email))
 
-        # if self.request.user not in game.hosts.all():
-        #     raise Http404("You are not a host of this non-active game")
+    def get(self, request, game_id, *args, **kwargs):
+        # todo: render a player's game responses
+        # return render(request, 'game/game_form.html', self.get_context(self.game, None))
+        return self.render_game(request, 'e@mail.com')
 
-        return game
+    def post(self, request, *args, **kwargs):
 
-    def _child_dispatch(self, request, *args, **kwargs):
-        game = self.get_game()
-
+        # todo: this should maybe go back to the view Marc's working on?
         # make sure game is still open, and handle various scenarios
-        if not game.is_active:
+        if not self.game.is_active:
 
             # 1: This game has already been published, send all traffic to leaderboard
-            if game.publish:
+            if self.game.publish:
                 header = "Game Over"
                 msg = "This game is already scored, head on over to the results and join the conversation!"
                 button_label = "The Results"
@@ -140,8 +132,7 @@ class GameFormView(FormMixin, BaseGameView):
             # 2: This user has already submitted answers for this game, send them to their answers
             # todo: need a static form view for players that have already answered
             if request.user.is_authenticated:
-                # todo: REMOVE NOT BELOW
-                if request.user.id not in game.players.values_list('player', flat=True):
+                if request.user.id in self.game.players.values_list('player', flat=True):
                     header = "Game Played"
                     msg = "You've already played this game! Your answers have been emailed to you."
                     form_action = reverse('home')
@@ -152,24 +143,7 @@ class GameFormView(FormMixin, BaseGameView):
             msg = "This game is no longer active, please try a different game."
             return self._game_form_fail_card(request, header, msg, None)
 
-    def get(self, request, *args, **kwargs):
-        code = request.GET.get('code')
-        # todo: make access code query param a signed combo of series_id, game_id and player_id
-        if self.player is None:
-            return self._redirect_to_play()
-
-        game = self.get_game()
-        if request.user.is_authenticated:
-            signed_email = self.signer.sign(request.user.email)
-        else:
-            signed_email = self.signer.sign(request.GET.get('email'))
-        return render(request, 'game/game_form.html', self.get_context(game, signed_email))
-
-    def post(self, request, *args, **kwargs):
-        game = self.get_game()
-
         # Make sure this is a real email that hasn't been tampered with
-        # todo: use code instead of email here
         signed_email = self.request.POST.get('email')
         if signed_email:
             try:
@@ -178,9 +152,10 @@ class GameFormView(FormMixin, BaseGameView):
                 raise PermissionDenied
             try:
                 player = Player.objects.get(email=email)
+                # todo: player should be in the series! make sure they're added on validation
             except Player.DoesNotExist:
                 raise PermissionDenied
-            if player.id in game.players.values_list('player', flat=True):
+            if player.id in self.game.players.values_list('player', flat=True):
                 header = "Game Played"
                 msg = "You've already played this game! Your answers have been emailed to you."
                 return self._game_form_fail_card(request, header, msg, None)
@@ -190,15 +165,28 @@ class GameFormView(FormMixin, BaseGameView):
                      for qid, answer in
                      zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))}
 
-        forms = self.get_forms(game, form_data)
+        forms = self.get_forms(self.game, form_data)
         if any([f.errors for f in forms.values()]):
-            context = self.get_context(game, signed_email, forms)
+            context = self.get_context(self.game, signed_email, forms)
             return render(request, 'game/game_form.html', context)
 
         # todo: save form data
         print("success!")
 
+        # todo: a success screen
         return redirect('home')
+
+    def test_func(self):
+        # override super method, we don't want to restrict access to game form for
+        # new players of a series. obtaining the unique url is validation enough
+        return True
+
+    def get_game(self):
+        try:
+            # todo: make this use game uuid
+            return Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
+        except Game.DoesNotExist:
+            raise Http404("Game does not exist")
 
     def get_context(self, game, signed_email, forms=None):
         context = super().get_context()
@@ -238,7 +226,7 @@ class GameFormView(FormMixin, BaseGameView):
         return questions_with_forms
 
     def _game_form_fail_card(self, request, header, msg, button_label, form_action=None):
-
+        # todo: probably deprecated
         if form_action is None:
             if self.slug == "commonology":
                 form_action = reverse('leaderboard:current-leaderboard')
@@ -258,9 +246,10 @@ class GameFormView(FormMixin, BaseGameView):
         )
 
     def _redirect_to_play(self):
+        # todo: probably deprecated
         if self.requested_slug:
-            return redirect('series-game:play', series_slug=self.requested_slug)
-        return redirect('game:play')
+            return redirect('series-game:play', series_slug=self.requested_slug, uuid=self.uuid)
+        return redirect('game:play', uuid=self.uuid)
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
@@ -372,7 +361,7 @@ class GameEntryView(CardFormView):
             if not g:
                 return self.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
             url = game_url(g.google_form_url, email)
-            return redirect(url)
+            return GameFormView(player=player).get(request)
         else:
             if slug == 'commonology':
                 send_confirm(request, slug, email)
