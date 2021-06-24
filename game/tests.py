@@ -1,4 +1,3 @@
-import re
 import datetime
 import string
 import random
@@ -10,7 +9,6 @@ from dateutil.relativedelta import relativedelta
 
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.core import mail
 
 from project.utils import REDIS, our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key

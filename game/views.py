@@ -1,6 +1,7 @@
 import gspread
 import logging
 
+from django.http import HttpResponse
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.sites.shortcuts import get_current_site
@@ -9,11 +10,11 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic.base import View
 from project.views import CardFormView
 from game.forms import TabulatorForm
-from game.models import Game
+from game.models import Game, Series
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
-from game.utils import find_latest_active_game, find_hosted_game
+from game.utils import find_latest_active_game, find_latest_public_game
 from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
@@ -107,6 +108,14 @@ def send_confirm(request, slug, email):
     return sendgrid_send("Let's play Commonology", msg, [(email, None)])
 
 
+def render_game(request, game, user):
+    slug = game.series.slug
+    if not user.series.filter(slug=slug).exists():
+        series = Series.objects.filter(slug=slug).first()
+        series.players.add(user)
+    return HttpResponse(f'stub function that would render {game} for {user}')
+
+
 # THIS SHOULD BE TEMPORARY UNTIL WE HOST OUR OWN FORMS
 # The following GameEntryView class works and should be used instead.
 # See https://github.com/quizitive/commonology/issues/288
@@ -118,44 +127,49 @@ class GameEntryWithoutValidationView(CardFormView):
 
     def message(self, request, msg):
         self.custom_message = msg
-        return self.render(request, form=None, button_label='Next',
+        return self.render(request, form=None, button_label='Home',
                            form_method="get", form_action='/')
+
+    def leaderboard(self, request, msg):
+        return self.render(request, form=None, button_label='Leaderboard',
+                           form_method="get", form_action='/leaderboard')
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
-        game_id = request.GET.get('game_id')
+        game_uuid = kwargs.get('game_uuid')
+        user = request.user
 
-        if game_id:
-            if request.user.is_anonymous:
-                return self.message(request,
-                                    'I think you are a game host trying to preview a game.  You must login first')
-            # /c/rambus/play?game_id=2
-            g = find_hosted_game(slug, game_id, request.user)
+        if not game_uuid:
+            g = find_latest_public_game(slug)
+            if g is None:
+                return self.message(request, 'Cannot find game.  Perhaps you have a bad link.')
         else:
-            g = find_latest_active_game(slug)
+            g = Game.objects.filter(series__slug=slug, uuid=game_uuid).first()
 
-        if slug == 'commonology':
-            if not g:
-                return self.message(request,
-                                    'Sorry the next game has not started yet.  Join our list so we can let you know when it does.')
-            else:
-                return redirect(g.google_form_url)
-
-        if not g:
-            return self.message(request,
-                                'Sorry the next game has not started yet. You should receive an email reminder when it is ready')
-
-        if request.user.is_anonymous:
-            return self.message(request,
-                                'You must be logged in to play this version of the game.')
-        else:
-            player = is_validated(request.user.email)
-
-        if player and player.series.filter(slug=slug).exists():
+        # Backward compatibility
+        if g.google_form_url:
             return redirect(g.google_form_url)
 
-        return self.message(request,
-                            'Sorry the game you requested is not available without an invitation.')
+        is_active = g.is_active
+        is_host = user in g.hosts.all()
+
+        if is_host:
+            # May be a host previewing a game
+            return render_game(request, g, user)
+
+        if not is_active and g.publish:
+            return self.leaderboard(request, 'Seems like the game finished.  Go to the leaderboard.')
+
+        if not is_active:
+            if user in g.players.all():
+                return self.message(request, 'You played already.  Your answers have been emailed to you.')
+
+            return self.message(request,
+                                'Sorry the next game has not started yet.  Join our list so we can let you know when it does.')
+
+        if not user.is_anonymous:
+
+        return render_game(request, g, user)
 
 
 class GameEntryView(CardFormView):
@@ -217,8 +231,9 @@ class GameEntryValidationView(View):
     # c/<slug>/play/<uuid>
     def get(self, request, *args, **kwargs):
         slug = kwargs['series_slug']
-        uuid = kwargs['uidb64']
-        pe = PendingEmail.objects.filter(uuid__exact=uuid).get()
+        game_uuid = kwargs['pending_uuid']
+        pending_uuid = kwargs['pending_uuid']
+        pe = PendingEmail.objects.filter(uuid__exact=pending_uuid).get()
         if pe is None:
             gc = GameEntryView()
             return gc.warning(request, 'Seems like there was a problem with the validation link. Please try again.')
