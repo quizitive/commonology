@@ -22,7 +22,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0008_auto_20210608_1438'),
+        ('game', '0009_game_unique_code'),
     ]
 
     operations = [
