@@ -11,9 +11,26 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def about_view(request, *args, **kwargs):
+def document_render(request, filename):
     context = next_game_context()
-    return render(request, 'about.html', context)
+    context['filename'] = filename
+    return render(request, 'document.html', context)
+
+
+def about_view(request, *args, **kwargs):
+    return document_render(request, 'about.html')
+
+
+def product_view(request, *args, **kwargs):
+    return document_render(request, 'product.html')
+
+
+def tos_view(request, *args, **kwargs):
+    return document_render(request, 'tos.html')
+
+
+def privacy_view(request, *args, **kwargs):
+    return document_render(request, 'privacy.html')
 
 
 def index(request):
