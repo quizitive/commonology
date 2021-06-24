@@ -1,0 +1,34 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block title %}Commonology | Terms of Service{% endblock %}
+
+{% block content %}
+<div class="w3-row" style="padding: 8pt"></div>
+  <div class="content">
+    <h2 class="w3-margin-bottom w3-margin-top w3-padding" style="vertical-align:bottom;">
+      <img src="{% static 'img/logo.svg' %}" class="w3-padding-24">
+    </h2>
+
+<div style="padding: 0 10px">
+
+{% include filename %}
+
+</div>
+
+    <div class="w3-cell-row w3-padding-large w3-center" style="width:100%;margin-top:48px;">
+    {% if game_is_on %}
+    <a style="text-decoration:none;" href="{% url 'game:play' %}">
+      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Play Now!</button>
+    </a>
+    {% else %}
+    <a style="text-decoration:none;" href="{% url 'leaderboard:current-results' %}">
+      <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">Latest Results</button>
+    </a>
+      <p>The next game begins on Wednesday!</p>
+    {% endif %}
+    </div>
+
+  </div>
+  <div class="w3-row" style="padding: 24px"></div>
+{% endblock content %}
