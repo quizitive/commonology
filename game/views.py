@@ -173,17 +173,10 @@ class GameEntryView(CardFormView):
         #    3. The player is not the host
 
         if 'email' not in request.POST:
-            # There was no form probably game is not active.
             return redirect('home')
 
         slug = kwargs.get('series_slug') or 'commonology'
         email = request.POST['email']
-        player = is_validated(email)
-
-        if player:
-            # the get method already deteremined that this slug has an active game.
-            g = find_latest_active_game(slug)
-            return render_game(request, g, player)
 
         send_confirm(request, slug, email)
         self.custom_message = f"We sent the game link to {email}. " \
@@ -217,7 +210,7 @@ class GameEntryValidationView(View):
 
         g = find_latest_active_game(slug)
         if not g:
-            #  This should rarely happy because GameEntryView.get() confirmed there is an active game.
+            # This should rarely happy because GameEntryView.get() confirmed there is an active game.
             # However, someone could try to use a confirm link too late.
             gc = GameEntryView()
             return gc.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
