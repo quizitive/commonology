@@ -18,7 +18,6 @@ from game.utils import find_latest_public_game
 from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
-from users.utils import is_validated
 from users.views import remove_pending_email_invitations
 from mail.sendgrid_utils import sendgrid_send
 
