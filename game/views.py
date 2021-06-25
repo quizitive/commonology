@@ -95,13 +95,16 @@ def game_url(google_form_url, email):
     return google_form_url.replace('alex@commonologygame.com', email)
 
 
-def send_confirm(request, slug, email):
+def send_confirm(request, g, email):
     remove_pending_email_invitations()
     pe = PendingEmail(email=email)
     pe.save()
 
+    slug = g.series.slug
+    game_uuid = g.uuid
+
     domain = get_current_site(request)
-    url = (f'https://{domain}/c/{slug}/play/{pe.uuid}')
+    url = (f'https://{domain}/c/{slug}/play/{game_uuid}/{pe.uuid}')
 
     msg = render_to_string('game/validate_email.html', {'join_url': url})
 
@@ -175,10 +178,20 @@ class GameEntryView(CardFormView):
         if 'email' not in request.POST:
             return redirect('home')
 
-        slug = kwargs.get('series_slug') or 'commonology'
+        game_uuid = kwargs.get('game_uuid')
+
+        if game_uuid:
+            g = Game.objects.filter(uuid=game_uuid).first()
+        else:
+            slug = kwargs.get('series_slug') or 'commonology'
+            g = find_latest_public_game(slug)
+
+        if g is None:
+            return self.message(request, 'Cannot find game.  Perhaps you have a bad link.')
+
         email = request.POST['email']
 
-        send_confirm(request, slug, email)
+        send_confirm(request, g, email)
         self.custom_message = f"We sent the game link to {email}. " \
                               f"Don't forget to check your spam or junk folder if need be." \
                               f"By the way, if you were logged in you'd be playing already."
@@ -188,10 +201,10 @@ class GameEntryView(CardFormView):
 
 
 class GameEntryValidationView(View):
-    # c/<slug>/play/<uuid>
+    # c/<slug>/play/<game_uuid>/<pending_uuid>
     def get(self, request, *args, **kwargs):
         slug = kwargs['series_slug']
-        game_uuid = kwargs['pending_uuid']
+        game_uuid = kwargs['game_uuid']
         pending_uuid = kwargs['pending_uuid']
         pe = PendingEmail.objects.filter(uuid__exact=pending_uuid).get()
         if pe is None:
@@ -208,7 +221,7 @@ class GameEntryValidationView(View):
             p = Player(email=email)
             p.save()
 
-        g = Game.objects.filter(series__slug=slug, uuid=game_uuid).first()
+        g = Game.objects.filter(uuid=game_uuid).first()
         if not g.is_active:
             # This should rarely happy because GameEntryView.get() confirmed there is an active game.
             # However, someone could try to use a confirm link too late.
