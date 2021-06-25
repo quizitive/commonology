@@ -14,7 +14,7 @@ from game.models import Game, Series
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
-from game.utils import find_latest_active_game, find_latest_public_game
+from game.utils import find_latest_public_game
 from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
@@ -208,8 +208,8 @@ class GameEntryValidationView(View):
             p = Player(email=email)
             p.save()
 
-        g = find_latest_active_game(slug)
-        if not g:
+        g = Game.objects.filter(series__slug=slug, uuid=game_uuid).first()
+        if not g.is_active:
             # This should rarely happy because GameEntryView.get() confirmed there is an active game.
             # However, someone could try to use a confirm link too late.
             gc = GameEntryView()
