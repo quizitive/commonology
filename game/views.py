@@ -172,6 +172,8 @@ class GameEntryWithoutValidationView(CardFormView):
         return render_game(request, g, user)
 
 
+...... combine GameEntryWithoutValidationView.get into next class and drop the GameEntryWithoutValidationView
+
 class GameEntryView(CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
