@@ -1,5 +1,6 @@
 import gspread
 import logging
+from numpy import base_repr
 
 from django.conf import settings
 from django.http import Http404
@@ -10,12 +11,11 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
-from django.urls import reverse
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from project.views import CardFormView
 from game.forms import TabulatorForm, QuestionAnswerForm
-from game.models import Game, Series
+from game.models import Game, Series, Answer
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
@@ -71,12 +71,6 @@ class BaseGameView(SeriesPermissionMixin, View):
 
         return super().dispatch(request, *args, **kwargs)
 
-    def _child_dispatch(self, request, *args, **kwargs):
-        # implement this in views that inherit from this class if you need
-        # a place to add additional dispatch logic after class variables
-        # are instantiated but before the dispatch work is done
-        pass
-
     def get_game(self):
         """Implement this method to define game permission logic"""
         raise NotImplementedError
@@ -96,103 +90,86 @@ class BaseGameView(SeriesPermissionMixin, View):
 class GameFormView(FormMixin, BaseGameView):
     signer = Signer()
     request = None
+    game = None
     player = None
-    uuid = None
 
-    def __call__(self, *args, **kwargs):
-        pass
+    def render_game(self, request, *args, **kwargs):
+        # called when an validated player passes though GameEntryView
+        psid = self.sign_game_player()
+        self.requested_slug = self.game.series.slug
+        return render(request, 'game/game_form.html', self.get_context(self.game, psid))
 
-    def dispatch(self, request, *args, **kwargs):
-        self.uuid = self.kwargs.get('uuid')
-        return super().dispatch(request, *args, **kwargs)
-
-    def render_game(self, request, player_email):
-        # used to load a clean game form for a validated player
-        signed_email = self.signer.sign(player_email)
-        return render(request, 'game/game_form.html', self.get_context(self.game, signed_email))
-
-    def get(self, request, game_id, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         # todo: render a player's game responses
-        # return render(request, 'game/game_form.html', self.get_context(self.game, None))
-        return self.render_game(request, 'e@mail.com')
+        if (psid := kwargs.get('player_signed_id')) is None:
+            raise PermissionDenied
+
+        game, player = self.get_game_and_player(psid)
+
+        form_data = {
+            str(qid): answer
+            for qid, answer in Answer.objects.filter(
+                question__game=self.game,
+                player=player
+            ).values_list('question', 'raw_string')
+        }
+        forms = self.get_forms(self.game, form_data)
+        context = self.get_context(self.game, None, forms)
+        # todo: disable button, etc
+        return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
 
-        # todo: this should maybe go back to the view Marc's working on?
-        # make sure game is still open, and handle various scenarios
-        if not self.game.is_active:
+        # Make sure this is a real submission that hasn't been tampered with
+        if (psid := self.request.POST.get('psid')) is None:
+            raise PermissionDenied
 
-            # 1: This game has already been published, send all traffic to leaderboard
-            if self.game.publish:
-                header = "Game Over"
-                msg = "This game is already scored, head on over to the results and join the conversation!"
-                button_label = "The Results"
-                return self._game_form_fail_card(request, header, msg, button_label)
+        game, player = self.get_game_and_player(psid)
 
-            # 2: This user has already submitted answers for this game, send them to their answers
-            # todo: need a static form view for players that have already answered
-            if request.user.is_authenticated:
-                if request.user.id in self.game.players.values_list('player', flat=True):
-                    header = "Game Played"
-                    msg = "You've already played this game! Your answers have been emailed to you."
-                    form_action = reverse('home')
-                    return self._game_form_fail_card(request, header, msg, None)
-
-            # 3: This user isn't logged in and/or didn't play this game, send them home
-            header = "Game Not Active"
-            msg = "This game is no longer active, please try a different game."
-            return self._game_form_fail_card(request, header, msg, None)
-
-        # Make sure this is a real email that hasn't been tampered with
-        signed_email = self.request.POST.get('email')
-        if signed_email:
-            try:
-                email = self.signer.unsign(signed_email)
-            except BadSignature:
-                raise PermissionDenied
-            try:
-                player = Player.objects.get(email=email)
-                # todo: player should be in the series! make sure they're added on validation
-            except Player.DoesNotExist:
-                raise PermissionDenied
-            if player.id in self.game.players.values_list('player', flat=True):
-                header = "Game Played"
-                msg = "You've already played this game! Your answers have been emailed to you."
-                return self._game_form_fail_card(request, header, msg, None)
+        if player.id in self.game.players.values_list('player', flat=True):
+            header = "Game Played"
+            msg = "You've already played this game! Your answers have been emailed to you."
+            raise PermissionDenied
 
         # build a dict with the form inputs
-        form_data = {qid: answer
-                     for qid, answer in
-                     zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))}
+        form_data = {
+            qid: answer
+            for qid, answer in
+            zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))
+        }
 
         forms = self.get_forms(self.game, form_data)
         if any([f.errors for f in forms.values()]):
-            context = self.get_context(self.game, signed_email, forms)
+            context = self.get_context(self.game, psid, forms)
             return render(request, 'game/game_form.html', context)
 
         # todo: save form data
         print("success!")
 
         # todo: a success screen
+        # todo: email answers link
         return redirect('home')
 
     def test_func(self):
         # override super method, we don't want to restrict access to game form for
-        # new players of a series. obtaining the unique url is validation enough
+        # new players of a series, obtaining the unique url is validation enough
         return True
 
     def get_game(self):
+        # self.game will be set if view is instantiated from GameEntryView
+        if self.game is not None:
+            return self.game
+        # otherwise use url to define self.game
         try:
-            # todo: make this use game uuid
             return Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
         except Game.DoesNotExist:
             raise Http404("Game does not exist")
 
-    def get_context(self, game, signed_email, forms=None):
+    def get_context(self, game, psid, forms=None):
         context = super().get_context()
         context.update({
             'questions': self.questions_with_forms(game, forms),
-            'email': signed_email
+            'psid': psid
         })
         return context
 
@@ -205,6 +182,7 @@ class GameFormView(FormMixin, BaseGameView):
             forms = {q.id: QuestionAnswerForm(
                 question_id=q.id,
                 auto_id=f'%s_{q.id}',
+                initial={'question_id': q.id, 'raw_string': form_data.get(str(q.id))},
                 data={'question_id': q.id, 'raw_string': form_data.get(str(q.id))}
             )
                 for q in game.questions.order_by('number')
@@ -225,31 +203,20 @@ class GameFormView(FormMixin, BaseGameView):
         ]
         return questions_with_forms
 
-    def _game_form_fail_card(self, request, header, msg, button_label, form_action=None):
-        # todo: probably deprecated
-        if form_action is None:
-            if self.slug == "commonology":
-                form_action = reverse('leaderboard:current-leaderboard')
-            else:
-                form_action = reverse('series-leaderboard:current-leaderboard',
-                                      kwargs={'series_slug': self.requested_slug})
+    def get_game_and_player(self, psid):
+        """Parses unique psid to get game and player object, raises PermissionDenied on all errors"""
+        try:
+            game, player = self.unsign_game_player(psid)
+        except (BadSignature, Player.DoesNotExist, Game.DoesNotExist):
+            raise PermissionDenied
+        return game, player
 
-        gc = GameEntryView()
-        return gc.warning(
-            request,
-            header=header,
-            message=msg,
-            button_label=button_label,
-            keep_form=False,
-            form_method='get',
-            form_action=form_action
-        )
+    def unsign_game_player(self, pac):
+        b36_gid, b36_pid = self.signer.unsign(pac).split("-")
+        return Game.objects.get(id=int(b36_gid, 36)), Player.objects.get(id=int(b36_pid, 36))
 
-    def _redirect_to_play(self):
-        # todo: probably deprecated
-        if self.requested_slug:
-            return redirect('series-game:play', series_slug=self.requested_slug, uuid=self.uuid)
-        return redirect('game:play', uuid=self.uuid)
+    def sign_game_player(self):
+        return self.signer.sign(f"{base_repr(self.game.id, 36)}-{base_repr(self.player.id, 36)}")
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
@@ -330,20 +297,22 @@ class GameEntryView(CardFormView):
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
         g = find_latest_active_game(slug)
+        player, _ = Player.objects.get_or_create(email='digifuzi@gmail.com')
+        return GameFormView(game=g, player=player).render_game(request)
         if not g:
             return self.warning(request,
                                 ('Sorry the next game has not started yet.  '
                                  'Join our list so we can let you know when it does.'),
                                 keep_form=False)
 
-        if request.user.is_authenticated:
-            player = is_validated(request.user.email)
-            # if not (slug == 'commonology' or player.series.filter(slug=slug).exists()):
-            #     return self.warning(request, 'Sorry the game you requested is not available without an invitation.',
-            #                         keep_form=False)
-
-            # url = game_url(g.google_form_url, request.user.email)
-            return GameFormView(request=request).dispatch(request, *args, **kwargs)
+        # if request.user.is_authenticated:
+        #     player = is_validated(request.user.email)
+        #     # if not (slug == 'commonology' or player.series.filter(slug=slug).exists()):
+        #     #     return self.warning(request, 'Sorry the game you requested is not available without an invitation.',
+        #     #                         keep_form=False)
+        #
+        #     # url = game_url(g.google_form_url, request.user.email)
+        #     return GameFormView(request=request).dispatch(request, *args, **kwargs)
 
         return super().get(request, *args, **kwargs)
 
