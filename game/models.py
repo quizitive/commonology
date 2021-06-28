@@ -97,6 +97,13 @@ class Game(models.Model):
             )
         )
 
+    def user_played(self, player):
+        q = self.questions.first()
+        if q:
+            return q.raw_answers.filter(player=player.id).exists()
+        return False
+
+
     @property
     def teams(self):
         return self.questions.exclude(

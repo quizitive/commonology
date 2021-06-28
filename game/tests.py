@@ -322,7 +322,7 @@ class TestPlayRequest(TestCase):
 
     def test_no_games(self):
         client = Client()
-        path = reverse('series-game:play', kwargs={'series_slug': 'foobar'})
+        path = '/c/foobar/play/'
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Cannot find an active game.  Perhaps you have a bad link")
@@ -334,24 +334,66 @@ class TestPlayRequest(TestCase):
         g.save()
 
         client = Client()
-        path = reverse('game:play')
+        path = '/play/'
         try:
             client.get(path)
             self.assertTrue(False)
         except NoReverseMatch:
             pass
 
-    def test_host(self):
+    def test_game_host(self):
         # Test playing non active game as game host
         # test with uuid and without
-        self.series.owner = self.player
-        self.series.save()
+
+        game = self.game
+        game.end = game.start
+        game.save()
 
         client = get_local_client()
+        path = f'/play/{game.uuid}'
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Seems like the game finished but has not been scored yet.')
 
+        self.series.hosts.add(self.player)
+        path = f'/play/{game.uuid}'
+        response = client.get(path)
+        self.assertContains(response, self.game.name)
 
+        # This should fail because find latest game would return None and so no game can be found.
+        path = f'/play/'
+        response = client.get(path)
+        self.assertContains(response, 'Cannot find an active game.  Perhaps you have a bad link.')
 
-        pass
+    def test_with_login(self):
+        # test with uuid and without
+        # test non ative game
+        game = self.game
+        client = get_local_client()
+
+        path = '/play/'
+        response = client.get(path)
+        self.assertContains(response, game.name)
+
+        path = reverse('game:uuidplay', kwargs={'game_uuid': str(game.uuid)})
+        response = client.get(path)
+        self.assertContains(response, game.name)
+
+        game.end = game.start
+        game.save()
+        path = '/play/'
+        response = client.get(path)
+        self.assertContains(response, 'Cannot find an active game.  Perhaps you have a bad link.')
+
+        path = reverse('game:uuidplay', kwargs={'game_uuid': str(game.uuid)})
+        response = client.get(path)
+        self.assertContains(response, 'Seems like the game finished but has not been scored yet.')
+
+        game.publish=True
+        game.save()
+        path = reverse('game:uuidplay', kwargs={'game_uuid': str(game.uuid)})
+        response = client.get(path)
+        self.assertContains(response, 'Seems like the game finished.  See the leaderboard.')
 
     def test_without_login(self):
         # try with just /play and /c/rambus/play and /c/commonology/play
@@ -366,10 +408,6 @@ class TestPlayRequest(TestCase):
         # delete game and test for warning
 
         # succdeeds if game.name is in response
-
-    def test_with_login(self):
-        # test with uuid and without
-        pass
 
 
     #

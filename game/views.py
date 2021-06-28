@@ -130,21 +130,15 @@ class GameEntryView(CardFormView):
     button_label = "Next"
     custom_message = "Enter your email to play the game so we can send the results to you."
 
-    def message_join(self, request,
-                     msg=f'Sorry the next game has not started yet.  '
-                         f'Join our list so we can let you know when it does.'):
-        self.custom_message = msg
-        return self.render(request, form=None, button_label='Join',
-                           form_method="get", form_action='/join')
-
     def message(self, request, msg):
         self.custom_message = msg
         return self.render(request, form=None, button_label='Home',
                            form_method="get", form_action='/')
 
-    def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.'):
+    def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
+        self.custom_message = msg
         return self.render(request, form=None, button_label='Leaderboard',
-                           form_method="get", form_action='/leaderboard')
+                           form_method="get", form_action=f'/c/{slug}/leaderboard/')
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
@@ -157,26 +151,27 @@ class GameEntryView(CardFormView):
                 return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
         else:
             g = Game.objects.filter(uuid=game_uuid).first()
+            slug = g.series.slug
 
         # Backward compatibility
         if g.google_form_url:
             return redirect(g.google_form_url)
 
         is_active = g.is_active
-        is_host = user in g.hosts.all()
+        is_host = user in g.series.hosts.all()
 
         if is_host:
             # May be a host previewing a game
             return render_game(request, g)
 
         if not is_active and g.publish:
-            return self.leaderboard(request)
+            return self.leaderboard(request, slug=slug)
 
         if not is_active:
-            if user in g.players.all():
+            if g.user_played(user):
                 return self.message(request, 'You played already.  Your answers have been emailed to you.')
 
-            return self.message_join(request)
+            return self.message(request, msg='Seems like the game finished but has not been scored yet.')
 
         if user.is_authenticated:
             return render_game(request, g)
