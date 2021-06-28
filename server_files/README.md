@@ -288,6 +288,16 @@ $ sudo su -
 
 Note: you can use wildcards with systemctl like this `sudo systemctl restart 'celery*'`.
 
+## Daphne
+
+Daphne is needed for real time messages on our results page.
+
+```shell
+$ sudo su -
+# cp /home/django/commonology/server_files/etc/systemd/system/daphne.service /etc/systemd/system/
+# systemctl enable daphne
+```
+
 ## GUnicorn
 
 ```shell
