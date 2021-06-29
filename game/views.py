@@ -2,6 +2,7 @@ import gspread
 import logging
 from numpy import base_repr
 
+from django.http import HttpResponse
 from django.conf import settings
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
@@ -16,14 +17,15 @@ from django.views.generic.edit import FormMixin
 from project.views import CardFormView
 from game.forms import TabulatorForm, QuestionAnswerForm
 from game.models import Game, Series, Answer
+from game.forms import TabulatorForm
+from game.models import Game, Series
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
-from game.utils import find_latest_active_game, find_hosted_game
+from game.utils import find_latest_public_game
 from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
-from users.utils import is_validated
 from users.views import remove_pending_email_invitations
 from mail.sendgrid_utils import sendgrid_send
 
@@ -234,154 +236,177 @@ def game_url(google_form_url, email):
     return google_form_url.replace('alex@commonologygame.com', email)
 
 
-def send_confirm(request, slug, email):
+def send_confirm(request, g, email):
     remove_pending_email_invitations()
     pe = PendingEmail(email=email)
     pe.save()
 
+    slug = g.series.slug
+    game_uuid = g.uuid
+
     domain = get_current_site(request)
-    url = (f'https://{domain}/c/{slug}/play/{pe.uuid}')
+    url = (f'https://{domain}/c/{slug}/play/{game_uuid}/{pe.uuid}')
 
     msg = render_to_string('game/validate_email.html', {'join_url': url})
 
     return sendgrid_send("Let's play Commonology", msg, [(email, None)])
 
 
-# THIS SHOULD BE TEMPORARY UNTIL WE HOST OUR OWN FORMS
-# The following GameEntryView class works and should be used instead.
-# See https://github.com/quizitive/commonology/issues/288
-# Also enable tests.TestPlayRequest and remove tests.TestPlayRequestWithoutValidation
-class GameEntryWithoutValidationView(CardFormView):
-    form_class = PendingEmailForm
-    header = "Game starts here!"
-    button_label = "Next"
+def render_game(request, game, user=None):
+    slug = game.series.slug
 
-    def message(self, request, msg):
-        self.custom_message = msg
-        return self.render(request, form=None, button_label='Next',
-                           form_method="get", form_action='/')
+    if user:
+        request.session['user_id'] = user.id
+    else:
+        user = request.user
 
-    def get(self, request, *args, **kwargs):
-        slug = kwargs.get('series_slug') or 'commonology'
-        game_id = request.GET.get('game_id')
-
-        if game_id:
-            if request.user.is_anonymous:
-                return self.message(request,
-                                    'I think you are a game host trying to preview a game.  You must login first')
-            # /c/rambus/play?game_id=2
-            g = find_hosted_game(slug, game_id, request.user)
-        else:
-            g = find_latest_active_game(slug)
-
-        if slug == 'commonology':
-            if not g:
-                return self.message(request,
-                                    'Sorry the next game has not started yet.  Join our list so we can let you know when it does.')
-            else:
-                return GameFormView(request=request).dispatch(request, *args, **kwargs)
-
-        if not g:
-            return self.message(request,
-                                'Sorry the next game has not started yet. You should receive an email reminder when it is ready')
-
-        if request.user.is_anonymous:
-            return self.message(request,
-                                'You must be logged in to play this version of the game.')
-        else:
-            player = is_validated(request.user.email)
-
-        if player and player.series.filter(slug=slug).exists():
-            return redirect(g.google_form_url)
-
-        return self.message(request,
-                            'Sorry the game you requested is not available without an invitation.')
+    if not user.series.filter(slug=slug).exists():
+        series = Series.objects.filter(slug=slug).first()
+        series.players.add(user)
+    return HttpResponse(f'stub function that would render {game.name} for {user}')
 
 
 class GameEntryView(CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
-    button_label = "Next"
-    custom_message = "Enter your email to play the game so we can send the results to you."
+    button_label = "Email me a play link"
+    custom_message = "Login to play or enter your email and we will send you a play link."
+
+    def message(self, request, msg):
+        self.custom_message = msg
+        return self.render(request, form=None, button_label='Home',
+                           form_method="get", form_action='/')
+
+    def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
+        self.custom_message = msg
+        return self.render(request, form=None, button_label='Leaderboard',
+                           form_method="get", form_action=f'/c/{slug}/leaderboard/')
+
+    def join(self, request, msg):
+        self.custom_message = msg
+        return self.render(request, form=None, button_label='Join',
+                           form_method="get", form_action='/join/')
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
-        g = find_latest_active_game(slug)
-        player, _ = Player.objects.get_or_create(email='digifuzi@gmail.com')
-        return GameFormView(game=g, player=player).render_game(request)
-        if not g:
-            return self.warning(request,
-                                ('Sorry the next game has not started yet.  '
-                                 'Join our list so we can let you know when it does.'),
-                                keep_form=False)
+        game_uuid = kwargs.get('game_uuid')
+        user = request.user
 
-        # if request.user.is_authenticated:
-        #     player = is_validated(request.user.email)
-        #     # if not (slug == 'commonology' or player.series.filter(slug=slug).exists()):
-        #     #     return self.warning(request, 'Sorry the game you requested is not available without an invitation.',
-        #     #                         keep_form=False)
-        #
-        #     # url = game_url(g.google_form_url, request.user.email)
-        #     return GameFormView(request=request).dispatch(request, *args, **kwargs)
+        if not game_uuid:
+            g = find_latest_public_game(slug)
+        else:
+            g = Game.objects.filter(uuid=game_uuid).first()
 
+        if g is None:
+            if user.is_authenticated:
+                return self.message(request, 'Cannot find an active game.  We will let you know when the next game begins.')
+            elif game_uuid:
+                return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
+            else:
+                return self.join(request, 'Cannot find an active game.  Join so we can let you know when the next game begins.')
+
+        slug = g.series.slug
+
+        # Backward compatibility
+        if g.google_form_url:
+            return redirect(g.google_form_url)
+
+        is_active = g.is_active
+        is_host = user in g.series.hosts.all()
+
+        if is_host:
+            # May be a host previewing a game
+            return render_game(request, g)
+
+        if not is_active and g.publish:
+            return self.leaderboard(request, slug=slug)
+
+        if g.user_played(user):
+            return self.message(request, 'You played already.  Your answers have been emailed to you.')
+
+        if not is_active:
+            return self.message(request, msg='Seems like the game finished but has not been scored yet.')
+
+        if user.is_authenticated:
+            return render_game(request, g)
+
+        self.card_template = 'game/game_entry_card.html'
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        # The get method already determined that:
+        #    1. There is an active game for the given slug
+        #    2. The player is not logged in
+        #    3. The player is not the host
+
         if 'email' not in request.POST:
-            # There was no form probably game is not active.
             return redirect('home')
 
-        slug = kwargs.get('series_slug') or 'commonology'
-        email = request.POST['email']
-        player = is_validated(email)
+        game_uuid = kwargs.get('game_uuid')
 
-        if player and player.series.filter(slug=slug).exists():
-            g = find_latest_active_game(slug)
-            if not g:
-                return self.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
-            url = game_url(g.google_form_url, email)
-            return GameFormView(player=player).get(request)
+        if game_uuid:
+            g = Game.objects.filter(uuid=game_uuid).first()
         else:
-            if slug == 'commonology':
-                send_confirm(request, slug, email)
-                self.custom_message = f"We sent the game link to {email}. " \
-                                      f"Don't forget to check your spam or junk folder if need be."
+            slug = kwargs.get('series_slug') or 'commonology'
+            g = find_latest_public_game(slug)
 
-                self.header = "Game link sent!"
-                return self.render(request, form=None, button_label='OK')
+        if g is None:
+            return self.message(request, 'Cannot find game.  Perhaps you have a bad link.')
 
-        return self.warning(request,
-                            'Sorry the game you requested is not available without an invitation.',
-                            keep_form=False)
+        email = request.POST['email']
+
+        send_confirm(request, g, email)
+        self.custom_message = f"We sent the game link to {email}. " \
+                              f"Don't forget to check your spam or junk folder if need be. " \
+                              f"By the way, if you were logged in you'd be playing already."
+
+        self.header = "Game link sent!"
+        return self.render(request, form=None, button_label='OK')
 
 
-class GameEntryValidationView(View):
-    # c/<slug>/play/<uuid>
+class GameEntryValidationView(CardFormView):
+    form_class = PendingEmailForm
+    header = "Email validated here!"
+    button_label = "Next"
+    custom_message = ''
+
+    def message(self, request, msg):
+        self.custom_message = msg
+        return self.render(request, form=None, button_label='Home',
+                           form_method="get", form_action='/')
+
+    # c/<slug>/play/<game_uuid>/<pending_uuid>
     def get(self, request, *args, **kwargs):
-        slug = kwargs['series_slug']
-        uuid = kwargs['uidb64']
-        pe = PendingEmail.objects.filter(uuid__exact=uuid).get()
+        game_uuid = kwargs['game_uuid']
+        pending_uuid = kwargs['pending_uuid']
+
+        g = Game.objects.filter(uuid=game_uuid).first()
+        if not g:
+            return self.warning(request, 'That game does not exist.  Perhaps you are using the wrong link.', keep_form=False)
+
+        if not g.is_active:
+            # This should rarely happy because GameEntryView.get() confirmed there is an active game.
+            # However, someone could try to use a confirm link too late.
+            return self.warning(request, 'Sorry the next game is no longer active.', keep_form=False)
+
+        if request.user.is_authenticated:
+            return render_game(request, g)
+
+        pe = PendingEmail.objects.filter(uuid__exact=pending_uuid).first()
         if pe is None:
-            gc = GameEntryView()
-            return gc.warning(request, 'Seems like there was a problem with the validation link. Please try again.')
+            return self.message(request, 'Seems like there was a problem with the validation link. Please try again.')
 
         email = pe.email
         try:
             p = Player.objects.get(email=email)
             if not p.is_active:
                 p.is_active = True
+                p.save()
         except Player.DoesNotExist:
             p = Player(email=email)
-        p.series.add(Series.objects.get(slug=slug))
-        p.save()
+            p.save()
 
-        g = find_latest_active_game(slug)
-        if not g:
-            gc = GameEntryView()
-            return gc.warning(request, 'Sorry the next game has not started yet.', keep_form=False)
-
-        url = game_url(g.google_form_url, email)
-        return redirect(url)
+        return render_game(request, g, p)
 
 
 # ---- To be deprecated once we host forms ---- #
