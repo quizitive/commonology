@@ -1,0 +1,6 @@
+{% extends "cards/base_card.html" %}
+{% block card_extras %}
+    <form method="get" action="/login/{{ login_email }}">
+     <input type="submit" value="Login to play" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
+    </form>
+{% endblock %}

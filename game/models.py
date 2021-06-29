@@ -1,8 +1,7 @@
 import uuid
-
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
-from django.forms import CharField, ValidationError
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 from django.db.models.signals import post_save
@@ -10,6 +9,8 @@ from django.dispatch import receiver
 
 from users.models import Player
 from chat.models import Thread
+
+from project.utils import our_now
 
 
 class Series(models.Model):
@@ -96,6 +97,12 @@ class Game(models.Model):
             )
         )
 
+    def user_played(self, player):
+        q = self.questions.first()
+        if q:
+            return q.raw_answers.filter(player=player.id).exists()
+        return False
+
     @property
     def teams(self):
         return self.questions.exclude(
@@ -151,6 +158,11 @@ class Game(models.Model):
     @property
     def date_range_pretty(self):
         return f'{self.min_date:%m/%d} - {self.max_date:%m/%d/%Y}'
+
+    @property
+    def is_active(self):
+        now = our_now()
+        return self.start <= now <= self.end
 
 
 class Question(models.Model):
