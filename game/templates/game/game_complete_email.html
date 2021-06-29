@@ -1,0 +1,24 @@
+
+{% autoescape off %}
+
+{% block email-content %}
+
+  <p>Thanks for playing {{ game_name }}! You can view your answers by clicking the button below.</p>
+
+  <div id="button-holder">
+    <button class="w3-button cg-blue" style="display: block;">
+      <a href="{{ url }}">View my answers</a>
+    </button>
+  </div>
+
+  <p>
+    Cheers,
+    <br/>
+    The Commonology Team
+  </p>
+  <div id="footer" style="margin-bottom:-24px">
+  </div>
+
+{% endblock %}
+
+{% endautoescape %}

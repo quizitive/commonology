@@ -123,6 +123,7 @@ class GameFormView(FormMixin, BaseGameView):
             raise PermissionDenied
 
         game, player = self.get_game_and_player(psid)
+        answers_url = self.build_signed_url(game, player)
 
         if player.id in self.game.players.values_list('player', flat=True):
             return CardFormView().render(
@@ -132,7 +133,7 @@ class GameFormView(FormMixin, BaseGameView):
                                f"You can see them again by clicking the button below.",
                 button_label="View my answers",
                 form_method='get',
-                form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
+                form_action=answers_url
             )
 
         # build a dict with the form inputs
@@ -150,7 +151,13 @@ class GameFormView(FormMixin, BaseGameView):
         for form in forms.values():
             form.save()
 
-        # todo: email answers link
+        domain = get_current_site(request)
+        email_context = {
+            'game_name': game.name,
+            'url': f'https://{domain}{answers_url}'
+        }
+        answers_msg = render_to_string('game/game_complete_email.html', email_context)
+        sendgrid_send(f'{game.name}', answers_msg, [(player.email, None)])
         c = CardFormView().render(
             request,
             header="Success!",
@@ -232,6 +239,9 @@ class GameFormView(FormMixin, BaseGameView):
 
     def sign_game_player(self, game, player):
         return self.signer.sign(f"{base_repr(game.id, 36)}-{base_repr(player.id, 36)}")
+
+    def build_signed_url(self, game, player):
+        return f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
