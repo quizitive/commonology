@@ -140,6 +140,11 @@ class GameEntryView(CardFormView):
         return self.render(request, form=None, button_label='Leaderboard',
                            form_method="get", form_action=f'/c/{slug}/leaderboard/')
 
+    def join(self, request, msg):
+        self.custom_message = msg
+        return self.render(request, form=None, button_label='Join',
+                           form_method="get", form_action='/join/')
+
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
         game_uuid = kwargs.get('game_uuid')
@@ -147,13 +152,18 @@ class GameEntryView(CardFormView):
 
         if not game_uuid:
             g = find_latest_public_game(slug)
-            if g is None:
-                return self.message(request, 'Cannot find an active game.  We will let you know when the next game begins.')
         else:
             g = Game.objects.filter(uuid=game_uuid).first()
-            if g is None:
+
+        if g is None:
+            if user.is_authenticated:
+                return self.message(request, 'Cannot find an active game.  We will let you know when the next game begins.')
+            elif game_uuid:
                 return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
-            slug = g.series.slug
+            else:
+                return self.join(request, 'Cannot find active game.  Join so we can let you know when the next game begins.')
+
+        slug = g.series.slug
 
         # Backward compatibility
         if g.google_form_url:

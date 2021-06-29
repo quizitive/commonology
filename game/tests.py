@@ -327,7 +327,7 @@ class TestPlayRequest(TestCase):
         path = '/c/foobar/play/'
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Cannot find an active game.  We will let you know when the next game begins.')
+        self.assertContains(response, 'Cannot find active game.  Join so we can let you know when the next game begins.')
 
     def test_with_google_form(self):
         # test with uuid and without
@@ -461,6 +461,13 @@ class TestPlayRequest(TestCase):
             last_char = '0'
         uuid = uuid[:-1] + last_char
 
+        path = reverse('game:uuidplay', kwargs={'game_uuid': uuid})
+        client = Client()
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Cannot find an active game.  Perhaps you have a bad link.')
+
+        client = get_local_client()
         path = reverse('game:uuidplay', kwargs={'game_uuid': uuid})
         client = Client()
         response = client.get(path)
