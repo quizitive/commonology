@@ -200,7 +200,7 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(auto_now_add=True)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='answers', db_index=True)
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, related_name='raw_answers', db_index=True)

@@ -135,20 +135,28 @@ class GameFormView(FormMixin, BaseGameView):
         form_data = {
             qid: answer
             for qid, answer in
-            zip(self.request.POST.getlist('question_id'), self.request.POST.getlist('raw_string'))
+            zip(self.request.POST.getlist('question'), self.request.POST.getlist('raw_string'))
         }
 
-        forms = self.get_forms(self.game, form_data)
+        forms = self.get_forms(self.game, form_data, player)
         if any([f.errors for f in forms.values()]):
             context = self.get_context(self.game, psid, forms)
             return render(request, 'game/game_form.html', context)
 
-        # todo: save form data
-        print("success!")
+        for qid, form in forms.items():
+            # form.save()
+            print("form saved")
 
-        # todo: a success screen
         # todo: email answers link
-        return redirect('home')
+        c = CardFormView().render(
+            request,
+            header="Success!",
+            custom_message=f"Your answers have been submitted. You can see them again by clicking the button below.",
+            button_label="View my answers",
+            form_method='get',
+            form_action='/'
+        )
+        return c
 
     def test_func(self):
         # override super method, we don't want to restrict access to game form for
@@ -173,23 +181,25 @@ class GameFormView(FormMixin, BaseGameView):
         })
         return context
 
-    def get_forms(self, game, form_data=()):
+    def get_forms(self, game, form_data=(), player=None):
         """Get all the game question forms, empty or populated with form_data from post.
-           Any form data submitted with question_id not in this game will be ignored,
+           Any form data submitted with question not in this game will be ignored,
            likewise any question without data (e.g. incomplete forms) will be handled"""
         form_data = form_data or {}
         if form_data:
             forms = {q.id: QuestionAnswerForm(
-                question_id=q.id,
+                question=q,
                 auto_id=f'%s_{q.id}',
-                initial={'question_id': q.id, 'raw_string': form_data.get(str(q.id))},
-                data={'question_id': q.id, 'raw_string': form_data.get(str(q.id))}
+                initial={'raw_string': form_data.get(str(q.id))},
+                data={'question': q,
+                      'raw_string': form_data.get(str(q.id)),
+                      'player': player}
             )
                 for q in game.questions.order_by('number')
             }
         else:
             forms = {q.id: QuestionAnswerForm(
-                question_id=q.id,
+                question=q,
                 auto_id=f'%s_{q.id}'
             )
                 for q in game.questions.order_by('number')
