@@ -38,6 +38,7 @@ class QuestionAnswerForm(forms.ModelForm):
     def __init__(self, question, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['question'].initial = question
+        self.fields['player'].required = False
 
         self.q = question
         if self.q.choices:
