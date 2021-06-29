@@ -91,13 +91,10 @@ class BaseGameView(SeriesPermissionMixin, View):
 
 class GameFormView(FormMixin, BaseGameView):
     signer = Signer()
-    request = None
-    game = None
-    player = None
 
-    def render_game(self, request, *args, **kwargs):
+    def render_game(self, request, game, player):
         # called when an validated player passes though GameEntryView
-        psid = self.sign_game_player()
+        psid = self.sign_game_player(game, player)
         self.requested_slug = self.game.series.slug
         return render(request, 'game/game_form.html', self.get_context(self.game, psid))
 
@@ -129,9 +126,15 @@ class GameFormView(FormMixin, BaseGameView):
         game, player = self.get_game_and_player(psid)
 
         if player.id in self.game.players.values_list('player', flat=True):
-            header = "Game Played"
-            msg = "You've already played this game! Your answers have been emailed to you."
-            raise PermissionDenied
+            return CardFormView().render(
+                request,
+                header="You've already played!",
+                custom_message=f"You have already submitted answers for this game. "
+                               f"You can see them again by clicking the button below.",
+                button_label="View my answers",
+                form_method='get',
+                form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
+            )
 
         # build a dict with the form inputs
         form_data = {
@@ -145,9 +148,8 @@ class GameFormView(FormMixin, BaseGameView):
             context = self.get_context(self.game, psid, forms)
             return render(request, 'game/game_form.html', context)
 
-        for qid, form in forms.items():
-            # form.save()
-            print("form saved")
+        for form in forms.values():
+            form.save()
 
         # todo: email answers link
         c = CardFormView().render(
@@ -156,7 +158,7 @@ class GameFormView(FormMixin, BaseGameView):
             custom_message=f"Your answers have been submitted. You can see them again by clicking the button below.",
             button_label="View my answers",
             form_method='get',
-            form_action='/'
+            form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
         )
         return c
 
@@ -227,8 +229,8 @@ class GameFormView(FormMixin, BaseGameView):
         b36_gid, b36_pid = self.signer.unsign(pac).split("-")
         return Game.objects.get(id=int(b36_gid, 36)), Player.objects.get(id=int(b36_pid, 36))
 
-    def sign_game_player(self):
-        return self.signer.sign(f"{base_repr(self.game.id, 36)}-{base_repr(self.player.id, 36)}")
+    def sign_game_player(self, game, player):
+        return self.signer.sign(f"{base_repr(game.id, 36)}-{base_repr(player.id, 36)}")
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
@@ -253,17 +255,12 @@ def send_confirm(request, g, email):
 
 
 def render_game(request, game, user=None):
-    slug = game.series.slug
-
     if user:
         request.session['user_id'] = user.id
     else:
         user = request.user
-
-    if not user.series.filter(slug=slug).exists():
-        series = Series.objects.filter(slug=slug).first()
-        series.players.add(user)
-    return HttpResponse(f'stub function that would render {game.name} for {user}')
+    game.series.players.add(user)
+    return GameFormView(game=game, player=user).render_game(request)
 
 
 class GameEntryView(CardFormView):
