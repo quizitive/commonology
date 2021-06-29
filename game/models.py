@@ -103,7 +103,6 @@ class Game(models.Model):
             return q.raw_answers.filter(player=player.id).exists()
         return False
 
-
     @property
     def teams(self):
         return self.questions.exclude(

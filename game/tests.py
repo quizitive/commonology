@@ -1,3 +1,4 @@
+import re
 import datetime
 import string
 import random
@@ -9,10 +10,12 @@ from dateutil.relativedelta import relativedelta
 
 from django.test import TestCase, Client
 from django.urls import reverse, NoReverseMatch
+from django.core import mail
 
 from project.utils import REDIS, our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from users.tests import get_local_user, get_local_client, ABINORMAL
+from users.models import Player, PendingEmail
 from game.utils import next_wed_noon, next_friday_1159
 from game.models import Series, Question, Answer
 from game.views import find_latest_public_game
@@ -330,21 +333,21 @@ class TestPlayRequest(TestCase):
     def test_with_google_form(self):
         # test with uuid and without
         g = self.game
-        g.google_form_url = 'foobar'
+        g.google_form_url = 'https://docs.google.com/forms/u/1/d/1nrL3Me1hek9loJqNHWnCkphfLZhKP4D1C_92pYbK3sU/'
         g.save()
 
         client = Client()
         path = '/play/'
-        try:
-            client.get(path)
-            self.assertTrue(False)
-        except NoReverseMatch:
-            pass
+        response = client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, g.google_form_url)
+
+        path = reverse('game:uuidplay', kwargs={'game_uuid': str(g.uuid)})
+        response = client.get(path)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, g.google_form_url)
 
     def test_game_host(self):
-        # Test playing non active game as game host
-        # test with uuid and without
-
         game = self.game
         game.end = game.start
         game.save()
@@ -366,8 +369,6 @@ class TestPlayRequest(TestCase):
         self.assertContains(response, 'Cannot find an active game.  Perhaps you have a bad link.')
 
     def test_with_login(self):
-        # test with uuid and without
-        # test non ative game
         game = self.game
         client = get_local_client()
 
@@ -389,130 +390,63 @@ class TestPlayRequest(TestCase):
         response = client.get(path)
         self.assertContains(response, 'Seems like the game finished but has not been scored yet.')
 
-        game.publish=True
+        game.publish = True
         game.save()
         path = reverse('game:uuidplay', kwargs={'game_uuid': str(game.uuid)})
         response = client.get(path)
         self.assertContains(response, 'Seems like the game finished.  See the leaderboard.')
 
+    def get_invite_url(self, email):
+        client = Client()
+        mail.outbox = []
+        response = client.post(reverse('game:play'), data={"email": email})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "forget to check your spam or junk folder if need be.")
+        msg = mail.outbox[0].body
+        url = re.search("(?P<url>https?://[^\s]+)\"\>Click", msg).group("url")
+        mail.outbox = []
+        return url
+
     def test_without_login(self):
         # try with just /play and /c/rambus/play and /c/commonology/play
         # test with uuid and without
-        pass
-        # test that user is created
+        game = self.game
+        path = reverse('game:uuidplay', kwargs={'game_uuid': str(game.uuid)})
 
-        # test with no active games
+        client = Client()
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+
+        p = Player.objects.filter(email=ABINORMAL).first()
+        self.assertIsNone(p)
+        self.assertContains(response, "Enter your email to play the game so we can send the results to you.")
+
+        url = self.get_invite_url(email=ABINORMAL)
+        pe = PendingEmail.objects.filter(email=ABINORMAL).first()
+        self.assertIsNotNone(pe)
+
+        response = client.get(url)
+        self.assertContains(response, game.name)
+
+        # Was player created
+        p = Player.objects.filter(email=ABINORMAL).first()
+        self.assertIsNotNone(p)
 
         # delete pe record and test for failure
+        Player.objects.filter(email=ABINORMAL).delete()
+        PendingEmail.objects.all().delete()
+        response = client.get(url)
+        self.assertContains(response, 'Seems like there was a problem with the validation link. Please try again.')
 
-        # delete game and test for warning
+    def test_stale_email_confirm_link(self):
+        game = self.game
+        client = Client()
 
-        # succdeeds if game.name is in response
-
-
-    #
-    # def test_play_as_common_member(self):
-    #     game = self.game
-    #     game.end = game.start + relativedelta(months=1)
-    #     game.save()
-    #
-    #     client = get_local_client()
-    #
-    #     path = reverse('game:play')
-    #     response = client.get(path)
-    #     self.assertEqual(response.status_code, 302)
-    #     self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
-    #
-    #     client = Client()
-    #     path = reverse('game:play')
-    #     response = client.get(path)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, "Enter your email to play the game so we can send the results to you.")
-    #
-    #     mail.outbox = []
-    #     response = client.post(reverse('game:play'), data={"email": ABINORMAL})
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, "forget to check your spam or junk folder if need be.")
-    #     msg = mail.outbox[0].body
-    #     url = re.search("(?P<url>https?://[^\s]+)\"\>Click", msg).group("url")
-    #     mail.outbox = []
-    #
-    #     response = client.get(url)
-    #     self.assertIn(response.status_code, [302, 404])
-    #     self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
-    #
-    # def test_play_rambus(self):
-    #     series, game = make_test_series(series_name='Rambus')
-    #     slug = series.slug
-    #     game.end = game.start + relativedelta(months=1)
-    #     game.save()
-    #     game_player = get_local_user()
-    #
-    #     # email address in db, logged in, but not in rambus series
-    #     client = get_local_client()
-    #     path = reverse('series-game:play', kwargs={'series_slug': slug})
-    #     response = client.get(path)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
-    #
-    #     # # email address in db, not logged in, not in rabmus series
-    #     get_local_user(e=ABINORMAL)
-    #     response = Client().post(path, data={"email": ABINORMAL})
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
-    #
-    #     # email address in db and in rambus series
-    #     series.players.add(game_player)
-    #     response = client.get(path)
-    #     self.assertEqual(response.status_code, 302)
-    #     self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
-    #
-    #     # anonymous user not in any series
-    #     client = get_local_client(e=ABINORMAL)
-    #     response = client.get(path)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
-    #
-    #     response = Client().get(path)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, "Enter your email to play the game so we can send the results to you.")
-    #
-    #     response = Client().post(path, data={"email": 'never@beenusedhere.com'})
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, "Sorry the game you requested is not available without an invitation.")
-    #
-    # def test_game_not_started(self):
-    #     client = Client()
-    #
-    #     game = self.game
-    #     start_save = game.start
-    #     game.start = game.end
-    #     game.save()
-    #
-    #     path = reverse('game:play')
-    #     response = client.get(path)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, 'Sorry the next game has not started yet.')
-    #
-    #     game.start = start_save
-    #     game.save()
-    #
-    # def test_game_without_url(self):
-    #     slug = 'nourl'
-    #     series, game = make_test_series(slug)
-    #     game.end = game.start + relativedelta(months=1)
-    #     game.save()
-    #     player = get_local_user()
-    #     series.players.add(player)
-    #     client = get_local_client()
-    #     path = reverse('series-game:play', kwargs={'series_slug': slug})
-    #
-    #     response = client.get(path)
-    #     self.assertEqual(response.status_code, 302)
-    #     self.assertEqual(response.url, 'https://docs.google.com/forms/d/uuid/viewform?edit_requested=true')
-    #
-    #     game.google_form_url = ''
-    #     game.save()
-    #     response = client.get(path)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertContains(response, 'Sorry the next game has not started yet.')
+        url = self.get_invite_url(email=ABINORMAL)
+        pe = PendingEmail.objects.filter(email=ABINORMAL).first()
+        self.assertIsNotNone(pe)
+        game.end = game.start
+        game.save()
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Sorry the next game is no longer active.')

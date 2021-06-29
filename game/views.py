@@ -167,10 +167,10 @@ class GameEntryView(CardFormView):
         if not is_active and g.publish:
             return self.leaderboard(request, slug=slug)
 
-        if not is_active:
-            if g.user_played(user):
-                return self.message(request, 'You played already.  Your answers have been emailed to you.')
+        if g.user_played(user):
+            return self.message(request, 'You played already.  Your answers have been emailed to you.')
 
+        if not is_active:
             return self.message(request, msg='Seems like the game finished but has not been scored yet.')
 
         if user.is_authenticated:
@@ -209,7 +209,17 @@ class GameEntryView(CardFormView):
         return self.render(request, form=None, button_label='OK')
 
 
-class GameEntryValidationView(View):
+class GameEntryValidationView(CardFormView):
+    form_class = PendingEmailForm
+    header = "Email validated here!"
+    button_label = "Next"
+    custom_message = ''
+
+    def message(self, request, msg):
+        self.custom_message = msg
+        return self.render(request, form=None, button_label='Home',
+                           form_method="get", form_action='/')
+
     # c/<slug>/play/<game_uuid>/<pending_uuid>
     def get(self, request, *args, **kwargs):
         game_uuid = kwargs['game_uuid']
@@ -217,23 +227,19 @@ class GameEntryValidationView(View):
 
         g = Game.objects.filter(uuid=game_uuid).first()
         if not g:
-            gc = GameEntryView()
-            return gc.warning(request, 'That game does not exist.  Perhaps you are using the wrong link.', keep_form=False)
+            return self.warning(request, 'That game does not exist.  Perhaps you are using the wrong link.', keep_form=False)
 
         if not g.is_active:
             # This should rarely happy because GameEntryView.get() confirmed there is an active game.
             # However, someone could try to use a confirm link too late.
-            gc = GameEntryView()
-            return gc.warning(request, 'Sorry the next game is no longer active.', keep_form=False)
+            return self.warning(request, 'Sorry the next game is no longer active.', keep_form=False)
 
         if request.user.is_authenticated:
             return render_game(request, g)
 
-        pe = PendingEmail.objects.filter(uuid__exact=pending_uuid).get()
+        pe = PendingEmail.objects.filter(uuid__exact=pending_uuid).first()
         if pe is None:
-            gc = GameEntryView()
-            gc.message = 'Seems like there was a problem with the validation link. Please try again.'
-            return gc.get(request, {'game_uuid': game_uuid})
+            return self.message(request, 'Seems like there was a problem with the validation link. Please try again.')
 
         email = pe.email
         try:
