@@ -5,6 +5,7 @@ app_name = 'game'
 
 urlpatterns = [
     path('score/', views.tabulator_form_view, name='tabulator_form'),
-    path('play/', views.GameEntryWithoutValidationView.as_view(), name='play'),
-    path('play/<uidb64>', views.GameEntryValidationView.as_view(), name='player_confirm'),
+    path('play/', views.GameEntryView.as_view(), name='play'),
+    path('play/<game_uuid>', views.GameEntryView.as_view(), name='uuidplay'),
+    path('play/<game_uuid>/<pending_uuid>', views.GameEntryValidationView.as_view(), name='player_confirm'),
 ]
