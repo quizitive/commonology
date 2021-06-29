@@ -161,7 +161,7 @@ class GameEntryView(CardFormView):
             elif game_uuid:
                 return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
             else:
-                return self.join(request, 'Cannot find active game.  Join so we can let you know when the next game begins.')
+                return self.join(request, 'Cannot find an active game.  Join so we can let you know when the next game begins.')
 
         slug = g.series.slug
 
