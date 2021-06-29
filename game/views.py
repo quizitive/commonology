@@ -127,8 +127,8 @@ def render_game(request, game, user=None):
 class GameEntryView(CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
-    button_label = "Next"
-    custom_message = "Enter your email to play the game so we can send the results to you."
+    button_label = "Email me a play link"
+    custom_message = "Login to play or enter your email and we will send you a play link."
 
     def message(self, request, msg):
         self.custom_message = msg
@@ -188,6 +188,7 @@ class GameEntryView(CardFormView):
         if user.is_authenticated:
             return render_game(request, g)
 
+        self.card_template = 'game/game_entry_card.html'
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):

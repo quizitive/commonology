@@ -418,7 +418,7 @@ class TestPlayRequest(TestCase):
 
         p = Player.objects.filter(email=ABINORMAL).first()
         self.assertIsNone(p)
-        self.assertContains(response, "Enter your email to play the game so we can send the results to you.")
+        self.assertContains(response, "Login to play or enter your email and we will send you a play link.")
 
         url = self.get_invite_url(email=ABINORMAL)
         pe = PendingEmail.objects.filter(email=ABINORMAL).first()
