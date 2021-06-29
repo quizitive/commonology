@@ -46,6 +46,7 @@ class QuestionAnswerForm(forms.ModelForm):
 
         self.q = question
         if self.q.choices:
+            # hide default CharField and render custom "radio button" style input (in template)
             self.fields['raw_string'].widget = forms.HiddenInput(attrs={'required': True})
             self.fields['raw_string'].initial = None
 
@@ -58,8 +59,3 @@ class QuestionAnswerForm(forms.ModelForm):
             if value not in self.q.choices:
                 raise forms.ValidationError(f"{value} isn't a valid choice for this question")
         return value
-
-    # def as_p(self):
-    #     as_p = super().as_p()
-    #     # a hack to remove standard error formatting, easier than rewriting as_p from scratch
-    #     return mark_safe(as_p.replace("(Hidden field raw_string)", ""))
