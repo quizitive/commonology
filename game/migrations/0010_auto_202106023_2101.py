@@ -36,5 +36,10 @@ class Migration(migrations.Migration):
             name='type',
             field=models.CharField(choices=[('GA', 'Game'), ('OP', 'Optional'), ('OV', 'Optional (visible)')], max_length=2),
         ),
-        migrations.RunPython(forwards, backwards)
+        migrations.RunPython(forwards, backwards),
+        migrations.AlterField(
+            model_name='answer',
+            name='timestamp',
+            field=models.DateTimeField(auto_now_add=True),
+        ),
     ]
