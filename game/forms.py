@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.safestring import mark_safe
-from game.models import Question
+from game.models import Question, Answer
 
 
 class TabulatorForm(forms.Form):
@@ -22,8 +22,12 @@ class TabulatorForm(forms.Form):
     )
 
 
-class QuestionAnswerForm(forms.Form):
-    question_id = forms.IntegerField(widget=forms.HiddenInput())
+class QuestionAnswerForm(forms.ModelForm):
+    class Meta:
+        model = Answer
+        fields = ('question', 'raw_string', 'player')
+
+    question = forms.ModelChoiceField(queryset=Question.objects.all(), widget=forms.HiddenInput())
     raw_string = forms.CharField(
         label="",
         widget=forms.TextInput(attrs={'class': 'w3-input', 'placeholder': 'Your answer'}),
@@ -31,11 +35,11 @@ class QuestionAnswerForm(forms.Form):
         error_messages={'required': 'This is a required question'}
     )
 
-    def __init__(self, question_id, *args, **kwargs):
+    def __init__(self, question, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['question_id'].initial = question_id
+        self.fields['question'].initial = question
 
-        self.q = Question.objects.get(id=question_id)
+        self.q = question
         if self.q.choices:
             self.fields['raw_string'].widget = forms.HiddenInput(attrs={'required': True})
             self.fields['raw_string'].initial = None
@@ -48,7 +52,7 @@ class QuestionAnswerForm(forms.Form):
         if self.q.choices:
             if value not in self.q.choices:
                 raise forms.ValidationError(f"{value} isn't a valid choice for this question")
-        return
+        return value
 
     def as_p(self):
         as_p = super().as_p()
