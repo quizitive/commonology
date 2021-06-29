@@ -44,20 +44,6 @@ def add_owner_as_host_and_player(sender, instance, created, **kwargs):
         instance.players.add(instance.owner)
 
 
-def validate_google_url(value):
-    if value and ('alex@commonologygame.com' not in value):
-        raise ValidationError('The google URL must have alex@commonologygame.com in it.')
-    else:
-        return value
-
-
-@receiver(post_save, sender=Series)
-def add_owner_as_host_and_player(sender, instance, created, **kwargs):
-    if created:
-        instance.hosts.add(instance.owner)
-        instance.players.add(instance.owner)
-
-
 class Game(models.Model):
     game_id = models.IntegerField()
     name = models.CharField(max_length=100)
@@ -167,11 +153,6 @@ class Game(models.Model):
     @property
     def date_range_pretty(self):
         return f'{self.start:%m/%d} - {self.end:%m/%d/%Y}'
-
-    @property
-    def is_active(self):
-        now = our_now()
-        return self.start <= now <= self.end
 
     @property
     def is_active(self):
