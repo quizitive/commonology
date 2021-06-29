@@ -4,7 +4,7 @@ from django import forms
 from django.views.generic.edit import FormMixin
 from django.contrib import messages
 from django.core.mail import send_mail
-from game.utils import next_event, find_latest_active_game
+from game.utils import next_event, find_latest_public_game
 
 import logging
 
@@ -42,7 +42,7 @@ def index(request):
 
 def next_game_context():
     event_text, event_time = next_event()
-    game_is_on = find_latest_active_game('commonology') is not None
+    game_is_on = find_latest_public_game('commonology') is not None
     return {
         'event_time': event_time,
         'event_text': event_text,
