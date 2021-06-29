@@ -35,8 +35,12 @@ class QuestionAnswerForm(forms.ModelForm):
         error_messages={'required': 'This is a required question'}
     )
 
-    def __init__(self, question, *args, **kwargs):
+    def __init__(self, question, editable=True, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if not editable:
+            self.fields['raw_string'].disabled = True
+            self.fields['raw_string'].widget.attrs['placeholder'] = ''
+
         self.fields['question'].initial = question
         self.fields['player'].required = False
 
@@ -55,7 +59,7 @@ class QuestionAnswerForm(forms.ModelForm):
                 raise forms.ValidationError(f"{value} isn't a valid choice for this question")
         return value
 
-    def as_p(self):
-        as_p = super().as_p()
-        # a hack to remove standard error formatting, easier than rewriting as_p from scratch
-        return mark_safe(as_p.replace("(Hidden field raw_string)", ""))
+    # def as_p(self):
+    #     as_p = super().as_p()
+    #     # a hack to remove standard error formatting, easier than rewriting as_p from scratch
+    #     return mark_safe(as_p.replace("(Hidden field raw_string)", ""))

@@ -95,11 +95,11 @@ class GameFormView(FormMixin, BaseGameView):
     def render_game(self, request, game, player):
         # called when an validated player passes though GameEntryView
         psid = self.sign_game_player(game, player)
-        self.requested_slug = self.game.series.slug
-        return render(request, 'game/game_form.html', self.get_context(self.game, psid))
+        self.requested_slug = game.series.slug
+        self.game = game
+        return render(request, 'game/game_form.html', self.get_context(game, psid))
 
     def get(self, request, *args, **kwargs):
-        # todo: render a player's game responses
         if (psid := kwargs.get('player_signed_id')) is None:
             raise PermissionDenied
 
@@ -112,9 +112,8 @@ class GameFormView(FormMixin, BaseGameView):
                 player=player
             ).values_list('question', 'raw_string')
         }
-        forms = self.get_forms(self.game, form_data)
-        context = self.get_context(self.game, None, forms)
-        # todo: disable button, etc
+        forms = self.get_forms(self.game, form_data, editable=False)
+        context = self.get_context(self.game, None, forms, True)
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -177,15 +176,16 @@ class GameFormView(FormMixin, BaseGameView):
         except Game.DoesNotExist:
             raise Http404("Game does not exist")
 
-    def get_context(self, game, psid, forms=None):
+    def get_context(self, game, psid, forms=None, is_preview=False):
         context = super().get_context()
         context.update({
             'questions': self.questions_with_forms(game, forms),
-            'psid': psid
+            'psid': psid,
+            'is_preview': is_preview
         })
         return context
 
-    def get_forms(self, game, form_data=(), player=None):
+    def get_forms(self, game, form_data=(), player=None, editable=True):
         """Get all the game question forms, empty or populated with form_data from post.
            Any form data submitted with question not in this game will be ignored,
            likewise any question without data (e.g. incomplete forms) will be handled"""
@@ -193,6 +193,7 @@ class GameFormView(FormMixin, BaseGameView):
         if form_data:
             forms = {q.id: QuestionAnswerForm(
                 question=q,
+                editable=editable,
                 auto_id=f'%s_{q.id}',
                 initial={'raw_string': form_data.get(str(q.id))},
                 data={'question': q,
@@ -260,7 +261,7 @@ def render_game(request, game, user=None):
     else:
         user = request.user
     game.series.players.add(user)
-    return GameFormView(game=game, player=user).render_game(request)
+    return GameFormView().render_game(request, game, user)
 
 
 class GameEntryView(CardFormView):
