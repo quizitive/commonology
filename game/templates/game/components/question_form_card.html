@@ -9,10 +9,15 @@
       <div class="w3-col m10 w3-padding-16" >
 
         {% for choice in q.choices %}
-          <div class="w3-cell-row response-item w3-card-0 w3-round w3-padding" style="height:40px">
+          <div class="w3-cell-row response-item w3-card-0 w3-round w3-padding
+               {% if form.raw_string.value == choice %}player-answer{% endif %}"
+               style="height:40px">
             <div class="choice w3-cell w3-rest">{{ choice }}</div>
             <div class="answer-score w3-cell w3-cell-middle w3-cell-right">
-              <i class="fas fa-check answer-score" style="display: none;"></i>
+              <i class="fas fa-check answer-score"
+                 {% if form.raw_string.value != choice %}
+                 style="display: none;"
+                 {% endif %}></i>
             </div>
           </div>
         {% endfor %}
