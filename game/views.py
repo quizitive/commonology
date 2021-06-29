@@ -148,9 +148,11 @@ class GameEntryView(CardFormView):
         if not game_uuid:
             g = find_latest_public_game(slug)
             if g is None:
-                return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
+                return self.message(request, 'Cannot find an active game.  We will let you know when the next game begins.')
         else:
             g = Game.objects.filter(uuid=game_uuid).first()
+            if g is None:
+                return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
             slug = g.series.slug
 
         # Backward compatibility
