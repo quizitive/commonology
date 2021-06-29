@@ -6,16 +6,14 @@ from game.models import Game
 
 def find_latest_active_game(slug):
     t = our_now()
-    g = Game.objects.filter(series__slug=slug, end__gte=t, start__lte=t).reverse().first()
-    if g and not g.google_form_url:
-        return None
+    g = Game.objects.filter(series__slug=slug, end__gte=t, start__lte=t).order_by('start').reverse().first()
     return g
 
 
-def find_hosted_game(slug, game_id, user):
-    g = Game.objects.filter(series__slug=slug, game_id=game_id, hosts=user).first()
-    if g and not g.google_form_url:
-        return None
+def find_latest_public_game(slug):
+    t = our_now()
+    g = Game.objects.filter(series__slug=slug, series__public=True,
+                            end__gte=t, start__lte=t).order_by('start').reverse().first()
     return g
 
 

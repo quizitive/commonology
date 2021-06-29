@@ -34,6 +34,7 @@ INTERNAL_IPS = ()
 if DEBUG:
     INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN)
 
+USE_TZ = True
 TIME_ZONE = 'America/New_York'
 
 CELERY_TIMEZONE = TIME_ZONE
