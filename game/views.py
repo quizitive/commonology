@@ -181,7 +181,7 @@ class GameFormView(FormMixin, BaseGameView):
         context.update({
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
-            'is_preview': is_preview
+            'is_preview': is_preview  # flag to disable forms and js and hide submit button
         })
         return context
 
