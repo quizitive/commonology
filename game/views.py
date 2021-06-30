@@ -139,7 +139,7 @@ class GameFormView(FormMixin, BaseGameView):
             # todo: don't save blank optional answers
             form.save()
 
-        self.email_player_success(request, player, game)
+        self.email_player_success(request, game, player)
 
         return self.render_message_card(request, 'success', player, game)
 
