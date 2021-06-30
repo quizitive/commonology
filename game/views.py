@@ -2,7 +2,6 @@ import gspread
 import logging
 from numpy import base_repr
 
-from django.http import HttpResponse
 from django.conf import settings
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
@@ -17,8 +16,6 @@ from django.views.generic.edit import FormMixin
 from project.views import CardFormView
 from game.forms import TabulatorForm, QuestionAnswerForm
 from game.models import Game, Series, Answer
-from game.forms import TabulatorForm
-from game.models import Game, Series
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db
@@ -100,41 +97,31 @@ class GameFormView(FormMixin, BaseGameView):
         return render(request, 'game/game_form.html', self.get_context(game, psid))
 
     def get(self, request, *args, **kwargs):
+        # any request without a player_signed_id gets redirected to GameEntryView
         if (psid := kwargs.get('player_signed_id')) is None:
-            raise PermissionDenied
+            return redirect('game:uuidplay', game_uuid=self.game.uuid)
 
-        game, player = self.get_game_and_player(psid)
+        game, player = self.unsign_game_player(psid)
 
         form_data = {
             str(qid): answer
             for qid, answer in Answer.objects.filter(
-                question__game=self.game,
+                question__game=game,
                 player=player
             ).values_list('question', 'raw_string')
         }
-        forms = self.get_forms(self.game, form_data, editable=False)
-        context = self.get_context(self.game, None, forms, True)
+        forms = self.get_forms(game, form_data, editable=False)
+        context = self.get_context(game, None, forms, True)
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
-
-        # Make sure this is a real submission that hasn't been tampered with
+        # make sure this is a real submission that hasn't been tampered with
         if (psid := self.request.POST.get('psid')) is None:
             raise PermissionDenied
-
-        game, player = self.get_game_and_player(psid)
-        answers_url = self.build_signed_url(game, player)
+        game, player = self.unsign_game_player(psid)
 
         if player.id in self.game.players.values_list('player', flat=True):
-            return CardFormView().render(
-                request,
-                header="You've already played!",
-                custom_message=f"You have already submitted answers for this game. "
-                               f"You can see them again by clicking the button below.",
-                button_label="View my answers",
-                form_method='get',
-                form_action=answers_url
-            )
+            return self.render_message_card(request, 'duplicate', player, game)
 
         # build a dict with the form inputs
         form_data = {
@@ -152,6 +139,33 @@ class GameFormView(FormMixin, BaseGameView):
             # todo: don't save blank optional answers
             form.save()
 
+        self.email_player_success(request, player, game)
+
+        return self.render_message_card(request, 'success', player, game)
+
+    def render_message_card(self, request, msg, player, game):
+        msgs = {
+            'success': {
+                "header": "Success!",
+                "custom_message": f"Your answers have been submitted. You can see them now by clicking "
+                                  f"the button below, and we've emailed the link to {player.email}.",
+            },
+            'duplicate': {
+                "header": "You've already played!",
+                "custom_message": f"You have already submitted answers for this game. "
+                                f"You can see them again by clicking the button below.",
+            }
+        }
+        return CardFormView().render(
+            request,
+            button_label="View my answers",
+            form_method='get',
+            form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
+            **msgs[msg]
+        )
+
+    def email_player_success(self, request, game, player):
+        answers_url = self.build_signed_url(game, player)
         domain = get_current_site(request)
         email_context = {
             'game_name': game.name,
@@ -159,21 +173,10 @@ class GameFormView(FormMixin, BaseGameView):
         }
         answers_msg = render_to_string('game/game_complete_email.html', email_context)
         sendgrid_send(f'{game.name}', answers_msg, [(player.email, None)])
-        c = CardFormView().render(
-            request,
-            header="Success!",
-            # todo: revisit this language
-            custom_message=f"Your answers have been submitted. We've emailed you the link, or "
-                           f"you can see them now by clicking the button below.",
-            button_label="View my answers",
-            form_method='get',
-            form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
-        )
-        return c
 
     def test_func(self):
-        # override super method, we don't want to restrict access to game form for
-        # new players of a series, obtaining the unique url is validation enough
+        # override super method, which requires users to be logged in
+        # this view can be accessed by anonymous users with a psid
         return True
 
     def get_game(self):
@@ -197,7 +200,7 @@ class GameFormView(FormMixin, BaseGameView):
 
     def get_forms(self, game, form_data=(), player=None, editable=True):
         """Get all the game question forms, empty or populated with form_data from post.
-           Any form data submitted with question not in this game will be ignored,
+           Any form data submitted with a question not in this game will be ignored,
            likewise any question without data (e.g. incomplete forms) will be handled"""
         form_data = form_data or {}
         if form_data:
@@ -228,23 +231,19 @@ class GameFormView(FormMixin, BaseGameView):
         ]
         return questions_with_forms
 
-    def get_game_and_player(self, psid):
-        """Parses unique psid to get game and player object, raises PermissionDenied on all errors"""
-        try:
-            game, player = self.unsign_game_player(psid)
-        except (BadSignature, Player.DoesNotExist, Game.DoesNotExist):
-            raise PermissionDenied
-        return game, player
-
-    def unsign_game_player(self, pac):
-        b36_gid, b36_pid = self.signer.unsign(pac).split("-")
-        return Game.objects.get(id=int(b36_gid, 36)), Player.objects.get(id=int(b36_pid, 36))
-
     def sign_game_player(self, game, player):
         return self.signer.sign(f"{base_repr(game.id, 36)}-{base_repr(player.id, 36)}")
 
     def build_signed_url(self, game, player):
         return f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
+
+    def unsign_game_player(self, psid):
+        """Parses unique psid to get game and player object, raises PermissionDenied on all errors"""
+        try:
+            b36_gid, b36_pid = self.signer.unsign(psid).split("-")
+            return Game.objects.get(id=int(b36_gid, 36)), Player.objects.get(id=int(b36_pid, 36))
+        except (BadSignature, Player.DoesNotExist, Game.DoesNotExist):
+            raise PermissionDenied
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
