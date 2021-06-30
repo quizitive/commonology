@@ -45,6 +45,7 @@ class GameAdmin(admin.ModelAdmin):
     list_filter = ('series',)
     inlines = (QuestionAdmin,)
     actions = ('clear_cache', )
+    view_on_site = True
 
     def clear_cache(self, request, queryset):
         lb_prefixes = [f'leaderboard_{q[0]}_{q[1]}' for q in queryset.values_list('series__slug', 'game_id')]
