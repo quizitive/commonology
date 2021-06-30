@@ -86,6 +86,10 @@ class Game(models.Model):
         self.game_id = game_id
         super().save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        # Need this for admin view-on-site to work.
+        return f"/play/{self.uuid}"
+
     @property
     def players(self):
         return self.game_questions.first().raw_answers.values(
