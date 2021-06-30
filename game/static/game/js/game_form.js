@@ -9,7 +9,6 @@ $('.w3-cell-row.response-item').click((e) => {
 
   removeErrors(e)
 })
-// todo:
 
 // Enter text in text box removes errors
 $('input[name=raw_string]').on('change keypress keyup paste', (e) => {
