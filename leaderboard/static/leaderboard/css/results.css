@@ -63,6 +63,10 @@ textarea {
 textarea:focus, input:focus{
   outline: none;
 }
+input:disabled {
+  color: black;
+  background: none;
+}
 
 
 @media only screen and (max-width: 767px) {
