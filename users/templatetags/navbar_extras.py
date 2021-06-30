@@ -32,5 +32,15 @@ def login_modal(request):
 
 
 @register.simple_tag
+def login_next_url(request):
+    if val := request.GET.get("next"):
+        return f'?next={val}'
+    p = request.path
+    if p == '/login/' or p == '/join/':
+        return ''
+    return f'?next={p}'
+
+
+@register.simple_tag
 def game_is_on():
     return find_latest_active_game('commonology') is not None

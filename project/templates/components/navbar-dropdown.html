@@ -17,7 +17,7 @@
 
 {% else %}
 
-<a href="{% url 'login' %}"><button class="w3-button w3-round">Login</button></a>
-<a href="{% url 'join' %}"><button class="w3-button w3-round cg-blue">Join</button></a>
+<a href="{% url 'login' %}{% login_next_url request %}"><button class="w3-button w3-round">Login</button></a>
+<a href="{% url 'join' %}{% login_next_url request %}"><button class="w3-button w3-round cg-blue">Join</button></a>
 
 {% endif %}
