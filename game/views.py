@@ -149,6 +149,7 @@ class GameFormView(FormMixin, BaseGameView):
             return render(request, 'game/game_form.html', context)
 
         for form in forms.values():
+            # todo: don't save blank optional answers
             form.save()
 
         domain = get_current_site(request)
@@ -161,7 +162,9 @@ class GameFormView(FormMixin, BaseGameView):
         c = CardFormView().render(
             request,
             header="Success!",
-            custom_message=f"Your answers have been submitted. You can see them again by clicking the button below.",
+            # todo: revisit this language
+            custom_message=f"Your answers have been submitted. We've emailed you the link, or "
+                           f"you can see them now by clicking the button below.",
             button_label="View my answers",
             form_method='get',
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
@@ -369,6 +372,7 @@ class GameEntryView(CardFormView):
                               f"By the way, if you were logged in you'd be playing already."
 
         self.header = "Game link sent!"
+        # todo: This button always throws a CSRF error!
         return self.render(request, form=None, button_label='OK')
 
 
