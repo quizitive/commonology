@@ -18,6 +18,7 @@ BRANCH=master
 if [ $# -ge 1 ]; then
   BRANCH=$1
   git fetch orgin $BRANCH:$BRANCH
+  git checkout $BRANCH
 fi
 
 ACTION=none
