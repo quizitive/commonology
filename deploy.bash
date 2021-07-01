@@ -17,8 +17,13 @@ git pull origin master
 BRANCH=master
 if [ $# -ge 1 ]; then
   BRANCH=$1
-  git fetch origin $BRANCH:$BRANCH
-  git checkout $BRANCH
+
+  if [ $BRANCH != "master" ]; then
+    echo "Fetching $BRANCH"
+    git fetch origin $BRANCH:$BRANCH
+    git checkout $BRANCH
+  fi
+
   if [ $HOSTNAME != "commonologygame.com" ]; then
     echo "Updating DB"
     source scripts/pg_update_dev_db.bash
