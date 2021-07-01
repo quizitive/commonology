@@ -12,12 +12,13 @@ pyenv activate project
 
 cd /home/django/commonology
 
+git checkout master
+git pull origin master
 BRANCH=master
 if [ $# -ge 1 ]; then
   BRANCH=$1
+  git checkout $BRANCH
 fi
-
-git pull origin $BRANCH
 
 echo "About to run pycodestyle."
 pycodestyle --config=./setup.cfg .
