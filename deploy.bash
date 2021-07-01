@@ -21,17 +21,8 @@ if [ $# -ge 1 ]; then
   git checkout $BRANCH
 fi
 
-ACTION=none
-if [ $# -ge 2 ]; then
-  ACTION=$2
-fi
-
-if [ $ACTION == "UPDATEDB" ]; then
-  if [ $HOSTNAME == "commonologygame.com" ]; then
-    echo "Will not update db on production."
-    exit
-  fi
-
+if [ $BRANCH != "master" ] && [ $HOSTNAME != "commonologygame.com" ]; then
+  echo "Got $BRANCH so updating db"
   source scripts/pg_update_dev_db.bash
 fi
 
