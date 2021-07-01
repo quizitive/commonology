@@ -14,15 +14,19 @@ cd /home/django/commonology
 
 git checkout master
 git pull origin master
+ACTION = "none"
 BRANCH=master
 if [ $# -ge 1 ]; then
   BRANCH=$1
   git fetch orgin $BRANCH:$BRANCH
   git checkout $BRANCH
+  if [ $HOSTNAME != "commonologygame.com" ]; then
+    ACTION = "UPDATEDB"
+  fi
 fi
 
-if [ $BRANCH != "master" ] && [ $HOSTNAME != "commonologygame.com" ]; then
-  echo "Got $BRANCH so updating db"
+if [ $ACTION == "UPDATEDB" ]; then
+  echo "Updating DB"
   source scripts/pg_update_dev_db.bash
 fi
 
