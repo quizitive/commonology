@@ -12,12 +12,19 @@ pyenv activate project
 
 cd /home/django/commonology
 
+git checkout master
+git pull origin master
 BRANCH=master
 if [ $# -ge 1 ]; then
   BRANCH=$1
+  git fetch orgin $BRANCH:$BRANCH
+  git checkout $BRANCH
 fi
 
-git pull origin $BRANCH
+if [ $BRANCH != "master" ] && [ $HOSTNAME != "commonologygame.com" ]; then
+  echo "Got $BRANCH so updating db"
+  source scripts/pg_update_dev_db.bash
+fi
 
 echo "About to run pycodestyle."
 pycodestyle --config=./setup.cfg .
