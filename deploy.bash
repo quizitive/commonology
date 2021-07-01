@@ -17,11 +17,12 @@ git pull origin master
 BRANCH=master
 if [ $# -ge 1 ]; then
   BRANCH=$1
-  git fetch orgin $BRANCH:$BRANCH
+  git fetch origin $BRANCH:$BRANCH
   git checkout $BRANCH
   if [ $HOSTNAME != "commonologygame.com" ]; then
     echo "Updating DB"
     source scripts/pg_update_dev_db.bash
+    cd /home/django/commonology
   fi
 fi
 
@@ -37,6 +38,7 @@ fi
 
 
 echo "About to run pip install."
+cd /home/django/commonology
 pip install -q -r requirements.txt
 if [ $? -eq 0 ]; then
     echo OK
