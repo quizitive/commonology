@@ -17,7 +17,21 @@ git pull origin master
 BRANCH=master
 if [ $# -ge 1 ]; then
   BRANCH=$1
-  git checkout $BRANCH
+  git fetch orgin $BRANCH:$BRANCH
+fi
+
+ACTION=none
+if [ $# -ge 2 ]; then
+  ACTION=$2
+fi
+
+if [ $ACTION == "UPDATEDB" ]; then
+  if [ $HOSTNAME == "commonologygame.com" ]; then
+    echo "Will not update db on production."
+    exit
+  fi
+
+  source scripts/pg_update_dev_db.bash
 fi
 
 echo "About to run pycodestyle."
