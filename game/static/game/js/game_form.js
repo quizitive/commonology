@@ -11,7 +11,8 @@ $('.w3-cell-row.response-item').click((e) => {
 })
 
 // Enter text in text box removes errors
-$('input[name=raw_string]').on('change keypress keyup paste', (e) => {
+const $textInputQuestions = $("input[name=raw_string][required], input[name=display_name]")
+$textInputQuestions.on('change keypress keyup paste', (e) => {
   removeErrors(e)
 })
 
@@ -28,8 +29,8 @@ $('button[type=submit]').click((e) => {
   // check all inputs for a value
   var errors = false
   var scrollTop = 0
-  $("input[name=raw_string][required]").not("[value]").each((i, elm) => {
-    if ($(elm).val() === "") {
+  $textInputQuestions.each((i, elm) => {
+    if ($(elm).val().trim() === "") {
       $(elm).closest(".question-container").css("border-color", "#ec1c24")
       $(elm).next(".errors").html('<ul class="errorlist"><li>This is a required question</li></ul>')
       errors = true
