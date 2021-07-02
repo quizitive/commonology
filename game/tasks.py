@@ -137,7 +137,7 @@ def new_answers_to_db(game, responses):
                 player_id=players[e],
                 raw_string=a
             )
-            for t, e, a in player_answers if (a or q_type != Question.op)
+            for t, e, a in player_answers if (a or q_type == Question.ga)
         ]
         answers.extend(ans_objs)
     Answer.objects.bulk_create(answers)

@@ -14,7 +14,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from project.views import CardFormView
-from game.forms import TabulatorForm, QuestionAnswerForm
+from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
@@ -92,9 +92,10 @@ class GameFormView(FormMixin, BaseGameView):
     def render_game(self, request, game, player):
         # called when an validated player passes though GameEntryView
         psid = self.sign_game_player(game, player)
+        dn_form = self.display_name_form(player.display_name)
         self.requested_slug = game.series.slug
         self.game = game
-        return render(request, 'game/game_form.html', self.get_context(game, psid))
+        return render(request, 'game/game_form.html', self.get_context(game, psid, dn_form))
 
     def get(self, request, *args, **kwargs):
         # any request without a player_signed_id gets redirected to GameEntryView
@@ -103,6 +104,7 @@ class GameFormView(FormMixin, BaseGameView):
 
         game, player = self.unsign_game_player(psid)
 
+        dn_form = self.display_name_form(player.display_name, editable=False)
         form_data = {
             str(qid): answer
             for qid, answer in Answer.objects.filter(
@@ -110,8 +112,8 @@ class GameFormView(FormMixin, BaseGameView):
                 player=player
             ).values_list('question', 'raw_string')
         }
-        forms = self.get_forms(game, form_data, editable=False)
-        context = self.get_context(game, None, forms, True)
+        forms = self.get_game_forms(game, form_data, editable=False)
+        context = self.get_context(game, None, dn_form, forms, True)
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -123,6 +125,7 @@ class GameFormView(FormMixin, BaseGameView):
         if player.id in self.game.players.values_list('player', flat=True):
             return self.render_message_card(request, 'duplicate', player, game)
 
+        dn_form = self.display_name_form(self.request.POST.get('display_name'))
         # build a dict with the form inputs
         form_data = {
             qid: answer
@@ -130,10 +133,13 @@ class GameFormView(FormMixin, BaseGameView):
             zip(self.request.POST.getlist('question'), self.request.POST.getlist('raw_string'))
         }
 
-        forms = self.get_forms(self.game, form_data, player)
+        forms = self.get_game_forms(self.game, form_data, player)
         if any([f.errors for f in forms.values()]):
-            context = self.get_context(self.game, psid, forms)
+            context = self.get_context(self.game, psid, dn_form, forms)
             return render(request, 'game/game_form.html', context)
+
+        player.display_name = self.request.POST.get('display_name')
+        player.save()
 
         for form in forms.values():
             # todo: don't save blank optional answers
@@ -189,16 +195,17 @@ class GameFormView(FormMixin, BaseGameView):
         except Game.DoesNotExist:
             raise Http404("Game does not exist")
 
-    def get_context(self, game, psid, forms=None, is_preview=False):
+    def get_context(self, game, psid, dn_form, forms=None, editable=True):
         context = super().get_context()
         context.update({
+            'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
-            'is_preview': is_preview  # flag to disable forms and js and hide submit button
+            'editable': editable  # flag to disable forms and js and hide submit button
         })
         return context
 
-    def get_forms(self, game, form_data=(), player=None, editable=True):
+    def get_game_forms(self, game, form_data=(), player=None, editable=True):
         """Get all the game question forms, empty or populated with form_data from post.
            Any form data submitted with a question not in this game will be ignored,
            likewise any question without data (e.g. incomplete forms) will be handled"""
@@ -225,11 +232,17 @@ class GameFormView(FormMixin, BaseGameView):
         return forms
 
     def questions_with_forms(self, game, forms=None):
-        forms = forms or self.get_forms(game)
+        forms = forms or self.get_game_forms(game)
         questions_with_forms = [
             (q, forms[q.id]) for q in game.questions.order_by('number')
         ]
         return questions_with_forms
+
+    def display_name_form(self, display_name, editable=True):
+        return GameDisplayNameForm(
+            editable=editable,
+            initial={'display_name': display_name}
+        )
 
     def sign_game_player(self, game, player):
         return self.signer.sign(f"{base_repr(game.id, 36)}-{base_repr(player.id, 36)}")

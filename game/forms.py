@@ -49,7 +49,7 @@ class QuestionAnswerForm(forms.ModelForm):
             self.fields['raw_string'].widget = forms.HiddenInput(attrs={'required': True})
             self.fields['raw_string'].initial = None
 
-        if self.q.type in (Question.op, Question.ov):
+        if self.q.is_optional:
             self.fields['raw_string'].required = False
 
     def clean_raw_string(self):
@@ -58,3 +58,22 @@ class QuestionAnswerForm(forms.ModelForm):
             if value not in self.q.choices:
                 raise forms.ValidationError(f"{value} isn't a valid choice for this question")
         return value
+
+    def save(self, commit=True):
+        if self.q.is_optional and not self.cleaned_data['raw_string']:
+            return
+        return super().save(commit)
+
+
+class GameDisplayNameForm(forms.Form):
+    display_name = forms.CharField(
+        label="",
+        widget=forms.TextInput(attrs={'class': 'w3-input', 'placeholder': 'Your name'}),
+        max_length=100,
+        error_messages={'required': 'This is a required question'}
+    )
+
+    def __init__(self, editable=True, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not editable:
+            self.fields['display_name'].disabled = True
