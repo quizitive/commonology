@@ -113,7 +113,7 @@ class GameFormView(FormMixin, BaseGameView):
             ).values_list('question', 'raw_string')
         }
         forms = self.get_game_forms(game, form_data, editable=False)
-        context = self.get_context(game, None, dn_form, forms, True)
+        context = self.get_context(game, None, dn_form, forms, False)
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
