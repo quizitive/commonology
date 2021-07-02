@@ -67,6 +67,12 @@ input:disabled {
   color: black;
   background: none;
 }
+ul {
+  color: red;
+  list-style-type: none;
+  padding: 0;
+  margin: 8px 0;
+}
 
 
 @media only screen and (max-width: 767px) {
