@@ -1,14 +1,12 @@
 import uuid
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
-from django.conf import settings
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from project.utils import our_now
 from users.models import Player
 from chat.models import Thread
 
