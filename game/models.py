@@ -165,8 +165,6 @@ class Question(models.Model):
                              related_name='questions', db_index=True)
     number = models.PositiveIntegerField(default=1)
     text = models.CharField(max_length=10000)
-    mc = 'MC'
-    fr = 'FR'
     ga = 'GA'
     op = 'OP'
     ov = 'OV'
@@ -190,6 +188,10 @@ class Question(models.Model):
             thread = Thread.objects.create()
             self.thread = thread
         super().save(*args, **kwargs)
+
+    @property
+    def is_optional(self):
+        return self.type in (self.op, self.ov)
 
 
 class Answer(models.Model):
