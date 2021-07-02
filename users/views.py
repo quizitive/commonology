@@ -388,7 +388,7 @@ class UnsubscribeView(View):
         try:
             e = Signer().unsign(t)
             unsubscribe(e)
-            context['custom_message'] = f"You have been unsubscribed. If you did not mean to unsubscribe" \
+            context['custom_message'] = f"You have been unsubscribed. If you did not mean to unsubscribe " \
                                         f"you can simply login and update your profile."
         except BadSignature:
             context['custom_message'] = "There is something wrong with your unsubscribe link."
