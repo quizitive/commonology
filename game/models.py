@@ -51,7 +51,7 @@ class Game(models.Model):
     end = models.DateTimeField(verbose_name="When the game ends:", null=False, blank=False)
     google_form_url = models.CharField(max_length=255, blank=True,
                                        help_text="Enter the form url")
-    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
@@ -78,6 +78,10 @@ class Game(models.Model):
             game_id = max_game_id + 1
         self.game_id = game_id
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        # Need this for admin view-on-site to work.
+        return f"/play/{self.uuid}"
 
     @property
     def players(self):

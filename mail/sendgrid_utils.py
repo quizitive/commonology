@@ -1,5 +1,5 @@
 import time
-import datetime
+
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -46,7 +46,8 @@ def sendgrid_send(subject, msg, email_list,
 
     if send_at:
         message.send_at = send_at
-    message.header = Header("List-Unsubscribe", "<-unsubscribelink->")
+    if unsub_link:
+        message.header = Header("List-Unsubscribe", "<-unsubscribelink->")
     if categories:
         message.category = [Category(i) for i in categories]
 
