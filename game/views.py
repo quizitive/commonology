@@ -142,7 +142,6 @@ class GameFormView(FormMixin, BaseGameView):
         player.save()
 
         for form in forms.values():
-            # todo: don't save blank optional answers
             form.save()
 
         self.email_player_success(request, game, player)
@@ -159,7 +158,7 @@ class GameFormView(FormMixin, BaseGameView):
             'duplicate': {
                 "header": "You've already played!",
                 "custom_message": f"You have already submitted answers for this game. "
-                                f"You can see them again by clicking the button below.",
+                                  f"You can see them again by clicking the button below.",
             }
         }
         return CardFormView().render(
@@ -384,8 +383,7 @@ class GameEntryView(CardFormView):
                               f"By the way, if you were logged in you'd be playing already."
 
         self.header = "Game link sent!"
-        # todo: This button always throws a CSRF error!
-        return self.render(request, form=None, button_label='OK')
+        return self.render(request, form=None, form_method='get', form_action='', button_label='OK')
 
 
 class GameEntryValidationView(CardFormView):
