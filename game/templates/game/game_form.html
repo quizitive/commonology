@@ -2,16 +2,7 @@
 {% load static %}
 
 {% block page_style %}
-  <link rel=stylesheet href="{% static 'leaderboard/css/results.css' %}">
-{#  todo: move this to css  #}
-  <style>
-  ul {
-    color: red;
-    list-style-type: none;
-    padding: 0;
-    margin: 8px 0;
-  }
-  </style>
+  <link rel=stylesheet href="{% static 'leaderboard/css/results.css' %}?v=1.2">
 {% endblock %}
 
 {% block scripts %}
@@ -31,7 +22,7 @@
        {% csrf_token %}
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
-       <!-- todo: Display Name Form -->
+       <!-- Display Name Form -->
       {% include 'game/components/display_name_form.html' with text='Your Name (First & Last)' form=dn_form %}
 
         {% for q, form in questions %}
