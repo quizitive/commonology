@@ -16,9 +16,15 @@
 
     {% include 'leaderboard/components/game_header.html' with hide_navigation=True %}
 
+    {% if game.top_commentary %}
+    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+      {{ game.top_commentary|safe }}
+    </div>
+    {% endif %}
+
     <div class="cg-border-blue w3-padding-16">
 
-      <form method="post" action="{% url 'series-game:game-form' series_slug game_id %}" novalidate>
+      <form method="post" action="{% url 'series-game:game-form' series_slug game.id %}" novalidate>
        {% csrf_token %}
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
