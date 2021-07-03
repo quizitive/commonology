@@ -11,6 +11,7 @@
         {% for choice in q.choices %}
           <div class="w3-cell-row response-item w3-card-0 w3-round w3-padding
                {% if form.raw_string.value == choice %}player-answer{% endif %}"
+               tabindex="0" role="button"
                style="height:40px">
             <div class="choice w3-cell w3-rest">{{ choice }}</div>
             <div class="answer-score w3-cell w3-cell-middle w3-cell-right">
