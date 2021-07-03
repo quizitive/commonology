@@ -1,5 +1,6 @@
 // --- Clickable Choices --- //
-$('.w3-cell-row.response-item').click((e) => {
+$clickableChoices = $('.w3-cell-row.response-item')
+$clickableChoices.click((e) => {
   // add the value of the selection to the hidden input
   $(e.currentTarget).siblings('input[name=raw_string]').val($(e.currentTarget).find('.choice').text())
   // add border from player-answer formatting
@@ -9,6 +10,12 @@ $('.w3-cell-row.response-item').click((e) => {
 
   removeErrors(e)
 })
+// allow pressing enter as mouse click
+$clickableChoices.keydown(function(e){
+    if(e.which === 13){
+        $(this).click();
+    }
+});
 
 // Enter text in text box removes errors
 const $textInputQuestions = $("input[name=raw_string][required], input[name=display_name]")
