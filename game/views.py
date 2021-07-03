@@ -77,6 +77,7 @@ class BaseGameView(SeriesPermissionMixin, View):
     def get_context(self, *args, **kwargs):
         date_range = self.game.date_range_pretty
         context = {
+            'game': self.game,
             'game_id': self.game.game_id,
             'game_name': self.game.name,
             'date_range': date_range,
@@ -197,6 +198,7 @@ class GameFormView(FormMixin, BaseGameView):
     def get_context(self, game, psid, dn_form, forms=None, editable=True):
         context = super().get_context()
         context.update({
+            'game': game,
             'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
