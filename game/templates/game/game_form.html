@@ -27,7 +27,7 @@
 
     <div class="cg-border-blue w3-padding-16">
 
-      <form method="post" action="{% url 'series-game:game-form' series_slug game.id %}" novalidate>
+      <form method="post" action="{% url 'series-game:game-form' series_slug game.game_id %}" novalidate>
        {% csrf_token %}
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
