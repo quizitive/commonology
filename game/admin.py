@@ -62,6 +62,7 @@ class AnswerAdmin(admin.ModelAdmin):
     search_fields = ('raw_string', 'question__text', 'question__game__name', 'player__email')
 
     list_filter = ('question__game__name', )
+
     def game(self, obj):
         return obj.game
 
