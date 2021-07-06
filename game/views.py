@@ -87,8 +87,26 @@ class BaseGameView(SeriesPermissionMixin, View):
         return context
 
 
-class GameFormView(FormMixin, BaseGameView):
+class PSIDMixin:
+    """A mixin with utility functions to sign and unsign a player and game ID combination"""
     signer = Signer()
+
+    def sign_game_player(self, game, player):
+        return self.signer.sign(f"{base_repr(game.id, 36)}-{base_repr(player.id, 36)}")
+
+    def build_signed_url(self, game, player):
+        return f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
+
+    def unsign_game_player(self, psid):
+        """Parses unique psid to get game and player object, raises PermissionDenied on all errors"""
+        try:
+            b36_gid, b36_pid = self.signer.unsign(psid).split("-")
+            return Game.objects.get(id=int(b36_gid, 36)), Player.objects.get(id=int(b36_pid, 36))
+        except (BadSignature, Player.DoesNotExist, Game.DoesNotExist):
+            raise PermissionDenied
+
+
+class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
     def render_game(self, request, game, player):
         # called when an validated player passes though GameEntryView
@@ -124,7 +142,7 @@ class GameFormView(FormMixin, BaseGameView):
         game, player = self.unsign_game_player(psid)
 
         if player.id in self.game.players.values_list('player', flat=True):
-            return self.render_message_card(request, 'duplicate', player, game)
+            return self.render_answers_submitted_card(request, 'duplicate', player, game)
 
         dn_form = self.display_name_form(self.request.POST.get('display_name'))
         # build a dict with the form inputs
@@ -147,9 +165,9 @@ class GameFormView(FormMixin, BaseGameView):
 
         self.email_player_success(request, game, player)
 
-        return self.render_message_card(request, 'success', player, game)
+        return self.render_answers_submitted_card(request, 'success', player, game)
 
-    def render_message_card(self, request, msg, player, game):
+    def render_answers_submitted_card(self, request, msg, player, game):
         msgs = {
             'success': {
                 "header": "Success!",
@@ -245,20 +263,6 @@ class GameFormView(FormMixin, BaseGameView):
             initial={'display_name': display_name}
         )
 
-    def sign_game_player(self, game, player):
-        return self.signer.sign(f"{base_repr(game.id, 36)}-{base_repr(player.id, 36)}")
-
-    def build_signed_url(self, game, player):
-        return f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
-
-    def unsign_game_player(self, psid):
-        """Parses unique psid to get game and player object, raises PermissionDenied on all errors"""
-        try:
-            b36_gid, b36_pid = self.signer.unsign(psid).split("-")
-            return Game.objects.get(id=int(b36_gid, 36)), Player.objects.get(id=int(b36_pid, 36))
-        except (BadSignature, Player.DoesNotExist, Game.DoesNotExist):
-            raise PermissionDenied
-
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
 def game_url(google_form_url, email):
@@ -290,7 +294,7 @@ def render_game(request, game, user=None):
     return GameFormView().render_game(request, game, user)
 
 
-class GameEntryView(CardFormView):
+class GameEntryView(PSIDMixin, CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
     button_label = "Email me a play link"
@@ -346,7 +350,16 @@ class GameEntryView(CardFormView):
             return self.leaderboard(request, slug=slug)
 
         if g.user_played(user):
-            return self.message(request, 'You played already.  Your answers have been emailed to you.')
+            return self.info(
+                request,
+                keep_form=False,
+                button_label="View my answers",
+                header="You've already played!",
+                form_method='get',
+                form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
+                message=f"You have already submitted answers for this game. "
+                        f"You can see them again by clicking the button below.",
+            )
 
         if not is_active:
             return self.message(request, msg='Seems like the game finished but has not been scored yet.')
