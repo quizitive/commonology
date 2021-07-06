@@ -95,7 +95,7 @@ class Game(models.Model):
         )
 
     def user_played(self, player):
-        q = self.questions.first(type=Question.ga)
+        q = self.questions.filter(type=Question.ga).first()
         if q:
             return q.raw_answers.filter(player=player.id).exists()
         return False
