@@ -58,8 +58,10 @@ class GameAdmin(admin.ModelAdmin):
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('raw_string', 'question', 'game')
-    search_fields = ('raw_string', 'question__text', 'question__game__name')
+    list_display = ('raw_string', 'question', 'player', 'game')
+    search_fields = ('raw_string', 'question__text', 'question__game__name', 'player__email')
+
+    list_filter = ('question__game__name', )
 
     def game(self, obj):
         return obj.game
