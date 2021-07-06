@@ -106,7 +106,7 @@ class CardFormView(FormMixin, View):
 
     def info(self, request, message, keep_form=True, *args, **kwargs):
         self.custom_message = ''
-        messages.warning(request, message)
+        messages.info(request, message)
         if not keep_form:
             self.form_class = None
         return self.render(request, *args, **kwargs)
