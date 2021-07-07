@@ -138,7 +138,11 @@ class JoinView(UserCardFormView):
                               f"You may close this window now."
 
         self.header = "Invitation Sent!"
-        return self.render(request, form=None, button_label='Ok')
+        return self.info(request,
+                         message=self.custom_message,
+                         keep_form=False,
+                         form_method='get',
+                         button_label='Ok')
 
 
 def make_uuid_url(request, uuid=None, name='/join/', slug=None):
