@@ -33,6 +33,8 @@ def login_modal(request):
 
 @register.simple_tag
 def login_next_url(request):
+    if not request:
+        return ''
     if val := request.GET.get("next"):
         return f'?next={val}'
     p = request.path
