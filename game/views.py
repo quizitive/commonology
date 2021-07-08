@@ -1,6 +1,7 @@
 import gspread
 import logging
 from numpy import base_repr
+from pandas import DataFrame
 
 from django.conf import settings
 from django.http import Http404
@@ -19,7 +20,7 @@ from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
-from game.tasks import api_to_db
+from game.tasks import api_to_db, game_answers_db_to_df
 from game.utils import find_latest_public_game
 from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from users.models import PendingEmail, Player
@@ -480,9 +481,10 @@ def tabulator_form_view(request):
         form.fields['sheet_name'].initial = fn
         gc = gspread.service_account(settings.GOOGLE_GSPREAD_API_CONFIG)
         update = request.POST.get('update_existing') == 'on'
+        game = Game.objects.get(sheet_name=fn, series__slug=series)
 
         try:
-            tabulate_results(series, fn, gc, update)
+            tabulate_results(game, gc, update)
             context['msg'] = "The results have been updated, feel free to submit again."
         except gspread.exceptions.SpreadsheetNotFound:
             context['msg'] = "The Google Sheet entered does not exist, no changes were made"
@@ -496,27 +498,35 @@ def tabulator_form_view(request):
     return render(request, 'game/tabulator_form.html', context)
 
 
-def tabulate_results(series_slug, filename, gc, update=False):
+def tabulate_results(game, gc, update=False):
     """
     Reads from, tabulates, and prints output to the named Google Sheet
-    :param series_slug: The slug of the series to which this game belongs
-    :param filename: The name of the spreadsheet in Google Drive
+    :param game: The game object
     :param gc: An authenticated instance of gspread
     :param update: Whether or not to update existing answer records in the DB
     :return: None
     """
-    sheet_doc = gc.open(filename)
-    raw_data = sheet_doc.values_get(range='Form Responses 1').get('values')
-    responses = api_data_to_df(raw_data)
+    try:
+        sheet_doc = gc.open(game.sheet_name)
+    except gspread.exceptions.SpreadsheetNotFound:
+        sheet_doc = gc.create(game.sheet_name, settings.GOOGLE_DRIVE_FOLDER_ID)
 
+    try:
+        sheet_doc.worksheet('Form Responses 1')
+        raw_data = sheet_doc.values_get(range='Form Responses 1').get('values')
+        responses = api_data_to_df(raw_data)
+    except gspread.exceptions.WorksheetNotFound:
+        responses = DataFrame()
+
+    responses = responses.append(game_answers_db_to_df(game))
     user_rollups = get_user_rollups(sheet_doc)
     rollups_dict = build_rollups_dict(user_rollups)
     answer_codes = build_answer_codes(responses, rollups_dict)
 
     # write to database
     api_to_db(
-        series_slug,
-        filename,
+        game.series.slug,
+        game.sheet_name,
         responses.to_json(),
         answer_codes,
         update
@@ -524,9 +534,8 @@ def tabulate_results(series_slug, filename, gc, update=False):
 
     # calculate the question-by-question data and leaderboard
     # NOTE: both of these call the method that rebuilds themself from db and clears the cache
-    game = Game.objects.get(sheet_name=filename, series__slug=series_slug)
     answer_tally = build_answer_tally_fromdb(game)
     leaderboard = build_leaderboard_fromdb(game, answer_tally)
 
     # write to google
-    write_all_to_gdrive(sheet_doc, answer_tally, answer_codes, leaderboard)
+    write_all_to_gdrive(sheet_doc, responses, answer_tally, answer_codes, leaderboard)

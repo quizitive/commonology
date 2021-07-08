@@ -160,3 +160,8 @@ def answers_codes_to_db(game, answer_codes):
                 answers.append(a)
     AnswerCode.objects.bulk_update_or_create(
         answers, ['coded_answer'], match_field=('question', 'raw_string'))
+
+
+def game_answers_db_to_df(game):
+    # todo: this
+    return
