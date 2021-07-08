@@ -3,7 +3,10 @@
 
 {% block card_extras %}
     <form method="get" action="/login/">
-     <input type="hidden" name="next" value="{{ request.path }}">
+     <input type="hidden" name="next" value="{{ request.path|safe }}">
      <input type="submit" value="Login to play" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
     </form>
+    <p style="color:#bebebe;font-size:12px;font-style:italic;margin:12px 0;">
+      We do this for added security, so we know your answers are actually yours.
+    </p>
 {% endblock %}
