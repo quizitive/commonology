@@ -56,11 +56,23 @@ def api_data_to_df(raw_data):
     return responses
 
 
-def write_all_to_gdrive(sheet_doc, answer_tally, answer_codes, leaderboard):
+def write_all_to_gdrive(sheet_doc, responses, answer_tally, answer_codes, leaderboard):
+    write_responses_sheet(sheet_doc, responses)
     rollups_and_tallies = build_rollups_and_tallies(answer_tally, answer_codes)
     write_rollups_sheet(sheet_doc, rollups_and_tallies)
     write_summarized_answer_sheet(sheet_doc, rollups_and_tallies)
     write_leaderboard_sheet(sheet_doc, leaderboard)
+
+
+def write_responses_sheet(sheet_doc, responses):
+    writable_responses = responses.colums.values.tolist() + responses.values.tolist()
+    try:
+        sheet = sheet_doc.worksheet("[auto] answers")
+        sheet_doc.del_worksheet(sheet)
+    except gspread.exceptions.WorksheetNotFound:
+        pass
+    sheet = sheet_doc.add_worksheet("[auto] raw responses", 200, 26)
+    sheet.update(writable_responses, major_dimension='COLUMNS')
 
 
 def build_rollups_and_tallies(answer_tally, answer_codes):
