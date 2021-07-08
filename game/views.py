@@ -394,15 +394,15 @@ class GameEntryView(PSIDMixin, CardFormView):
         email = request.POST['email']
 
         send_confirm(request, g, email)
-        self.custom_message = f"We sent the game link to {email}. " \
-                              f"Don't forget to check your spam or junk folder if need be. " \
-                              f"By the way, if you were logged in you'd be playing already."
+        self.custom_message = mark_safe(f"<b>We sent the game link to {email}. </b>"
+                              f"Don't forget to check your spam or junk folder if need be. "
+                              f"By the way, if you were logged in you'd be playing already.")
 
         self.header = "Game link sent!"
         return self.render(request, form=None, form_method='get', form_action='', button_label='OK')
 
 
-class GameEntryValidationView(CardFormView):
+class GameEntryValidationView(PSIDMixin, CardFormView):
     form_class = PendingEmailForm
     header = "Email validated here!"
     button_label = "Next"
@@ -428,6 +428,8 @@ class GameEntryValidationView(CardFormView):
             return self.warning(request, 'Sorry the next game is no longer active.', keep_form=False)
 
         if request.user.is_authenticated:
+            if g.user_played(request.user):
+                return self._user_played(request, g, request.user)
             return render_game(request, g)
 
         pe = PendingEmail.objects.filter(uuid__exact=pending_uuid).first()
@@ -444,7 +446,22 @@ class GameEntryValidationView(CardFormView):
             p = Player(email=email)
             p.save()
 
+        if g.user_played(p):
+            return self._user_played(request, g, p)
+
         return render_game(request, g, p)
+
+    def _user_played(self, request, g, user):
+        return self.info(
+            request,
+            keep_form=False,
+            button_label="View my answers",
+            header="You've already played!",
+            form_method='get',
+            form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
+            message=f"You have already submitted answers for this game. "
+                    f"You can see them again by clicking the button below.",
+        )
 
 
 # ---- To be deprecated once we host forms ---- #
