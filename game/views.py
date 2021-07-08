@@ -11,6 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from project.views import CardFormView
@@ -171,8 +172,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         msgs = {
             'success': {
                 "header": "Success!",
-                "custom_message": f"Your answers have been submitted. You can see them now by clicking "
-                                  f"the button below, and we've emailed the link to {player.email}.",
+                "custom_message": mark_safe(f"<b>Your answers have been submitted.</b> You can see them now by clicking "
+                                  f"the button below, and we've emailed the link to <b>{player.email}</b>."),
             },
             'duplicate': {
                 "header": "You've already played!",
