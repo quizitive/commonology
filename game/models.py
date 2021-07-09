@@ -124,6 +124,11 @@ class Game(models.Model):
         ).annotate(count=models.Count('raw_string')).order_by()
 
     @property
+    def raw_player_answers(self):
+        return Answer.objects.filter(question__game=self).order_by(
+            'timestamp', 'player', 'question__number', 'question__text')
+
+    @property
     def coded_player_answers(self):
         answer_code_subquery = AnswerCode.objects.filter(
             raw_string=models.OuterRef('raw_string'),
