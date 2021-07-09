@@ -1,5 +1,6 @@
 from datetime import datetime
 from pytz import timezone
+from collections import deque
 
 import pandas as pd
 from celery import shared_task
@@ -162,6 +163,32 @@ def answers_codes_to_db(game, answer_codes):
         answers, ['coded_answer'], match_field=('question', 'raw_string'))
 
 
-def game_answers_db_to_df(game):
-    # todo: this
-    return
+def raw_answers_db_to_df(game):
+    """
+    Accepts many answer objects for players and creates a grid-like list-of-lists
+    where each list is for a given player, and includes timestamp, email, display_name
+    and the raw_string value for each question in the game
+    """
+    raw_player_answers = deque(game.raw_player_answers.values_list(
+        'player__email', 'player__display_name', 'timestamp', 'question__text', 'raw_string',
+    ))
+    answer_cols = ['Timestamp', 'Email Address', 'Name'] + [
+        q_text for q_text in game.questions.values_list('text', flat=True).order_by('number')
+    ]
+
+    # the following is largely borrowed from leaderboard.leaderboard.build_leaderboard_fromdb
+    # it could possibly be dried out, but on initial analysis it becomes abstract very quickly
+    raw_answer_data = []
+    while raw_player_answers:
+        p_id, p_dn, ts, q_text, ans, = raw_player_answers[0]
+        p_data = [ts.strftime('%m/%d/%Y %H:%M:%S'), p_id, p_dn]
+        this_p_id = p_id
+        while this_p_id == p_id and raw_player_answers:
+            *_, ans = raw_player_answers.popleft()
+            p_data.append(ans)
+            if raw_player_answers:
+                this_p_id, *_ = raw_player_answers[0]
+        raw_answer_data.append(p_data)
+
+    raw_answers_df = pd.DataFrame(columns=answer_cols, data=raw_answer_data)
+    return raw_answers_df
