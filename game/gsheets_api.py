@@ -65,14 +65,14 @@ def write_all_to_gdrive(sheet_doc, responses, answer_tally, answer_codes, leader
 
 
 def write_responses_sheet(sheet_doc, responses):
-    writable_responses = responses.colums.values.tolist() + responses.values.tolist()
+    writable_responses = [responses.columns.values.tolist()] + responses.values.tolist()
     try:
-        sheet = sheet_doc.worksheet("[auto] answers")
+        sheet = sheet_doc.worksheet("[auto] raw responses")
         sheet_doc.del_worksheet(sheet)
     except gspread.exceptions.WorksheetNotFound:
         pass
-    sheet = sheet_doc.add_worksheet("[auto] raw responses", 200, 26)
-    sheet.update(writable_responses, major_dimension='COLUMNS')
+    sheet = sheet_doc.add_worksheet("[auto] raw responses", len(writable_responses), 20)
+    sheet.update(writable_responses)
 
 
 def build_rollups_and_tallies(answer_tally, answer_codes):

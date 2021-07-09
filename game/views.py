@@ -20,7 +20,7 @@ from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import api_data_to_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
-from game.tasks import api_to_db, game_answers_db_to_df
+from game.tasks import api_to_db, raw_answers_db_to_df
 from game.utils import find_latest_public_game
 from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
 from users.models import PendingEmail, Player
@@ -518,7 +518,7 @@ def tabulate_results(game, gc, update=False):
     except gspread.exceptions.WorksheetNotFound:
         responses = DataFrame()
 
-    responses = responses.append(game_answers_db_to_df(game))
+    responses = responses.append(raw_answers_db_to_df(game))
     user_rollups = get_user_rollups(sheet_doc)
     rollups_dict = build_rollups_dict(user_rollups)
     answer_codes = build_answer_codes(responses, rollups_dict)
