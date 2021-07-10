@@ -518,7 +518,10 @@ def tabulate_results(game, gc, update=False):
     except gspread.exceptions.WorksheetNotFound:
         responses = DataFrame()
 
-    responses = responses.append(raw_answers_db_to_df(game))
+    # add responses from database, giving precedent to Google Form responses in duplicate submissions
+    responses = responses.append(raw_answers_db_to_df(game), ignore_index=True)
+    responses.drop_duplicates('Email Address', keep='first', inplace=True)
+
     user_rollups = get_user_rollups(sheet_doc)
     rollups_dict = build_rollups_dict(user_rollups)
     answer_codes = build_answer_codes(responses, rollups_dict)
