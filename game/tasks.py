@@ -1,6 +1,7 @@
 from datetime import datetime
 from pytz import timezone
 from collections import deque
+from copy import deepcopy
 
 import pandas as pd
 from celery import shared_task
@@ -172,23 +173,27 @@ def raw_answers_db_to_df(game):
     raw_player_answers = deque(game.raw_player_answers.values_list(
         'player__email', 'player__display_name', 'timestamp', 'question__text', 'raw_string',
     ))
-    answer_cols = ['Timestamp', 'Email Address', 'Name'] + [
+    qtext = [
         q_text for q_text in game.questions.values_list('text', flat=True).order_by('number')
     ]
 
-    # the following is largely borrowed from leaderboard.leaderboard.build_leaderboard_fromdb
-    # it could possibly be dried out, but on initial analysis it becomes abstract very quickly
     raw_answer_data = []
     while raw_player_answers:
+        qt_cp = deepcopy(qtext)
         p_id, p_dn, ts, q_text, ans, = raw_player_answers[0]
         p_data = [ts.strftime('%m/%d/%Y %H:%M:%S'), p_id, p_dn]
         this_p_id = p_id
         while this_p_id == p_id and raw_player_answers:
-            *_, ans = raw_player_answers.popleft()
+            next_q = qt_cp.pop(0)
+            *_, this_q, ans = raw_player_answers.popleft()
+            while this_q != next_q:
+                p_data.append(None)
+                next_q = qt_cp.pop(0)
             p_data.append(ans)
             if raw_player_answers:
                 this_p_id, *_ = raw_player_answers[0]
         raw_answer_data.append(p_data)
 
-    raw_answers_df = pd.DataFrame(columns=answer_cols, data=raw_answer_data)
+    raw_answers_df = pd.DataFrame(
+        columns=['Timestamp', 'Email Address', 'Name'] + qtext, data=raw_answer_data)
     return raw_answers_df
