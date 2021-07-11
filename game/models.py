@@ -4,7 +4,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 
 from users.models import Player
@@ -33,13 +33,6 @@ class Series(models.Model):
     def save(self, *args, **kwargs):
         self.slug = self.slug or slugify(self.name)
         super().save(*args, **kwargs)
-
-
-@receiver(post_save, sender=Series)
-def add_owner_as_host_and_player(sender, instance, created, **kwargs):
-    if created:
-        instance.hosts.add(instance.owner)
-        instance.players.add(instance.owner)
 
 
 @receiver(post_save, sender=Series)
@@ -167,6 +160,11 @@ class Game(models.Model):
     def is_active(self):
         now = our_now()
         return self.start <= now <= self.end
+
+
+@receiver(m2m_changed, sender=Game.hosts.through)
+def add_host_as_player(sender, instance, **kwargs):
+    instance.series.players.add(*instance.hosts.all())
 
 
 class Question(models.Model):
