@@ -7,6 +7,8 @@ import pandas as pd
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+from game.tasks import raw_answers_db_to_df
+
 
 def get_or_create_gdrive_token():
 
@@ -56,6 +58,22 @@ def api_data_to_df(raw_data):
     return responses
 
 
+def api_and_db_data_as_df(game, sheet_doc):
+    try:
+        sheet_doc.worksheet('Form Responses 1')
+        raw_data = sheet_doc.values_get(range='Form Responses 1').get('values')
+        responses = api_data_to_df(raw_data)
+    except gspread.exceptions.WorksheetNotFound:
+        responses = pd.DataFrame()
+
+    # add responses from database, giving precedent to Google Form responses in duplicate submissions
+    responses = responses.append(raw_answers_db_to_df(game), ignore_index=True)
+    responses['Timestamp'] = responses['Timestamp'].astype('datetime64[ns]')
+    responses.drop_duplicates('Email Address', keep='first', inplace=True)
+    responses.sort_values('Timestamp', inplace=True)
+    return responses
+
+
 def write_all_to_gdrive(sheet_doc, responses, answer_tally, answer_codes, leaderboard):
     write_responses_sheet(sheet_doc, responses)
     rollups_and_tallies = build_rollups_and_tallies(answer_tally, answer_codes)
@@ -65,6 +83,7 @@ def write_all_to_gdrive(sheet_doc, responses, answer_tally, answer_codes, leader
 
 
 def write_responses_sheet(sheet_doc, responses):
+    responses['Timestamp'] = responses['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
     writable_responses = [responses.columns.values.tolist()] + responses.values.tolist()
     try:
         sheet = sheet_doc.worksheet("[auto] raw responses")

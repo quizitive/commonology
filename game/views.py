@@ -18,7 +18,7 @@ from django.views.generic.edit import FormMixin
 from project.views import CardFormView
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
-from game.gsheets_api import api_data_to_df, write_all_to_gdrive
+from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 from game.tasks import api_to_db, raw_answers_db_to_df
 from game.utils import find_latest_public_game
@@ -511,16 +511,7 @@ def tabulate_results(game, gc, update=False):
     except gspread.exceptions.SpreadsheetNotFound:
         sheet_doc = gc.create(game.sheet_name, settings.GOOGLE_DRIVE_FOLDER_ID)
 
-    try:
-        sheet_doc.worksheet('Form Responses 1')
-        raw_data = sheet_doc.values_get(range='Form Responses 1').get('values')
-        responses = api_data_to_df(raw_data)
-    except gspread.exceptions.WorksheetNotFound:
-        responses = DataFrame()
-
-    # add responses from database, giving precedent to Google Form responses in duplicate submissions
-    responses = responses.append(raw_answers_db_to_df(game), ignore_index=True)
-    responses.drop_duplicates('Email Address', keep='first', inplace=True)
+    responses = api_and_db_data_as_df(game, sheet_doc)
 
     user_rollups = get_user_rollups(sheet_doc)
     rollups_dict = build_rollups_dict(user_rollups)
