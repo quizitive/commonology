@@ -300,7 +300,7 @@ class GameEntryView(PSIDMixin, CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
     button_label = "Email me a play link"
-    custom_message = "Login to play or enter your email and we will send you a unique play link."
+    custom_message = "Login to play, or enter your email and we will send you a unique play link."
 
     def message(self, request, msg):
         self.custom_message = msg
