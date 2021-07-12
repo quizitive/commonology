@@ -1,8 +1,8 @@
 import uuid
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
-from django.conf import settings
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -33,13 +33,6 @@ class Series(models.Model):
     def save(self, *args, **kwargs):
         self.slug = self.slug or slugify(self.name)
         super().save(*args, **kwargs)
-
-
-@receiver(post_save, sender=Series)
-def add_owner_as_host_and_player(sender, instance, created, **kwargs):
-    if created:
-        instance.hosts.add(instance.owner)
-        instance.players.add(instance.owner)
 
 
 @receiver(post_save, sender=Series)
@@ -102,7 +95,7 @@ class Game(models.Model):
         )
 
     def user_played(self, player):
-        q = self.questions.first()
+        q = self.questions.filter(type=Question.ga).first()
         if q:
             return q.raw_answers.filter(player=player.id).exists()
         return False
@@ -161,7 +154,7 @@ class Game(models.Model):
 
     @property
     def date_range_pretty(self):
-        return f'{self.min_date:%m/%d} - {self.max_date:%m/%d/%Y}'
+        return f'{self.start:%m/%d} - {self.end:%m/%d/%Y}'
 
     @property
     def is_active(self):
@@ -174,17 +167,16 @@ class Question(models.Model):
                              related_name='questions', db_index=True)
     number = models.PositiveIntegerField(default=1)
     text = models.CharField(max_length=10000)
-    mc = 'MC'
-    fr = 'FR'
+    ga = 'GA'
     op = 'OP'
     ov = 'OV'
     QUESTION_TYPES = [
-        (mc, 'Multiple Choice'),
-        (fr, 'Free Response'),
+        (ga, 'Game'),
         (op, 'Optional'),
         (ov, 'Optional (visible)')
     ]
     type = models.CharField(max_length=2, choices=QUESTION_TYPES)
+    choices = ArrayField(models.CharField(max_length=100, null=True), null=True, blank=True)
     image = models.FileField(upload_to='questions/', null=True, blank=True)
     caption = models.CharField(max_length=255, blank=True, default="")
     hide_default_results = models.BooleanField(default=False)
@@ -199,9 +191,13 @@ class Question(models.Model):
             self.thread = thread
         super().save(*args, **kwargs)
 
+    @property
+    def is_optional(self):
+        return self.type in (self.op, self.ov)
+
 
 class Answer(models.Model):
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(auto_now_add=True)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='answers', db_index=True)
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, related_name='raw_answers', db_index=True)

@@ -8,4 +8,6 @@ urlpatterns = [
     path('play/', views.GameEntryView.as_view(), name='play'),
     path('play/<game_uuid>', views.GameEntryView.as_view(), name='uuidplay'),
     path('play/<game_uuid>/<pending_uuid>', views.GameEntryValidationView.as_view(), name='player_confirm'),
+    path('game/<int:game_id>/', views.GameFormView.as_view(), name='game-form'),
+    path('game/<int:game_id>/<str:player_signed_id>/', views.GameFormView.as_view(), name='game-view')
 ]
