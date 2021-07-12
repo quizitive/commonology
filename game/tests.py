@@ -293,6 +293,12 @@ class TestModels(TestCase):
         self.assertIn(user, series.hosts.all())
         self.assertIn(user, series.players.all())
 
+    def test_game_host_is_series_player(self):
+        series, game = make_test_series()
+        user = get_local_user()
+        game.hosts.add(user)
+        self.assertIn(user, series.players.all())
+
 
 def make_test_series(series_name='Commonology', hour_window=False):
     sheet_name = "Test Commonology Game (Responses)"
