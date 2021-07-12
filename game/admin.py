@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.forms import Textarea
 from django.db import models
+from django.utils.html import format_html
 
 from game.models import Series, Game, Question, Answer, AnswerCode
 from project.utils import redis_delete_patterns
@@ -38,7 +39,8 @@ class QuestionAdmin(admin.StackedInline):
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_display = ('name', 'game_id', 'series', 'start', 'end')
+    readonly_fields = ["uuid"]
+    list_display = ('name', 'game_id', 'series', 'start', 'end', 'play')
     ordering = ('-game_id', )
     search_fields = ('game_id', 'name', 'series__slug')
     filter_horizontal = ('hosts',)
@@ -54,6 +56,18 @@ class GameAdmin(admin.ModelAdmin):
         ats_deleted = redis_delete_patterns(*at_prefixes)
         self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
         self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
+
+    def get_readonly_fields(self, request, obj=None):
+        # This will list model fields with editable=False in the admin.
+        return [f.name for f in obj._meta.fields if not f.editable]
+
+    def play(self, obj):
+        series = Series.objects.filter(id=obj.series_id).first()
+        if series:
+            return format_html(f"<a href=/c/{series.slug}/play/{obj.uuid}>play</a>")
+        else:
+            return f"{obj.uuid}"
+    play.allow_tags = True
 
 
 @admin.register(Answer)
