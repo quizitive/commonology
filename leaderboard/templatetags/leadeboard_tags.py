@@ -57,5 +57,5 @@ def formatted_answer_cell(context, counter):
 
 
 @register.simple_tag(takes_context=True)
-def game_is_on(context):
-    return find_latest_active_game(context.get('series_slug') or 'commonology') is not None
+def active_game(context):
+    return find_latest_active_game(context.get('series_slug') or 'commonology')
