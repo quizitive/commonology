@@ -91,7 +91,6 @@ class GameAdmin(admin.ModelAdmin):
                               level=messages.ERROR)
             logging.error("Exception occurred", exc_info=True)
 
-
     def get_readonly_fields(self, request, obj=None):
         # This will list model fields with editable=False in the admin.
         return [f.name for f in obj._meta.fields if not f.editable]
