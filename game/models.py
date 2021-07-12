@@ -124,6 +124,10 @@ class Game(models.Model):
         ).annotate(count=models.Count('raw_string')).order_by()
 
     @property
+    def raw_player_answers(self):
+        return Answer.objects.filter(question__game=self).order_by('player', 'question__number')
+
+    @property
     def coded_player_answers(self):
         answer_code_subquery = AnswerCode.objects.filter(
             raw_string=models.OuterRef('raw_string'),
@@ -140,7 +144,7 @@ class Game(models.Model):
                 default=False,
                 output_field=models.BooleanField()
             )
-        ).order_by('player', 'question')
+        ).order_by('player', 'question__number')
 
     @property
     def max_date(self):
