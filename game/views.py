@@ -1,92 +1,266 @@
 import gspread
 import logging
+from numpy import base_repr
+from pandas import DataFrame
 
-from django.http import HttpResponse
 from django.conf import settings
+from django.http import Http404
+from django.core.exceptions import PermissionDenied
+from django.core.signing import Signer, BadSignature
 from django.shortcuts import render, redirect
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.safestring import mark_safe
 from django.views.generic.base import View
+from django.views.generic.edit import FormMixin
 from project.views import CardFormView
-from game.forms import TabulatorForm
-from game.models import Game, Series
-from game.gsheets_api import api_data_to_df, write_all_to_gdrive
-from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
-from game.tasks import api_to_db
+from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
+from game.models import Game, Series, Answer
 from game.utils import find_latest_public_game
-from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
+from leaderboard.leaderboard import tabulate_results
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
 from mail.sendgrid_utils import sendgrid_send
 
 
-@staff_member_required
-def tabulator_form_view(request):
-    context = {
-        'fn': '',
-        'msg': ''
-    }
-    form = TabulatorForm(list(request.user.hosted_series.values_list('slug', 'name')))
-    if request.method == "POST":
+class SeriesPermissionMixin(UserPassesTestMixin):
+    """
+    A mixin to validate that a user can access series assets.
+    Will return true for players of that series or for any public series.
+    """
 
-        series = request.POST.get('series')
-        fn = request.POST.get('sheet_name')
-        context['fn'] = fn
-        form.fields['sheet_name'].initial = fn
-        gc = gspread.service_account(settings.GOOGLE_GSPREAD_API_CONFIG)
-        update = request.POST.get('update_existing') == 'on'
+    slug = 'commonology'
 
+    def dispatch(self, request, *args, **kwargs):
+        self.slug = kwargs.get('slug') or self.slug
+        return super().dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+        if self.request.user.is_staff:
+            return True
+        series = Series.objects.get(slug=self.slug)
+        if series.public:
+            return True
+        return series.players.filter(id=self.request.user.id).exists()
+
+
+class BaseGameView(SeriesPermissionMixin, View):
+    game = None
+
+    # these preserve the original request and are used for top level url handling
+    # in order to preserve commonologygame.com/leaderboard/ for the main game
+    requested_slug = None
+    requested_game_id = None
+
+    def dispatch(self, request, *args, **kwargs):
+        self.requested_slug = kwargs.get('series_slug')
+        self.slug = self.requested_slug or self.slug
+        if self.slug:
+            try:
+                Series.objects.get(slug=self.slug)
+            except Series.DoesNotExist:
+                raise Http404()
+
+        self.requested_game_id = kwargs.get('game_id')
+        self.game = self.get_game()
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_game(self):
+        """Implement this method to define game permission logic"""
+        raise NotImplementedError
+
+    def get_context(self, *args, **kwargs):
+        date_range = self.game.date_range_pretty
+        context = {
+            'game': self.game,
+            'game_id': self.game.game_id,
+            'game_name': self.game.name,
+            'date_range': date_range,
+            'series_slug': self.requested_slug,
+            'requested_game_id': self.requested_game_id,
+        }
+        return context
+
+
+class PSIDMixin:
+    """A mixin with utility functions to sign and unsign a player and game ID combination"""
+    signer = Signer()
+
+    def sign_game_player(self, game, player):
+        return self.signer.sign(f"{base_repr(game.id, 36)}-{base_repr(player.id, 36)}")
+
+    def build_signed_url(self, game, player):
+        return f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}'
+
+    def unsign_game_player(self, psid):
+        """Parses unique psid to get game and player object, raises PermissionDenied on all errors"""
         try:
-            tabulate_results(series, fn, gc, update)
-            context['msg'] = "The results have been updated, feel free to submit again."
-        except gspread.exceptions.SpreadsheetNotFound:
-            context['msg'] = "The Google Sheet entered does not exist, no changes were made"
-        except gspread.exceptions.WorksheetNotFound:
-            context['msg'] = "A tab was not found in the Google Sheet. Were the tabs renamed?"
-        except Exception as e:
-            context['msg'] = "An unexpected error occurred. Ping Ted."
-            logging.error("Exception occurred", exc_info=True)
-
-    context['form'] = form
-    return render(request, 'game/tabulator_form.html', context)
+            b36_gid, b36_pid = self.signer.unsign(psid).split("-")
+            return Game.objects.get(id=int(b36_gid, 36)), Player.objects.get(id=int(b36_pid, 36))
+        except (BadSignature, Player.DoesNotExist, Game.DoesNotExist):
+            raise PermissionDenied
 
 
-def tabulate_results(series_slug, filename, gc, update=False):
-    """
-    Reads from, tabulates, and prints output to the named Google Sheet
-    :param series_slug: The slug of the series to which this game belongs
-    :param filename: The name of the spreadsheet in Google Drive
-    :param gc: An authenticated instance of gspread
-    :param update: Whether or not to update existing answer records in the DB
-    :return: None
-    """
-    sheet_doc = gc.open(filename)
-    raw_data = sheet_doc.values_get(range='Form Responses 1').get('values')
-    responses = api_data_to_df(raw_data)
+class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
-    user_rollups = get_user_rollups(sheet_doc)
-    rollups_dict = build_rollups_dict(user_rollups)
-    answer_codes = build_answer_codes(responses, rollups_dict)
+    def render_game(self, request, game, player):
+        # called when an validated player passes though GameEntryView
+        psid = self.sign_game_player(game, player)
+        dn_form = self.display_name_form(player.display_name)
+        self.requested_slug = game.series.slug
+        self.game = game
+        return render(request, 'game/game_form.html', self.get_context(game, psid, dn_form))
 
-    # write to database
-    api_to_db(
-        series_slug,
-        filename,
-        responses.to_json(),
-        answer_codes,
-        update
-    )
+    def get(self, request, *args, **kwargs):
+        # any request without a player_signed_id gets redirected to GameEntryView
+        if (psid := kwargs.get('player_signed_id')) is None:
+            return redirect('game:uuidplay', game_uuid=self.game.uuid)
 
-    # calculate the question-by-question data and leaderboard
-    # NOTE: both of these call the method that rebuilds themself from db and clears the cache
-    game = Game.objects.get(sheet_name=filename, series__slug=series_slug)
-    answer_tally = build_answer_tally_fromdb(game)
-    leaderboard = build_leaderboard_fromdb(game, answer_tally)
+        game, player = self.unsign_game_player(psid)
 
-    # write to google
-    write_all_to_gdrive(sheet_doc, answer_tally, answer_codes, leaderboard)
+        dn_form = self.display_name_form(player.display_name, editable=False)
+        form_data = {
+            str(qid): answer
+            for qid, answer in Answer.objects.filter(
+                question__game=game,
+                player=player
+            ).values_list('question', 'raw_string')
+        }
+        forms = self.get_game_forms(game, form_data, editable=False)
+        context = self.get_context(game, None, dn_form, forms, False)
+        return render(request, 'game/game_form.html', context)
+
+    def post(self, request, *args, **kwargs):
+        # make sure this is a real submission that hasn't been tampered with
+        if (psid := self.request.POST.get('psid')) is None:
+            raise PermissionDenied
+        game, player = self.unsign_game_player(psid)
+
+        if player.id in self.game.players.values_list('player', flat=True):
+            return self.render_answers_submitted_card(request, 'duplicate', player, game)
+
+        dn_form = self.display_name_form(self.request.POST.get('display_name'))
+        # build a dict with the form inputs
+        form_data = {
+            qid: answer
+            for qid, answer in
+            zip(self.request.POST.getlist('question'), self.request.POST.getlist('raw_string'))
+        }
+
+        forms = self.get_game_forms(self.game, form_data, player)
+        if any([f.errors for f in forms.values()]):
+            context = self.get_context(self.game, psid, dn_form, forms)
+            return render(request, 'game/game_form.html', context)
+
+        player.display_name = self.request.POST.get('display_name')
+        player.save()
+
+        for form in forms.values():
+            form.save()
+
+        self.email_player_success(request, game, player)
+
+        return self.render_answers_submitted_card(request, 'success', player, game)
+
+    def render_answers_submitted_card(self, request, msg, player, game):
+        msgs = {
+            'success': {
+                "header": "Success!",
+                "custom_message": mark_safe(f"<b>Your answers have been submitted.</b> You can see them now by clicking "
+                                  f"the button below, and we've emailed the link to <b>{player.email}</b>."),
+            },
+            'duplicate': {
+                "header": "You've already played!",
+                "custom_message": f"You have already submitted answers for this game. "
+                                  f"You can see them again by clicking the button below.",
+            }
+        }
+        return CardFormView().render(
+            request,
+            button_label="View my answers",
+            form_method='get',
+            form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
+            **msgs[msg]
+        )
+
+    def email_player_success(self, request, game, player):
+        answers_url = self.build_signed_url(game, player)
+        domain = get_current_site(request)
+        email_context = {
+            'game_name': game.name,
+            'url': f'https://{domain}{answers_url}'
+        }
+        answers_msg = render_to_string('game/game_complete_email.html', email_context)
+        sendgrid_send(f'{game.name}', answers_msg, [(player.email, None)])
+
+    def test_func(self):
+        # override super method, which requires users to be logged in
+        # this view can be accessed by anonymous users with a psid
+        return True
+
+    def get_game(self):
+        # self.game will be set if view is instantiated from GameEntryView
+        if self.game is not None:
+            return self.game
+        # otherwise use url to define self.game
+        try:
+            return Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
+        except Game.DoesNotExist:
+            raise Http404("Game does not exist")
+
+    def get_context(self, game, psid, dn_form, forms=None, editable=True):
+        context = super().get_context()
+        context.update({
+            'game': game,
+            'dn_form': dn_form,
+            'questions': self.questions_with_forms(game, forms),
+            'psid': psid,
+            'editable': editable  # flag to disable forms and js and hide submit button
+        })
+        return context
+
+    def get_game_forms(self, game, form_data=(), player=None, editable=True):
+        """Get all the game question forms, empty or populated with form_data from post.
+           Any form data submitted with a question not in this game will be ignored,
+           likewise any question without data (e.g. incomplete forms) will be handled"""
+        form_data = form_data or {}
+        if form_data:
+            forms = {q.id: QuestionAnswerForm(
+                question=q,
+                editable=editable,
+                auto_id=f'%s_{q.id}',
+                initial={'raw_string': form_data.get(str(q.id))},
+                data={'question': q,
+                      'raw_string': form_data.get(str(q.id)),
+                      'player': player}
+            )
+                for q in game.questions.order_by('number')
+            }
+        else:
+            forms = {q.id: QuestionAnswerForm(
+                question=q,
+                auto_id=f'%s_{q.id}'
+            )
+                for q in game.questions.order_by('number')
+            }
+        return forms
+
+    def questions_with_forms(self, game, forms=None):
+        forms = forms or self.get_game_forms(game)
+        questions_with_forms = [
+            (q, forms[q.id]) for q in game.questions.order_by('number')
+        ]
+        return questions_with_forms
+
+    def display_name_form(self, display_name, editable=True):
+        return GameDisplayNameForm(
+            editable=editable,
+            initial={'display_name': display_name}
+        )
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
@@ -111,24 +285,19 @@ def send_confirm(request, g, email):
 
 
 def render_game(request, game, user=None):
-    slug = game.series.slug
-
     if user:
         request.session['user_id'] = user.id
     else:
         user = request.user
-
-    if not user.series.filter(slug=slug).exists():
-        series = Series.objects.filter(slug=slug).first()
-        series.players.add(user)
-    return HttpResponse(f'stub function that would render {game.name} for {user}')
+    game.series.players.add(user)
+    return GameFormView().render_game(request, game, user)
 
 
-class GameEntryView(CardFormView):
+class GameEntryView(PSIDMixin, CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
     button_label = "Email me a play link"
-    custom_message = "Login to play or enter your email and we will send you a play link."
+    custom_message = "Login to play, or enter your email and we will send you a unique play link."
 
     def message(self, request, msg):
         self.custom_message = msg
@@ -180,7 +349,16 @@ class GameEntryView(CardFormView):
             return self.leaderboard(request, slug=slug)
 
         if g.user_played(user):
-            return self.message(request, 'You played already.  Your answers have been emailed to you.')
+            return self.info(
+                request,
+                keep_form=False,
+                button_label="View my answers",
+                header="You've already played!",
+                form_method='get',
+                form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
+                message=f"You have already submitted answers for this game. "
+                        f"You can see them again by clicking the button below.",
+            )
 
         if not is_active:
             return self.message(request, msg='Seems like the game finished but has not been scored yet.')
@@ -214,15 +392,15 @@ class GameEntryView(CardFormView):
         email = request.POST['email']
 
         send_confirm(request, g, email)
-        self.custom_message = f"We sent the game link to {email}. " \
-                              f"Don't forget to check your spam or junk folder if need be. " \
-                              f"By the way, if you were logged in you'd be playing already."
+        self.custom_message = mark_safe(f"<b>We sent the game link to {email}. </b>"
+                              f"Don't forget to check your spam or junk folder if need be. "
+                              f"By the way, if you were logged in you'd be playing already.")
 
         self.header = "Game link sent!"
-        return self.render(request, form=None, button_label='OK')
+        return self.render(request, form=None, form_method='get', form_action='', button_label='OK')
 
 
-class GameEntryValidationView(CardFormView):
+class GameEntryValidationView(PSIDMixin, CardFormView):
     form_class = PendingEmailForm
     header = "Email validated here!"
     button_label = "Next"
@@ -248,6 +426,8 @@ class GameEntryValidationView(CardFormView):
             return self.warning(request, 'Sorry the next game is no longer active.', keep_form=False)
 
         if request.user.is_authenticated:
+            if g.user_played(request.user):
+                return self._user_played(request, g, request.user)
             return render_game(request, g)
 
         pe = PendingEmail.objects.filter(uuid__exact=pending_uuid).first()
@@ -264,4 +444,51 @@ class GameEntryValidationView(CardFormView):
             p = Player(email=email)
             p.save()
 
+        if g.user_played(p):
+            return self._user_played(request, g, p)
+
         return render_game(request, g, p)
+
+    def _user_played(self, request, g, user):
+        return self.info(
+            request,
+            keep_form=False,
+            button_label="View my answers",
+            header="You've already played!",
+            form_method='get',
+            form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
+            message=f"You have already submitted answers for this game. "
+                    f"You can see them again by clicking the button below.",
+        )
+
+
+# ---- To be deprecated once we host forms ---- #
+@staff_member_required
+def tabulator_form_view(request):
+    context = {
+        'fn': '',
+        'msg': ''
+    }
+    form = TabulatorForm(list(request.user.hosted_series.values_list('slug', 'name')))
+    if request.method == "POST":
+
+        series = request.POST.get('series')
+        fn = request.POST.get('sheet_name')
+        context['fn'] = fn
+        form.fields['sheet_name'].initial = fn
+        update = request.POST.get('update_existing') == 'on'
+        game = Game.objects.get(sheet_name=fn, series__slug=series)
+
+        try:
+            tabulate_results(game, update)
+            context['msg'] = "The results have been updated, feel free to submit again."
+        except gspread.exceptions.SpreadsheetNotFound:
+            context['msg'] = "The Google Sheet entered does not exist, no changes were made"
+        except gspread.exceptions.WorksheetNotFound:
+            context['msg'] = "A tab was not found in the Google Sheet. Were the tabs renamed?"
+        except Exception as e:
+            context['msg'] = "An unexpected error occurred. Ping Ted."
+            logging.error("Exception occurred", exc_info=True)
+
+    context['form'] = form
+    return render(request, 'game/tabulator_form.html', context)
