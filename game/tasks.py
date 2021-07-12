@@ -196,4 +196,4 @@ def raw_answers_db_to_df(game):
 
     raw_answers_df = pd.DataFrame(
         columns=['Timestamp', 'Email Address', 'Name'] + qtext, data=raw_answer_data)
-    return raw_answers_df
+    return raw_answers_df.sort_values('Timestamp')
