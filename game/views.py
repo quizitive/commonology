@@ -18,11 +18,8 @@ from django.views.generic.edit import FormMixin
 from project.views import CardFormView
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
-from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive
-from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
-from game.tasks import api_to_db, raw_answers_db_to_df
 from game.utils import find_latest_public_game
-from leaderboard.leaderboard import build_leaderboard_fromdb, build_answer_tally_fromdb
+from leaderboard.leaderboard import tabulate_results
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
@@ -300,7 +297,7 @@ class GameEntryView(PSIDMixin, CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
     button_label = "Email me a play link"
-    custom_message = "Login to play or enter your email and we will send you a unique play link."
+    custom_message = "Login to play, or enter your email and we will send you a unique play link."
 
     def message(self, request, msg):
         self.custom_message = msg
@@ -479,12 +476,11 @@ def tabulator_form_view(request):
         fn = request.POST.get('sheet_name')
         context['fn'] = fn
         form.fields['sheet_name'].initial = fn
-        gc = gspread.service_account(settings.GOOGLE_GSPREAD_API_CONFIG)
         update = request.POST.get('update_existing') == 'on'
         game = Game.objects.get(sheet_name=fn, series__slug=series)
 
         try:
-            tabulate_results(game, gc, update)
+            tabulate_results(game, update)
             context['msg'] = "The results have been updated, feel free to submit again."
         except gspread.exceptions.SpreadsheetNotFound:
             context['msg'] = "The Google Sheet entered does not exist, no changes were made"
@@ -496,40 +492,3 @@ def tabulator_form_view(request):
 
     context['form'] = form
     return render(request, 'game/tabulator_form.html', context)
-
-
-def tabulate_results(game, gc, update=False):
-    """
-    Reads from, tabulates, and prints output to the named Google Sheet
-    :param game: The game object
-    :param gc: An authenticated instance of gspread
-    :param update: Whether or not to update existing answer records in the DB
-    :return: None
-    """
-    try:
-        sheet_doc = gc.open(game.sheet_name)
-    except gspread.exceptions.SpreadsheetNotFound:
-        sheet_doc = gc.create(game.sheet_name, settings.GOOGLE_DRIVE_FOLDER_ID)
-
-    responses = api_and_db_data_as_df(game, sheet_doc)
-
-    user_rollups = get_user_rollups(sheet_doc)
-    rollups_dict = build_rollups_dict(user_rollups)
-    answer_codes = build_answer_codes(responses, rollups_dict)
-
-    # write to database
-    api_to_db(
-        game.series.slug,
-        game.sheet_name,
-        responses.to_json(),
-        answer_codes,
-        update
-    )
-
-    # calculate the question-by-question data and leaderboard
-    # NOTE: both of these call the method that rebuilds themself from db and clears the cache
-    answer_tally = build_answer_tally_fromdb(game)
-    leaderboard = build_leaderboard_fromdb(game, answer_tally)
-
-    # write to google
-    write_all_to_gdrive(sheet_doc, responses, answer_tally, answer_codes, leaderboard)

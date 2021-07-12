@@ -3,12 +3,54 @@ import json
 from collections import OrderedDict, deque
 
 import pandas as pd
+import gspread
 
 from django.db.models import Sum, Subquery, OuterRef
+from django.conf import settings
 
 from project.utils import REDIS
 from users.models import Team
 from game.models import Game, AnswerCode
+from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive
+from game.tasks import api_to_db
+from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
+
+
+def tabulate_results(game, update=False):
+    """
+    Reads from, tabulates, and prints output to the named Google Sheet
+    :param game: The game object
+    :param update: Whether or not to update existing answer records in the DB
+    :return: None
+    """
+    gc = gspread.service_account(settings.GOOGLE_GSPREAD_API_CONFIG)
+    try:
+        sheet_doc = gc.open(game.sheet_name)
+    except gspread.exceptions.SpreadsheetNotFound:
+        sheet_doc = gc.create(game.sheet_name, settings.GOOGLE_DRIVE_FOLDER_ID)
+
+    responses = api_and_db_data_as_df(game, sheet_doc)
+
+    user_rollups = get_user_rollups(sheet_doc)
+    rollups_dict = build_rollups_dict(user_rollups)
+    answer_codes = build_answer_codes(responses, rollups_dict)
+
+    # write to database
+    api_to_db(
+        game.series.slug,
+        game.sheet_name,
+        responses.to_json(),
+        answer_codes,
+        update
+    )
+
+    # calculate the question-by-question data and leaderboard
+    # NOTE: both of these call the method that rebuilds themself from db and clears the cache
+    answer_tally = build_answer_tally_fromdb(game)
+    leaderboard = build_leaderboard_fromdb(game, answer_tally)
+
+    # write to google
+    write_all_to_gdrive(sheet_doc, responses, answer_tally, answer_codes, leaderboard)
 
 
 def build_filtered_leaderboard(game, answer_tally, player_ids=None, search_term=None, team_id=None):
