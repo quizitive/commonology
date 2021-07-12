@@ -4,7 +4,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 
 from users.models import Player
@@ -164,6 +164,11 @@ class Game(models.Model):
     def is_active(self):
         now = our_now()
         return self.start <= now <= self.end
+
+
+@receiver(m2m_changed, sender=Game.hosts.through)
+def add_host_as_player(sender, instance, **kwargs):
+    instance.series.players.add(*instance.hosts.all())
 
 
 class Question(models.Model):
