@@ -125,8 +125,7 @@ class Game(models.Model):
 
     @property
     def raw_player_answers(self):
-        return Answer.objects.filter(question__game=self).order_by(
-            'timestamp', 'player', 'question__number', 'question__text')
+        return Answer.objects.filter(question__game=self).order_by('player', 'question__number')
 
     @property
     def coded_player_answers(self):
@@ -145,7 +144,7 @@ class Game(models.Model):
                 default=False,
                 output_field=models.BooleanField()
             )
-        ).order_by('player', 'question')
+        ).order_by('player', 'question__number')
 
     @property
     def max_date(self):

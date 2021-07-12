@@ -51,7 +51,7 @@ def game_to_db(series, filename, start=None, end=None):
 def questions_to_db(game, responses):
     q_text = responses.columns[3:]
     questions = []
-    for qt in q_text:
+    for idx, qt in enumerate(q_text):
         if qt.startswith('OPTIONAL: '):
             q_type = Question.op
         else:
@@ -59,7 +59,7 @@ def questions_to_db(game, responses):
         q, _ = Question.objects.get_or_create(
             game=game,
             text=qt,
-            defaults={'type': q_type}
+            defaults={'type': q_type, 'number': idx}
         )
         questions.append(q)
     return questions
