@@ -1,4 +1,7 @@
+import logging
+
 from django.contrib import admin
+from django.contrib.messages import constants as messages
 from django.forms.fields import CharField
 from django.contrib.postgres.forms import SimpleArrayField
 from django.forms import Textarea, ModelForm
@@ -6,6 +9,7 @@ from django.db import models
 from django.utils.html import format_html
 
 from game.models import Series, Game, Question, Answer, AnswerCode
+from leaderboard.leaderboard import tabulate_results
 from project.utils import redis_delete_patterns
 
 
@@ -57,7 +61,7 @@ class GameAdmin(admin.ModelAdmin):
     filter_horizontal = ('hosts',)
     list_filter = ('series',)
     inlines = (QuestionAdmin,)
-    actions = ('clear_cache', )
+    actions = ('clear_cache', 'score_selected_games', 'score_selected_games_update_existing')
     view_on_site = True
 
     def clear_cache(self, request, queryset):
@@ -67,6 +71,26 @@ class GameAdmin(admin.ModelAdmin):
         ats_deleted = redis_delete_patterns(*at_prefixes)
         self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
         self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
+
+    def score_selected_games(self, request, queryset):
+        for game in queryset:
+            self._score_game(request, game)
+    score_selected_games.short_description = "Score Selected Games"
+
+    def score_selected_games_update_existing(self, request, queryset):
+        for game in queryset:
+            self._score_game(request, game, update=True)
+    score_selected_games_update_existing.short_description = 'Score Selected Games (update existing - slower!)'
+
+    def _score_game(self, request, game, update=False):
+        try:
+            tabulate_results(game, update)
+            self.message_user(request, f"{game.name} has successfully been scored!")
+        except Exception as e:
+            self.message_user(request, "An unexpected error occurred. Ping Ted.",
+                              level=messages.ERROR)
+            logging.error("Exception occurred", exc_info=True)
+
 
     def get_readonly_fields(self, request, obj=None):
         # This will list model fields with editable=False in the admin.
