@@ -1,11 +1,10 @@
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth import get_user_model
 
 from game.models import Game
-from leaderboard.views import SeriesPermissionMixin
+from game.views import SeriesPermissionMixin
 from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard
 
 

@@ -3,99 +3,44 @@ from django.views.generic.base import View
 from django.http import Http404
 from django.contrib import messages
 from django.db.models import Max
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-from game.models import Game, Series, Question, Answer, AnswerCode
+from game.models import Game, Question
+from game.views import BaseGameView
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_rank_and_percentile_in_game
 
 
-class SeriesPermissionMixin(UserPassesTestMixin):
-    """
-    A mixin to validate that a user can access series assets.
-    Will return true for players of that series or for any public series.
-    """
+class LeaderboardView(BaseGameView):
 
-    slug = 'commonology'
-
-    def dispatch(self, request, *args, **kwargs):
-        self.slug = self.kwargs.get('slug') or self.slug
-        return super().dispatch(request, *args, **kwargs)
-
-    def test_func(self):
-        if self.request.user.is_staff:
-            return True
-        series = Series.objects.get(slug=self.slug)
-        if series.public:
-            return True
-        return series.players.filter(id=self.request.user.id).exists()
-
-
-class SeriesPermissionView(SeriesPermissionMixin, View):
-    game_id = None
-
-    # these preserve the original request and are used for top level url handling
-    # in order to preserve commonologygame.com/leaderboard/ for the main game
-    requested_slug = None
-    requested_game_id = None
-
-    def dispatch(self, request, *args, **kwargs):
-        self.requested_slug = kwargs.get('series_slug')
-        self.slug = self.requested_slug or self.slug
-        if self.slug:
-            try:
-                Series.objects.get(slug=self.slug)
-            except Series.DoesNotExist:
-                raise Http404()
+    def get_game(self):
+        """Only allows staff to view historical games, sets self.game_id to published game with highest game_id"""
 
         # todo: maybe change this to is_authenticated to allow access to historical leaderboards
-        self.game_id = self.requested_game_id = kwargs.get('game_id')
-        if self.game_id is not None and not request.user.is_staff:
+        if self.requested_game_id is not None and not self.request.user.is_staff:
             raise Http404()
 
         # if no id is specified get the most recent published game for this series
-        if not self.game_id:
-            self.game_id = Game.objects.filter(
-                publish=True, series__slug=self.slug).aggregate(Max('game_id'))['game_id__max']
+        if not self.requested_game_id:
+            game = Game.objects.filter(
+                publish=True, series__slug=self.slug).order_by('-game_id').first()
+        else:
+            game = Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
 
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context(self, game):
-        date_range = game.date_range_pretty
-        context = {
-            'game_id': game.game_id,
-            'game_name': game.name,
-            'date_range': date_range,
-            'series_slug': self.requested_slug,
-            'requested_game_id': self.requested_game_id,
-        }
-        return context
-
-
-class LeaderboardView(SeriesPermissionView):
+        return game
 
     def get(self, request, *args, **kwargs):
-        try:
-            game = Game.objects.get(game_id=self.game_id, series__slug=self.slug)
-        except Game.DoesNotExist:
-            raise Http404("Game does not exist")
-
-        context = self.get_context(game)
-
+        context = self.get_context()
         messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, 'leaderboard/leaderboard_view.html', context)
 
 
-class ResultsView(SeriesPermissionView):
+class ResultsView(LeaderboardView):
 
     def get(self, request, *args, **kwargs):
-        try:
-            game = Game.objects.get(game_id=self.game_id, series__slug=self.slug)
-        except Game.DoesNotExist:
-            raise Http404("Game does not exist")
-
+        game = self.get_game()
         answer_tally = build_answer_tally(game)
-        context = self.get_context(game)
+        context = self.get_context()
         questions = game.questions.exclude(type=Question.op).order_by('number')
         player_answers = []
         if request.user.is_authenticated:

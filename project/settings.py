@@ -219,7 +219,7 @@ MAILCHIMP_SERVER = 'us2'
 MAILCHIMP_EMAIL_LIST_ID = env.get("MAILCHIMP_EMAIL_LIST_ID")
 
 GOOGLE_GSPREAD_API_CONFIG = os.path.join(BASE_DIR, '.config/gspread/commonology_service_account.json')
-
+GOOGLE_DRIVE_FOLDER_ID = env.get("GOOGLE_DRIVE_FOLDER_ID")
 
 LOGGING = {
     'version': 1,
