@@ -293,6 +293,12 @@ class TestModels(TestCase):
         self.assertIn(user, series.hosts.all())
         self.assertIn(user, series.players.all())
 
+    def test_game_host_is_series_player(self):
+        series, game = make_test_series()
+        user = get_local_user()
+        game.hosts.add(user)
+        self.assertIn(user, series.players.all())
+
 
 def make_test_series(series_name='Commonology', hour_window=False):
     sheet_name = "Test Commonology Game (Responses)"
@@ -418,7 +424,7 @@ class TestPlayRequest(TestCase):
 
         p = Player.objects.filter(email=ABINORMAL).first()
         self.assertIsNone(p)
-        self.assertContains(response, "Login to play or enter your email and we will send you a play link.")
+        self.assertContains(response, "Login to play, or enter your email and we will send you a unique play link.")
 
         url = self.get_invite_url(email=ABINORMAL)
         pe = PendingEmail.objects.filter(email=ABINORMAL).first()

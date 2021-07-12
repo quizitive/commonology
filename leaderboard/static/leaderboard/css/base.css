@@ -8,8 +8,17 @@ div.content {
 h1.leaderboard {
   margin: 0;
 }
+.game-buttons {
+  padding: 24px 0 0 0;
+}
 .game-header-button {
-  min-width: 135px;
+  margin: 4px 0;
+  width: 49%;
+}
+.game-header-button.play-button {
+  width: 99%;
+  /*min-width: 285px;*/
+  /*margin-top: 5px;*/
 }
 
 /* These settings force the leaderboard to render well on mobile */

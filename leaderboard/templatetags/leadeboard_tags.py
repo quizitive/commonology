@@ -2,6 +2,8 @@ from django import template
 from django.shortcuts import reverse
 from django.utils.safestring import mark_safe
 
+from game.utils import find_latest_active_game
+
 register = template.Library()
 
 
@@ -22,11 +24,11 @@ def button_highlight(context, dest_link):
 
 
 @register.simple_tag(takes_context=True)
-def series_or_default_url(context, view_name):
+def series_or_default_url(context, app_name, view_name):
     if context['series_slug']:
-        return reverse(f'series-leaderboard:{view_name}', kwargs={'series_slug': context['series_slug']})
+        return reverse(f'series-{app_name}:{view_name}', kwargs={'series_slug': context['series_slug']})
     else:
-        return reverse(f'leaderboard:{view_name}')
+        return reverse(f'{app_name}:{view_name}')
 
 
 @register.simple_tag(takes_context=True)
@@ -52,3 +54,8 @@ def formatted_answer_cell(context, counter):
              f'</div>{addl_div}'
 
     return mark_safe(result)
+
+
+@register.simple_tag(takes_context=True)
+def active_game(context):
+    return find_latest_active_game(context.get('series_slug') or 'commonology')
