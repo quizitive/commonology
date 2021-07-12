@@ -300,9 +300,9 @@ class GameEntryView(PSIDMixin, CardFormView):
     custom_message = "Login to play, or enter your email and we will send you a unique play link."
 
     def message(self, request, msg):
-        self.custom_message = msg
-        return self.render(request, form=None, button_label='Home',
-                           form_method="get", form_action='/')
+        # self.custom_message = msg
+        return super().message(request, msg, keep_form=False, button_label='Ok',
+                           form_method="get", form_action='')
 
     def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
         self.custom_message = msg
@@ -392,12 +392,12 @@ class GameEntryView(PSIDMixin, CardFormView):
         email = request.POST['email']
 
         send_confirm(request, g, email)
-        self.custom_message = mark_safe(f"<b>We sent the game link to {email}. </b>"
+        custom_message = mark_safe(f"<b>We sent the game link to {email}. </b>"
                               f"Don't forget to check your spam or junk folder if need be. "
                               f"By the way, if you were logged in you'd be playing already.")
 
         self.header = "Game link sent!"
-        return self.render(request, form=None, form_method='get', form_action='', button_label='OK')
+        return self.message(request, custom_message)
 
 
 class GameEntryValidationView(PSIDMixin, CardFormView):
