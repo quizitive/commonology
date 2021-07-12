@@ -57,6 +57,10 @@ class GameAdmin(admin.ModelAdmin):
         self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
         self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
 
+    def get_readonly_fields(self, request, obj=None):
+        # This will list model fields with editable=False in the admin.
+        return [f.name for f in obj._meta.fields if not f.editable]
+
     def play(self, obj):
         series = Series.objects.filter(id=obj.series_id).first()
         if series:
