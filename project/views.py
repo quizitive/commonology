@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django import forms
-from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import send_mail
 from project.card_views import CardFormView
 from project.charts import ChartJS, ExampleDataClass
@@ -86,7 +86,7 @@ class ContactView(CardFormView):
         return self.render(request)
 
 
-@login_required
+@staff_member_required
 def stats_view(request):
     chart_1 = ChartJS(ExampleDataClass, name="myChart", game_id=1)
     chart_2 = ChartJS(ExampleDataClass, name="chart_2", game_id=2)
