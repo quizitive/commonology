@@ -47,7 +47,7 @@ class BaseCardView(ContextMixin, View):
             self.form_class = None
         return self.render(request, *args, **kwargs)
 
-    def message(self, request, message, keep_form=True, *args, **kwargs):
+    def render_message(self, request, message, keep_form=True, *args, **kwargs):
         self.custom_message = message
         if not keep_form:
             self.form_class = None
