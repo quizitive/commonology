@@ -71,6 +71,17 @@
         text-align: center;
         line-height: 1.1rem;
       }
+      #social_container{
+          width: 400px;
+          overflow: hidden;
+      }
+      #social_list{
+          display: inline;
+          list-style-type: none;
+      }
+      #social_list li{
+          float: left;
+      }
     </style>
   </head>
 
@@ -89,12 +100,14 @@
           {% endblock %}
         </div>
       </div>
+        {%  include "mail/social_mail.html" %}
       <div id="email-footer">
         {% block email-footer-content %}
           This email was sent to -email-.<br>
           {% if unsub_link %}
           <a id="unsubscribe" href="-unsubscribelink-">unsubscribe from this list</a><br>
           {% endif %}
+
         {% endblock %}
         Commonology · Quizitive, LLC · 5000  Thayer Center, Suite C · Oakland, MD 21550 · USA
       </div>
