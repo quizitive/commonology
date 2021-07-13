@@ -15,7 +15,7 @@ div.content {
     margin: 0 auto;
     max-width: 640px;
     min-height: 100vh;
-    padding-bottom: 80px;
+    padding-bottom: 120px;
 }
 
 div.w3-modal-content {
@@ -122,18 +122,6 @@ button.login-google:hover {
 }
 
 /* Social Media Icon */
-#social_container{
-  width: 400px;
-  overflow: hidden;
-}
-#social_list{
-  display: inline;
-  list-style-type: none;
-}
-#social_list li{
-  float: left;
-}
-
 .social_dim {
 width: 18px;
 height: 18px;

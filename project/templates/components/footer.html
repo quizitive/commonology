@@ -1,31 +1,43 @@
 {% load static %}
 
 <div id="footer-container" class="w3-bottombar">
-    <div id="footer" class="w3-bar w3-medium w3-padding">
-      <div class="w3-cell-row">
+    <div id="footer" class="w3-bar w3-medium w3-padding" style="padding-top:24px">
+      <div class="w3-cell-row" style="height:100%;">
         <div class="w3-cell w3-mobile" style="width:6%;"></div>
-        <div class="w3-cell w3-cell-middle" style="font-size:0.8rem;width:35%">
-          &#169 2021 Quizitive, LLC
-        </div>
-        <div class="w3-cell w3-cell-middle w3-rest w3-center">
-          &nbsp
-          <img src="{% static 'img/icon.svg' %}" height="38px">
-        </div>
-        <div class="w3-cell w3-cell-middle w3-right-align" style="font-size:0.8rem;width:35%">
 
-          <div class="w3-cell-row w3-mobile">
+        <div class="w3-cell w3-mobile" style="width:88%">
+          <div class="w3-cell-row" style="margin-top:18px;">
 
-         {%  include "components/social.html" %}
-         <a href="https://twitter.com/commonologygame?ref_src=twsrc%5Etfw" class="bottombar w3-cell w3-mobile" data-show-screen-name="false" data-show-count="false">Twitter</a>
-         <a class="bottombar w3-cell w3-mobile" href="{% url 'about' %}">About</a>
-         <a class="bottombar w3-cell w3-mobile" href="{% url 'product' %}">Product</a>
-         <a class="bottombar w3-cell w3-mobile" href="{% url 'tos' %}">TOS</a>
+          <div class="w3-cell w3-cell-middle" style="width:35%;padding:8px 8px 0;">
+            <div class="w3-row">
+             {%  include "components/social.html" %}
+            </div>
+          </div>
 
-         <a class="bottombar w3-cell w3-mobile" href="/contact">Contact</a>
+          <div class="w3-cell w3-cell-middle w3-rest w3-center" style="padding:4px 0 0 0;">
+            <div class="w3-row"><img src="{% static 'img/icon.svg' %}" height="38px"></div>
+          </div>
+
+          <div class="w3-cell w3-cell-middle w3-right-align" style="font-size:0.8rem;width:35%;">
+
+            <div class="w3-cell-row w3-mobile" style="width:65%;float:right;">
+               <a class="bottombar w3-cell w3-mobile" href="{% url 'about' %}">About</a>
+               <a class="bottombar w3-cell w3-mobile" href="{% url 'product' %}">Product</a>
+               <a class="bottombar w3-cell w3-mobile" href="{% url 'tos' %}">Terms</a>
+               <a class="bottombar w3-cell w3-mobile" href="/contact">Contact</a>
+            </div>
 
           </div>
         </div>
+
+        <div class="w3-row w3-right-align" style="color:#aaaaaa;font-size:0.7rem;margin:4px 0 0 0;">
+          &#169 2021 Quizitive, LLC. All rights reserved.
+        </div>
+
+      </div>
+
         <div class="w3-cell w3-mobile" style="width:6%;"></div>
       </div>
+
     </div>
 </div>
