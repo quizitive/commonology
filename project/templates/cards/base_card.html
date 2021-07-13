@@ -1,4 +1,6 @@
 <div class="cg-card w3-modal-content w3-round w3-card-0 w3-border cg-border-grey" style="overflow: hidden;margin:auto;">
+
+  {% if header %}
   <header class="w3-container w3-border-bottom w3-center">
 
     {% if is_modal %}
@@ -8,6 +10,8 @@
 
     <h4>{{ header }}</h4>
   </header>
+  {% endif %}
+
   <div class="w3-container w3-padding-large">
 
   <!-- standard Django user messages e.g. messages.info(request, "message') -->
@@ -26,17 +30,27 @@
     {% endif %}
   {% endblock %}
 
+  {% if chart %}
+  {% block chart %}
+    <div class="w3-padding"></div>
+    <canvas class="chart" id="{{ chart.name }}"></canvas>
+    {{ chart.get|json_script:chart.data_name }}
+  {% endblock %}
+  {% endif %}
+
   {% block form %}
     <form method="{{ form_method|default:'post' }}" {% if form_action %}action="{{ form_action }}"{% endif %}>
       {% if form %}
       {% csrf_token %}
       {{ form.as_p }}
       {% endif %}
+      {% if button_label %}
       <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
+      {% endif %}
     </form>
   {% endblock %}
 
-    {% block card_extras %}{% endblock %}
+  {% block card_extras %}{% endblock %}
 
   </div>
 </div>

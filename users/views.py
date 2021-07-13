@@ -31,24 +31,7 @@ def user_logout(request):
     return redirect(reverse('home'))
 
 
-class UserCardFormView(CardFormView):
-    """
-    A base class with sensible defaults for our basic user form-in-card
-    See template cards/base_card.html for additional template
-    variables that can be set to customize form further.
-
-    Common use case would be to define a form_class and override post()
-    to handle form-specific functionality
-    """
-    # form_class = YourFormClass
-    header = "Welcome To Commonology"
-    custom_message = None
-    button_label = "Ok"
-    card_template = 'cards/base_card.html'
-    page_template = 'users/base.html'
-
-
-class ProfileView(LoginRequiredMixin, UserCardFormView):
+class ProfileView(LoginRequiredMixin, CardFormView):
 
     form_class = PlayerProfileForm
     card_template = 'users/cards/profile_card.html'
@@ -105,7 +88,7 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
         return sendgrid_send('Email confirmation', msg, [(email, None)])
 
 
-class JoinView(UserCardFormView):
+class JoinView(CardFormView):
     form_class = PendingEmailForm
     header = "Join Commonology"
     button_label = "Join"
@@ -188,7 +171,7 @@ def send_invite(request, email, referrer=None):
     return sendgrid_send("You're Invited to Commonology", msg, [(email, None)])
 
 
-class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
+class InviteFriendsView(LoginRequiredMixin, CardFormView):
 
     header = "Invite Friends"
     form_class = InviteFriendsForm
@@ -358,7 +341,7 @@ class EmailChangeConfirmedView(View):
         return render(request, 'users/base.html', context)
 
 
-class PwdChangeView(UserCardFormView, PasswordChangeView):
+class PwdChangeView(CardFormView, PasswordChangeView):
     header = "Change Password"
     success_url = reverse_lazy('profile')
 
