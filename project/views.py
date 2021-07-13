@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from project.card_views import CardFormView
+from project.charts import ChartJS, ExampleDataClass
 from game.utils import next_event, find_latest_public_game
 
 import logging
@@ -87,7 +88,7 @@ class ContactView(CardFormView):
 
 @login_required
 def stats_view(request):
-    chart_1 = ChartJS(ExampleDataClass, name="myChart", game_id=1, backgroundColor=Color.Green)
+    chart_1 = ChartJS(ExampleDataClass, name="myChart", game_id=1)
     chart_2 = ChartJS(ExampleDataClass, name="chart_2", game_id=2)
     context = {
         "custom_message": "Trend of the percent of game players that are members",

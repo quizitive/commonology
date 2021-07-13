@@ -300,15 +300,15 @@ class GameEntryView(PSIDMixin, CardFormView):
     custom_message = "Login to play, or enter your email and we will send you a unique play link."
 
     def message(self, request, msg):
-        return self.render_message(request, msg, keep_form=False, button_label='Ok',
+        return self.render_message(request, msg, form=None, button_label='Ok',
                            form_method="get", form_action='')
 
     def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
-        return self.render_message(request, msg, keep_form=False, button_label='Leaderboard',
+        return self.render_message(request, msg, form=None, button_label='Leaderboard',
                            form_method="get", form_action=f'/c/{slug}/leaderboard/')
 
     def join(self, request, msg):
-        return self.render_message(request, msg, keep_form=False, button_label='Join',
+        return self.render_message(request, msg, form=None, button_label='Join',
                            form_method="get", form_action='/join/')
 
     def get(self, request, *args, **kwargs):
