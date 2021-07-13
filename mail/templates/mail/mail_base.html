@@ -71,17 +71,6 @@
         text-align: center;
         line-height: 1.1rem;
       }
-      #social_container{
-          width: 400px;
-          overflow: hidden;
-      }
-      #social_list{
-          display: inline;
-          list-style-type: none;
-      }
-      #social_list li{
-          float: left;
-      }
     </style>
   </head>
 
@@ -100,9 +89,15 @@
           {% endblock %}
         </div>
       </div>
-        {%  include "mail/social_mail.html" %}
+
       <div id="email-footer">
+
         {% block email-footer-content %}
+            <p>
+            <a href="https://twitter.com/commonologygame">Twitter</a>&nbsp;
+            <a href="https://www.facebook.com/CommonologyGame">Facebook</a>&nbsp;
+            <a href="https://instagram.com/commonology">Instagram</a>
+            </p>
           This email was sent to -email-.<br>
           {% if unsub_link %}
           <a id="unsubscribe" href="-unsubscribelink-">unsubscribe from this list</a><br>
