@@ -33,24 +33,18 @@ class BaseCardView(ContextMixin, View):
         context.update(kwargs)
         return super().get_context_data(**context)
 
-    def warning(self, request, message, keep_form=True, *args, **kwargs):
+    def warning(self, request, message, *args, **kwargs):
         self.custom_message = ''
         messages.warning(request, message)
-        if not keep_form:
-            self.form_class = None
         return self.render(request, *args, **kwargs)
 
     def info(self, request, message, keep_form=True, *args, **kwargs):
         self.custom_message = ''
         messages.info(request, message)
-        if not keep_form:
-            self.form_class = None
         return self.render(request, *args, **kwargs)
 
     def render_message(self, request, message, keep_form=True, *args, **kwargs):
         self.custom_message = message
-        if not keep_form:
-            self.form_class = None
         return self.render(request, *args, **kwargs)
 
 
@@ -83,6 +77,21 @@ class CardFormView(FormMixin, BaseCardView):
             else:
                 field.widget.attrs['class'] = 'w3-input'
         return form
+
+    def warning(self, request, message, keep_form=True, *args, **kwargs):
+        if not keep_form:
+            self.form_class = None
+        return super().warning(request, message, *args, **kwargs)
+
+    def info(self, request, message, keep_form=True, *args, **kwargs):
+        if not keep_form:
+            self.form_class = None
+        return super().info(request, message, *args, **kwargs)
+
+    def render_message(self, request, message, keep_form=True, *args, **kwargs):
+        if not keep_form:
+            self.form_class = None
+        return super().render_message(request, message, *args, **kwargs)
 
 
 class CardChartView(BaseCardView):
