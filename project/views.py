@@ -51,8 +51,8 @@ def next_game_context():
 
 
 class ContactForm(forms.Form):
-    choices = (("1", "Game Host"), ("2", "Investor Relations"))
-    to_email = ['concierge@commonologygame.com', 'ms@quizitive.com']
+    choices = (("1", "Game Host"), ("2", "Investor Relations"), ("3", "Technical Question"))
+    to_email = ['concierge@commonologygame.com', 'ms@commmonologygame.com', 'tech@commonologygame.com']
     from_email = forms.EmailField(required=True)
     destination = forms.ChoiceField(choices=choices)
     message = forms.CharField(widget=forms.Textarea, max_length=750, min_length=2)
