@@ -78,5 +78,4 @@ class CardFormView(FormMixin, BaseCardView):
 
 
 class CardChartView(BaseCardView):
-
     header = "A Chart"

@@ -15,7 +15,11 @@ div.content {
     margin: 0 auto;
     max-width: 640px;
     min-height: 100vh;
-    padding-bottom: 80px;
+    padding-bottom: 115px;
+}
+
+div.w3-modal-content {
+  max-width: 640px;
 }
 
 div.w3-modal-content {
@@ -119,4 +123,10 @@ span.login-google {
 }
 button.login-google:hover {
   border-radius:4px;
+}
+
+/* Social Media Icon */
+.social_dim {
+width: 18px;
+height: 18px;
 }
