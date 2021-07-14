@@ -89,12 +89,20 @@
           {% endblock %}
         </div>
       </div>
+
       <div id="email-footer">
+
         {% block email-footer-content %}
+            <p>
+            <a href="https://twitter.com/commonologygame">Twitter</a>&nbsp;
+            <a href="https://www.facebook.com/CommonologyGame">Facebook</a>&nbsp;
+            <a href="https://instagram.com/commonology">Instagram</a>
+            </p>
           This email was sent to -email-.<br>
           {% if unsub_link %}
           <a id="unsubscribe" href="-unsubscribelink-">unsubscribe from this list</a><br>
           {% endif %}
+
         {% endblock %}
         Commonology · Quizitive, LLC · 5000  Thayer Center, Suite C · Oakland, MD 21550 · USA
       </div>
