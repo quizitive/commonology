@@ -395,7 +395,8 @@ class GameEntryView(PSIDMixin, CardFormView):
                               f"By the way, if you were logged in you'd be playing already.")
 
         self.header = "Game link sent!"
-        return self.message(request, custom_message)
+        return self.render_message(request, custom_message, form=None,
+                                   form_method='get', form_action='', button_label='Ok')
 
 
 class GameEntryValidationView(PSIDMixin, CardFormView):
