@@ -1,5 +1,5 @@
-from pychartjs import BaseChart, ChartType, Color
-
+from pychartjs import BaseChart, ChartType, Color, BaseChartDataClass
+from game.models import Game
 
 class ChartJS(BaseChart):
 
@@ -7,6 +7,7 @@ class ChartJS(BaseChart):
         self.data_class = data_class
         self.name = name
         self.kwargs = kwargs
+        self.type = ChartType.Line
 
     @property
     def data_name(self):
@@ -17,56 +18,54 @@ class ChartJS(BaseChart):
         return self.data_class(**self.kwargs)
 
 
-class BaseChartDataClass:
+class SimpleDataChart(BaseChart):
 
-    def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            self.__setattr__(k, v)
-        self.data = self._data()
+    def __init__(self, name, **kwargs):
+        self.name = name
+        self.kwargs = kwargs
+        self.type = ChartType.Line
 
-    def _data(self):
-        raise NotImplementedError
+    @property
+    def data_name(self):
+        return self.name + "-data"
+
+    class data:
+        # data = [12, 19, 3, 17, 10]
+
+        class Series1:
+            data = [12, 19, 3, 17, 10]
+
+        class Series2:
+            data = [1, 4, 13, 12, 9]
+
 
 
 class ExampleDataClass(BaseChartDataClass):
 
-    def _data(self):
-        if self.game_id == 1:
+    labels = [f'foo{n}' for n in range(5)]
+
+    def get_data(self):
+        if hasattr(self, 'members'):
             return [12, 19, 3, 17, 10]
         return [1, 4, 13, 12, 9]
 
 
-class ExampleDataClass2(BaseChartDataClass):
-
-    def _data(self):
-        if self.game_id == 1:
-            return [12, 19, 3, 17, 10]
-        return [1, 4, 13, 12, 9]
-
-
-class ExampleTwoDatasetDataClass(BaseChartDataClass):
+class ExampleMultiSeriesDatset:
 
     def __init__(self, **kwargs):
+        self.dataset1 = ExampleDataClass(**kwargs)
+        self.dataset2 = GamePlayerCount(40)
+        # super().__init__(**kwargs)
+
+
+class GamePlayerCount(BaseChartDataClass):
+
+    def __init__(self, since_game, **kwargs):
+        self.since_game = since_game
         super().__init__(**kwargs)
-        self.dataset1_1 = self._dataset_1()
 
-    class Dataset1(BaseChartDataClass):
-        def _data(self):
-            if self.game_id == 1:
-                return [12, 19, 3, 17, 10]
-            return [1, 4, 13, 12, 9]
-
-    class Dataset2(BaseChartDataClass):
-        def _data(self):
-            if self.game_id == 1:
-                return [12, 19, 3, 17, 10]
-            return [1, 4, 13, 12, 9]
-
-
-class GamePlayers(BaseChartDataClass):
-
-    def _data(self):
-        pass
+    def get_data(self):
+        return [g.players.count() for g in Game.objects.filter(game_id__gte=self.since_game)]
 
 
 class WeeklyPlayers(BaseChartDataClass):
@@ -75,7 +74,7 @@ class WeeklyPlayers(BaseChartDataClass):
         super().__init__(**kwargs)
         self.backgroundColor = Color.Green
 
-    def _data(self):
+    def get_data(self):
         if self.game_id == 1:
             return [12, 19, 3, 17, 10]
         return [1, 4, 13, 12, 9]
