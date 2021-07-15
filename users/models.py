@@ -24,14 +24,17 @@ class CustomCIEmailField(CIEmailField):
         super(CustomCIEmailField, self).__init__(*args, **kwargs)
 
     def get_prep_value(self, value):
-        return str(value).lower()
+        if value:
+            return str(value).lower()
+        else:
+            return value
 
 
 class CustomUser(AbstractUser):
     username = None
     email = CustomCIEmailField(_('email address'), unique=True)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=30, blank=True)
     location = models.CharField(max_length=MAX_LOCATION_LEN, choices=LOCATIONS, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     referrer = CustomCIEmailField(_('Referrer email address'), blank=True, null=True)
