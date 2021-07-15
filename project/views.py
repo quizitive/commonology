@@ -61,7 +61,7 @@ class ContactForm(forms.Form):
 class ContactView(CardFormView):
     form_class = ContactForm
     header = "Establishing Contact"
-    button_label = "Next"
+    button_label = "Send"
     custom_message = "Enter a message and we WILL read it."
 
     def post(self, request, *args, **kwargs):
