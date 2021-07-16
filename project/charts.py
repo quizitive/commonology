@@ -1,21 +1,39 @@
-from pychartjs import BaseChart, ChartType, Color, BaseChartDataClass
+from pychartjs import BaseChart, ChartType, Color, BaseChartDataClass, BaseChartSubclass
 from game.models import Game
+
 
 class ChartJS(BaseChart):
 
     def __init__(self, data_class, name, **kwargs):
-        self.data_class = data_class
+        self.data = data_class(**kwargs)
+        self.labels = self._labels(**kwargs)
         self.name = name
-        self.kwargs = kwargs
         self.type = ChartType.Line
 
     @property
     def data_name(self):
         return self.name + "-data"
 
-    @property
-    def data(self):
-        return self.data_class(**self.kwargs)
+    def _labels(self, **kwargs):
+        if hasattr(self, 'get_labels'):
+            return BaseChartSubclass(labels=self.get_labels(**kwargs))
+        else:
+            return BaseChartSubclass()
+
+
+class LineChartJS(ChartJS):
+
+    # @property
+    def get_labels(self, game_id):
+        # return ['hi', 'my', 'name', 'is', 'ted']
+        return [game_id for _ in range(5)]
+
+    # @property
+    # def data(self):
+    #     return self.data_class(**self.kwargs)
+
+    # class labels:
+    #     grouped = ['Mon', 'Tue', 'Wed']
 
 
 class SimpleDataChart(BaseChart):
@@ -34,15 +52,13 @@ class SimpleDataChart(BaseChart):
 
         class Series1:
             data = [12, 19, 3, 17, 10]
+            # labels = ['hi', 'my', 'name', 'is', 'ted']
 
         class Series2:
             data = [1, 4, 13, 12, 9]
 
 
-
 class ExampleDataClass(BaseChartDataClass):
-
-    labels = [f'foo{n}' for n in range(5)]
 
     def get_data(self):
         if hasattr(self, 'members'):
@@ -55,7 +71,9 @@ class ExampleMultiSeriesDatset:
     def __init__(self, **kwargs):
         self.dataset1 = ExampleDataClass(**kwargs)
         self.dataset2 = GamePlayerCount(40)
-        # super().__init__(**kwargs)
+
+    def get_labels(self):
+        return self.dataset2.get_labels()
 
 
 class GamePlayerCount(BaseChartDataClass):
@@ -66,6 +84,9 @@ class GamePlayerCount(BaseChartDataClass):
 
     def get_data(self):
         return [g.players.count() for g in Game.objects.filter(game_id__gte=self.since_game)]
+
+    def get_labels(self):
+        return [g.game_id for g in Game.objects.filter(game_id__gte=self.since_game)]
 
 
 class WeeklyPlayers(BaseChartDataClass):
