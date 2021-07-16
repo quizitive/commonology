@@ -198,6 +198,9 @@ class Question(models.Model):
         if not self.pk:
             thread = Thread.objects.create()
             self.thread = thread
+        if self.is_optional:
+            if not self.text.startswith("OPTIONAL: "):
+                self.text = "OPTIONAL: " + self.text
         super().save(*args, **kwargs)
 
     @property
