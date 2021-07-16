@@ -299,6 +299,10 @@ class TestModels(TestCase):
         game.hosts.add(user)
         self.assertIn(user, series.players.all())
 
+    def test_optional_questions_text(self):
+        op_q = Question.objects.create(text="This question is optional.", type=Question.op)
+        self.assertEqual(op_q.text, "OPTIONAL: This question is optional.")
+
 
 def make_test_series(series_name='Commonology', hour_window=False):
     sheet_name = "Test Commonology Game (Responses)"
