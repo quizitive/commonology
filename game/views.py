@@ -271,8 +271,8 @@ def game_url(google_form_url, email):
 
 def send_confirm(request, g, email, referrer_id=None):
     remove_pending_email_invitations()
-
-    pe = PendingEmail(email=email, referrer_player_id=referrer_id)
+    referrer = Player.objects.filter(id=referrer_id).first()
+    pe = PendingEmail(email=email, referrer=referrer)
     pe.save()
 
     slug = g.series.slug
