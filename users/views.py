@@ -196,7 +196,7 @@ class InviteFriendsView(LoginRequiredMixin, CardFormView):
                 # can't join if user exists
                 messages.warning(request, f"User {email} already exists")
             except User.DoesNotExist:
-                send_invite(request, email, request.user.email)
+                send_invite(request, email, request.user)
                 messages.info(request, f"Invite successfully sent to {email}.")
 
         return redirect('invite')
