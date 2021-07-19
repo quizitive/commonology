@@ -400,7 +400,7 @@ class GameEntryView(PSIDMixin, CardFormView):
 
         self.header = "Game link sent!"
         return self.render_message(request, custom_message, form=None,
-                                   form_method='get', form_action='', button_label='Ok')
+                                   form_method='get', form_action='', button_label=None)
 
 
 class GameEntryValidationView(PSIDMixin, CardFormView):
@@ -444,7 +444,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
                 p.is_active = True
                 p.save()
         except Player.DoesNotExist:
-            p = Player(email=email)
+            p = Player(email=email, referrer=pe.referrer)
             p.save()
 
         if g.user_played(p):
