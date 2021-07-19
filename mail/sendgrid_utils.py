@@ -13,10 +13,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def make_substitutions(e, i):
-    x = sign_user(e, i)
+def make_substitutions(e, id):
+    x = sign_user(e, id)
     url = mark_safe(f"https://{settings.DOMAIN}/unsubscribe/{x}")
-    return {'-email-': e, '-unsubscribelink-': url}
+    game_url_args = f'r={id}'
+    return {'-email-': e, '-unsubscribelink-': url, '-game_url_args-': game_url_args}
 
 
 #
