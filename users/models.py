@@ -37,7 +37,6 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(max_length=30, blank=True)
     location = models.CharField(max_length=MAX_LOCATION_LEN, choices=LOCATIONS, blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    referrer = CustomCIEmailField(_('Referrer email address'), blank=True, null=True)
     subscribed = models.BooleanField(default=True,
                                      help_text="If email address is bad then unsubscribe and deactivate them.")
 
@@ -53,14 +52,8 @@ class CustomUser(AbstractUser):
         return self.email
 
 
-class PendingEmail(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField()
-    referrer = models.EmailField(null=True)
-    created = models.DateTimeField(default=timezone.now)
-
-
 class Player(CustomUser):
+    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
     is_member = models.BooleanField(
@@ -85,6 +78,13 @@ class Player(CustomUser):
         return self.answers.values(
             game_id=models.F('question__game__game_id'), series=models.F('question__game__series__slug')).exclude(
             game_id=None).distinct().order_by('-game_id')
+
+
+class PendingEmail(models.Model):
+    referrer = models.ForeignKey(Player, null=True, on_delete=models.CASCADE)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField()
+    created = models.DateTimeField(default=timezone.now)
 
 
 @receiver(post_save, sender=Player)
