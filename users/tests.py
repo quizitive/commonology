@@ -7,7 +7,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.conf import settings
-from users.models import PendingEmail
+from users.models import PendingEmail, Player
 from users.utils import sign_user
 from game.models import Series
 
@@ -249,7 +249,7 @@ class PendingUsersTests(TestCase):
         self.assertIn(response.status_code, [200, 302])
 
         pe = PendingEmail.objects.get(email=ABINORMAL)
-        self.assertEqual(NORMAL, pe.referrer)
+        self.assertEqual(Player.objects.get(email=NORMAL), pe.referrer)
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn(str(pe.uuid), mail.outbox[0].body)
