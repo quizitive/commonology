@@ -23,12 +23,12 @@ def pending_fix(apps, schema_editor):
     PendingEmail = apps.get_model('users', 'PendingEmail')
 
     for p in PendingEmail.objects.all():
-        try:
-            r = Player.objects.filter(email=p.referrer).get()
-            p.referrer_player = r
-            p.save()
-        except Player.DoesNotExist:
-            if p.referrer:
+        if p.referrer:
+            try:
+                r = Player.objects.filter(email=p.referrer).get()
+                p.referrer_player = r
+                p.save()
+            except Player.DoesNotExist:
                 print(f"Cannot find player record for {p.referrer}")
 
 
@@ -44,17 +44,20 @@ class Migration(migrations.Migration):
             name='referrer_player',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
-        migrations.RunPython(pending_fix),
-        migrations.RemoveField(
-            model_name='pendingemail',
-            name='referrer',
-        ),
+
         migrations.AddField(
             model_name='player',
             name='referrer_player',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
+
+        migrations.RunPython(pending_fix),
         migrations.RunPython(player_fix),
+
+        migrations.RemoveField(
+            model_name='pendingemail',
+            name='referrer',
+        ),
         migrations.RemoveField(
             model_name='player',
             name='referrer',
