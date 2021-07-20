@@ -1,6 +1,5 @@
 import gspread
 import logging
-
 from numpy import base_repr
 
 from django.http import Http404
@@ -15,10 +14,10 @@ from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from project.views import CardFormView
+from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
 from game.utils import find_latest_public_game
-from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from leaderboard.leaderboard import tabulate_results
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
@@ -182,6 +181,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         return CardFormView().render(
             request,
             button_label="View my answers",
+            form_class=None,
             form_method='get',
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
             **msgs[msg]
@@ -302,7 +302,7 @@ class GameEntryView(PSIDMixin, CardFormView):
 
     def message(self, request, msg):
         return self.render_message(request, msg, form=None, button_label='Ok',
-                           form_method="get", form_action='')
+                           form_method="get", form_action='/')
 
     def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
         return self.render_message(request, msg, form=None, button_label='Leaderboard',
@@ -349,15 +349,15 @@ class GameEntryView(PSIDMixin, CardFormView):
             return self.leaderboard(request, slug=slug)
 
         if g.user_played(user):
-            return self.info(
+            return self.render_message(
                 request,
-                keep_form=False,
+                message=f"You have already submitted answers for this game. "
+                        f"You can see them again by clicking the button below.",
+                form=None,
                 button_label="View my answers",
                 header="You've already played!",
                 form_method='get',
                 form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
-                message=f"You have already submitted answers for this game. "
-                        f"You can see them again by clicking the button below.",
             )
 
         if not is_active:
