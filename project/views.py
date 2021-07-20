@@ -3,7 +3,6 @@ from django import forms
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import send_mail
 from project.card_views import CardFormView
-from project.charts import ChartJS, ExampleDataClass
 from game.utils import next_event, find_latest_public_game
 
 import logging
@@ -84,15 +83,3 @@ class ContactView(CardFormView):
                            form_method="get", form_action='/')
 
         return self.render(request)
-
-
-@staff_member_required
-def stats_view(request):
-    chart_1 = ChartJS(ExampleDataClass, name="myChart", game_id=1)
-    chart_2 = ChartJS(ExampleDataClass, name="chart_2", game_id=2)
-    context = {
-        "custom_message": "Trend of the percent of game players that are members",
-        "chart_1": chart_1,
-        "chart_2": chart_2,
-    }
-    return render(request, 'stats.html', context)

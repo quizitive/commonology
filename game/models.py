@@ -4,6 +4,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
+from django.utils.functional import cached_property
 from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 
@@ -83,7 +84,7 @@ class Game(models.Model):
         # Need this for admin view-on-site to work.
         return f"/play/{self.uuid}"
 
-    @property
+    @cached_property
     def players(self):
         return self.game_questions.first().raw_answers.values(
             'player', 'player__display_name').annotate(
@@ -107,7 +108,7 @@ class Game(models.Model):
             team_id=models.F('player__teams'),
             team_name=models.F('player__teams__name')).exclude(team_id=None).distinct()
 
-    @property
+    @cached_property
     def game_questions(self):
         return self.questions.filter(type=Question.ga).order_by('number')
 
