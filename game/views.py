@@ -1,9 +1,7 @@
 import gspread
 import logging
 from numpy import base_repr
-from pandas import DataFrame
 
-from django.conf import settings
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.core.signing import Signer, BadSignature
@@ -16,6 +14,7 @@ from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from project.views import CardFormView
+from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
 from game.utils import find_latest_public_game
@@ -463,6 +462,19 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
             message=f"You have already submitted answers for this game. "
                     f"You can see them again by clicking the button below.",
         )
+
+
+@staff_member_required
+def stats_view(request):
+    chart_1 = PlayerTrendChart(
+        PlayersAndMembersDataset, slug='commonology', name="chart_3", since_game=38)
+    chart_2 = PlayerTrendChart(
+        PlayersAndMembersDataset, slug='commonology', name="chart_2", since_game=38, agg_period=4)
+    context = {
+        "chart_1": chart_1,
+        "chart_2": chart_2,
+    }
+    return render(request, 'game/stats.html', context)
 
 
 # ---- To be deprecated once we host forms ---- #
