@@ -110,7 +110,7 @@ class Game(models.Model):
 
     @cached_property
     def game_questions(self):
-        return self.questions.exclude(type__in=(Question.op, Question.ov)).order_by('number')
+        return self.questions.filter(type=Question.ga).order_by('number')
 
     @property
     def visible_questions(self):
@@ -121,7 +121,8 @@ class Game(models.Model):
         return Answer.objects.values(
             'question_id', 'raw_string'
         ).filter(
-            question__game=self
+            question__game=self,
+            question__type=Question.ga,
         ).annotate(count=models.Count('raw_string')).order_by()
 
     @property
@@ -199,6 +200,9 @@ class Question(models.Model):
         if not self.pk:
             thread = Thread.objects.create()
             self.thread = thread
+        if self.is_optional:
+            if not self.text.startswith("OPTIONAL: "):
+                self.text = "OPTIONAL: " + self.text
         super().save(*args, **kwargs)
 
     @property
