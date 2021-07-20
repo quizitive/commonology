@@ -15,7 +15,7 @@ from django.template.loader import render_to_string
 from django.views.generic.base import View
 from project.views import CardFormView
 from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
-from users.models import PendingEmail
+from users.models import PendingEmail, Player
 from users.utils import unsubscribe
 from mail.sendgrid_utils import sendgrid_send
 from project.utils import redis_delete_patterns
@@ -57,7 +57,8 @@ class ProfileView(LoginRequiredMixin, CardFormView):
                           f"updated your profile once you have followed the confirmation link.")
 
             remove_pending_email_invitations()
-            pe = PendingEmail(email=new_email, referrer=email)
+            referrer = Player.objects.get(email=email)
+            pe = PendingEmail(email=new_email, referrer=referrer)
             pe.save()
             self.send_change_confirm(request, pe)
             return self.render(request)
@@ -196,7 +197,7 @@ class InviteFriendsView(LoginRequiredMixin, CardFormView):
                 # can't join if user exists
                 messages.warning(request, f"User {email} already exists")
             except User.DoesNotExist:
-                send_invite(request, email, request.user.email)
+                send_invite(request, email, request.user)
                 messages.info(request, f"Invite successfully sent to {email}.")
 
         return redirect('invite')
