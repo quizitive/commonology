@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django import forms
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import send_mail
-
 from project.card_views import CardFormView
 from game.utils import next_event, find_latest_public_game
 
@@ -50,8 +50,8 @@ def next_game_context():
 
 
 class ContactForm(forms.Form):
-    choices = (("1", "Game Host"), ("2", "Investor Relations"))
-    to_email = ['concierge@commonologygame.com', 'ms@quizitive.com']
+    choices = (("1", "Game Host"), ("2", "Investor Relations"), ("3", "Technical Question"))
+    to_email = ['concierge@commonologygame.com', 'ms@commmonologygame.com', 'tech@commonologygame.com']
     from_email = forms.EmailField(required=True)
     destination = forms.ChoiceField(choices=choices)
     message = forms.CharField(widget=forms.Textarea, max_length=750, min_length=2)
