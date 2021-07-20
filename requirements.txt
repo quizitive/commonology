@@ -29,4 +29,4 @@ django-object-actions==3.0.2
 fakeredis==1.5.0
 channels==3.0.3
 channels-redis==3.2.0
-pyChart.JS==0.3.0
+git+https://git@github.com/quizitive/pyChart.js.git
