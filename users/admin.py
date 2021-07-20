@@ -46,9 +46,9 @@ class PlayerUserAdmin(UserAdmin):
 
 @admin.register(PendingEmail)
 class PendingEmailAdmin(admin.ModelAdmin):
-    list_display = ('email', 'referrer', 'created', 'uuid')
+    list_display = ('email', 'created', 'referrer', 'uuid')
     list_filter = ('created',)
-    search_fields = ('email', 'referrer', 'uuid')
+    search_fields = ('email', 'uuid')
 
 
 @admin.register(Team)
