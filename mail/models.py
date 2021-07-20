@@ -21,7 +21,8 @@ class MailMessage(models.Model):
     categories = models.CharField(max_length=50, blank=True,
                                   help_text="A comma separated list of categories. i.e GameOn|Reminder|Resuts + Week#")
     subject = models.CharField(max_length=150, blank=False)
-    message = RichTextUploadingField(blank=True)
+    message = RichTextUploadingField(blank=True,
+                                     help_text='Play link example: https://commonologygame.com/play?-game_url_args-')
     created = models.DateTimeField(default=timezone.now)
     tested = models.BooleanField(default=False,
                                  help_text="Must be checked to send blast.  It is set when a test message is sent.")
