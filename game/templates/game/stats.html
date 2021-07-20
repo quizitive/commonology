@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block page_style %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="{% static 'js/charts.js' %}" type="text/javascript"></script>
 {% endblock %}
 
@@ -14,13 +14,11 @@
   <div class="content">
 
     <div class="w3-padding-16"></div>
-    {% include 'cards/base_card.html' with header="Member Growth" chart=chart_1 %}
+    {% include 'cards/base_card.html' with header="Player/Member Growth Weekly" chart=chart_1 custom_message="Weekly player counts, of whom are members"%}
 
     <div class="w3-padding-16"></div>
-{#    {% include 'cards/base_card.html' with header="Month over Month Growth" chart=chart_2 %}#}
+    {% include 'cards/base_card.html' with header="Player/Member Growth 4-Week-Average" chart=chart_2 custom_message="4-week-average player counts, of whom are members" %}
 
     <div class="w3-padding-16"></div>
-    {% include 'cards/base_card.html' with header="Month over Month Growth" chart=chart_3 %}
-
   </div>
 {% endblock %}
