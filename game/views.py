@@ -268,9 +268,10 @@ def game_url(google_form_url, email):
     return google_form_url.replace('alex@commonologygame.com', email)
 
 
-def send_confirm(request, g, email):
+def send_confirm(request, g, email, referrer_id=None):
     remove_pending_email_invitations()
-    pe = PendingEmail(email=email)
+    referrer = Player.objects.filter(id=referrer_id).first()
+    pe = PendingEmail(email=email, referrer=referrer)
     pe.save()
 
     slug = g.series.slug
@@ -315,6 +316,8 @@ class GameEntryView(PSIDMixin, CardFormView):
         slug = kwargs.get('series_slug') or 'commonology'
         game_uuid = kwargs.get('game_uuid')
         user = request.user
+
+        referrer_id = request.GET.get('r', user.id)
 
         if not game_uuid:
             g = find_latest_public_game(slug)
@@ -388,14 +391,15 @@ class GameEntryView(PSIDMixin, CardFormView):
 
         email = request.POST['email']
 
-        send_confirm(request, g, email)
+        referrer_id = request.GET.get('r')
+        send_confirm(request, g, email, referrer_id)
         custom_message = mark_safe(f"<b>We sent the game link to {email}. </b>"
                               f"Don't forget to check your spam or junk folder if need be. "
                               f"By the way, if you were logged in you'd be playing already.")
 
         self.header = "Game link sent!"
         return self.render_message(request, custom_message, form=None,
-                                   form_method='get', form_action='', button_label='Ok')
+                                   form_method='get', form_action='', button_label=None)
 
 
 class GameEntryValidationView(PSIDMixin, CardFormView):
@@ -439,7 +443,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
                 p.is_active = True
                 p.save()
         except Player.DoesNotExist:
-            p = Player(email=email)
+            p = Player(email=email, referrer=pe.referrer)
             p.save()
 
         if g.user_played(p):
