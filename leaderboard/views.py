@@ -16,16 +16,19 @@ class LeaderboardView(BaseGameView):
     def get_game(self):
         """Only allows staff to view historical games, sets self.game_id to published game with highest game_id"""
 
-        # todo: maybe change this to is_authenticated to allow access to historical leaderboards
-        if self.requested_game_id is not None and not self.request.user.is_staff:
-            raise Http404()
-
         # if no id is specified get the most recent published game for this series
         if not self.requested_game_id:
             game = Game.objects.filter(
                 publish=True, series__slug=self.slug).order_by('-game_id').first()
         else:
             game = Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
+
+        # todo: maybe change this to is_authenticated to allow access to historical leaderboards
+        if self.requested_game_id is not None and not (
+                self.request.user.is_staff
+                or self.request.user in game.hosts.all()
+        ):
+            raise Http404()
 
         return game
 
