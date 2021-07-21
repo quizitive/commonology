@@ -28,7 +28,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
-        if self.request.user.is_staff:
+        if self.request.user.is_staff or self.request.user in self.game.hosts.all():
             return True
         if not self.game.publish:
             return False
