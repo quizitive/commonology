@@ -13,7 +13,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
-from project.views import CardFormView
+from project.card_views import BaseCardView, CardFormView, MultiCardPageView
 from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
@@ -178,7 +178,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
                                   f"You can see them again by clicking the button below.",
             }
         }
-        return CardFormView().render(
+        c1 = CardFormView().render_card(
             request,
             button_label="View my answers",
             form_class=None,
@@ -186,6 +186,12 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
             **msgs[msg]
         )
+        c2 = ShareGameView().render_card(
+            request,
+            form_method='get',
+            form_action='/rewards'
+        )
+        return MultiCardPageView().render(request, cards=[c1, c2])
 
     def email_player_success(self, request, game, player):
         answers_url = self.build_signed_url(game, player)
@@ -261,6 +267,15 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             editable=editable,
             initial={'display_name': display_name}
         )
+
+
+class ShareGameView(BaseCardView):
+
+    header = "Share with Friends"
+    custom_message = mark_safe(f"Love playing Commonology? <b>Earn rewards by sharing with friends!</b>"
+                               f"Click the button below to learn more about our rewards program.")
+    button_label = "Learn More"
+
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
