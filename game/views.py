@@ -454,7 +454,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
     def _user_played(self, request, g, user):
         return self.info(
             request,
-            keep_form=False,
+            form=None,
             button_label="View my answers",
             header="You've already played!",
             form_method='get',
