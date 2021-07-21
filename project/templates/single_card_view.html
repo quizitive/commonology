@@ -1,0 +1,28 @@
+<!--single_card_view.html-->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}
+  {% include 'components/navbar.html' %}
+{% endblock %}
+
+{% block app_style %}
+  <link rel="stylesheet" href="{% static 'css/users/base.css' %}">
+  <link rel="stylesheet" href="{% static 'users/css/form_style.css' %}?v=1.1">
+{% endblock %}
+
+{% block content %}
+
+  <div class="content card-content">
+
+    <br/><br/>
+
+    {# --- Simple card-on-screen view with default card --- #}
+    {% block card %}
+    {% include card_template|default:"cards/base_card.html" %}
+    {% endblock %}
+
+  </div>
+
+{% endblock %}
