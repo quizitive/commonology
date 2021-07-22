@@ -1,6 +1,7 @@
 # Michael Herman gets all the credit for this: https://testdriven.io/blog/django-custom-user-model/
 import uuid
 import random
+import secrets
 import string
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -52,7 +53,15 @@ class CustomUser(AbstractUser):
         return self.email
 
 
+def create_code(k=5):
+    while True:
+        code = secrets.token_urlsafe()[:k]
+        if not Player.objects.filter(code=code).exists():
+            return code
+
+
 class Player(CustomUser):
+    code = models.CharField(unique=True, max_length=5, default=create_code, db_index=True)
     referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
