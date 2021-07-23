@@ -62,7 +62,7 @@ def code_player():
 
 class Player(CustomUser):
     # code = models.CharField(unique=True, max_length=5, default=code_player, db_index=True)
-    code = models.CharField(max_length=5, null=True)
+    code = models.CharField(max_length=5, null=True, unique=True)
     referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
