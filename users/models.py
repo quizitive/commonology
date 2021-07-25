@@ -93,7 +93,7 @@ class Player(CustomUser):
             flag = True
             while flag:
                 code = secrets.token_urlsafe()[:5]
-                if not Player.objects.filter(_code=x).exists():
+                if not Player.objects.filter(_code=code).exists():
                     flag = False
             self._code = code
 
