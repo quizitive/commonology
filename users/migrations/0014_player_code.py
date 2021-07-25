@@ -11,8 +11,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='player',
-            name='code',
-            field=models.CharField(max_length=5, null=True),
+            name='_code',
+            field=models.CharField(db_index=True, max_length=5, null=True),
         ),
     ]
 
