@@ -21,7 +21,7 @@ class PlayerUserAdmin(UserAdmin):
     list_filter = ('date_joined', 'subscribed', 'is_member', 'is_staff', 'is_active', 'is_superuser',
                    'series')
     fieldsets = (
-        (None, {'fields': ('email', 'code', 'password')}),
+        (None, {'fields': ('email', 'password', 'code')}),
         ('Personal', {'fields': ('first_name', 'last_name', 'display_name', 'birth_date', 'is_member', 'subscribed')}),
         ('Other', {'fields': ('date_joined', 'location', 'referrer')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser',
@@ -34,6 +34,7 @@ class PlayerUserAdmin(UserAdmin):
                        'is_staff', 'is_active', 'is_superuser', 'groups')}
         ),
     )
+    readonly_fields = ('code', )
     search_fields = ('email', 'first_name', 'last_name', 'display_name')
     ordering = ('email',)
     actions = [subscribe_action, unsubscribe_action]
