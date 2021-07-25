@@ -4,6 +4,7 @@ import random
 import secrets
 import string
 
+from django.db import connection
 from django.db import IntegrityError
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -55,13 +56,24 @@ class CustomUser(AbstractUser):
         return self.email
 
 
+def is_code_unique(code):
+    sql = 'select users_player.id FROM users_player WHERE users_player.code = %s'
+    with connection.cursor() as cursor:
+        cursor.execute(sql, [code])
+        row = cursor.fetchone()
+    return row is None
+
+
 def code_player():
-    return secrets.token_urlsafe()[:5]
+    while True:
+        code = secrets.token_urlsafe()[:5]
+        if is_code_unique(code):
+            return code
 
 
 class Player(CustomUser):
-    code = models.CharField(max_length=5, unique=True, db_index=True, default=code_player,
-                            help_text="Unique identifer useful for url parameters like referrer.")
+    _code = models.CharField(max_length=5, db_index=True, null=True,
+                             help_text="Unique identifer useful for url parameters like referrer.")
     referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
@@ -70,16 +82,26 @@ class Player(CustomUser):
         help_text="Designates whether this player has joined the online community."
     )
 
+    @property
+    def code(self):
+        return self._code
+
+    def set_code(self):
+        # arg is needed for a setter but ignored because we are having the model determine
+        # viable unique codes.
+        if not self._code:
+            flag = True
+            while flag:
+                code = secrets.token_urlsafe()[:5]
+                if not Player.objects.filter(_code=x).exists():
+                    flag = False
+            self._code = code
+
     def __str__(self):
         return self.email
 
     def save(self, *args, **kwargs):
-        flag = True
-        while flag:
-            if Player.objects.filter(code=self.code).exists():
-                self.code = code_player()
-            else:
-                flag = False
+        self.set_code()
         super(Player, self).save()
 
     @property
