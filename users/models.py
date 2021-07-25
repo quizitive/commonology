@@ -73,7 +73,7 @@ def code_player():
 
 class Player(CustomUser):
     _code = models.CharField(max_length=5, db_index=True, null=True,
-                             help_text="Unique identifer useful for url parameters like referrer.")
+                             help_text="Unique identifier useful for url parameters like referrer.")
     referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
