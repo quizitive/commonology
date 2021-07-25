@@ -57,11 +57,6 @@ class CustomUser(AbstractUser):
 
 def code_player():
     return secrets.token_urlsafe()[:5]
-    # while True:
-    #     code = secrets.token_urlsafe()[:5]
-    #     if not Player.objects.filter(code=code).exists():
-    #         return code
-
 
 class Player(CustomUser):
     code = models.CharField(max_length=5, unique=True, db_index=True, default=code_player,
