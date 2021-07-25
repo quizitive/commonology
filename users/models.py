@@ -56,11 +56,10 @@ class CustomUser(AbstractUser):
 
 
 def code_player():
-    return secrets.token_urlsafe()[:5]
-    # while True:
-    # code = secrets.token_urlsafe()[:5]
-    # if not Player.objects.filter(code=code).exists():
-    #     return code
+    while True:
+        code = secrets.token_urlsafe()[:5]
+        if not Player.objects.filter(code=code).exists():
+            return code
 
 
 class Player(CustomUser):
