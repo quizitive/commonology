@@ -58,6 +58,7 @@ class CustomUser(AbstractUser):
 def code_player():
     return secrets.token_urlsafe()[:5]
 
+
 class Player(CustomUser):
     code = models.CharField(max_length=5, unique=True, db_index=True, default=code_player,
                             help_text="Unique identifer useful for url parameters like referrer.")
