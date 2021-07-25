@@ -57,13 +57,15 @@ class CustomUser(AbstractUser):
 
 def code_player():
     return secrets.token_urlsafe()[:5]
-    #while True:
-        #code = secrets.token_urlsafe()[:5]
-        # if not Player.objects.filter(code=code).exists():
-        #     return code
+    # while True:
+    # code = secrets.token_urlsafe()[:5]
+    # if not Player.objects.filter(code=code).exists():
+    #     return code
+
 
 class Player(CustomUser):
-    code = models.CharField(max_length=5, unique=True, db_index=True, default=code_player)
+    code = models.CharField(max_length=5, unique=True, db_index=True, default=code_player,
+                            help_text="Unique identifer useful for url parameters like referrer.")
     referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
