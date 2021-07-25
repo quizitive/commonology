@@ -21,7 +21,7 @@ class PlayerUserAdmin(UserAdmin):
     list_filter = ('date_joined', 'subscribed', 'is_member', 'is_staff', 'is_active', 'is_superuser',
                    'series')
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        (None, {'fields': ('email', 'code', 'password')}),
         ('Personal', {'fields': ('first_name', 'last_name', 'display_name', 'birth_date', 'is_member', 'subscribed')}),
         ('Other', {'fields': ('date_joined', 'location', 'referrer')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser',

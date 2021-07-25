@@ -3,6 +3,8 @@ import uuid
 import random
 import secrets
 import string
+
+from django.db import IntegrityError
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import CIEmailField
@@ -54,15 +56,14 @@ class CustomUser(AbstractUser):
 
 
 def code_player():
-    while True:
-        code = secrets.token_urlsafe()[:k]
-        if not Player.objects.filter(code=code).exists():
-            return code
-
+    return secrets.token_urlsafe()[:5]
+    #while True:
+        #code = secrets.token_urlsafe()[:5]
+        # if not Player.objects.filter(code=code).exists():
+        #     return code
 
 class Player(CustomUser):
-    # code = models.CharField(unique=True, max_length=5, default=code_player, db_index=True)
-    code = models.CharField(max_length=5, null=True, unique=True, db_index=True)
+    code = models.CharField(max_length=5, unique=True, db_index=True, default=code_player)
     referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
