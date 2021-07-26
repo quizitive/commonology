@@ -22,6 +22,7 @@ from leaderboard.leaderboard import tabulate_results
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
+from users.utils import check_player, get_player
 from mail.sendgrid_utils import sendgrid_send
 
 
@@ -270,7 +271,7 @@ def game_url(google_form_url, email):
 
 def send_confirm(request, g, email, referrer_id=None):
     remove_pending_email_invitations()
-    referrer = Player.objects.filter(id=referrer_id).first()
+    referrer = get_player(referrer_id)
     pe = PendingEmail(email=email, referrer=referrer)
     pe.save()
 
@@ -297,8 +298,8 @@ def render_game(request, game, user=None):
 class GameEntryView(PSIDMixin, CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
-    button_label = "Email me a play link"
-    custom_message = "Login to play, or enter your email and we will send you a unique play link."
+    button_label = "Submit"
+    custom_message = "Enter your email address to play."
 
     def message(self, request, msg):
         return self.render_message(request, msg, form=None, button_label='Ok',
@@ -316,8 +317,6 @@ class GameEntryView(PSIDMixin, CardFormView):
         slug = kwargs.get('series_slug') or 'commonology'
         game_uuid = kwargs.get('game_uuid')
         user = request.user
-
-        referrer_id = request.GET.get('r', user.id)
 
         if not game_uuid:
             g = find_latest_public_game(slug)
@@ -366,7 +365,6 @@ class GameEntryView(PSIDMixin, CardFormView):
         if user.is_authenticated:
             return render_game(request, g)
 
-        self.card_template = 'game/game_entry_card.html'
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -392,8 +390,13 @@ class GameEntryView(PSIDMixin, CardFormView):
         email = request.POST['email']
 
         referrer_id = request.GET.get('r')
+
+        p = get_player(referrer_id)
+        if p and (p.email == email):
+            return render_game(request, g, p)
+
         send_confirm(request, g, email, referrer_id)
-        custom_message = mark_safe(f"<b>We sent the game link to {email}. </b>"
+        custom_message = mark_safe(f"<b>We sent a game link to {email}. </b>"
                               f"Don't forget to check your spam or junk folder if need be. "
                               f"By the way, if you were logged in you'd be playing already.")
 
