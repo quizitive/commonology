@@ -71,8 +71,10 @@ def player_log_entry(player, message):
                                 action_flag=CHANGE,
                                 change_message=message)
 
+
 def get_player(code):
     return Player.objects.filter(_code=code).first()
+
 
 def check_player(code, email):
     p = get_player(code)
