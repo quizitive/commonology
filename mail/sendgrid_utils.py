@@ -70,7 +70,7 @@ def mass_mail(subject, msg, from_email, players, categories=None):
     total_count = 0
     for p in qs:
         count += 1
-        email_list.append((p.email, p.id))
+        email_list.append((p.email, p.code))
 
         if 0 == count % 500:
             total_count += 500
