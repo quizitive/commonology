@@ -74,8 +74,3 @@ def player_log_entry(player, message):
 
 def get_player(code):
     return Player.objects.filter(_code=code).first()
-
-
-def check_player(code, email):
-    p = get_player(code)
-    return p and (p.email == email)

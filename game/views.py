@@ -22,7 +22,7 @@ from leaderboard.leaderboard import tabulate_results
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
-from users.utils import check_player, get_player
+from users.utils import get_player
 from mail.sendgrid_utils import sendgrid_send
 
 
