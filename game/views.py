@@ -5,6 +5,7 @@ from numpy import base_repr
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.core.signing import Signer, BadSignature
+from django.db import transaction
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.sites.shortcuts import get_current_site
@@ -158,12 +159,15 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         player.display_name = self.request.POST.get('display_name')
         player.save()
 
-        for form in forms.values():
-            form.save()
-
+        self._save_forms(forms)
         self.email_player_success(request, game, player)
 
         return self.render_answers_submitted_card(request, 'success', player, game)
+
+    @transaction.atomic
+    def _save_forms(self, forms):
+        for form in forms.values():
+            form.save()
 
     def render_answers_submitted_card(self, request, msg, player, game):
         msgs = {
