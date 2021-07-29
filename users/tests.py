@@ -169,7 +169,7 @@ class UsersManagersTests(TestCase):
 
     def test_unsubscribe_link(self):
         user = get_local_user()
-        id = user.id
+        id = user.code
         saved_key = settings.SECRET_KEY
         settings.SECRET_KEY = 'Test'
         url = sign_user(user, id)

@@ -366,7 +366,7 @@ class UnsubscribeView(View):
             return render(request, 'users/base.html', context)
 
         try:
-            u = User.objects.filter(id=i).first()
+            u = User.objects.filter(_code=i).first()
         except User.DoesNotExist:
             context['custom_message'] = "You have been unsubscribed."
             return render(request, 'users/base.html', context)
