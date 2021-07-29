@@ -189,7 +189,7 @@ class UsersManagersTests(TestCase):
         self.assertFalse(user.subscribed)
 
         msg = mail.outbox[0].body
-        url = re.search("HTTP.*://.*/subscribe/.*\"", msg).group(0)[:-1]
+        url = re.search("HTTPS.*://.*/subscribe/.*\"", msg).group(0)[:-1]
         base_url, token = url.rsplit('/', 1)
         response = client.get(reverse('subscribe', kwargs={'token': token}))
         self.assertEqual(response.status_code, 200)

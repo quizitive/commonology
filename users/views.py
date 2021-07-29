@@ -353,7 +353,7 @@ class PwdChangeView(CardFormView, PasswordChangeView):
 
 def send_unsubscribed_notice(request, player):
     email = player.email
-    protocol = request.META['SERVER_PROTOCOL'].split('/')[0]
+    protocol = 'HTTPS'
     domain = request.META['SERVER_NAME']
 
     signed_code = sign_user(player.email, player.code)

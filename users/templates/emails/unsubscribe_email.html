@@ -1,4 +1,4 @@
-{% extends 'mail/mail_base.html' %}
+
 
 {% autoescape off %}
 
@@ -23,7 +23,7 @@
 </p>
 <div id="footer">
   <p>
-  Button not working? Try pasting the url directly into your browser:
+  Button not working? Try this link:
     <a href="{{ protocol }}://{{ domain }}/subscribe/{{ signed_code }}">Subscribe</a>
   </p>
 </div>
