@@ -169,16 +169,18 @@ class UsersManagersTests(TestCase):
 
     def test_unsubscribe_link(self):
         user = get_local_user()
-        id = user.id
+        id = user.code
+
         saved_key = settings.SECRET_KEY
         settings.SECRET_KEY = 'Test'
-        url = sign_user(user, id)
-        self.assertEqual(url, f"{id}:0s9kU4sbRep-eXx01wMXH7dfp84JlIrkIxEJpAstUnI")
+
+        token = sign_user(user, id)
+        self.assertEqual(token, f"{id}:0s9kU4sbRep-eXx01wMXH7dfp84JlIrkIxEJpAstUnI")
 
         self.assertTrue(user.subscribed)
         client = Client()
 
-        token = url.lstrip(f'https://{settings.DOMAIN}/unsubscribe/')
+        mail.outbox = []
         url = reverse('unsubscribe', kwargs={'token': token})
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -186,14 +188,21 @@ class UsersManagersTests(TestCase):
         user = User.objects.get(email=email)
         self.assertFalse(user.subscribed)
 
-        user.subscribed = True
-        user.save()
+        msg = mail.outbox[0].body
+        url = re.search("HTTPS.*://.*/subscribe/.*\"", msg).group(0)[:-1]
+        base_url, token = url.rsplit('/', 1)
+        response = client.get(reverse('subscribe', kwargs={'token': token}))
+        self.assertEqual(response.status_code, 200)
+        user = User.objects.filter(email=user.email).get()
+        self.assertTrue(user.subscribed)
 
         # Trying a bad unsubscribe url
+        mail.outbox = []
         url += 'foo'
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
         user = User.objects.get(email=email)
+        self.assertContains(response, "There is something wrong with the link you used.")
         self.assertTrue(user.subscribed)
 
         settings.SECRET_KEY = saved_key
