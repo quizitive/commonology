@@ -1,0 +1,33 @@
+{% extends 'mail/mail_base.html' %}
+
+{% autoescape off %}
+
+{% block email-content %}
+
+<p>Hi,</p>
+
+<p>
+  You are unsubscribed from Commonology.  If you did not want to unsubscribe please use this link to resubscribe.
+</p>
+
+<div id="button-holder">
+  <button class="w3-button cg-blue" style="display: block;">
+    <a href="{{ protocol }}://{{ domain }}/subscribe/{{ signed_code }}">Subscribe</a>
+  </button>
+</div>
+
+<p>
+  Cheers,
+  <br/>
+  The Commonology Team
+</p>
+<div id="footer">
+  <p>
+  Button not working? Try pasting the url directly into your browser:
+    <a href="{{ protocol }}://{{ domain }}/subscribe/{{ signed_code }}">Subscribe</a>
+  </p>
+</div>
+  {% block email-footer-content %}{% endblock %}
+
+{% endblock %}
+{% endautoescape %}
