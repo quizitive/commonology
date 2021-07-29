@@ -16,7 +16,7 @@ from django.views.generic.base import View
 from project.views import CardFormView
 from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
 from users.models import PendingEmail, Player
-from users.utils import unsubscribe
+from users.utils import unsubscribe, sign_user
 from mail.sendgrid_utils import sendgrid_send
 from project.utils import redis_delete_patterns
 from game.models import Series
@@ -351,6 +351,19 @@ class PwdChangeView(CardFormView, PasswordChangeView):
         return super().form_valid(form)
 
 
+def send_unsubscribed_notice(request, player):
+    email = player.email
+    protocol = request.META['SERVER_PROTOCOL'].split('/')[0]
+    domain = request.META['SERVER_NAME']
+
+    signed_code = sign_user(player.email, player.code)
+
+    context = {'signed_code': signed_code, 'protocol': protocol, 'domain': domain}
+    msg = render_to_string('emails/unsubscribe_email.html', context)
+
+    return sendgrid_send("Unsubscribed", msg, [(email, None)])
+
+
 class UnsubscribeView(View):
     def get(self, request, token):
         i, t = token.split(':')
@@ -368,7 +381,7 @@ class UnsubscribeView(View):
         try:
             u = User.objects.filter(_code=i).first()
         except User.DoesNotExist:
-            context['custom_message'] = "You have been unsubscribed."
+            context['custom_message'] = "You are not subscribed."
             return render(request, 'users/base.html', context)
 
         email = u.email
@@ -378,8 +391,42 @@ class UnsubscribeView(View):
             unsubscribe(e)
             context['custom_message'] = f"You have been unsubscribed. If you did not mean to unsubscribe " \
                                         f"you can simply login and update your profile."
+            send_unsubscribed_notice(request, u)
         except BadSignature:
             context['custom_message'] = "There is something wrong with your unsubscribe link."
+        return render(request, 'users/base.html', context)
+
+    def post(self, request, *args, **kwargs):
+        return redirect(reverse('home'))
+
+
+class SubscribeView(View):
+    def get(self, request, token):
+        i, t = token.split(':')
+        context = {'header': 'Subscribe'}
+
+        bad_msg = f"There is something wrong with the link you used. "\
+                  f"If you wish to re-subscribe then please log in and "\
+                  f"and check subscribed in your profile settings. You can "\
+                  f"change your profile by selecting your name in the dropdown "\
+                  f"menu on the top right of our site.  Sorry for the inconvenience."
+
+        try:
+            u = User.objects.filter(_code=i).first()
+        except User.DoesNotExist:
+            context['custom_message'] = bad_msg
+            return render(request, 'users/base.html', context)
+
+        email = u.email
+        t = ':'.join([email, t])
+        try:
+            e = Signer().unsign(t)
+            if u.email == e:
+                u.subscribed = True
+                u.save()
+            context['custom_message'] = f"You have re-subscribed."
+        except BadSignature:
+            context['custom_message'] = bad_msg
         return render(request, 'users/base.html', context)
 
     def post(self, request, *args, **kwargs):
