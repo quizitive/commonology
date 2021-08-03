@@ -5,6 +5,7 @@ from numpy import base_repr
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.core.signing import Signer, BadSignature
+from django.db import transaction
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.sites.shortcuts import get_current_site
@@ -13,7 +14,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
-from project.card_views import BaseCardView, CardFormView, MultiCardPageView
+from project.views import CardFormView
 from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
@@ -22,6 +23,7 @@ from leaderboard.leaderboard import tabulate_results
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
+from users.utils import get_player
 from mail.sendgrid_utils import sendgrid_send
 
 
@@ -158,12 +160,15 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         player.display_name = self.request.POST.get('display_name')
         player.save()
 
-        for form in forms.values():
-            form.save()
-
+        self._save_forms(forms)
         self.email_player_success(request, game, player)
 
         return self.render_answers_submitted_card(request, 'success', player, game)
+
+    @transaction.atomic
+    def _save_forms(self, forms):
+        for form in forms.values():
+            form.save()
 
     def render_answers_submitted_card(self, request, msg, player, game):
         msgs = {
@@ -178,7 +183,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
                                   f"You can see them again by clicking the button below.",
             }
         }
-        c1 = CardFormView().render_card(
+        return CardFormView(page_template='game/game_card_view.html').render(
             request,
             button_label="View my answers",
             form_class=None,
@@ -186,12 +191,6 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
             **msgs[msg]
         )
-        c2 = ShareGameView().render_card(
-            request,
-            form_method='get',
-            form_action='/rewards'
-        )
-        return MultiCardPageView().render(request, cards=[c1, c2])
 
     def email_player_success(self, request, game, player):
         answers_url = self.build_signed_url(game, player)
@@ -269,15 +268,6 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         )
 
 
-class ShareGameView(BaseCardView):
-
-    header = "Share with Friends"
-    custom_message = mark_safe(f"Love playing Commonology? <b>Earn rewards by sharing with friends!</b>"
-                               f"Click the button below to learn more about our rewards program.")
-    button_label = "Learn More"
-
-
-
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
 def game_url(google_form_url, email):
     return google_form_url.replace('alex@commonologygame.com', email)
@@ -285,7 +275,7 @@ def game_url(google_form_url, email):
 
 def send_confirm(request, g, email, referrer_id=None):
     remove_pending_email_invitations()
-    referrer = Player.objects.filter(id=referrer_id).first()
+    referrer = get_player(referrer_id)
     pe = PendingEmail(email=email, referrer=referrer)
     pe.save()
 
@@ -312,8 +302,9 @@ def render_game(request, game, user=None):
 class GameEntryView(PSIDMixin, CardFormView):
     form_class = PendingEmailForm
     header = "Game starts here!"
-    button_label = "Email me a play link"
-    custom_message = "Login to play, or enter your email and we will send you a unique play link."
+    button_label = "Submit"
+    custom_message = "Enter your email address to play."
+    page_template = "game/game_card_view.html"
 
     def message(self, request, msg):
         return self.render_message(request, msg, form=None, button_label='Ok',
@@ -331,8 +322,6 @@ class GameEntryView(PSIDMixin, CardFormView):
         slug = kwargs.get('series_slug') or 'commonology'
         game_uuid = kwargs.get('game_uuid')
         user = request.user
-
-        referrer_id = request.GET.get('r', user.id)
 
         if not game_uuid:
             g = find_latest_public_game(slug)
@@ -381,7 +370,6 @@ class GameEntryView(PSIDMixin, CardFormView):
         if user.is_authenticated:
             return render_game(request, g)
 
-        self.card_template = 'game/game_entry_card.html'
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -407,8 +395,13 @@ class GameEntryView(PSIDMixin, CardFormView):
         email = request.POST['email']
 
         referrer_id = request.GET.get('r')
+
+        p = get_player(referrer_id)
+        if p and (p.email == email):
+            return render_game(request, g, p)
+
         send_confirm(request, g, email, referrer_id)
-        custom_message = mark_safe(f"<b>We sent the game link to {email}. </b>"
+        custom_message = mark_safe(f"<b>We sent a game link to {email}. </b>"
                               f"Don't forget to check your spam or junk folder if need be. "
                               f"By the way, if you were logged in you'd be playing already.")
 
@@ -422,6 +415,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
     header = "Email validated here!"
     button_label = "Next"
     custom_message = ''
+    page_template = "game/game_card_view.html"
 
     def message(self, request, msg):
         self.custom_message = msg

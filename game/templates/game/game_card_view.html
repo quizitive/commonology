@@ -1,0 +1,25 @@
+{% extends 'game/base.html' %}
+{% load static %}
+
+{% block page_style %}
+  <link rel=stylesheet href="{% static 'leaderboard/css/results.css' %}?v=1.3">
+  <style>
+  [role="button"]:focus {border: 1px solid #2a9fbc;outline:none;}
+
+  </style>
+{% endblock %}
+
+{% block content %}
+
+  <div class="content card-content">
+
+    <br/><br/>
+
+    {# --- Simple card-on-screen view with default card --- #}
+    {% block card %}
+    {% include card_template|default:"cards/base_card.html" %}
+    {% endblock %}
+
+  </div>
+
+{% endblock %}
