@@ -36,10 +36,10 @@
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
        <!-- Display Name Form -->
-      {% include 'game/components/display_name_card.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
+      {% include 'game/cards/display_name_card.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
 
         {% for q, form in questions %}
-          {% include 'game/components/question_form_card.html' with text=q.text q=q responses=q.choices%}
+          {% include 'game/cards/question_form_card.html' with text=q.text q=q responses=q.choices%}
         {% endfor %}
 
         <div class="w3-container w3-padding-48" style="max-width:480px;margin:auto;">

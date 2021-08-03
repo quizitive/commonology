@@ -175,20 +175,24 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             'success': {
                 "header": "Success!",
                 "custom_message": mark_safe(f"<b>Your answers have been submitted.</b> You can see them now by clicking "
-                                  f"the button below, and we've emailed the link to <b>{player.email}</b>."),
+                                  f"the button below, and we've emailed the link to <b>{player.email}</b>.<br/>"),
             },
             'duplicate': {
                 "header": "You've already played!",
-                "custom_message": f"You have already submitted answers for this game. "
-                                  f"You can see them again by clicking the button below.",
+                "custom_message": mark_safe(f"You have already submitted answers for this game. "
+                                  f"You can see them again by clicking the button below.\n<br/>"),
             }
         }
-        return CardFormView(page_template='game/game_card_view.html').render(
+        return CardFormView(
+            page_template='game/game_card_view.html',
+            card_template='game/cards/game_complete_card.html'
+        ).render(
             request,
             button_label="View my answers",
             form_class=None,
             form_method='get',
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
+            player_code=player.code,
             **msgs[msg]
         )
 
