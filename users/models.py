@@ -5,7 +5,6 @@ import secrets
 import string
 
 from django.db import connection
-from django.db import IntegrityError
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import CIEmailField
