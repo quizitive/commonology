@@ -2,7 +2,7 @@
 
 import datetime
 from django.db import migrations, models
-import game.models
+from django.utils.timezone import make_aware
 
 
 class Migration(migrations.Migration):
@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='game',
             name='end',
-            field=models.DateTimeField(default=datetime.datetime(2020, 1, 1, 0, 0), verbose_name='When the game ends:'),
+            field=models.DateTimeField(default=make_aware(datetime.datetime(2020, 1, 1, 0, 0)), verbose_name='When the game ends:'),
         ),
         migrations.AddField(
             model_name='game',
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='game',
             name='start',
-            field=models.DateTimeField(default=datetime.datetime(2020, 1, 1, 0, 0), verbose_name='When the game starts:'),
+            field=models.DateTimeField(default=make_aware(datetime.datetime(2020, 1, 1, 0, 0)), verbose_name='When the game starts:'),
         ),
         migrations.AlterField(
             model_name='game',
