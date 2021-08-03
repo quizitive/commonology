@@ -67,7 +67,7 @@ input:disabled {
   color: black;
   background: none;
 }
-ul {
+ul.errorlist {
   color: red;
   list-style-type: none;
   padding: 0;
