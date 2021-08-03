@@ -5,9 +5,7 @@
   <link rel=stylesheet href="{% static 'leaderboard/css/results.css' %}?v=1.2">
   <style>
   [role="button"]:focus {border: 1px solid #2a9fbc;outline:none;}
-  body {
-    background: #d9efff;
-  }
+
   </style>
 {% endblock %}
 
@@ -38,7 +36,7 @@
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
        <!-- Display Name Form -->
-      {% include 'game/components/display_name_form.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
+      {% include 'game/components/display_name_card.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
 
         {% for q, form in questions %}
           {% include 'game/components/question_form_card.html' with text=q.text q=q responses=q.choices%}
