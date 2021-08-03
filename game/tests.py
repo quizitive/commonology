@@ -313,6 +313,8 @@ def make_test_series(series_name='Commonology', hour_window=False):
         et = t + relativedelta(hours=1)
     game = game_to_db(series, sheet_name, start=t, end=et)
     game.save()
+    question = Question.objects.create(text="Are you my mother?")
+    game.questions.add(question)
     return series, game
 
 
@@ -370,7 +372,7 @@ class TestPlayRequest(TestCase):
         self.series.hosts.add(self.player)
         path = f'/play/{game.uuid}'
         response = client.get(path)
-        self.assertContains(response, self.game.name)
+        self.assertContains(response, self.game.questions.first().text)
 
         # This should fail because find latest game would return None and so no game can be found.
         path = f'/play/'
@@ -383,11 +385,11 @@ class TestPlayRequest(TestCase):
 
         path = '/play/'
         response = client.get(path)
-        self.assertContains(response, game.name)
+        self.assertContains(response, game.questions.first().text)
 
         path = reverse('game:uuidplay', kwargs={'game_uuid': game.uuid})
         response = client.get(path)
-        self.assertContains(response, game.name)
+        self.assertContains(response, game.questions.first().text)
 
         game.end = game.start
         game.save()
@@ -435,7 +437,7 @@ class TestPlayRequest(TestCase):
         self.assertIsNotNone(pe)
 
         response = client.get(url)
-        self.assertContains(response, game.name)
+        self.assertContains(response, game.questions.first().text)
 
         # Was player created
         p = Player.objects.filter(email=ABINORMAL).first()
