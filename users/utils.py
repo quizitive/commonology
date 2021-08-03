@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from .models import PendingEmail
+from .models import PendingEmail, Player
 from django.contrib.auth import get_user_model
 from django.core.signing import Signer
 from django.contrib.contenttypes.models import ContentType
@@ -70,3 +70,7 @@ def player_log_entry(player, message):
                                 object_repr=str(player.email),
                                 action_flag=CHANGE,
                                 change_message=message)
+
+
+def get_player(code):
+    return Player.objects.filter(_code=code).first()
