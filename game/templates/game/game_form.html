@@ -5,6 +5,7 @@
   <link rel=stylesheet href="{% static 'leaderboard/css/results.css' %}?v=1.2">
   <style>
   [role="button"]:focus {border: 1px solid #2a9fbc;outline:none;}
+
   </style>
 {% endblock %}
 
@@ -17,22 +18,25 @@
 {% block content %}
   <div class="content">
 
-    {% include 'leaderboard/components/game_header.html' with hide_navigation=True %}
+  <div class="series-header w3-round w3-padding-large w3-border w3-margin-top w3-margin-bottom"
+       style="background: white;">
+  <img src="{% static 'img/logo.svg' %}">
+  </div>
 
     {% if game.top_commentary %}
-    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-round" style="position: relative;background: white; border: 1px solid lightgrey; border-top: 5px solid #0095da;">
       {{ game.top_commentary|safe }}
     </div>
     {% endif %}
 
-    <div class="cg-border-blue w3-padding-16">
+    <div class="cg-border-blue">
 
       <form method="post" action="{% url 'series-game:game-form' series_slug game.game_id %}" novalidate>
        {% csrf_token %}
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
        <!-- Display Name Form -->
-      {% include 'game/components/display_name_form.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
+      {% include 'game/components/display_name_card.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
 
         {% for q, form in questions %}
           {% include 'game/components/question_form_card.html' with text=q.text q=q responses=q.choices%}
