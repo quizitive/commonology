@@ -32,7 +32,9 @@
 </head>
 
 <body>
-{% block navbar %}{% endblock %}
+{% block navbar %}
+  {% include 'components/navbar.html' %}
+{% endblock %}
 {% block content %}{% endblock %}
 
 {% block scripts %}{% endblock %}

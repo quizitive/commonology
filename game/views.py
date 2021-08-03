@@ -183,7 +183,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
                                   f"You can see them again by clicking the button below.",
             }
         }
-        return CardFormView().render(
+        return CardFormView(page_template='game/game_card_view.html').render(
             request,
             button_label="View my answers",
             form_class=None,
@@ -304,6 +304,7 @@ class GameEntryView(PSIDMixin, CardFormView):
     header = "Game starts here!"
     button_label = "Submit"
     custom_message = "Enter your email address to play."
+    page_template = "game/game_card_view.html"
 
     def message(self, request, msg):
         return self.render_message(request, msg, form=None, button_label='Ok',
@@ -414,6 +415,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
     header = "Email validated here!"
     button_label = "Next"
     custom_message = ''
+    page_template = "game/game_card_view.html"
 
     def message(self, request, msg):
         self.custom_message = msg
