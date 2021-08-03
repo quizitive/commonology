@@ -1,9 +1,14 @@
 body {
-    font-family: "Poppins", "Quicksand Medium", "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif
+  font-family: "Poppins", "Quicksand Medium", "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
+  background: #d9efff;
 }
 
 div.content {
   max-width: 640px;
+}
+
+div.w3-modal-content {
+  max-width: 500px;
 }
 
 /* so cards have rounded corners on top and bottom */
