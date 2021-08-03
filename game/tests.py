@@ -8,8 +8,9 @@ from copy import deepcopy
 from csv import reader
 from dateutil.relativedelta import relativedelta
 
+from django.utils.timezone import make_aware
 from django.test import TestCase, Client
-from django.urls import reverse, NoReverseMatch
+from django.urls import reverse
 from django.core import mail
 
 from project.utils import REDIS, our_now, redis_delete_patterns
@@ -259,13 +260,13 @@ class TestGSheetsAPI(BaseGameDataTestCase):
 class TestUtils(TestCase):
 
     def test_next_wed_noon(self):
-        a_tuesday = datetime.datetime(year=2021, month=2, day=1)
+        a_tuesday = make_aware(datetime.datetime(year=2021, month=2, day=1))
         next_game_start = next_wed_noon(a_tuesday)
         self.assertEqual(next_game_start.weekday(), 2)
         self.assertEqual(next_game_start.hour, 12)
 
     def test_next_fri_1159(self):
-        a_thursday = datetime.datetime(year=2021, month=2, day=3)
+        a_thursday = make_aware(datetime.datetime(year=2021, month=2, day=3))
         next_game_end = next_friday_1159(a_thursday)
         self.assertEqual(next_game_end.weekday(), 4)
         self.assertEqual(next_game_end.strftime(format="%H:%M:%S"), "23:59:59")
