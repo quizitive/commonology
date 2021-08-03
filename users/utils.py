@@ -4,13 +4,14 @@ from django.contrib.auth import get_user_model
 from django.core.signing import Signer
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.models import LogEntry, CHANGE
+from django.utils.timezone import make_aware
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 def remove_pending_email_invitations(n=7):
-    t = datetime.now() - timedelta(days=n)
+    t = make_aware(datetime.now()) - timedelta(days=n)
     PendingEmail.objects.filter(created__lt=t).delete()
 
 
