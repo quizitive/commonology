@@ -9,7 +9,7 @@ from celery import shared_task
 
 from django.utils.timezone import make_aware
 from django.db import transaction
-from project.utils import our_now
+from project.utils import our_now, REDIS
 from game.models import Series, Game, Question, Answer, AnswerCode
 from django.contrib.auth import get_user_model
 
@@ -194,7 +194,7 @@ def raw_answers_db_to_df(game):
             p_data.append(ans)
             if raw_player_answers:
                 this_p_id, *_ = raw_player_answers[0]
-        raw_answer_data.append(p_data)
+        raw_answer_data.append(p_data + [''] * (3 + len(qtext) - len(p_data)))
 
     raw_answers_df = pd.DataFrame(
         columns=['Timestamp', 'Email Address', 'Name'] + qtext, data=raw_answer_data)

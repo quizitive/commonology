@@ -11,7 +11,7 @@ from django.conf import settings
 from project.utils import REDIS
 from users.models import Team
 from game.models import Game, AnswerCode
-from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive
+from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
 from game.tasks import api_to_db
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
 
@@ -23,12 +23,7 @@ def tabulate_results(game, update=False):
     :param update: Whether or not to update existing answer records in the DB
     :return: None
     """
-    gc = gspread.service_account(settings.GOOGLE_GSPREAD_API_CONFIG)
-    try:
-        sheet_doc = gc.open(game.sheet_name)
-    except gspread.exceptions.SpreadsheetNotFound:
-        sheet_doc = gc.create(game.sheet_name, settings.GOOGLE_DRIVE_FOLDER_ID)
-
+    sheet_doc = get_sheet_doc(game)
     responses = api_and_db_data_as_df(game, sheet_doc)
 
     user_rollups = get_user_rollups(sheet_doc)
