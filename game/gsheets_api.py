@@ -3,10 +3,13 @@ import pickle
 
 import gspread
 import pandas as pd
+from celery import shared_task
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-
+from django.conf import settings
+from project.utils import REDIS
+from game.models import Game
 from game.tasks import raw_answers_db_to_df
 
 
@@ -36,6 +39,15 @@ def get_or_create_gdrive_token():
         with open('../token.pickle', 'wb') as token:
             pickle.dump(creds, token)
     return creds
+
+
+def get_sheet_doc(game):
+    gc = gspread.service_account(settings.GOOGLE_GSPREAD_API_CONFIG)
+    try:
+        sheet_doc = gc.open(game.sheet_name)
+    except gspread.exceptions.SpreadsheetNotFound:
+        sheet_doc = gc.create(game.sheet_name, settings.GOOGLE_DRIVE_FOLDER_ID)
+    return sheet_doc
 
 
 def api_data_to_df(raw_data):
@@ -83,14 +95,16 @@ def write_all_to_gdrive(sheet_doc, responses, answer_tally, answer_codes, leader
 
 
 def write_responses_sheet(sheet_doc, responses):
-    responses['Timestamp'] = responses['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        responses['Timestamp'] = responses['Timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    except AttributeError:
+        pass
     writable_responses = [responses.columns.values.tolist()] + responses.values.tolist()
     try:
         sheet = sheet_doc.worksheet("[auto] raw responses")
-        sheet_doc.del_worksheet(sheet)
+        sheet.clear()
     except gspread.exceptions.WorksheetNotFound:
-        pass
-    sheet = sheet_doc.add_worksheet("[auto] raw responses", len(writable_responses), 20)
+        sheet = sheet_doc.add_worksheet("[auto] raw responses", len(writable_responses), 20)
     sheet.update(writable_responses)
 
 
@@ -115,10 +129,9 @@ def write_summarized_answer_sheet(sheet_doc, rollups_and_tallies):
     answers_sheet_data = make_answers_sheet(rollups_and_tallies)
     try:
         sheet = sheet_doc.worksheet("[auto] answers")
-        sheet_doc.del_worksheet(sheet)
+        sheet.clear()
     except gspread.exceptions.WorksheetNotFound:
-        pass
-    sheet = sheet_doc.add_worksheet("[auto] answers", 200, 26)
+        sheet = sheet_doc.add_worksheet("[auto] answers", 200, 26)
     sheet.update(answers_sheet_data, major_dimension='COLUMNS')
 
 
@@ -126,6 +139,7 @@ def write_leaderboard_sheet(sheet_doc, leaderboard):
     api_lb = leaderboard.drop(columns=['id', 'is_host'])
     try:
         sheet = sheet_doc.worksheet("[auto] leaderboard")
+        sheet.clear()
     except gspread.exceptions.WorksheetNotFound:
         sheet = sheet_doc.add_worksheet("[auto] leaderboard", len(api_lb), 16)
     sheet.update([list(api_lb.columns)] + api_lb.values.tolist())
@@ -160,3 +174,15 @@ def make_rollups_sheet(rollups_and_tallies):
                 rollup_score.append(int(tallies[coding]))
         sheet_data.extend((unique_strings, resulting_codes, rollup_score, []))
     return sheet_data
+
+
+@shared_task
+def write_new_responses_to_gdrive(gid):
+    game = Game.objects.get(id=gid)
+    redis_key = f'responses_{game.series.slug}_{game.game_id}'
+    if REDIS.get(redis_key):
+        return
+    REDIS.set(redis_key, 'true', ex=60)
+    sheet_doc = get_sheet_doc(game)
+    responses = raw_answers_db_to_df(game)
+    write_responses_sheet(sheet_doc, responses)
