@@ -2,6 +2,7 @@ from django.views.generic.base import View
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormMixin, ContextMixin
 from django.contrib import messages
+from django.template.loader import render_to_string
 
 
 class BaseCardView(ContextMixin, View):
@@ -14,13 +15,16 @@ class BaseCardView(ContextMixin, View):
     custom_message = None
     button_label = "Ok"
     card_template = 'cards/base_card.html'
-    page_template = 'users/base.html'
+    page_template = 'single_card_view.html'
 
     def get(self, request, *args, **kwargs):
         return self.render(request, *args, **kwargs)
 
     def render(self, request, *args, **kwargs):
         return render(request, self.page_template, self.get_context_data(**kwargs))
+
+    def render_card(self, request, *args, **kwargs):
+        return render_to_string(self.card_template, self.get_context_data(**kwargs), request)
 
     def get_context_data(self, *args, **kwargs):
         context = {
@@ -79,3 +83,13 @@ class CardFormView(FormMixin, BaseCardView):
 
 class CardChartView(BaseCardView):
     header = "A Chart"
+
+
+class MultiCardPageView(BaseCardView):
+    """Renders many card views to a single page"""
+
+    page_template = 'multi_card_view.html'
+    cards = []
+
+    def dispatch(self, request, *args, **kwargs):
+        self.cards = kwargs.get('cards')
