@@ -1,5 +1,6 @@
 from datetime import datetime
 from pytz import timezone
+from zoneinfo import ZoneInfo
 from collections import deque
 from copy import deepcopy
 
@@ -181,6 +182,7 @@ def raw_answers_db_to_df(game):
     while raw_player_answers:
         qt_cp = deepcopy(qtext)
         p_id, p_dn, ts, q_text, ans, = raw_player_answers[0]
+        ts = ts.astimezone(ZoneInfo('US/Eastern'))
         p_data = [ts.strftime('%m/%d/%Y %H:%M:%S'), p_id, p_dn]
         this_p_id = p_id
         while this_p_id == p_id and raw_player_answers:
