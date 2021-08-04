@@ -18,6 +18,7 @@ from project.views import CardFormView
 from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
+from game.gsheets_api import write_new_responses_to_gdrive
 from game.utils import find_latest_public_game
 from leaderboard.leaderboard import tabulate_results
 from users.models import PendingEmail, Player
@@ -162,6 +163,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
         self._save_forms(forms)
         self.email_player_success(request, game, player)
+        write_new_responses_to_gdrive.delay(game.id)
 
         return self.render_answers_submitted_card(request, 'success', player, game)
 
