@@ -17,7 +17,7 @@ def document_render(request, filename):
 
 
 def about_view(request, *args, **kwargs):
-    return document_render(request, 'about.html')
+    return render(request, 'about.html')
 
 
 def product_view(request, *args, **kwargs):
