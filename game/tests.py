@@ -302,14 +302,13 @@ class TestModels(TestCase):
         self.assertIn(user, series.players.all())
 
     def test_optional_questions_text(self):
-        op_q = Question.objects.create(text="This question is optional.", type=Question.op)
+        op_q = Question.objects.create(text="This question is optional.", type=Question.op, number=1)
         self.assertEqual(op_q.text, "OPTIONAL: This question is optional.")
 
     def test_unique_question_number(self):
         series, game = make_test_series()
-        Question.objects.create(game=game, text='q1', number=1)
         with self.assertRaises(IntegrityError):
-            Question.objects.create(game=game, text='q2', number=1)
+            Question.objects.create(game=game, text='q1', number=1)
 
 
 def make_test_series(series_name='Commonology', hour_window=False):
@@ -321,7 +320,7 @@ def make_test_series(series_name='Commonology', hour_window=False):
         et = t + relativedelta(hours=1)
     game = game_to_db(series, sheet_name, start=t, end=et)
     game.save()
-    question = Question.objects.create(text="Are you my mother?")
+    question = Question.objects.create(text="Are you my mother?", number=1)
     game.questions.add(question)
     return series, game
 
