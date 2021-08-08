@@ -12,6 +12,7 @@ from django.utils.timezone import make_aware
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
+from django.db import IntegrityError
 
 from project.utils import REDIS, our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
@@ -301,8 +302,13 @@ class TestModels(TestCase):
         self.assertIn(user, series.players.all())
 
     def test_optional_questions_text(self):
-        op_q = Question.objects.create(text="This question is optional.", type=Question.op)
+        op_q = Question.objects.create(text="This question is optional.", type=Question.op, number=1)
         self.assertEqual(op_q.text, "OPTIONAL: This question is optional.")
+
+    def test_unique_question_number(self):
+        series, game = make_test_series()
+        with self.assertRaises(IntegrityError):
+            Question.objects.create(game=game, text='q1', number=1)
 
 
 def make_test_series(series_name='Commonology', hour_window=False):
@@ -314,7 +320,7 @@ def make_test_series(series_name='Commonology', hour_window=False):
         et = t + relativedelta(hours=1)
     game = game_to_db(series, sheet_name, start=t, end=et)
     game.save()
-    question = Question.objects.create(text="Are you my mother?")
+    question = Question.objects.create(text="Are you my mother?", number=1)
     game.questions.add(question)
     return series, game
 
