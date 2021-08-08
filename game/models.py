@@ -176,7 +176,7 @@ def add_host_as_player(sender, instance, **kwargs):
 class Question(models.Model):
     game = models.ForeignKey(Game, null=True, on_delete=models.SET_NULL,
                              related_name='questions', db_index=True)
-    number = models.PositiveIntegerField(default=1)
+    number = models.PositiveIntegerField(null=True)
     text = models.CharField(max_length=10000)
     ga = 'GA'
     op = 'OP'
@@ -192,6 +192,9 @@ class Question(models.Model):
     caption = models.CharField(max_length=255, blank=True, default="")
     hide_default_results = models.BooleanField(default=False)
     thread = models.ForeignKey(Thread, related_name='object', null=True, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('game', 'number')
 
     def __str__(self):
         return self.text
