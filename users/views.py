@@ -13,7 +13,7 @@ from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
 from django.views.generic.base import View
-from project.views import CardFormView
+from project.card_views import BaseCardView, CardFormView
 from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
@@ -172,14 +172,15 @@ def send_invite(request, email, referrer=None):
     return sendgrid_send("You're Invited to Commonology", msg, [(email, None)])
 
 
-class InviteFriendsView(LoginRequiredMixin, CardFormView):
+class InviteFriendsView(LoginRequiredMixin, BaseCardView):
 
     header = "Invite Friends"
-    form_class = InviteFriendsForm
-    button_label = "Send"
+    form_class = None
+    button_label = ""
+    card_template = "users/cards/invite_card.html"
 
     def get(self, request, *args, **kwargs):
-        messages.info(request, "Enter your friends' emails to invite them to Commonology!")
+        # messages.info(request, "Enter your friends' emails to invite them to Commonology!")
         return super().get(request)
 
     def post(self, request, *args, **kwargs):
