@@ -10,9 +10,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def document_render(request, filename):
+def document_render(request, filename, title):
     context = next_game_context()
     context['filename'] = filename
+    context['title'] = title
     return render(request, 'document.html', context)
 
 
@@ -21,15 +22,15 @@ def about_view(request, *args, **kwargs):
 
 
 def product_view(request, *args, **kwargs):
-    return document_render(request, 'product.html')
+    return document_render(request, 'product.html', 'Product Description')
 
 
 def tos_view(request, *args, **kwargs):
-    return document_render(request, 'tos.html')
+    return document_render(request, 'tos.html', 'Terms of Service')
 
 
 def privacy_view(request, *args, **kwargs):
-    return document_render(request, 'privacy.html')
+    return document_render(request, 'privacy.html', 'Privacy Policy')
 
 
 def index(request):
