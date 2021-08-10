@@ -175,13 +175,8 @@ def send_invite(request, email, referrer=None):
 class InviteFriendsView(LoginRequiredMixin, BaseCardView):
 
     header = "Invite Friends"
-    form_class = None
     button_label = ""
     card_template = "users/cards/invite_card.html"
-
-    def get(self, request, *args, **kwargs):
-        # messages.info(request, "Enter your friends' emails to invite them to Commonology!")
-        return super().get(request)
 
     def post(self, request, *args, **kwargs):
         emails = request.POST['emails'].split(",")
@@ -202,6 +197,16 @@ class InviteFriendsView(LoginRequiredMixin, BaseCardView):
                 messages.info(request, f"Invite successfully sent to {email}.")
 
         return redirect('invite')
+
+    def get_context_data(self, *args, **kwargs):
+        players_referred = self.request.user.players_referred
+        return super().get_context_data(
+            *args,
+            player_code=self.request.user.code,
+            players_referred=players_referred,
+            referral_count=players_referred.count(),
+            **kwargs
+        )
 
 
 class EmailConfirmedView(View):
