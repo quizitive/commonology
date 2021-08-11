@@ -376,11 +376,11 @@ class GameEntryView(PSIDMixin, CardFormView):
                 form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
             )
 
+        if game_uuid and g.not_started_yet:
+            return render_game(request, g, editable=is_active)
+
         if not is_active:
-            if game_uuid:
-                return render_game(request, g, editable=is_active)
-            else:
-                return self.message(request, msg='Seems like the game finished but has not been scored yet.')
+            return self.message(request, msg='Seems like the game finished but has not been scored yet.')
 
         if user.is_authenticated:
             return render_game(request, g)
