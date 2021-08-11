@@ -167,6 +167,11 @@ class Game(models.Model):
         now = our_now()
         return self.start <= now <= self.end
 
+    @property
+    def not_started_yet(self):
+        now = our_now()
+        return self.start > now
+
 
 @receiver(m2m_changed, sender=Game.hosts.through)
 def add_host_as_player(sender, instance, **kwargs):
