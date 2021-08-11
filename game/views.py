@@ -377,7 +377,7 @@ class GameEntryView(PSIDMixin, CardFormView):
             )
 
         if game_uuid and g.not_started_yet:
-            return render_game(request, g, editable=is_active)
+            return render_game(request, g, editable=False)
 
         if not is_active:
             return self.message(request, msg='Seems like the game finished but has not been scored yet.')
