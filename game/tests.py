@@ -495,8 +495,16 @@ class TestPlayRequest(TestCase):
 
     def test_game_reviewer(self):
         # Game url with uuid should render the game without a submit button prior to game start.
-
         game = self.game
+
+        client = get_local_client()
+        path = f'/play/{game.uuid}'
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.game.questions.first().text)
+        self.assertNotContains(response, "Thanks for playing!")
+
+        # Make sure the game has not started yet to test preview mode.
         game.start = game.end
         game.save()
 
@@ -505,4 +513,5 @@ class TestPlayRequest(TestCase):
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.game.questions.first().text)
-        # Check if submit button is not active
+        # Since the game is in preview mode, not editable then it has the Thank you string.
+        self.assertContains(response, "Thanks for playing!")
