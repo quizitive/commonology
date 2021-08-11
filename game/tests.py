@@ -492,3 +492,26 @@ class TestPlayRequest(TestCase):
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Cannot find an active game.  Perhaps you have a bad link.')
+
+    def test_game_reviewer(self):
+        # Game url with uuid should render the game without a submit button prior to game start.
+
+        game = self.game
+        game.start = game.end
+        game.save()
+
+        client = get_local_client()
+        path = f'/play/{game.uuid}'
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Seems like the game finished but has not been scored yet.')
+
+        self.series.hosts.add(self.player)
+        path = f'/play/{game.uuid}'
+        response = client.get(path)
+        self.assertContains(response, self.game.questions.first().text)
+
+        # This should fail because find latest game would return None and so no game can be found.
+        path = f'/play/'
+        response = client.get(path)
+        self.assertContains(response, 'Cannot find an active game.  We will let you know when the next game begins.')
