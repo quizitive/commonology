@@ -52,8 +52,16 @@
           color: #fff!important;
           background: #0095da!important;
       }
-      #footer {
-        margin-bottom: -24px;
+      #referral-banner {
+        max-width: 600px;
+        box-sizing: border-box;
+        margin: 8px auto;
+        background: #fff;
+        padding: 16px;
+      }
+      #share-link > a {
+        text-decoration: none;
+        color: black;
       }
       #footer > p {
         color: grey;
@@ -90,10 +98,14 @@
         </div>
       </div>
 
+      <div id="referral-banner">
+        {% include 'users/components/referral_link_banner.html' with no_button=True %}
+      </div>
+
       <div id="email-footer">
 
         {% block email-footer-content %}
-            <p>
+            <p style="padding: 8px 0">
             <a href="https://twitter.com/commonologygame">Twitter</a>&nbsp;
             <a href="https://www.facebook.com/CommonologyGame">Facebook</a>&nbsp;
             <a href="https://instagram.com/commonology">Instagram</a>
