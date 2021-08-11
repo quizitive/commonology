@@ -122,6 +122,7 @@ class Player(CustomUser):
     def players_referred(self):
         return Player.objects.filter(referrer=self)
 
+
 class PendingEmail(models.Model):
     referrer = models.ForeignKey(Player, null=True, on_delete=models.CASCADE)
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
