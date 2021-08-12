@@ -1,11 +1,12 @@
 import debug_toolbar
-
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib import admin
 from .views import index, about_view, product_view, tos_view, privacy_view, ContactView
 
+admin.site.site_header = "Commonology Administration"
+admin.site.site_title = "Commonology Administration"
 
 urlpatterns = [
     path('', index, name='home'),
