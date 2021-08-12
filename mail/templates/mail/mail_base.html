@@ -98,9 +98,11 @@
         </div>
       </div>
 
+      {% if referral_banner %}
       <div id="referral-banner">
-        {% include 'users/components/referral_link_banner.html' with no_button=True %}
+        {% include 'users/components/referral_link_banner.html' with no_button=True player_code='-game_url_args-' %}
       </div>
+      {% endif %}
 
       <div id="email-footer">
 
