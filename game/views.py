@@ -109,13 +109,18 @@ class PSIDMixin:
 
 class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
-    def render_game(self, request, game, player):
+    def render_game(self, request, game, player, editable=True):
         # called when an validated player passes though GameEntryView
-        psid = self.sign_game_player(game, player)
-        dn_form = self.display_name_form(player.display_name)
+        if editable:
+            psid = self.sign_game_player(game, player)
+            dn_form = self.display_name_form(player.display_name)
+        else:
+            psid = ''
+            dn_form = self.display_name_form('Reviewer')
+
         self.requested_slug = game.series.slug
         self.game = game
-        return render(request, 'game/game_form.html', self.get_context(game, psid, dn_form))
+        return render(request, 'game/game_form.html', self.get_context(game, psid, dn_form, editable=editable))
 
     def get(self, request, *args, **kwargs):
         # any request without a player_signed_id gets redirected to GameEntryView
@@ -296,13 +301,14 @@ def send_confirm(request, g, email, referrer_id=None):
     return sendgrid_send("Let's play Commonology", msg, [(email, None)])
 
 
-def render_game(request, game, user=None):
+def render_game(request, game, user=None, editable=True):
     if user:
         request.session['user_id'] = user.id
     else:
         user = request.user
-    game.series.players.add(user)
-    return GameFormView().render_game(request, game, user)
+    if editable:
+        game.series.players.add(user)
+    return GameFormView().render_game(request, game, user, editable)
 
 
 class GameEntryView(PSIDMixin, CardFormView):
@@ -369,6 +375,9 @@ class GameEntryView(PSIDMixin, CardFormView):
                 form_method='get',
                 form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
             )
+
+        if game_uuid and g.not_started_yet:
+            return render_game(request, g, editable=False)
 
         if not is_active:
             return self.message(request, msg='Seems like the game finished but has not been scored yet.')
