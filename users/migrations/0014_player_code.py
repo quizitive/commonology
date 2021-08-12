@@ -12,7 +12,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='player',
             name='_code',
-            field=models.CharField(db_index=True, max_length=5, null=True),
+            field=models.CharField(db_index=True, max_length=5, null=True,
+                                   help_text='Unique identifier useful for url parameters like referrer.'),
         ),
     ]
 
