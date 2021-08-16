@@ -14,6 +14,7 @@ from django.core.validators import validate_email
 from django.template.loader import render_to_string
 from django.views.generic.base import View
 from project.views import CardFormView
+from project.card_views import recaptcha_check
 from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
@@ -102,6 +103,11 @@ class JoinView(CardFormView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        recaptcha_response = request.POST.get('g-recaptcha-response')
+        if not recaptcha_check(recaptcha_response):
+            messages.error(request, 'Invalid reCaptcha response')
+            return redirect('join')
+
         email = request.POST.get('email')
         if not email:
             return redirect('login')
