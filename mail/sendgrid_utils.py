@@ -25,13 +25,13 @@ def make_substitutions(e, id):
 #
 def sendgrid_send(subject, msg, email_list,
                   from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME),
-                  send_at=None, categories=None, unsub_link=False):
+                  send_at=None, categories=None, unsub_link=False, components=()):
 
     # don't use sendgrid backend for tests
     if 'console' in settings.EMAIL_BACKEND or 'locmem' in settings.EMAIL_BACKEND:
         to_emails = [e for e, _ in email_list]
         send_mail(subject, msg, None, to_emails, html_message=msg)
-        return(len(to_emails))
+        return len(to_emails)
 
     to_emails = [To(email=e, substitutions=make_substitutions(e, id)) for e, id in email_list]
 
