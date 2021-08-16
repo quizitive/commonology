@@ -5,23 +5,23 @@
         font-family: "Poppins", Verdana, Arial, sans-serif;
         font-size: 0.9rem;
         background: #fafbfc;
-        padding: 24px 0;
+        padding: 8px 0;
       }
       #email-container {
         max-width: 600px;
         box-sizing: border-box;
         margin: auto;
-        border-top: 3px solid #237073;
-        background: #fff;
       }
       #email-header {
-        width: 100%;
-        border-bottom: 3px solid #237073;
+        border: 1px solid lightgrey;
+        border-top: 4px solid #237073;
+        background: #fff;
+        border-radius: 4px;
       }
       #email-header-image {
         display: block;
-        padding: 16px 24px;
-        max-width: 240px;
+        padding: 8px 24px;
+        max-width: 320px;
         margin: auto;
       }
       #email-content {
@@ -85,13 +85,13 @@
 
   <body style="padding: 0;">
     <div id="email-body">
-      <div id="email-container">
+      <div id="email-container" class="cg-email">
         <div id="email-header">
             <a href="https://commonologygame.com/">
             <img id="email-header-image" src="https://commonologygame.com/static/img/logo.png">
             </a>
           </div>
-        <div id="email-content">
+        <div id="email-content" style="background:#fff;border: 1px solid lightgrey;border-top:4px solid #0095da;border-radius:4px">
           {% block email-content %}
             {{ message }}
           {% endblock %}
