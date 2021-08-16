@@ -1,5 +1,5 @@
 from django.contrib import admin, messages
-from .models import MailMessage
+from .models import MailMessage, Component
 from django_object_actions import DjangoObjectActions
 from users.models import Player
 from .utils import make_absolute_urls
@@ -12,7 +12,8 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         email = obj.test_recipient
         msg = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
-        sendgrid_send(obj.subject, msg=msg, email_list=[(email, -1)], from_email=from_email, unsub_link=True)
+        sendgrid_send(obj.subject, msg=msg, email_list=[(email, -1)],
+                      from_email=from_email, unsub_link=True, components=obj.components)
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
@@ -58,6 +59,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     list_filter = ('created',)
     search_fields = ('subject',)
     ordering = ('-created',)
+    filter_horizontal = ('components',)
     save_on_top = True
 
     def save_model(self, request, obj, form, change):
@@ -66,3 +68,8 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             obj.tested = False
             obj.sent = False
             obj.save()
+
+
+@admin.register(Component)
+class MailComponentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'template')
