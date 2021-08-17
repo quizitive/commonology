@@ -13,7 +13,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         msg = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
         sendgrid_send(obj.subject, msg=msg, email_list=[(email, -1)],
-                      from_email=from_email, unsub_link=True, components=obj.components)
+                      from_email=from_email, unsub_link=True, components=obj.components.all())
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
@@ -39,7 +39,8 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             else:
                 players = obj.series.players
 
-            n = mass_mail(obj.subject, message, from_email, players=players, categories=obj.categories)
+            n = mass_mail(obj.subject, message, from_email, players=players,
+                          categories=obj.categories, components=obj.components.all())
             obj.sent = True
             obj.save()
             if n:
