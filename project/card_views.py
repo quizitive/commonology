@@ -9,10 +9,9 @@ from django.conf import settings
 
 
 def recaptcha_check(request):
-    recaptcha_response = request.POST.get('g-recaptcha-response')
-    if recaptcha_response is None:
-        # Must be running test code
+    if settings.IS_TEST:
         return
+    recaptcha_response = request.POST.get('g-recaptcha-response')
     data = {'secret': settings.RECAPTCHA3_SECRET,
             'response': recaptcha_response}
     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
