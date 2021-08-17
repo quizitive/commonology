@@ -144,8 +144,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
-        if not recaptcha_check(request):
-            raise PermissionDenied('Invalid reCaptcha response')
+        recaptcha_check(request)
 
         # make sure this is a real submission that hasn't been tampered with
         if (psid := self.request.POST.get('psid')) is None:
