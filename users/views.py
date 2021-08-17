@@ -103,8 +103,7 @@ class JoinView(CardFormView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        recaptcha_response = request.POST.get('g-recaptcha-response')
-        if not recaptcha_check(recaptcha_response):
+        if not recaptcha_check(request):
             messages.error(request, 'Invalid reCaptcha response')
             return redirect('join')
 
