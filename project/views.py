@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django import forms
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import send_mail
-from project.card_views import CardFormView
+from project.card_views import CardFormView, recaptcha_check
 from game.utils import next_event, find_latest_public_game
 
 import logging
@@ -65,6 +65,7 @@ class ContactView(CardFormView):
     custom_message = "Enter a message and we WILL read it."
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
         form = self.get_form()
         if form.is_valid():
             from_email = form.data['from_email']

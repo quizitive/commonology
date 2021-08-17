@@ -39,6 +39,8 @@ class ProfileView(LoginRequiredMixin, CardFormView):
     header = "Edit Profile"
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
+
         form = self.get_form()
 
         if not form.is_valid():
@@ -186,6 +188,7 @@ class InviteFriendsView(LoginRequiredMixin, CardFormView):
         return super().get(request)
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
         emails = request.POST['emails'].split(",")
         emails = [e.strip().lower() for e in emails]
         for email in emails:
