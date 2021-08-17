@@ -10,9 +10,14 @@ from .sendgrid_utils import mass_mail, sendgrid_send
 class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     def send_test(self, request, obj):
         email = obj.test_recipient
+        try:
+            test_user = Player.objects.get(email=obj.test_recipient)
+            user_code = test_user.code
+        except Player.DoesNotExist:
+            user_code = -1
         msg = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
-        sendgrid_send(obj.subject, msg=msg, email_list=[(email, -1)],
+        sendgrid_send(obj.subject, msg=msg, email_list=[(email, user_code)],
                       from_email=from_email, unsub_link=True, components=obj.components.all())
         obj.tested = True
         obj.save()
