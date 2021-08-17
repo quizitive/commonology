@@ -13,10 +13,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def make_substitutions(e, id):
-    x = sign_user(e, id)
+def make_substitutions(e, code):
+    x = sign_user(e, code)
     url = mark_safe(f"https://{settings.DOMAIN}/unsubscribe/{x}")
-    game_url_args = f'r={id}'
+    game_url_args = f'r={code}'
     return {'-email-': e, '-unsubscribelink-': url, '-game_url_args-': game_url_args}
 
 
@@ -33,9 +33,9 @@ def sendgrid_send(subject, msg, email_list,
         send_mail(subject, msg, None, to_emails, html_message=msg)
         return len(to_emails)
 
-    to_emails = [To(email=e, substitutions=make_substitutions(e, id)) for e, id in email_list]
+    to_emails = [To(email=e, substitutions=make_substitutions(e, code)) for e, code in email_list]
 
-    msg = render_to_string('mail/mail_base.html', context={'message': mark_safe(msg), 'unsub_link': unsub_link})
+    msg = render_to_string('mail/mail_base.html', context={'message': mark_safe(msg), 'components': components, 'unsub_link': unsub_link})
 
     message = Mail(
         from_email=from_email,
@@ -57,7 +57,7 @@ def sendgrid_send(subject, msg, email_list,
     return len(to_emails)
 
 
-def mass_mail(subject, msg, from_email, players, categories=None):
+def mass_mail(subject, msg, from_email, players, categories=None, components=()):
     if categories:
         categories = categories.split(', ')
 
@@ -75,7 +75,7 @@ def mass_mail(subject, msg, from_email, players, categories=None):
         if 0 == count % 500:
             total_count += 500
             sendgrid_send(subject, msg, email_list, from_email,
-                          send_at=send_at, categories=categories, unsub_link=True)
+                          send_at=send_at, categories=categories, unsub_link=True, components=components)
             send_at += 100
             count = 0
             email_list = []
@@ -83,7 +83,7 @@ def mass_mail(subject, msg, from_email, players, categories=None):
     if email_list:
         total_count += len(email_list)
         sendgrid_send(subject, msg, email_list, from_email,
-                      send_at=send_at, categories=categories, unsub_link=True)
+                      send_at=send_at, categories=categories, unsub_link=True, components=components)
 
     logger.info(f"{total_count} recipients were just sent a blast with subject = {subject}.")
     return total_count
