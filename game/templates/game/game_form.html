@@ -12,14 +12,14 @@
 {% block scripts %}
   {% if editable %}
      <script src="{% static 'game/js/game_form.js' %}"></script>
-        <script>
-            //global grecaptcha
-            grecaptcha.ready(function() {
-              grecaptcha.execute('{{recaptcha_key}}', {action: "/contact/"}).then(function(token) {
-                document.getElementById('g-recaptcha-response').value = token;
-              });
-            });
-        </script>
+     <script src='https://www.google.com/recaptcha/api.js?render={{recaptcha_key}}'></script>
+     <script>
+        grecaptcha.ready(function() {
+          grecaptcha.execute('{{recaptcha_key}}', {action: "/contact/"}).then(function(token) {
+            document.getElementById('g-recaptcha-response').value = token;
+          });
+        });
+     </script>
   {% endif %}
 {% endblock %}
 
