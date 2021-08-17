@@ -399,6 +399,8 @@ class GameEntryView(PSIDMixin, CardFormView):
         #    2. The player is not logged in
         #    3. The player is not the host
 
+        recaptcha_check(request)
+
         if 'email' not in request.POST:
             return redirect('home')
 
