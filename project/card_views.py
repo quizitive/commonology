@@ -1,6 +1,7 @@
 import requests
 from django.views.generic.base import View
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+from django.core.exceptions import PermissionDenied
 from django.views.generic.edit import FormMixin, ContextMixin
 from django.contrib import messages
 from django.template.loader import render_to_string
@@ -11,12 +12,13 @@ def recaptcha_check(request):
     recaptcha_response = request.POST.get('g-recaptcha-response')
     if recaptcha_response is None:
         # Must be running test code
-        return True
+        return
     data = {'secret': settings.RECAPTCHA3_SECRET,
             'response': recaptcha_response}
     r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
     result = r.json()
-    return result['success']
+    if not result['success']:
+        raise PermissionDenied('Invalid reCaptcha response')
 
 
 class BaseCardView(ContextMixin, View):
