@@ -2,6 +2,7 @@ from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.utils import timezone
 from django.conf import settings
+from django.template.loader import render_to_string
 from game.models import Series
 
 
@@ -12,6 +13,14 @@ class Component(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def render(self):
+        return render_to_string(self.template, self.context)
+
+    @property
+    def css_name(self):
+        return self.name.lower().replace(' ', '-')
 
 
 FROM_ADDRS = [(i, i) for i in [
