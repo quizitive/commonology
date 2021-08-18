@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -12,9 +13,9 @@ from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
-from django.views.generic.base import View
 from project.views import CardFormView
-from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
+from project.card_views import recaptcha_check
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, InviteFriendsForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.sendgrid_utils import sendgrid_send
@@ -38,6 +39,8 @@ class ProfileView(LoginRequiredMixin, CardFormView):
     header = "Edit Profile"
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
+
         form = self.get_form()
 
         if not form.is_valid():
@@ -102,6 +105,8 @@ class JoinView(CardFormView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
+
         email = request.POST.get('email')
         if not email:
             return redirect('login')
@@ -183,6 +188,7 @@ class InviteFriendsView(LoginRequiredMixin, CardFormView):
         return super().get(request)
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
         emails = request.POST['emails'].split(",")
         emails = [e.strip().lower() for e in emails]
         for email in emails:
