@@ -1,8 +1,23 @@
+import requests
 from django.views.generic.base import View
-from django.shortcuts import render, redirect
+from django.shortcuts import render
+from django.core.exceptions import PermissionDenied
 from django.views.generic.edit import FormMixin, ContextMixin
 from django.contrib import messages
 from django.template.loader import render_to_string
+from django.conf import settings
+
+
+def recaptcha_check(request):
+    if settings.IS_TEST:
+        return
+    recaptcha_response = request.POST.get('g-recaptcha-response')
+    data = {'secret': settings.RECAPTCHA3_SECRET,
+            'response': recaptcha_response}
+    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
+    result = r.json()
+    if not result['success']:
+        raise PermissionDenied('Invalid reCaptcha response')
 
 
 class BaseCardView(ContextMixin, View):
@@ -16,6 +31,7 @@ class BaseCardView(ContextMixin, View):
     button_label = "Ok"
     card_template = 'cards/base_card.html'
     page_template = 'single_card_view.html'
+    recaptcha_key = None
 
     def get(self, request, *args, **kwargs):
         return self.render(request, *args, **kwargs)
@@ -31,6 +47,7 @@ class BaseCardView(ContextMixin, View):
             'header': self.header,
             'card_template': self.card_template,
             'button_label': self.button_label,
+            'recaptcha_key': self.recaptcha_key,
             'custom_message': self.custom_message
             }
         context.update(kwargs)
@@ -60,6 +77,7 @@ class CardFormView(FormMixin, BaseCardView):
     to handle form-specific functionality
     """
     # form_class = YourFormClass
+    recaptcha_key = settings.RECAPTCHA3_KEY
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
