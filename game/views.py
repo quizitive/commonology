@@ -234,7 +234,11 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
     def get_context(self, game, psid, dn_form, forms=None, editable=True):
         context = super().get_context()
-        recaptcha_key = settings.RECAPTCHA3_KEY
+        if settings.RECAPTCHA3_INHIBIT:
+            recaptcha_key = False
+        else:
+            recaptcha_key = settings.RECAPTCHA3_KEY
+
         context.update({
             'game': game,
             'dn_form': dn_form,
