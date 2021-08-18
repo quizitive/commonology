@@ -14,7 +14,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
+from django.conf import settings
 from project.views import CardFormView
+from project.card_views import recaptcha_check
 from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
 from game.models import Game, Series, Answer
@@ -142,6 +144,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
+
         # make sure this is a real submission that hasn't been tampered with
         if (psid := self.request.POST.get('psid')) is None:
             raise PermissionDenied
@@ -230,12 +234,14 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
     def get_context(self, game, psid, dn_form, forms=None, editable=True):
         context = super().get_context()
+        recaptcha_key = settings.RECAPTCHA3_KEY
         context.update({
             'game': game,
             'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
-            'editable': editable  # flag to disable forms and js and hide submit button
+            'editable': editable,  # flag to disable forms and js and hide submit button
+            'recaptcha_key': recaptcha_key,
         })
         return context
 
@@ -392,6 +398,8 @@ class GameEntryView(PSIDMixin, CardFormView):
         #    1. There is an active game for the given slug
         #    2. The player is not logged in
         #    3. The player is not the host
+
+        recaptcha_check(request)
 
         if 'email' not in request.POST:
             return redirect('home')
