@@ -43,6 +43,8 @@ class BaseCardView(ContextMixin, View):
         return render_to_string(self.card_template, self.get_context_data(**kwargs), request)
 
     def get_context_data(self, *args, **kwargs):
+        if settings.RECAPTCHA3_INHIBIT:
+            self.recaptcha_key = False
         context = {
             'header': self.header,
             'card_template': self.card_template,
