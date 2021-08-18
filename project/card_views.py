@@ -9,7 +9,7 @@ from django.conf import settings
 
 
 def recaptcha_check(request):
-    if settings.IS_TEST:
+    if settings.IS_TEST or settings.RECAPTCHA3_INHIBIT:
         return
     recaptcha_response = request.POST.get('g-recaptcha-response')
     data = {'secret': settings.RECAPTCHA3_SECRET,
