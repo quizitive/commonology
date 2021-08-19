@@ -54,7 +54,7 @@ class QuestionAnswerForm(forms.ModelForm):
 
     def clean_raw_string(self):
         value = self.cleaned_data['raw_string']
-        if self.q.choices:
+        if value and self.q.choices:
             if value not in self.q.choices:
                 raise forms.ValidationError(f"{value} isn't a valid choice for this question")
         return value
