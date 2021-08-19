@@ -520,3 +520,10 @@ class TestPlayRequest(TestCase):
         self.assertContains(response, self.game.questions.first().text)
         # Since the game is in preview mode, not editable then it has the Thank you string.
         self.assertContains(response, "Thanks for playing!")
+
+    def test_submit_button_id(self):
+        client = get_local_client()
+        path = f'/play/{self.game.uuid}'
+        response = client.get(path)
+
+        self.assertContains(response, '<button id="submit-button"')
