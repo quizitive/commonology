@@ -1,9 +1,14 @@
+from functools import lru_cache, cached_property
+
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
 from django.contrib.auth import get_user_model
+from django.db.models import Min
 
-from game.models import Game
+from django_redis import cache
+
+from game.models import Game, Answer
 from game.views import SeriesPermissionMixin
 from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard
 
@@ -55,30 +60,13 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
 
         answer_tally = build_answer_tally(current_game)
 
-        user_following = {}
-        user = None
-        if request.user.is_authenticated:
-            User = get_user_model()
-            user = User.objects.get(id=request.user.id)
-            user_following = {
-                p: True
-                for p in user.following.values_list('id', flat=True)
-            }
+        user, user_following = self._user_and_following
 
         # leaderboard filters
         search_term = request.GET.get('q')
         team_id = request.GET.get('team')
-        player_ids = None
-        follow_filter = request.GET.get('following', False)
-        if follow_filter:
-            player_ids = user_following
-
-        if request.GET.get('followers', False):
-            if request.user.is_authenticated:
-                player_ids = user.followers.values_list('id', flat=True)
-            else:
-                player_ids = []
-
+        id_filter = request.GET.get('id_filter')
+        player_ids = self._player_ids_filter(self.request.user.id, self.game_id, id_filter)
         leaderboard = build_filtered_leaderboard(
             current_game, answer_tally, player_ids, search_term, team_id)
 
@@ -93,17 +81,9 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         except (TypeError, ValueError):
             page = 1
 
-        # leaderboard pagination logic
-        lb_page_start = (page - 1) * 100
-        lb_page_end = min(len(leaderboard), page * 100)
-        prev_page = page - 1 or None
-        if lb_page_end >= len(leaderboard):
-            next_page = None
-        else:
-            next_page = page + 1
+        lb_page_start, lb_page_end, prev_page, next_page, leaderboard, lb_message = \
+            self._pagination(leaderboard, page, id_filter)
 
-        visible_players = f"{lb_page_start + 1}-{lb_page_end}"
-        leaderboard = leaderboard[lb_page_start:lb_page_end]
         leaderboard = leaderboard.to_dict(orient='records')
 
         context = {
@@ -111,8 +91,9 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             'leaderboard': leaderboard,
             'search_term': search_term,
             'user_following': user_following,
-            'follow_filter': follow_filter,
-            'visible_players': visible_players,
+            'id_filter': id_filter,
+            # 'visible_players': visible_players,
+            'lb_message': lb_message,
             'total_players': total_players,
             'page': page,
             'next': next_page,
@@ -120,3 +101,65 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         }
 
         return render(request, 'leaderboard/components/leaderboard.html', context)
+
+    @cached_property
+    def _user_and_following(self):
+        user_following = {
+            p: True
+            for p in self.request.user.following.values_list('id', flat=True)
+        }
+        return self.request.user, user_following
+
+    def _player_ids_filter(self, user_id, game_id, id_filter):
+        player_id_filters = ('following', 'followers', 'new_players')
+        user, user_following = self._user_and_following
+        if id_filter not in player_id_filters:
+            return
+        if id_filter == 'following':
+            return user_following
+        if id_filter == 'followers':
+            try:
+                return user.followers.values_list('id', flat=True)
+            except AttributeError:
+                return []
+        if id_filter == 'new_players':
+            return Answer.objects.values('player_id').annotate(
+                Min('question__game__game_id')
+            ).order_by('player_id').filter(
+                question__game__game_id__min=game_id, question__game__series__slug=self.slug
+            ).values_list('player_id', flat=True)
+        return []
+
+    def _pagination(self, leaderboard, page, id_filter):
+        # leaderboard pagination logic
+        lb_page_start = (page - 1) * 100
+        lb_page_end = min(len(leaderboard), page * 100)
+        filtered_player_count = len(leaderboard)
+
+        prev_page = page - 1 or None
+        if lb_page_end >= len(leaderboard):
+            next_page = None
+        else:
+            next_page = page + 1
+
+        leaderboard = leaderboard[lb_page_start:lb_page_end]
+
+        if filtered_player_count > 0:
+            msg_map = {
+                "following": "players that you follow.",
+                "followers": "players that follow you.",
+                "new_players": "first time players!"
+            }
+            filter_msg = msg_map.get(id_filter, "total players.")
+            msg = f"Showing {lb_page_start + 1}-{lb_page_end} out of {filtered_player_count} {filter_msg}"
+        elif self.request.user.is_authenticated:
+            msg_map = {
+                "following": "Follow your friends by checking the bubble next to their name.",
+                "followers": "Nobody is following you yet :( Tell you friends you're awesome!",
+                "new_players": "No first time players :("
+            }
+            msg = msg_map.get(id_filter, "total players")
+        else:
+            msg = f"<a href='/login'>Login</a> or <a href='/join'>Join</a> to follow your friends!"
+
+        return lb_page_start, lb_page_end, prev_page, next_page, leaderboard, msg
