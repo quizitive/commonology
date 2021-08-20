@@ -13,12 +13,8 @@ from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
-from project.views import CardFormView
-from project.card_views import recaptcha_check
-from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, InviteFriendsForm
-from django.views.generic.base import View
-from project.card_views import BaseCardView, CardFormView
-from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
+from project.card_views import recaptcha_check, BaseCardView, CardFormView
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.sendgrid_utils import sendgrid_send
@@ -187,6 +183,7 @@ class InviteFriendsView(LoginRequiredMixin, BaseCardView):
     card_template = "users/cards/invite_card.html"
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
         emails = request.POST['emails'].split(",")
         emails = [e.strip().lower() for e in emails]
         for email in emails:

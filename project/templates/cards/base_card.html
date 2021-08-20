@@ -1,4 +1,8 @@
-<div class="cg-card w3-modal-content w3-round w3-card-0 w3-border cg-border-grey" style="overflow: hidden;margin:0 auto 32px;">
+{% if recaptcha_key %}
+<script src='https://www.google.com/recaptcha/api.js'></script>
+{% endif %}
+
+<div class="cg-card w3-modal-content w3-round w3-card-0 w3-border cg-border-grey" style="overflow: hidden;margin:0 auto 32;">
 
   {% if header %}
   <header class="w3-container w3-border-bottom w3-center">
@@ -12,7 +16,15 @@
   </header>
   {% endif %}
 
+
+
   <div class="w3-container w3-padding-large">
+
+  {% if recaptcha_key %}
+  <script>
+   function onSubmit(token) {document.getElementById("card_form").submit();}
+  </script>
+  {% endif %}
 
   <!-- standard Django user messages e.g. messages.info(request, "message') -->
   {% if messages %}
@@ -39,13 +51,19 @@
   {% endif %}
 
   {% block form %}
-    <form method="{{ form_method|default:'post' }}" {% if form_action %}action="{{ form_action }}"{% endif %}>
+    <form id="card_form" method="{{ form_method|default:'post' }}" {% if form_action %}action="{{ form_action }}"{% endif %}>
       {% if form %}
       {% csrf_token %}
       {{ form.as_p }}
       {% endif %}
       {% if button_label %}
-      <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
+          {% if recaptcha_key %}
+            <button class="g-recaptcha w3-button w3-round w3-block cg-blue w3-margin-bottom"
+                      data-sitekey={{recaptcha_key}}
+                      data-callback='onSubmit' data-action='submit'>{{ button_label|default:"Ok" }}</button>
+          {% else %}
+            <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
+          {% endif %}
       {% endif %}
     </form>
   {% endblock %}
