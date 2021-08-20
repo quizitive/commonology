@@ -48,6 +48,13 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         following: a boolean that filters on players the logged-in users follows
         page: pagination page, defaults to 1, page_size is 100
         """
+        try:
+            current_game = Game.objects.get(game_id=self.game_id, series=self.game.series)
+        except Game.DoesNotExist:
+            raise Http404("Game does not exist")
+
+        answer_tally = build_answer_tally(current_game)
+
         user_following = {}
         user = None
         if request.user.is_authenticated:
@@ -57,13 +64,6 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
                 p: True
                 for p in user.following.values_list('id', flat=True)
             }
-
-        try:
-            current_game = Game.objects.get(game_id=self.game_id, series=self.game.series)
-        except Game.DoesNotExist:
-            raise Http404("Game does not exist")
-
-        answer_tally = build_answer_tally(current_game)
 
         # leaderboard filters
         search_term = request.GET.get('q')
