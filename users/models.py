@@ -118,6 +118,10 @@ class Player(CustomUser):
             game_id=models.F('question__game__game_id'), series=models.F('question__game__series__slug')).exclude(
             game_id=None).distinct().order_by('-game_id')
 
+    @property
+    def players_referred(self):
+        return Player.objects.filter(referrer=self)
+
 
 class PendingEmail(models.Model):
     referrer = models.ForeignKey(Player, null=True, on_delete=models.CASCADE)
