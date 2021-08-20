@@ -11,10 +11,13 @@
               <button id="following-drp" class="w3-button cg-blue">
                 <i class="fas fa-check-circle" style="color:white; margin:auto;"></i>
                 <i class="fas fa-caret-down"></i></button>
-              <div class="w3-dropdown-content w3-bar-block w3-card-4" style="right:0;min-width:117px;">
+              <div class="w3-dropdown-content w3-bar-block w3-card-4" style="right:0;">
                 <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&following=true"
                    hx-target="#component-leaderboard"
                    class="w3-bar-item w3-button">Following</a>
+                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&followers=true"
+                   hx-target="#component-leaderboard"
+                   class="w3-bar-item w3-button">Followers</a>
                 <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
                    hx-target="#component-leaderboard"
                    class="w3-bar-item w3-button">All Players</a>
@@ -66,7 +69,7 @@
         {% endif %}
 
         <div class="w3-cell">
-        {% if visible_players == 0 and not user.is_authenticated %}
+        {% if visible_players == '1-0' and not user.is_authenticated %}
           <a href="{% url 'login' %}">Login</a>
           or
           <a href="{% url 'join' %}">Join</a>
