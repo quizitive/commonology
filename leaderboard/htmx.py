@@ -49,6 +49,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         page: pagination page, defaults to 1, page_size is 100
         """
         user_following = {}
+        user = None
         if request.user.is_authenticated:
             User = get_user_model()
             user = User.objects.get(id=request.user.id)
@@ -71,6 +72,12 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         follow_filter = request.GET.get('following', False)
         if follow_filter:
             player_ids = user_following
+
+        if request.GET.get('followers', False):
+            if request.user.is_authenticated:
+                player_ids = user.followers.values_list('id', flat=True)
+            else:
+                player_ids = []
 
         leaderboard = build_filtered_leaderboard(
             current_game, answer_tally, player_ids, search_term, team_id)
