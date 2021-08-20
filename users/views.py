@@ -13,9 +13,8 @@ from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
-from project.views import CardFormView
-from project.card_views import recaptcha_check
-from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, InviteFriendsForm
+from project.card_views import recaptcha_check, BaseCardView, CardFormView
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.sendgrid_utils import sendgrid_send
@@ -177,15 +176,11 @@ def send_invite(request, email, referrer=None):
     return sendgrid_send("You're Invited to Commonology", msg, [(email, None)])
 
 
-class InviteFriendsView(LoginRequiredMixin, CardFormView):
+class InviteFriendsView(LoginRequiredMixin, BaseCardView):
 
     header = "Invite Friends"
-    form_class = InviteFriendsForm
-    button_label = "Send"
-
-    def get(self, request, *args, **kwargs):
-        messages.info(request, "Enter your friends' emails to invite them to Commonology!")
-        return super().get(request)
+    button_label = ""
+    card_template = "users/cards/invite_card.html"
 
     def post(self, request, *args, **kwargs):
         recaptcha_check(request)
@@ -207,6 +202,16 @@ class InviteFriendsView(LoginRequiredMixin, CardFormView):
                 messages.info(request, f"Invite successfully sent to {email}.")
 
         return redirect('invite')
+
+    def get_context_data(self, *args, **kwargs):
+        players_referred = self.request.user.players_referred
+        return super().get_context_data(
+            *args,
+            player_code=f'r={self.request.user.code}',
+            players_referred=players_referred,
+            referral_count=players_referred.count(),
+            **kwargs
+        )
 
 
 class EmailConfirmedView(View):

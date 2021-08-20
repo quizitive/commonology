@@ -26,7 +26,7 @@ class BaseCardView(ContextMixin, View):
     See template cards/base_card.html for additional template
     variables that can be set to customize form further.
     """
-    header = "Welcome To Commonology"
+    header = None
     custom_message = None
     button_label = "Ok"
     card_template = 'cards/base_card.html'

@@ -2,32 +2,8 @@
 {% load static %}
 
 {% block card_extras %}
-
+</div>
+  <div style="padding:0 8px;background: #f7f8f9">
+  {% include 'users/components/referral_link_banner.html' %}
   </div>
-  <div class="share-section w3-padding-large w3-margin-bottom w3-margin-top" style="background: #f7f8f9">
-
-  <div class="w3-padding-16">
-    <b>Love playing Commonology? Refer your friends by sharing this link!</b>
-  </div>
-
-  <div id="share-link" class="cg-border-blue w3-round" style="padding:8px;border:1px solid;margin:4px 0;background:white;">https://commonologygame.com/play/?r={{ player_code }}</div>
-
-  <button id="copy-button" class="w3-button w3-round cg-blue w3-border cg-border-blue" onclick="copyToClipboard('#share-link');" style="margin: 0 4px 16px 0;">
-    Copy Link&nbsp&nbsp&nbsp<i class="far fa-copy"></i>
-  </button>
-  <div id="copy-msg" style="display:none;">Link copied!</div>
-
-  </div>
-
-  <script>
-  function copyToClipboard(tgt) {
-    var $temp = $("<input>");
-    $("body").append($temp);
-    $temp.val($(tgt).text()).select();
-    document.execCommand("copy");
-    $temp.remove();
-    $("#copy-msg").css("display", "inline");
-  }
-  </script>
-
 {% endblock %}

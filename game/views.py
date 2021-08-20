@@ -28,6 +28,7 @@ from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
 from users.utils import get_player
 from mail.sendgrid_utils import sendgrid_send
+from mail.models import Component
 
 
 class SeriesPermissionMixin(UserPassesTestMixin):
@@ -203,7 +204,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             form_class=None,
             form_method='get',
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
-            player_code=player.code,
+            player_code=f'r={player.code}',
             **msgs[msg]
         )
 
@@ -215,7 +216,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             'url': f'https://{domain}{answers_url}'
         }
         answers_msg = render_to_string('game/game_complete_email.html', email_context)
-        sendgrid_send(f'{game.name}', answers_msg, [(player.email, None)])
+        referral_link = Component.objects.filter(name="Referral Link").first()
+        sendgrid_send(f'{game.name}', answers_msg, [(player.email, player.code)], components=(referral_link,))
 
     def test_func(self):
         # override super method, which requires users to be logged in
