@@ -202,7 +202,7 @@ class InviteFriendsView(LoginRequiredMixin, BaseCardView):
         players_referred = self.request.user.players_referred
         return super().get_context_data(
             *args,
-            player_code=self.request.user.code,
+            player_code=f'r={self.request.user.code}',
             players_referred=players_referred,
             referral_count=players_referred.count(),
             **kwargs
