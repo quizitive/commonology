@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -12,6 +13,9 @@ from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
+from project.views import CardFormView
+from project.card_views import recaptcha_check
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, InviteFriendsForm
 from django.views.generic.base import View
 from project.card_views import BaseCardView, CardFormView
 from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
@@ -38,6 +42,8 @@ class ProfileView(LoginRequiredMixin, CardFormView):
     header = "Edit Profile"
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
+
         form = self.get_form()
 
         if not form.is_valid():
@@ -102,6 +108,8 @@ class JoinView(CardFormView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
+
         email = request.POST.get('email')
         if not email:
             return redirect('login')

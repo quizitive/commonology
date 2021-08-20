@@ -29,7 +29,7 @@ function removeErrors(e) {
 }
 
 // --- Question Validation --- //
-$('button[type=submit]').click((e) => {
+$('#submit-button').click((e) => {
   // don't submit form yet
   e.preventDefault()
 

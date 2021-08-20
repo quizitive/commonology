@@ -99,6 +99,11 @@ SOCIAL_AUTH_PIPELINE = (
     'users.utils.add_additional_fields'
 )
 
+RECAPTCHA3_INHIBIT = True
+RECAPTCHA3_KEY = env.get('RECAPTCHA3_KEY', '6LczLAUcAAAAACMff5nNS6xjhUDF3elRC3LpnKiW')
+RECAPTCHA3_SECRET = env.get('RECAPTCHA3_SECRET', '6LczLAUcAAAAADZrdjUJznBAS2eeP9tsBHT7DrEY')
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

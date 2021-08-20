@@ -11,8 +11,15 @@
 
 {% block scripts %}
   {% if editable %}
-  <script src="{% static 'game/js/game_form.js' %}"></script>
+     <script src="{% static 'game/js/game_form.js' %}?v=1.1"></script>
+      {% if recaptcha_key %}
+        <script src='https://www.google.com/recaptcha/api.js'></script>
+      {% endif %}
+     <script>
+        function onSubmit(token) {document.getElementById("game_form").submit();}
+     </script>
   {% endif %}
+
 {% endblock %}
 
 {% block title %}Commonology | Game {{ game.game_id }}{% endblock %}
@@ -33,7 +40,7 @@
 
     <div class="cg-border-blue">
 
-      <form method="post" action="{% url 'series-game:game-form' series_slug game.game_id %}" novalidate>
+      <form id="game_form" method="post" action="{% url 'series-game:game-form' series_slug game.game_id %}" novalidate>
        {% csrf_token %}
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
@@ -46,7 +53,18 @@
 
         <div class="w3-container w3-padding-48" style="max-width:480px;margin:auto;">
           {% if editable %}
-          <button type="submit" class="w3-button w3-round cg-blue" style="width:100%" >Submit</button>
+              {% if recaptcha_key %}
+                  <button id="submit-button"
+                          class="g-recaptcha w3-button w3-round w3-block cg-blue w3-margin-bottom"
+                          style="width: 100%"
+                          data-sitekey={{recaptcha_key}}
+                          data-callback='onSubmit' data-action='submit'>Submit</button>
+              {% else %}
+                  <button id="submit-button"
+                          class="w3-button w3-round w3-block cg-blue w3-margin-bottom"
+                          style="width: 100%"
+                          data-callback='onSubmit' data-action='submit'>Submit</button>
+              {% endif %}
           <p class="w3-container w3-center w3-margin-top" style="color:#9e9e9e;margin:auto;font-style:italic">
             A copy of your responses will be emailed to you
           </p>

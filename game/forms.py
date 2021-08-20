@@ -46,7 +46,7 @@ class QuestionAnswerForm(forms.ModelForm):
         self.q = question
         if self.q.choices:
             # hide default CharField and render custom "radio button" style input (in template)
-            self.fields['raw_string'].widget = forms.HiddenInput(attrs={'required': True})
+            self.fields['raw_string'].widget = forms.HiddenInput(attrs={'required': not self.q.is_optional})
             self.fields['raw_string'].initial = None
 
         if self.q.is_optional:
@@ -54,7 +54,7 @@ class QuestionAnswerForm(forms.ModelForm):
 
     def clean_raw_string(self):
         value = self.cleaned_data['raw_string']
-        if self.q.choices:
+        if value and self.q.choices:
             if value not in self.q.choices:
                 raise forms.ValidationError(f"{value} isn't a valid choice for this question")
         return value
