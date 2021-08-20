@@ -25,6 +25,7 @@ from game.rollups import *
 from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
+from game.forms import QuestionAnswerForm
 
 from django.contrib.auth import get_user_model
 
@@ -301,9 +302,20 @@ class TestModels(TestCase):
         game.hosts.add(user)
         self.assertIn(user, series.players.all())
 
-    def test_optional_questions_text(self):
-        op_q = Question.objects.create(text="This question is optional.", type=Question.op, number=1)
+    def test_optional_questions(self):
+        op_q = Question.objects.create(
+            text="This question is optional.", type=Question.op, number=1, choices=['a', 'b'])
         self.assertEqual(op_q.text, "OPTIONAL: This question is optional.")
+
+        user = get_local_user()
+        op_q_form = QuestionAnswerForm(op_q, data={
+            'question': op_q,
+            'raw_string': '',
+            'player': user
+        })
+
+        self.assertNotIn("required", op_q_form.as_p())
+        self.assertTrue(op_q_form.is_valid())
 
     def test_unique_question_number(self):
         series, game = make_test_series()
@@ -492,3 +504,33 @@ class TestPlayRequest(TestCase):
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Cannot find an active game.  Perhaps you have a bad link.')
+
+    def test_game_reviewer(self):
+        # Game url with uuid should render the game without a submit button prior to game start.
+        game = self.game
+
+        client = get_local_client()
+        path = f'/play/{game.uuid}'
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.game.questions.first().text)
+        self.assertNotContains(response, "Thanks for playing!")
+
+        # Make sure the game has not started yet to test preview mode.
+        game.start = game.end
+        game.save()
+
+        client = get_local_client()
+        path = f'/play/{game.uuid}'
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.game.questions.first().text)
+        # Since the game is in preview mode, not editable then it has the Thank you string.
+        self.assertContains(response, "Thanks for playing!")
+
+    def test_submit_button_id(self):
+        client = get_local_client()
+        path = f'/play/{self.game.uuid}'
+        response = client.get(path)
+
+        self.assertContains(response, '<button id="submit-button"')
