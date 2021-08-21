@@ -1,15 +1,13 @@
-from functools import lru_cache, cached_property
+from functools import cached_property
 
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
-from django.contrib.auth import get_user_model
 from django.db.models import Min
-
-from django_redis import cache
 
 from game.models import Game, Answer
 from game.views import SeriesPermissionMixin
+from game.utils import new_players_for_game
 from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard
 
 
@@ -66,7 +64,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         search_term = request.GET.get('q')
         team_id = request.GET.get('team')
         id_filter = request.GET.get('id_filter')
-        player_ids = self._player_ids_filter(self.request.user.id, self.game_id, id_filter)
+        player_ids = self._player_ids_filter(self.game_id, id_filter)
         leaderboard = build_filtered_leaderboard(
             current_game, answer_tally, player_ids, search_term, team_id)
 
@@ -92,7 +90,6 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             'search_term': search_term,
             'user_following': user_following,
             'id_filter': id_filter,
-            # 'visible_players': visible_players,
             'lb_message': lb_message,
             'total_players': total_players,
             'page': page,
@@ -104,13 +101,16 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
 
     @cached_property
     def _user_and_following(self):
-        user_following = {
-            p: True
-            for p in self.request.user.following.values_list('id', flat=True)
-        }
+        if self.request.user.is_authenticated:
+            user_following = {
+                p: True
+                for p in self.request.user.following.values_list('id', flat=True)
+            }
+        else:
+            user_following = {}
         return self.request.user, user_following
 
-    def _player_ids_filter(self, user_id, game_id, id_filter):
+    def _player_ids_filter(self, game_id, id_filter):
         player_id_filters = ('following', 'followers', 'new_players')
         user, user_following = self._user_and_following
         if id_filter not in player_id_filters:
@@ -123,11 +123,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             except AttributeError:
                 return []
         if id_filter == 'new_players':
-            return Answer.objects.values('player_id').annotate(
-                Min('question__game__game_id')
-            ).order_by('player_id').filter(
-                question__game__game_id__min=game_id, question__game__series__slug=self.slug
-            ).values_list('player_id', flat=True)
+            return new_players_for_game(self.slug, self.game_id)
         return []
 
     def _pagination(self, leaderboard, page, id_filter):
