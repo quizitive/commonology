@@ -3,7 +3,7 @@ from functools import cached_property
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
-from django.db.models import Min
+from django.utils.safestring import mark_safe
 
 from game.models import Game, Answer
 from game.views import SeriesPermissionMixin
@@ -156,6 +156,6 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             }
             msg = msg_map.get(id_filter, "total players")
         else:
-            msg = f"<a href='/login'>Login</a> or <a href='/join'>Join</a> to follow your friends!"
+            msg = mark_safe(f"<a href='/login'>Login</a> or <a href='/join'>Join</a> to follow your friends!")
 
         return lb_page_start, lb_page_end, prev_page, next_page, leaderboard, msg
