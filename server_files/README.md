@@ -346,6 +346,58 @@ For some reason this command sometimes adds the appropriate references to
 the end of each config file in `/etc/nginx/sites-available/`.  I copied the records
 from the ones in our repo.  We should not have to do this.
 
+## Email - Postfix (Optional)
+
+It can be valuable to send email from the command line or from a crontab command.  For example, in a later section
+we'll add a crontab entry to keep the Nginx blocker data up to date by running `update-ngxblocker -e ms@quizitivecom`.
+That results in a daily email message with output from that command.
+
+Rather than run a full fledged mail server we can take advantage of our SendGrid server by using postfix as a relay
+server.  Installing mailutils will give us postgres and a bunch of commandline goodies with the following commands
+accepting all the default settings when prompted.
+
+```shell
+sudo apt install postfix libsasl2-modules mailutils -y
+```
+
+Next we manually configure it to work with Sendgrid based on their documentation at
+`https://docs.sendgrid.com/for-developers/sending-email/postfix`.  That documentation recommends adding the
+following lines to `/etc/postfix/main.cf`.  Actually REPLACE the whole contents of that file with this.
+
+```
+smtp_sasl_auth_enable = yes
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options = noanonymous
+smtp_sasl_tls_security_options = noanonymous
+smtp_tls_security_level = encrypt
+header_size_limit = 4096000
+relayhost = [smtp.sendgrid.net]:587
+```
+
+Then create `/etc/postfix/sasl_passwd` and put the sendgrid account credentials in it like this:
+
+```
+[smtp.sendgrid.net]:587 apikey:<api key>
+```
+
+Obviously replace `<api key>` with a key from the SendGrid account.  I created a new one named "Webservers" restricted
+to Mail Send only.
+
+Set permissions and ignore warnings about overriding earlier entries.
+
+```commandline
+$ sudo su -
+# chmod 600 /etc/postfix/sasl_passwd
+# postmap /etc/postfix/sasl_passwd
+# systemctl enable postfix
+# systemctl daemon-reload
+# sudo systemctl restart postfix
+```
+
+Test it:
+
+`$ mail -s testing -r ms@quizitive.com ms@koplon.com < /dev/null`
+
 
 ## Nginx
 
