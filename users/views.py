@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.db.models import Max
 from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -13,13 +14,14 @@ from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
-from project.card_views import recaptcha_check, BaseCardView, CardFormView
+from project.card_views import recaptcha_check, BaseCardView, CardFormView, MultiCardPageView
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.sendgrid_utils import sendgrid_send
 from project.utils import redis_delete_patterns
-from game.models import Series
+from game.models import Series, Game
+from leaderboard.leaderboard import player_rank_and_percentile_in_game
 from .utils import remove_pending_email_invitations
 
 User = get_user_model()
@@ -442,3 +444,72 @@ class SubscribeView(View):
 
     def post(self, request, *args, **kwargs):
         return redirect(reverse('home'))
+
+
+class PlayerHomeViewOld(LoginRequiredMixin, View):
+    template = 'users/player_home.html'
+
+    def get(self, request):
+        context = self._get_context(request)
+        return render(request, self.template, context)
+
+    def post(self, request):
+        emails = [e.strip() for e in request.POST.get("invite").split(",")]
+        context = self._get_context(request)
+        context['invite_message'] = "Your invites have been sent! Feel free to enter more below."
+        return render(request, self.template, context)
+
+    def _get_context(self, request):
+        user = request.user
+        player, _ = Player.objects.get_or_create(id=user.id)
+        # todo: hardcoding commonology as series for now for now
+        games = Game.objects.filter(publish=True, series__slug='commonology').order_by('-game_id')
+        latest_game_id = games.aggregate(Max('game_id'))['game_id__max']
+
+        context = {
+            'display_name': user.first_name or user.email,
+            'message': self._dashboard_message(player, 'commonology', latest_game_id),
+            'latest_game_id': latest_game_id,
+            'games': player.game_ids,
+            'teams': player.teams.all(),
+            'invite_message': "Enter your friends' emails to invite them to Commonology!"
+        }
+        return context
+
+
+class PlayerHomeView(LoginRequiredMixin, MultiCardPageView):
+
+    def get(self, request, *args, **kwargs):
+        player = self.request.user
+        # todo: hardcoding commonology as series for now for now
+        games = Game.objects.filter(publish=True, series__slug='commonology').order_by('-game_id')
+        latest_game_id = games.aggregate(Max('game_id'))['game_id__max']
+        profile_card = BaseCardView(
+            request=request,
+            card_template='users/cards/snapshot_card.html',
+        ).render_card(
+            request,
+            header="My Profile",
+            button_label=None
+        )
+        self.cards = [profile_card]
+        return super().get(request, *args, **kwargs)
+
+    @staticmethod
+    def _dashboard_message(player, series_slug, latest_game_id):
+
+        if latest_game_id not in player.game_ids.values_list('game_id', flat=True):
+            return "Looks like you missed last weeks game... You'll get 'em this week!"
+
+        latest_rank, percentile = player_rank_and_percentile_in_game(player.id, series_slug, latest_game_id)
+        player_count = Game.objects.get(game_id=latest_game_id, series__slug=series_slug).players.count()
+
+        follow_up = "This is gonna be your week!"
+        if percentile <= 0.1:
+            follow_up = "That puts you in the top 10%!"
+        elif percentile <= 0.25:
+            follow_up = "That puts you in the top 25%!"
+        elif percentile <= 0.5:
+            follow_up = "That puts you in the top half!"
+
+        return f"Last week you ranked {latest_rank} out of {player_count} players. {follow_up}"

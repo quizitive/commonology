@@ -34,5 +34,6 @@ urlpatterns = [
     path('password_reset_complete/', auth_views.PasswordChangeDoneView.as_view(), name='password_reset_complete'),
     path('htmx/', PlayersHTMXView.as_view(), name='users-htmx'),
     path('unsubscribe/<token>', views.UnsubscribeView.as_view(), name='unsubscribe'),
-    path('subscribe/<token>', views.SubscribeView.as_view(), name='subscribe')
+    path('subscribe/<token>', views.SubscribeView.as_view(), name='subscribe'),
+    path('me/', views.PlayerHomeView.as_view(), name='player-home')
 ]

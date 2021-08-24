@@ -32,6 +32,7 @@ class BaseCardView(ContextMixin, View):
     card_template = 'cards/base_card.html'
     page_template = 'single_card_view.html'
     recaptcha_key = None
+    request = None
 
     def get(self, request, *args, **kwargs):
         return self.render(request, *args, **kwargs)
@@ -113,3 +114,7 @@ class MultiCardPageView(BaseCardView):
 
     def dispatch(self, request, *args, **kwargs):
         self.cards = kwargs.get('cards')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, cards=self.cards, **kwargs)
