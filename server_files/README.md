@@ -457,10 +457,13 @@ $ sudo su -
 # service nginx restart
 ```
 
+Note: used `-e nginx` arg with `setup-ngxblocker` because that is the extension we use on our nginx config files.
+
 Add this line to the crontab:
 
 `13 22 * * * root /usr/local/sbin/update-ngxblocker -e ms@quizitive.com`
 
+Try tests suggested at the end of hte github home page.
 
 ## Set outbound email using sendgrid.net
 
