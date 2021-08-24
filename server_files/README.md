@@ -391,7 +391,7 @@ $ sudo su -
 # postmap /etc/postfix/sasl_passwd
 # systemctl enable postfix
 # systemctl daemon-reload
-# sudo systemctl restart postfix
+# systemctl restart postfix
 ```
 
 Test it:
