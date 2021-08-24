@@ -435,6 +435,33 @@ $ sudo su
 # systemctl restart gunicorn.service 
 ```
 
+### Nginx-ulitimate-bad-bot-blocker
+
+Ref: `https://github.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker`
+
+This uses databases that are frequently updated to block traffic from known bad actors.
+
+```commandline
+$ sudo su -
+# wget https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/install-ngxblocker -O /usr/local/sbin/install-ngxblocker
+# cd /usr/local/sbin
+# chmod +x install-ngxblocker
+# ./install-ngxblocker
+# ./install-ngxblocker -x
+# chmod +x setup-ngxblocker
+# chmod +x update-ngxblocker
+# ./setup-ngxblocker -x -e nginx
+# nginx -t
+# nginx -s reload
+# service nginx reload
+# service nginx restart
+```
+
+Add this line to the crontab:
+
+`13 22 * * * root /usr/local/sbin/update-ngxblocker -e ms@quizitive.com`
+
+
 ## Set outbound email using sendgrid.net
 
 ### Configure SendGrid.net
