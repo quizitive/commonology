@@ -5,6 +5,7 @@ from django.core.signing import Signer
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.utils.timezone import make_aware
+from game.models import Series
 import logging
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ def add_additional_fields(strategy, details, backend, user=None, *args, **kwargs
 
     user.is_member = True
     user.save()
+    Series.objects.get(slug='commonology').players.add(user)
 
 
 def is_validated(email):
