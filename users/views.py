@@ -21,7 +21,7 @@ from users.utils import unsubscribe, sign_user
 from mail.sendgrid_utils import sendgrid_send
 from project.utils import redis_delete_patterns
 from game.models import Series, Game
-from leaderboard.leaderboard import player_rank_and_percentile_in_game
+from leaderboard.leaderboard import player_rank_and_percentile_in_game, player_top_game_rank, rank_string
 from .utils import remove_pending_email_invitations
 
 User = get_user_model()
@@ -484,13 +484,16 @@ class PlayerHomeView(LoginRequiredMixin, MultiCardPageView):
         # todo: hardcoding commonology as series for now for now
         games = Game.objects.filter(publish=True, series__slug='commonology').order_by('-game_id')
         latest_game_id = games.aggregate(Max('game_id'))['game_id__max']
+        best_game, best_rank = player_top_game_rank(player.id, 'commonology')
+        best_rank = (rank_string(best_rank), f"Game {best_game}")
         profile_card = BaseCardView(
             request=request,
             card_template='users/cards/snapshot_card.html',
         ).render_card(
             request,
             header="My Profile",
-            button_label=None
+            button_label=None,
+            best_rank=best_rank
         )
         self.cards = [profile_card]
         return super().get(request, *args, **kwargs)
@@ -501,7 +504,8 @@ class PlayerHomeView(LoginRequiredMixin, MultiCardPageView):
         if latest_game_id not in player.game_ids.values_list('game_id', flat=True):
             return "Looks like you missed last weeks game... You'll get 'em this week!"
 
-        latest_rank, percentile = player_rank_and_percentile_in_game(player.id, series_slug, latest_game_id)
+        latest_rank, percentile = \
+            player_rank_and_percentile_in_game(player.id, series_slug, latest_game_id)
         player_count = Game.objects.get(game_id=latest_game_id, series__slug=series_slug).players.count()
 
         follow_up = "This is gonna be your week!"
