@@ -41,7 +41,7 @@ class MailMessage(models.Model):
     subject = models.CharField(max_length=150, blank=False)
     message = RichTextUploadingField(blank=True,
                                      help_text='Play link example: https://commonologygame.com/play?-game_url_args-')
-    components = models.ManyToManyField(Component, related_name='messages')
+    components = models.ManyToManyField(Component, blank=True, related_name='messages')
     created = models.DateTimeField(default=timezone.now)
     tested = models.BooleanField(default=False,
                                  help_text="Must be checked to send blast.  It is set when a test message is sent.")
