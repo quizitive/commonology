@@ -36,7 +36,7 @@ def user_logout(request):
 class ProfileView(LoginRequiredMixin, CardFormView):
 
     form_class = PlayerProfileForm
-    card_template = 'users/cards/profile_card.html'
+    card_template = 'users/cards/profile_edit_card.html'
     header = "Edit Profile"
 
     def post(self, request, *args, **kwargs):
