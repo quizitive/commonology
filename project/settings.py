@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'sortedm2m_filter_horizontal_widget',
     'social_django',
     'chat',
     'game',
