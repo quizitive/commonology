@@ -26,7 +26,7 @@ class Component(models.Model):
 
     @property
     def render(self):
-        self.context['message'] = self.message
+        self.context['component'] = self
         return render_to_string(self.template, self.context)
 
     @property
