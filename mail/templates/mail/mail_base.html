@@ -75,11 +75,24 @@
   <body style="padding: 0;">
     <div id="email-body">
       <div id="email-container">
+
+      {#  HEADER  #}
         <div id="email-header">
             <a href="https://commonologygame.com/">
             <img id="email-header-image" src="https://commonologygame.com/static/img/logo.png">
             </a>
           </div>
+
+      {#  TOP COMPONENTS  #}
+      {% for component in components %}
+        {% if component.location == 'top' %}
+        <div id="{{ component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px">
+          {{ component.render }}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      {# EMAIL MESSAGE #}
         <div id="email-content" style="background:#fff;border: 1px solid lightgrey;border-top:4px solid #0095da;border-radius:4px">
           {% block email-content %}
             {{ message }}
@@ -87,16 +100,17 @@
         </div>
       </div>
 
+      {#  BOTTOM COMPONENTS  #}
       {% for component in components %}
-        {% if component %}
+        {% if component.location == 'btm' %}
         <div id="{{ component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px">
           {{ component.render }}
         </div>
         {% endif %}
       {% endfor %}
 
+      {# FOOTER #}
       <div id="email-footer">
-
         {% block email-footer-content %}
             <p style="padding: 8px 0">
             <a href="https://twitter.com/commonologygame">Twitter</a>&nbsp;
@@ -111,6 +125,7 @@
         {% endblock %}
         Commonology · Quizitive, LLC · 5000  Thayer Center, Suite C · Oakland, MD 21550 · USA
       </div>
+
     </div>
   </body>
 </html>
