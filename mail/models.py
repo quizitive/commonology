@@ -22,7 +22,7 @@ class Component(models.Model):
     location = models.CharField(max_length=3, choices=LOCATION_CHOICES, default='btm')
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({next(l for l in self.LOCATION_CHOICES if l[0] == self.location)[1]})"
 
     @property
     def render(self):
