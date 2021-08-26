@@ -1,5 +1,6 @@
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
+from sortedm2m.fields import SortedManyToManyField
 from django.utils import timezone
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -8,14 +9,24 @@ from game.models import Series
 
 class Component(models.Model):
     name = models.CharField(max_length=150, unique=True)
-    template = models.CharField(max_length=150)
+    message = RichTextUploadingField(null=True, blank=True)
+    template = models.CharField(max_length=150, default='mail/simple_component.html')
     context = models.JSONField(default=dict, blank=True)
+
+    top = 'top'
+    btm = 'btm'
+    LOCATION_CHOICES = [
+        (top, 'Top'),
+        (btm, 'Bottom'),
+    ]
+    location = models.CharField(max_length=3, choices=LOCATION_CHOICES, default='btm')
 
     def __str__(self):
         return self.name
 
     @property
     def render(self):
+        self.context['message'] = self.message
         return render_to_string(self.template, self.context)
 
     @property
@@ -41,7 +52,7 @@ class MailMessage(models.Model):
     subject = models.CharField(max_length=150, blank=False)
     message = RichTextUploadingField(blank=True,
                                      help_text='Play link example: https://commonologygame.com/play?-game_url_args-')
-    components = models.ManyToManyField(Component, blank=True, related_name='messages')
+    components = SortedManyToManyField(Component, blank=True, related_name='messages')
     created = models.DateTimeField(default=timezone.now)
     tested = models.BooleanField(default=False,
                                  help_text="Must be checked to send blast.  It is set when a test message is sent.")
