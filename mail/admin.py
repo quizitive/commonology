@@ -1,6 +1,9 @@
 from django.contrib import admin, messages
-from .models import MailMessage, Component
 from django_object_actions import DjangoObjectActions
+
+from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
+
+from .models import MailMessage, Component
 from users.models import Player
 from .utils import make_absolute_urls
 from .sendgrid_utils import mass_mail, sendgrid_send
@@ -74,6 +77,11 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             obj.tested = False
             obj.sent = False
             obj.save()
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name == 'components':
+            kwargs['widget'] = SortedFilteredSelectMultiple()
+        return super(MailMessageAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
 
 @admin.register(Component)
