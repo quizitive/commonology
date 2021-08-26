@@ -87,3 +87,4 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
 @admin.register(Component)
 class MailComponentAdmin(admin.ModelAdmin):
     list_display = ('name', 'template')
+    fields = ('name', 'location', 'message', 'template', 'context')
