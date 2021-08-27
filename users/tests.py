@@ -348,7 +348,7 @@ class PendingUsersTests(TestCase):
         self.assertFalse(flag)
 
         msg = mail.outbox[0].body
-        url = re.search("(?P<url>https?://[^\s]+)", msg).group("url")
+        url = re.search("change: (?P<url>https?://[^\s]+)", msg).group("url")
         mail.outbox = []
 
         response = client.get(url)
