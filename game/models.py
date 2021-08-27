@@ -71,6 +71,9 @@ class Game(models.Model):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return f'{self.series}-{self.game_id}'
+
     def save(self, *args, **kwargs):
         game_id = kwargs.get('game_id') or self.game_id
         series = kwargs.get('series') or self.series
@@ -204,6 +207,9 @@ class Question(models.Model):
     def __str__(self):
         return self.text
 
+    def __repr__(self):
+        return f'{self.game}-{self.number}'
+
     def save(self, *args, **kwargs):
         if not self.pk:
             thread = Thread.objects.create()
@@ -225,11 +231,14 @@ class Answer(models.Model):
         Question, on_delete=models.CASCADE, related_name='raw_answers', db_index=True)
     raw_string = models.CharField(max_length=1000)
 
+    class Meta:
+        unique_together = ('player', 'question')
+
     def __str__(self):
         return self.raw_string
 
-    class Meta:
-        unique_together = ('player', 'question')
+    def __repr__(self):
+        return f'{self.player}-{self.question}'
 
     @property
     def coded_answer(self):
@@ -252,6 +261,9 @@ class AnswerCode(models.Model):
 
     def __str__(self):
         return self.coded_answer
+
+    def __repr__(self):
+        return f'{self.question}-{self.raw_string}'
 
     @property
     def game(self):
