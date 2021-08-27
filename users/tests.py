@@ -9,7 +9,7 @@ from django.core import mail
 from django.conf import settings
 from users.models import PendingEmail, Player
 from users.utils import sign_user
-from game.models import Series
+from game.models import Series, Answer, Question
 
 
 User = get_user_model()
@@ -361,3 +361,17 @@ class PendingUsersTests(TestCase):
         self.assertFalse(flag)
 
         remove_abinormal()
+
+    def test_referral_count(self):
+        user1 = get_local_user()
+        user2 = get_local_user(e='igot@referred.com')
+        user2.referrer = user1
+        user2.save()
+
+        # not a referral until they play a game
+        self.assertEqual(user1.players_referred.count(), 0)
+
+        # give them an answer
+        q = Question.objects.create(text='question text')
+        Answer.objects.create(player=user2, raw_string='answer', question=q)
+        self.assertEqual(user1.players_referred.count(), 1)
