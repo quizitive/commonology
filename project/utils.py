@@ -1,15 +1,12 @@
 import datetime
 import pytz
 from django.conf import settings
-
-import redis
-import fakeredis
+from django.core.cache import caches
 
 
+REDIS = caches['default']
 if settings.IS_TEST:
-    REDIS = fakeredis.FakeStrictRedis()
-else:
-    REDIS = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    REDIS.key_prefix += '_test'
 
 
 def our_now():
@@ -27,6 +24,6 @@ def redis_delete_patterns(*patterns):
     for p in patterns:
         keys = REDIS.keys(f'{p}*')
         if keys:
-            REDIS.delete(*keys)
+            REDIS.delete_many(keys)
             total_keys_deleted += len(keys)
     return total_keys_deleted
