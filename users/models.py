@@ -120,7 +120,7 @@ class Player(CustomUser):
 
     @property
     def players_referred(self):
-        return Player.objects.filter(referrer=self)
+        return Player.objects.filter(referrer=self, answers__isnull=False).distinct()
 
 
 class PendingEmail(models.Model):
