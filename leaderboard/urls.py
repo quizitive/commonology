@@ -15,7 +15,6 @@ urlpatterns = [
     path('results/', views.ResultsView.as_view(), name='current-results'),
     path('results/<int:game_id>/', views.ResultsView.as_view(), name='game-id-results'),
     path('leaderboard/htmx/', htmx.LeaderboardHTMXView.as_view(), name='htmx'),
-    # path('me/', views.PlayerHomeView.as_view(), name='player-home')
 
     # todo: deprecate this after week 42
     path('leaderboard/results/', RedirectView.as_view(pattern_name='leaderboard:current-results'))

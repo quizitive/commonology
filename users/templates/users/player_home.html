@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Commonology | Dashboard{% endblock %}
+{% block title %}Commonology | My Profile{% endblock %}
 
 {% block page_style %}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -10,6 +10,8 @@
 {% block content %}
   <div class="content">
     <div class="w3-row" style="padding: 16pt"></div>
+
+    {% include 'users/cards/snapshot_card.html' with header="My Profile" %}
 
     <div class="w3-card w3-round" style="margin:auto;">
       <header class="w3-container cg-blue">
