@@ -1,15 +1,13 @@
 import datetime
 import pytz
+import functools
 from django.conf import settings
-
-import redis
-import fakeredis
+from django.core.cache import caches
 
 
+REDIS = caches['default']
 if settings.IS_TEST:
-    REDIS = fakeredis.FakeStrictRedis()
-else:
-    REDIS = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    REDIS.key_prefix += '_test'
 
 
 def our_now():
@@ -27,6 +25,35 @@ def redis_delete_patterns(*patterns):
     for p in patterns:
         keys = REDIS.keys(f'{p}*')
         if keys:
-            REDIS.delete(*keys)
+            REDIS.delete_many(keys)
             total_keys_deleted += len(keys)
     return total_keys_deleted
+
+
+def quick_cache(ttl=600):
+    """
+    A decorator to cache the result of any function by its name and arguments. Example usage:
+
+    @quick_cache(ttl=300)
+    def foo(a, b):
+        return a + b
+
+    > foo(1, 2) ->  checks redis for key `foo:1_2`, returns cache result if found, otherwise execute foo and set value
+    > foo(1, 2, force_refresh=True) -> always execute foo and set value
+
+    NOTE: Make sure arguments are unique! If passing a model instance, make
+    sure the model has a unique __repr__ defined.
+    """
+    def inner(func):
+        @functools.wraps(func)
+        def wrapper(*args, force_refresh=False, **kwargs):
+            redis_key = f'{func.__name__}:' + "_".join([repr(a) for a in args]) + "_".join(repr(k) for k in kwargs.values())
+            if not force_refresh:
+                cached_res = REDIS.get(redis_key)
+                if cached_res:
+                    return cached_res
+            res = func(*args, **kwargs)
+            REDIS.set(redis_key, res, timeout=ttl)
+            return res
+        return wrapper
+    return inner
