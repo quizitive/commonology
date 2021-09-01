@@ -17,7 +17,7 @@ def new_players_for_game(slug, game_id):
         ).order_by('player_id').filter(
             question__game__game_id__min=game_id, question__game__series__slug=slug
         ).values_list('player_id', flat=True)
-        REDIS.set(cache_key, str(list(new_players)), ex=60 * 60)
+        REDIS.set(cache_key, str(list(new_players)), timeout=60 * 60)
         return new_players
     return literal_eval(new_players_from_cache)
 
