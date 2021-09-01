@@ -18,7 +18,7 @@ from django.conf import settings
 from project.views import CardFormView
 from project.card_views import recaptcha_check
 from game.charts import PlayerTrendChart, PlayersAndMembersDataset
-from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
+from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
 from game.utils import find_latest_public_game
@@ -545,3 +545,9 @@ def tabulator_form_view(request):
 
     context['form'] = form
     return render(request, 'game/tabulator_form.html', context)
+
+
+class QuestionSuggestionView(CardFormView):
+    form_class = QuestionSuggestionForm
+    header = "Suggest a Question"
+    custom_message = "Suggest a question for a future game!"
