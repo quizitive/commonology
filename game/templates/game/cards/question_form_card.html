@@ -1,0 +1,38 @@
+{% extends 'game/cards/base_question_card.html' %}
+{% load static %}
+
+{% block form_or_results %}
+
+  <div class="result-card results w3-row w3-padding-16">
+
+      <div class="spacer w3-col m1">&nbsp</div>
+      <div class="w3-col m10 w3-padding-16" >
+
+        {% for choice in q.choices %}
+          <div class="w3-cell-row response-item w3-card-0 w3-round w3-padding
+               {% if form.raw_string.value == choice %}player-answer{% endif %}"
+               {% if editable %}tabindex="0" role="button"{% endif %}
+               style="height:40px">
+            <div class="choice w3-cell w3-rest">{{ choice }}</div>
+            <div class="answer-score w3-cell w3-cell-middle w3-cell-right">
+              <i class="fas fa-check answer-score"
+                 {% if form.raw_string.value != choice %}
+                 style="display: none;"
+                 {% endif %}></i>
+            </div>
+          </div>
+        {% endfor %}
+
+        {{ form.question }}
+        {{ form.raw_string }}
+          <div class="errors" style="font-size:14px;{% if q.choices %}max-width:420px;margin:auto;{% endif %}">
+            {{ form.raw_string.errors }}
+            {{ form.non_field_errors }}
+          </div>
+
+
+      </div>
+       <div class="spacer w3-col m1">&nbsp</div>
+    </div>
+
+{% endblock %}

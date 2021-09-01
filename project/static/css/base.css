@@ -13,9 +13,17 @@ label.required::after {
 
 div.content {
     margin: 0 auto;
-    max-width: 778px;
+    max-width: 640px;
     min-height: 100vh;
-    padding-bottom: 80px;
+    padding-bottom: 115px;
+}
+
+div.w3-modal-content {
+  max-width: 640px;
+}
+
+div.w3-modal-content {
+  max-width: 640px;
 }
 
 /* so cards have rounded corners on top and bottom */
@@ -43,7 +51,7 @@ header.w3-container {
     border-color: #0095da!important;
 }
 .cg-border-grey {
-    border-color: #cecece!important;
+    border: 1px solid #cecece;
 }
 
 /* --- Colors --- */
@@ -115,4 +123,10 @@ span.login-google {
 }
 button.login-google:hover {
   border-radius:4px;
+}
+
+/* Social Media Icon */
+.social_dim {
+width: 18px;
+height: 18px;
 }

@@ -1,6 +1,9 @@
 from django.contrib import admin, messages
-from .models import MailMessage
 from django_object_actions import DjangoObjectActions
+
+from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
+
+from .models import MailMessage, Component
 from users.models import Player
 from .utils import make_absolute_urls
 from .sendgrid_utils import mass_mail, sendgrid_send
@@ -10,9 +13,15 @@ from .sendgrid_utils import mass_mail, sendgrid_send
 class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     def send_test(self, request, obj):
         email = obj.test_recipient
+        try:
+            test_user = Player.objects.get(email=obj.test_recipient)
+            user_code = test_user.code
+        except Player.DoesNotExist:
+            user_code = -1
         msg = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
-        sendgrid_send(obj.subject, msg=msg, email_list=[(email, -1)], from_email=from_email, unsub_link=True)
+        sendgrid_send(obj.subject, msg=msg, email_list=[(email, user_code)],
+                      from_email=from_email, unsub_link=True, components=obj.components.all())
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
@@ -38,7 +47,8 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             else:
                 players = obj.series.players
 
-            n = mass_mail(obj.subject, message, from_email, players=players, categories=obj.categories)
+            n = mass_mail(obj.subject, message, from_email, players=players,
+                          categories=obj.categories, components=obj.components.all())
             obj.sent = True
             obj.save()
             if n:
@@ -58,6 +68,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     list_filter = ('created',)
     search_fields = ('subject',)
     ordering = ('-created',)
+    filter_horizontal = ('components',)
     save_on_top = True
 
     def save_model(self, request, obj, form, change):
@@ -66,3 +77,14 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             obj.tested = False
             obj.sent = False
             obj.save()
+
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name == 'components':
+            kwargs['widget'] = SortedFilteredSelectMultiple()
+        return super(MailMessageAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+
+
+@admin.register(Component)
+class MailComponentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'template')
+    fields = ('name', 'location', 'message', 'template', 'context')

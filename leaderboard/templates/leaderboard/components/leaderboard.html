@@ -11,10 +11,16 @@
               <button id="following-drp" class="w3-button cg-blue">
                 <i class="fas fa-check-circle" style="color:white; margin:auto;"></i>
                 <i class="fas fa-caret-down"></i></button>
-              <div class="w3-dropdown-content w3-bar-block w3-card-4" style="right:0;min-width:117px;">
-                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&following=true"
+              <div class="w3-dropdown-content w3-bar-block w3-card-4" style="right:0;">
+                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=following"
                    hx-target="#component-leaderboard"
                    class="w3-bar-item w3-button">Following</a>
+                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=followers"
+                   hx-target="#component-leaderboard"
+                   class="w3-bar-item w3-button">My Followers</a>
+                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=new_players"
+                   hx-target="#component-leaderboard"
+                   class="w3-bar-item w3-button">New Players</a>
                 <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
                    hx-target="#component-leaderboard"
                    class="w3-bar-item w3-button">All Players</a>
@@ -57,14 +63,16 @@
       </table>
       <div class="w3-container w3-cell-row w3-center w3-padding-16">
 
+        {% if prev %}
         <a class="w3-cell"
-           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}&page={{ page|add:-1 }}"
+           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}&page={{ page|add:-1 }}&id_filter={{ id_filter }}"
            hx-target="#component-leaderboard">
           <i class="fas fa-chevron-left" style="color:#0095da"></i>
         </a>
+        {% endif %}
 
         <div class="w3-cell">
-        {% if visible_players == 0 and not user.is_authenticated %}
+        {% if visible_players == '1-0' and not user.is_authenticated %}
           <a href="{% url 'login' %}">Login</a>
           or
           <a href="{% url 'join' %}">Join</a>
@@ -72,15 +80,17 @@
         {% elif visible_players == 0 and user.is_authenticated %}
           Follow your friends by checking the bubble next to their name.
         {% else %}
-          Showing {{ visible_players }} out of {{ total_players }} total players.
+          {{ lb_message }}
         {% endif %}
         </div>
 
+        {% if next %}
         <a class="w3-cell"
-           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}&page={{ page|add:1 }}"
+           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}&page={{ page|add:1 }}&id_filter={{ id_filter }}"
            hx-target="#component-leaderboard">
           <i class="fas fa-chevron-right" style="color:#0095da"></i>
         </a>
+      {% endif %}
 
       </div>
     </div>

@@ -4,6 +4,7 @@ from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout, get_user_model
@@ -12,11 +13,10 @@ from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
-from django.views.generic.base import View
-from project.views import CardFormView
-from users.forms import PlayerProfileForm, PendingEmailForm, InviteFriendsForm, JoinForm
-from users.models import PendingEmail
-from users.utils import unsubscribe
+from project.card_views import recaptcha_check, BaseCardView, CardFormView
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
+from users.models import PendingEmail, Player
+from users.utils import unsubscribe, sign_user
 from mail.sendgrid_utils import sendgrid_send
 from project.utils import redis_delete_patterns
 from game.models import Series
@@ -31,30 +31,15 @@ def user_logout(request):
     return redirect(reverse('home'))
 
 
-class UserCardFormView(CardFormView):
-    """
-    A base class with sensible defaults for our basic user form-in-card
-    See template cards/base_card.html for additional template
-    variables that can be set to customize form further.
-
-    Common use case would be to define a form_class and override post()
-    to handle form-specific functionality
-    """
-    # form_class = YourFormClass
-    header = "Welcome To Commonology"
-    custom_message = None
-    button_label = "Ok"
-    card_template = 'cards/base_card.html'
-    page_template = 'users/base.html'
-
-
-class ProfileView(LoginRequiredMixin, UserCardFormView):
+class ProfileView(LoginRequiredMixin, CardFormView):
 
     form_class = PlayerProfileForm
     card_template = 'users/cards/profile_card.html'
     header = "Edit Profile"
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
+
         form = self.get_form()
 
         if not form.is_valid():
@@ -74,7 +59,8 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
                           f"updated your profile once you have followed the confirmation link.")
 
             remove_pending_email_invitations()
-            pe = PendingEmail(email=new_email, referrer=email)
+            referrer = Player.objects.get(email=email)
+            pe = PendingEmail(email=new_email, referrer=referrer)
             pe.save()
             self.send_change_confirm(request, pe)
             return self.render(request)
@@ -105,7 +91,7 @@ class ProfileView(LoginRequiredMixin, UserCardFormView):
         return sendgrid_send('Email confirmation', msg, [(email, None)])
 
 
-class JoinView(UserCardFormView):
+class JoinView(CardFormView):
     form_class = PendingEmailForm
     header = "Join Commonology"
     button_label = "Join"
@@ -118,6 +104,8 @@ class JoinView(UserCardFormView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
+
         email = request.POST.get('email')
         if not email:
             return redirect('login')
@@ -138,7 +126,11 @@ class JoinView(UserCardFormView):
                               f"You may close this window now."
 
         self.header = "Invitation Sent!"
-        return self.render(request, form=None, button_label='Ok')
+        return self.info(request,
+                         message=self.custom_message,
+                         keep_form=False,
+                         form_method='get',
+                         button_label='Ok')
 
 
 def make_uuid_url(request, uuid=None, name='/join/', slug=None):
@@ -184,17 +176,14 @@ def send_invite(request, email, referrer=None):
     return sendgrid_send("You're Invited to Commonology", msg, [(email, None)])
 
 
-class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
+class InviteFriendsView(LoginRequiredMixin, BaseCardView):
 
     header = "Invite Friends"
-    form_class = InviteFriendsForm
-    button_label = "Send"
-
-    def get(self, request, *args, **kwargs):
-        messages.info(request, "Enter your friends' emails to invite them to Commonology!")
-        return super().get(request)
+    button_label = ""
+    card_template = "users/cards/invite_card.html"
 
     def post(self, request, *args, **kwargs):
+        recaptcha_check(request)
         emails = request.POST['emails'].split(",")
         emails = [e.strip().lower() for e in emails]
         for email in emails:
@@ -209,10 +198,20 @@ class InviteFriendsView(LoginRequiredMixin, UserCardFormView):
                 # can't join if user exists
                 messages.warning(request, f"User {email} already exists")
             except User.DoesNotExist:
-                send_invite(request, email, request.user.email)
+                send_invite(request, email, request.user)
                 messages.info(request, f"Invite successfully sent to {email}.")
 
         return redirect('invite')
+
+    def get_context_data(self, *args, **kwargs):
+        players_referred = self.request.user.players_referred
+        return super().get_context_data(
+            *args,
+            player_code=f'r={self.request.user.code}',
+            players_referred=players_referred,
+            referral_count=players_referred.count(),
+            **kwargs
+        )
 
 
 class EmailConfirmedView(View):
@@ -354,13 +353,26 @@ class EmailChangeConfirmedView(View):
         return render(request, 'users/base.html', context)
 
 
-class PwdChangeView(UserCardFormView, PasswordChangeView):
+class PwdChangeView(CardFormView, PasswordChangeView):
     header = "Change Password"
     success_url = reverse_lazy('profile')
 
     def form_valid(self, form):
         messages.info(self.request, "Your password has been successfully updated.")
         return super().form_valid(form)
+
+
+def send_unsubscribed_notice(request, player):
+    email = player.email
+    protocol = 'HTTPS'
+    domain = request.META['SERVER_NAME']
+
+    signed_code = sign_user(player.email, player.code)
+
+    context = {'signed_code': signed_code, 'protocol': protocol, 'domain': domain}
+    msg = render_to_string('emails/unsubscribe_email.html', context)
+
+    return sendgrid_send("Unsubscribed", msg, [(email, None)])
 
 
 class UnsubscribeView(View):
@@ -378,9 +390,9 @@ class UnsubscribeView(View):
             return render(request, 'users/base.html', context)
 
         try:
-            u = User.objects.filter(id=i).first()
+            u = User.objects.filter(_code=i).first()
         except User.DoesNotExist:
-            context['custom_message'] = "You have been unsubscribed."
+            context['custom_message'] = "You are not subscribed."
             return render(request, 'users/base.html', context)
 
         email = u.email
@@ -388,10 +400,44 @@ class UnsubscribeView(View):
         try:
             e = Signer().unsign(t)
             unsubscribe(e)
-            context['custom_message'] = f"You have been unsubscribed. If you did not mean to unsubscribe" \
+            context['custom_message'] = f"You have been unsubscribed. If you did not mean to unsubscribe " \
                                         f"you can simply login and update your profile."
+            send_unsubscribed_notice(request, u)
         except BadSignature:
             context['custom_message'] = "There is something wrong with your unsubscribe link."
+        return render(request, 'users/base.html', context)
+
+    def post(self, request, *args, **kwargs):
+        return redirect(reverse('home'))
+
+
+class SubscribeView(View):
+    def get(self, request, token):
+        i, t = token.split(':')
+        context = {'header': 'Subscribe'}
+
+        bad_msg = f"There is something wrong with the link you used. "\
+                  f"If you wish to re-subscribe then please log in and "\
+                  f"and check subscribed in your profile settings. You can "\
+                  f"change your profile by selecting your name in the dropdown "\
+                  f"menu on the top right of our site.  Sorry for the inconvenience."
+
+        try:
+            u = User.objects.filter(_code=i).first()
+        except User.DoesNotExist:
+            context['custom_message'] = bad_msg
+            return render(request, 'users/base.html', context)
+
+        email = u.email
+        t = ':'.join([email, t])
+        try:
+            e = Signer().unsign(t)
+            if u.email == e:
+                u.subscribed = True
+                u.save()
+            context['custom_message'] = f"You have re-subscribed."
+        except BadSignature:
+            context['custom_message'] = bad_msg
         return render(request, 'users/base.html', context)
 
     def post(self, request, *args, **kwargs):

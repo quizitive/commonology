@@ -1,13 +1,17 @@
+import uuid
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
-from django.forms import CharField, ValidationError
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
-from django.db.models.signals import post_save
+from django.utils.functional import cached_property
+from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 
 from users.models import Player
 from chat.models import Thread
+
+from project.utils import our_now
 
 
 class Series(models.Model):
@@ -39,13 +43,6 @@ def add_owner_as_host_and_player(sender, instance, created, **kwargs):
         instance.players.add(instance.owner)
 
 
-@receiver(post_save, sender=Series)
-def add_owner_as_host_and_player(sender, instance, created, **kwargs):
-    if created:
-        instance.hosts.add(instance.owner)
-        instance.players.add(instance.owner)
-
-
 class Game(models.Model):
     game_id = models.IntegerField()
     name = models.CharField(max_length=100)
@@ -55,6 +52,7 @@ class Game(models.Model):
     end = models.DateTimeField(verbose_name="When the game ends:", null=False, blank=False)
     google_form_url = models.CharField(max_length=255, blank=True,
                                        help_text="Enter the form url")
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data"
@@ -73,6 +71,9 @@ class Game(models.Model):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return f'{self.series}-{self.game_id}'
+
     def save(self, *args, **kwargs):
         game_id = kwargs.get('game_id') or self.game_id
         series = kwargs.get('series') or self.series
@@ -82,7 +83,11 @@ class Game(models.Model):
         self.game_id = game_id
         super().save(*args, **kwargs)
 
-    @property
+    def get_absolute_url(self):
+        # Need this for admin view-on-site to work.
+        return f"/play/{self.uuid}"
+
+    @cached_property
     def players(self):
         return self.game_questions.first().raw_answers.values(
             'player', 'player__display_name').annotate(
@@ -93,6 +98,12 @@ class Game(models.Model):
             )
         )
 
+    def user_played(self, player):
+        q = self.questions.filter(type=Question.ga).first()
+        if q:
+            return q.raw_answers.filter(player=player.id).exists()
+        return False
+
     @property
     def teams(self):
         return self.questions.exclude(
@@ -100,9 +111,9 @@ class Game(models.Model):
             team_id=models.F('player__teams'),
             team_name=models.F('player__teams__name')).exclude(team_id=None).distinct()
 
-    @property
+    @cached_property
     def game_questions(self):
-        return self.questions.exclude(type__in=(Question.op, Question.ov)).order_by('number')
+        return self.questions.filter(type=Question.ga).order_by('number')
 
     @property
     def visible_questions(self):
@@ -113,8 +124,13 @@ class Game(models.Model):
         return Answer.objects.values(
             'question_id', 'raw_string'
         ).filter(
-            question__game=self
+            question__game=self,
+            question__type=Question.ga,
         ).annotate(count=models.Count('raw_string')).order_by()
+
+    @property
+    def raw_player_answers(self):
+        return Answer.objects.filter(question__game=self).order_by('player', 'question__number')
 
     @property
     def coded_player_answers(self):
@@ -133,7 +149,7 @@ class Game(models.Model):
                 default=False,
                 output_field=models.BooleanField()
             )
-        ).order_by('player', 'question')
+        ).order_by('player', 'question__number')
 
     @property
     def max_date(self):
@@ -147,52 +163,82 @@ class Game(models.Model):
 
     @property
     def date_range_pretty(self):
-        return f'{self.min_date:%m/%d} - {self.max_date:%m/%d/%Y}'
+        return f'{self.start:%m/%d} - {self.end:%m/%d/%Y}'
+
+    @property
+    def is_active(self):
+        now = our_now()
+        return self.start <= now <= self.end
+
+    @property
+    def not_started_yet(self):
+        now = our_now()
+        return self.start > now
+
+
+@receiver(m2m_changed, sender=Game.hosts.through)
+def add_host_as_player(sender, instance, **kwargs):
+    instance.series.players.add(*instance.hosts.all())
 
 
 class Question(models.Model):
     game = models.ForeignKey(Game, null=True, on_delete=models.SET_NULL,
                              related_name='questions', db_index=True)
-    number = models.PositiveIntegerField(default=1)
+    number = models.PositiveIntegerField(null=True)
     text = models.CharField(max_length=10000)
-    mc = 'MC'
-    fr = 'FR'
+    ga = 'GA'
     op = 'OP'
     ov = 'OV'
     QUESTION_TYPES = [
-        (mc, 'Multiple Choice'),
-        (fr, 'Free Response'),
+        (ga, 'Game'),
         (op, 'Optional'),
         (ov, 'Optional (visible)')
     ]
     type = models.CharField(max_length=2, choices=QUESTION_TYPES)
+    choices = ArrayField(models.CharField(max_length=100, null=True), null=True, blank=True)
     image = models.FileField(upload_to='questions/', null=True, blank=True)
     caption = models.CharField(max_length=255, blank=True, default="")
     hide_default_results = models.BooleanField(default=False)
     thread = models.ForeignKey(Thread, related_name='object', null=True, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('game', 'number')
+
     def __str__(self):
         return self.text
+
+    def __repr__(self):
+        return f'{self.game}-{self.number}'
 
     def save(self, *args, **kwargs):
         if not self.pk:
             thread = Thread.objects.create()
             self.thread = thread
+        if self.is_optional:
+            if not self.text.startswith("OPTIONAL: "):
+                self.text = "OPTIONAL: " + self.text
         super().save(*args, **kwargs)
+
+    @property
+    def is_optional(self):
+        return self.type in (self.op, self.ov)
 
 
 class Answer(models.Model):
-    timestamp = models.DateTimeField()
+    timestamp = models.DateTimeField(auto_now_add=True)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='answers', db_index=True)
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, related_name='raw_answers', db_index=True)
     raw_string = models.CharField(max_length=1000)
 
+    class Meta:
+        unique_together = ('player', 'question')
+
     def __str__(self):
         return self.raw_string
 
-    class Meta:
-        unique_together = ('player', 'question')
+    def __repr__(self):
+        return f'{self.player}-{self.question}'
 
     @property
     def coded_answer(self):
@@ -215,6 +261,9 @@ class AnswerCode(models.Model):
 
     def __str__(self):
         return self.coded_answer
+
+    def __repr__(self):
+        return f'{self.question}-{self.raw_string}'
 
     @property
     def game(self):

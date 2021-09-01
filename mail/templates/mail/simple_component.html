@@ -1,0 +1,5 @@
+{% if component.message %}
+  <div class="{{ component.css_name }}" style="padding: 0 16px;">
+    {{ component.message|safe }}
+  </div>
+{% endif %}

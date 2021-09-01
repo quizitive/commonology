@@ -1,7 +1,10 @@
 # Michael Herman gets all the credit for this: https://testdriven.io/blog/django-custom-user-model/
 import uuid
 import random
+import secrets
 import string
+
+from django.db import connection
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import CIEmailField
@@ -24,17 +27,19 @@ class CustomCIEmailField(CIEmailField):
         super(CustomCIEmailField, self).__init__(*args, **kwargs)
 
     def get_prep_value(self, value):
-        return str(value).lower()
+        if value:
+            return str(value).lower()
+        else:
+            return value
 
 
 class CustomUser(AbstractUser):
     username = None
     email = CustomCIEmailField(_('email address'), unique=True)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=30, blank=True)
     location = models.CharField(max_length=MAX_LOCATION_LEN, choices=LOCATIONS, blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    referrer = CustomCIEmailField(_('Referrer email address'), blank=True, null=True)
     subscribed = models.BooleanField(default=True,
                                      help_text="If email address is bad then unsubscribe and deactivate them.")
 
@@ -50,14 +55,25 @@ class CustomUser(AbstractUser):
         return self.email
 
 
-class PendingEmail(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField()
-    referrer = models.EmailField(null=True)
-    created = models.DateTimeField(default=timezone.now)
+def is_code_unique(code):
+    sql = 'select users_player.id FROM users_player WHERE users_player.code = %s'
+    with connection.cursor() as cursor:
+        cursor.execute(sql, [code])
+        row = cursor.fetchone()
+    return row is None
+
+
+def code_player():
+    while True:
+        code = secrets.token_urlsafe()[:5]
+        if is_code_unique(code):
+            return code
 
 
 class Player(CustomUser):
+    _code = models.CharField(max_length=5, db_index=True, null=True,
+                             help_text="Unique identifier useful for url parameters like referrer.")
+    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
     is_member = models.BooleanField(
@@ -65,8 +81,27 @@ class Player(CustomUser):
         help_text="Designates whether this player has joined the online community."
     )
 
+    @property
+    def code(self):
+        return self._code
+
+    def set_code(self):
+        # arg is needed for a setter but ignored because we are having the model determine
+        # viable unique codes.
+        if not self._code:
+            flag = True
+            while flag:
+                code = secrets.token_urlsafe()[:5]
+                if not Player.objects.filter(_code=code).exists():
+                    flag = False
+            self._code = code
+
     def __str__(self):
         return self.email
+
+    def save(self, *args, **kwargs):
+        self.set_code()
+        super(Player, self).save()
 
     @property
     def name(self):
@@ -82,6 +117,17 @@ class Player(CustomUser):
         return self.answers.values(
             game_id=models.F('question__game__game_id'), series=models.F('question__game__series__slug')).exclude(
             game_id=None).distinct().order_by('-game_id')
+
+    @property
+    def players_referred(self):
+        return Player.objects.filter(referrer=self, answers__isnull=False).distinct()
+
+
+class PendingEmail(models.Model):
+    referrer = models.ForeignKey(Player, null=True, on_delete=models.CASCADE)
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField()
+    created = models.DateTimeField(default=timezone.now)
 
 
 @receiver(post_save, sender=Player)

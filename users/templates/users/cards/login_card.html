@@ -1,10 +1,21 @@
 {% extends 'cards/base_card.html' %}
 {% load static %}
+{% load navbar_extras %}
+
+{% block form %}
+  <form method="post" action="/login/{% login_next_url request %}">
+    {% if form %}
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% endif %}
+    <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
+  </form>
+{% endblock %}
 
 {% block card_extras %}
 
   <button class="login-google w3-button w3-input w3-margin-bottom w3-border-0" style="padding:0">
-    <a href="{% url "social:begin" "google-oauth2" %}" class="w3-center w3-block w3-round w3-border" style="text-decoration: none;">
+    <a href="{% url "social:begin" "google-oauth2" %}{% login_next_url request %}" class="w3-center w3-block w3-round w3-border" style="text-decoration: none;">
     <img src="{% static 'img/google_icon_margins.svg' %}" class="login-google">
     <span class="login-google">Login with Google</span>
     </a>
@@ -19,6 +30,6 @@
 
   <a class="w3-block w3-center w3-padding-small"
    href = "{% url 'password_reset' %}">Forgot password?</a>
-  <a href="{% url 'join' %}" class="w3-center w3-block w3-padding" style="border:0;">Don't have an account? Join us!</a>
+  <a href="{% url 'join' %}{% login_next_url request %}" class="w3-center w3-block w3-padding" style="border:0;">Don't have an account? Join us!</a>
 
 {% endblock %}

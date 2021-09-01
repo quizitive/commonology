@@ -3,12 +3,49 @@ import json
 from collections import OrderedDict, deque
 
 import pandas as pd
+import gspread
 
 from django.db.models import Sum, Subquery, OuterRef
+from django.conf import settings
 
-from project.utils import REDIS
+from project.utils import REDIS, quick_cache
 from users.models import Team
 from game.models import Game, AnswerCode
+from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
+from game.tasks import api_to_db
+from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
+
+
+def tabulate_results(game, update=False):
+    """
+    Reads from, tabulates, and prints output to the named Google Sheet
+    :param game: The game object
+    :param update: Whether or not to update existing answer records in the DB
+    :return: None
+    """
+    sheet_doc = get_sheet_doc(game)
+    responses = api_and_db_data_as_df(game, sheet_doc)
+
+    user_rollups = get_user_rollups(sheet_doc)
+    rollups_dict = build_rollups_dict(user_rollups)
+    answer_codes = build_answer_codes(responses, rollups_dict)
+
+    # write to database
+    api_to_db(
+        game.series.slug,
+        game.sheet_name,
+        responses.to_json(),
+        answer_codes,
+        update
+    )
+
+    # calculate the question-by-question data and leaderboard
+    # NOTE: both of these call the method that rebuilds themself from db and clears the cache
+    answer_tally = build_answer_tally(game, force_refresh=True)
+    leaderboard = build_leaderboard_fromdb(game, answer_tally)
+
+    # write to google
+    write_all_to_gdrive(sheet_doc, responses, answer_tally, answer_codes, leaderboard)
 
 
 def build_filtered_leaderboard(game, answer_tally, player_ids=None, search_term=None, team_id=None):
@@ -105,14 +142,8 @@ def _score_and_rank(leaderboard, lb_cols):
     return leaderboard
 
 
+@quick_cache(60 * 60)
 def build_answer_tally(game):
-    at = _answer_tally_from_cache(game)
-    if at is None:
-        at = build_answer_tally_fromdb(game)
-    return at
-
-
-def build_answer_tally_fromdb(game):
     raw_string_counts = game.valid_raw_string_counts
     answer_subquery = raw_string_counts.filter(raw_string=OuterRef('raw_string')).filter(question=OuterRef('question'))
     answer_counts = AnswerCode.objects.filter(
@@ -131,8 +162,6 @@ def build_answer_tally_fromdb(game):
 
     for q, tally in answer_tally.items():
         answer_tally[q] = OrderedDict(sorted(tally.items(), key=lambda x: -x[1]))
-
-    REDIS.set(f'answertally_{game.series}_{game.game_id}', json.dumps(answer_tally), 60 * 60)
     return answer_tally
 
 

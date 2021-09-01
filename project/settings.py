@@ -34,6 +34,7 @@ INTERNAL_IPS = ()
 if DEBUG:
     INTERNAL_IPS = ('127.0.0.1', 'staging.' + DOMAIN)
 
+USE_TZ = True
 TIME_ZONE = 'America/New_York'
 
 CELERY_TIMEZONE = TIME_ZONE
@@ -63,6 +64,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'sortedm2m_filter_horizontal_widget',
     'social_django',
     'chat',
     'game',
@@ -98,6 +100,11 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
     'users.utils.add_additional_fields'
 )
+
+RECAPTCHA3_INHIBIT = True
+RECAPTCHA3_KEY = env.get('RECAPTCHA3_KEY', '6LczLAUcAAAAACMff5nNS6xjhUDF3elRC3LpnKiW')
+RECAPTCHA3_SECRET = env.get('RECAPTCHA3_SECRET', '6LczLAUcAAAAADZrdjUJznBAS2eeP9tsBHT7DrEY')
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -219,7 +226,7 @@ MAILCHIMP_SERVER = 'us2'
 MAILCHIMP_EMAIL_LIST_ID = env.get("MAILCHIMP_EMAIL_LIST_ID")
 
 GOOGLE_GSPREAD_API_CONFIG = os.path.join(BASE_DIR, '.config/gspread/commonology_service_account.json')
-
+GOOGLE_DRIVE_FOLDER_ID = env.get("GOOGLE_DRIVE_FOLDER_ID")
 
 LOGGING = {
     'version': 1,

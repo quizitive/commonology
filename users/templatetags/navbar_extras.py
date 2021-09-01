@@ -3,7 +3,6 @@ from django.urls import reverse
 from django.template.loader import render_to_string
 
 from users.forms import LoginForm
-from game.utils import find_latest_active_game
 
 
 register = template.Library()
@@ -32,5 +31,12 @@ def login_modal(request):
 
 
 @register.simple_tag
-def game_is_on():
-    return find_latest_active_game('commonology') is not None
+def login_next_url(request):
+    if not request:
+        return ''
+    if val := request.GET.get("next"):
+        return f'?next={val}'
+    p = request.path
+    if p == '/login/' or p == '/join/':
+        return ''
+    return f'?next={p}'

@@ -7,9 +7,9 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.conf import settings
-from users.models import PendingEmail
+from users.models import PendingEmail, Player
 from users.utils import sign_user
-from game.models import Series
+from game.models import Series, Answer, Question
 
 
 User = get_user_model()
@@ -169,16 +169,18 @@ class UsersManagersTests(TestCase):
 
     def test_unsubscribe_link(self):
         user = get_local_user()
-        id = user.id
+        id = user.code
+
         saved_key = settings.SECRET_KEY
         settings.SECRET_KEY = 'Test'
-        url = sign_user(user, id)
-        self.assertEqual(url, f"{id}:0s9kU4sbRep-eXx01wMXH7dfp84JlIrkIxEJpAstUnI")
+
+        token = sign_user(user, id)
+        self.assertEqual(token, f"{id}:0s9kU4sbRep-eXx01wMXH7dfp84JlIrkIxEJpAstUnI")
 
         self.assertTrue(user.subscribed)
         client = Client()
 
-        token = url.lstrip(f'https://{settings.DOMAIN}/unsubscribe/')
+        mail.outbox = []
         url = reverse('unsubscribe', kwargs={'token': token})
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -186,14 +188,21 @@ class UsersManagersTests(TestCase):
         user = User.objects.get(email=email)
         self.assertFalse(user.subscribed)
 
-        user.subscribed = True
-        user.save()
+        msg = mail.outbox[0].body
+        url = re.search("HTTPS.*://.*/subscribe/.*\"", msg).group(0)[:-1]
+        base_url, token = url.rsplit('/', 1)
+        response = client.get(reverse('subscribe', kwargs={'token': token}))
+        self.assertEqual(response.status_code, 200)
+        user = User.objects.filter(email=user.email).get()
+        self.assertTrue(user.subscribed)
 
         # Trying a bad unsubscribe url
+        mail.outbox = []
         url += 'foo'
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
         user = User.objects.get(email=email)
+        self.assertContains(response, "There is something wrong with the link you used.")
         self.assertTrue(user.subscribed)
 
         settings.SECRET_KEY = saved_key
@@ -249,7 +258,7 @@ class PendingUsersTests(TestCase):
         self.assertIn(response.status_code, [200, 302])
 
         pe = PendingEmail.objects.get(email=ABINORMAL)
-        self.assertEqual(NORMAL, pe.referrer)
+        self.assertEqual(Player.objects.get(email=NORMAL), pe.referrer)
 
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn(str(pe.uuid), mail.outbox[0].body)
@@ -339,7 +348,7 @@ class PendingUsersTests(TestCase):
         self.assertFalse(flag)
 
         msg = mail.outbox[0].body
-        url = re.search("(?P<url>https?://[^\s]+)", msg).group("url")
+        url = re.search("change: (?P<url>https?://[^\s]+)", msg).group("url")
         mail.outbox = []
 
         response = client.get(url)
@@ -352,3 +361,17 @@ class PendingUsersTests(TestCase):
         self.assertFalse(flag)
 
         remove_abinormal()
+
+    def test_referral_count(self):
+        user1 = get_local_user()
+        user2 = get_local_user(e='igot@referred.com')
+        user2.referrer = user1
+        user2.save()
+
+        # not a referral until they play a game
+        self.assertEqual(user1.players_referred.count(), 0)
+
+        # give them an answer
+        q = Question.objects.create(text='question text')
+        Answer.objects.create(player=user2, raw_string='answer', question=q)
+        self.assertEqual(user1.players_referred.count(), 1)
