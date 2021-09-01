@@ -4,6 +4,7 @@ from numpy import base_repr
 
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.db import transaction
 from django.shortcuts import render, redirect
@@ -551,3 +552,15 @@ class QuestionSuggestionView(CardFormView):
     form_class = QuestionSuggestionForm
     header = "Suggest a Question"
     custom_message = "Suggest a question for a future game!"
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            msg = "A new question has been suggested on the site:\n\n" + form.data['suggestion']
+            subject = "New Question Suggestion"
+            email = "concierge@commonologygame.com"
+            send_mail(subject=subject, message=msg,
+                      from_email=None, recipient_list=[email])
+            self.custom_message = f"Your question has successfully been submitted. Feel free to " \
+                                  f"suggest another!"
+        return self.get(request, *args, **kwargs)
