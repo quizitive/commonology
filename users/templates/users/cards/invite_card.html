@@ -24,12 +24,12 @@
   {#      For each friend you refer you'll be entered into our monthly $100 raffle.#}
   {#      </div>#}
   {#    </div>#}
-      <div class="reward-item w3-padding-16 w3-cell-row">
+      <div class="reward-item w3-padding-24 w3-cell-row">
         <div class="w3-cell w3-cell-middle w3-right-align" style="padding-right:12px;width:50px;">
           <i class="fas fa-mug-hot fa-2x" style="color:#f26649;"></i>
         </div>
         <div class="w3-cell">
-        When you refer 10 friends we'll send you this stylish Commonology coffee mug!
+        When you refer 10 friends we'll send you this groovy Commonology coffee mug!
           <div class="supplies-note sm-grey-italic" style="margin-top: 4px;">
             Only while supplies last - act fast!
           </div>
@@ -60,8 +60,11 @@
       {% endfor %}
       </div>
       <div id="referral-note" class="w3-padding-16 sm-grey-italic">
-        Friends you refer will appear here after they play. Think we're missing someone?
-        <a href="{% url 'contact' %}">Contact Us</a>
+        Friends you refer will appear here after they play.
+        A referral only counts after they play at least one game.
+        We'll email you after you hit 10 referrals. Haven't heard from us?
+        Think we're missing someone?
+        <a href="{% url 'contact' %}" style="white-space: nowrap">Contact Us</a>
       </div>
      </div>
   </div>
