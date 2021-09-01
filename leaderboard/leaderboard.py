@@ -164,13 +164,7 @@ def build_answer_tally(game):
     return answer_tally
 
 
-def _answer_tally_from_cache(game):
-    at_json = REDIS.get(f'answertally_{game.series}_{game.game_id}')
-    if not at_json:
-        return None
-    return json.loads(at_json)
-
-
+@quick_cache()
 def player_rank_and_percentile_in_game(player_id, series_slug, game_id):
     game = Game.objects.get(game_id=game_id, series__slug=series_slug)
     answer_tally = build_answer_tally(game)
@@ -182,6 +176,7 @@ def player_rank_and_percentile_in_game(player_id, series_slug, game_id):
     return rank, percentile
 
 
+@quick_cache()
 def player_rank_in_all_games(player_id, series_slug):
     games = Game.objects.filter(series__slug=series_slug, publish=True)
     ranks = OrderedDict()
@@ -194,6 +189,7 @@ def player_rank_in_all_games(player_id, series_slug):
     return ranks
 
 
+@quick_cache()
 def player_top_game_rank(player_id, series_slug):
     best = math.inf
     best_game_id = None
