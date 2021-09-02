@@ -31,5 +31,5 @@ class ClaimView(LoginRequiredMixin, CardFormView):
         self.header = "Claim staked!"
         return self.info(request,
                          message=self.custom_message,
-                         form = None,
+                         form=None,
                          form_method='get')
