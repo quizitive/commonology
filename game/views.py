@@ -458,12 +458,12 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
 
         g = Game.objects.filter(uuid=game_uuid).first()
         if not g:
-            return self.warning(request, 'That game does not exist.  Perhaps you are using the wrong link.', keep_form=False)
+            return self.warning(request, 'That game does not exist.  Perhaps you are using the wrong link.', form=None)
 
         if not g.is_active:
             # This should rarely happy because GameEntryView.get() confirmed there is an active game.
             # However, someone could try to use a confirm link too late.
-            return self.warning(request, 'Sorry the next game is no longer active.', keep_form=False)
+            return self.warning(request, 'Sorry the next game is no longer active.', form=None)
 
         if request.user.is_authenticated:
             if g.user_played(request.user):
