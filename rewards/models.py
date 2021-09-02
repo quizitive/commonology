@@ -13,7 +13,7 @@ class Claim(models.Model):
 
 
 class MailingAddress(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    player = models.OneToOneField(Player, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(name="Full Name", max_length=128)
     address1 = models.CharField(name="Address line 1", max_length=128)
     address2 = models.CharField(name="Address line 2", max_length=128, blank=True)
