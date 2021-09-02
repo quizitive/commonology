@@ -3,9 +3,9 @@ from users.models import Player
 
 
 class Claim(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    reward = models.CharField(max_length=150, help_text="ex. Coffee Mug")
-    claim_date = models.DateField(name='Claim date')
+    player = models.OneToOneField(Player, on_delete=models.CASCADE, primary_key=True)
+    reward = models.CharField(max_length=150, default='First edition coffee mug', help_text="ex. Coffee mug")
+    claim_date = models.DateField(name='Claim date', auto_now=True)
     sent_date = models.DateField(name='Sent date', blank=True, null=True)
 
     def __str__(self):
