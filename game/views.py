@@ -8,7 +8,8 @@ from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.db import transaction
 from django.shortcuts import render, redirect
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib import messages
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
@@ -187,13 +188,14 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         msgs = {
             'success': {
                 "header": "Success!",
-                "custom_message": mark_safe(f"<b>Your answers have been submitted.</b> You can see them now by clicking "
-                                  f"the button below, and we've emailed the link to <b>{player.email}</b>.<br/>"),
+                "custom_message": mark_safe(
+                    f"<b>Your answers have been submitted.</b> You can see them now by clicking "
+                    f"the button below, and we've emailed the link to <b>{player.email}</b>.<br/>"),
             },
             'duplicate': {
                 "header": "You've already played!",
                 "custom_message": mark_safe(f"You have already submitted answers for this game. "
-                                  f"You can see them again by clicking the button below.\n<br/>"),
+                                            f"You can see them again by clicking the button below.\n<br/>"),
             }
         }
         return CardFormView(
@@ -333,15 +335,15 @@ class GameEntryView(PSIDMixin, CardFormView):
 
     def message(self, request, msg):
         return self.render_message(request, msg, form=None, button_label='Ok',
-                           form_method="get", form_action='/')
+                                   form_method="get", form_action='/')
 
     def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
         return self.render_message(request, msg, form=None, button_label='Leaderboard',
-                           form_method="get", form_action=f'/c/{slug}/leaderboard/')
+                                   form_method="get", form_action=f'/c/{slug}/leaderboard/')
 
     def join(self, request, msg):
         return self.render_message(request, msg, form=None, button_label='Join',
-                           form_method="get", form_action='/join/')
+                                   form_method="get", form_action='/join/')
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
@@ -355,11 +357,13 @@ class GameEntryView(PSIDMixin, CardFormView):
 
         if g is None:
             if user.is_authenticated:
-                return self.message(request, 'Cannot find an active game.  We will let you know when the next game begins.')
+                return self.message(request,
+                                    'Cannot find an active game.  We will let you know when the next game begins.')
             elif game_uuid:
                 return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
             else:
-                return self.join(request, 'Cannot find an active game.  Join so we can let you know when the next game begins.')
+                return self.join(request,
+                                 'Cannot find an active game.  Join so we can let you know when the next game begins.')
 
         slug = g.series.slug
 
@@ -432,8 +436,8 @@ class GameEntryView(PSIDMixin, CardFormView):
 
         send_confirm(request, g, email, referrer_id)
         custom_message = mark_safe(f"<b>We sent a game link to {email}. </b>"
-                              f"Don't forget to check your spam or junk folder if need be. "
-                              f"By the way, if you were logged in you'd be playing already.")
+                                   f"Don't forget to check your spam or junk folder if need be. "
+                                   f"By the way, if you were logged in you'd be playing already.")
 
         self.header = "Game link sent!"
         return self.render_message(request, custom_message, form=None,
@@ -459,7 +463,8 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
 
         g = Game.objects.filter(uuid=game_uuid).first()
         if not g:
-            return self.warning(request, 'That game does not exist.  Perhaps you are using the wrong link.', keep_form=False)
+            return self.warning(request, 'That game does not exist.  Perhaps you are using the wrong link.',
+                                keep_form=False)
 
         if not g.is_active:
             # This should rarely happy because GameEntryView.get() confirmed there is an active game.
@@ -548,7 +553,7 @@ def tabulator_form_view(request):
     return render(request, 'game/tabulator_form.html', context)
 
 
-class QuestionSuggestionView(CardFormView):
+class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
     form_class = QuestionSuggestionForm
     header = "Suggest a Question"
     custom_message = "Suggest a question for a future game!"
@@ -556,11 +561,16 @@ class QuestionSuggestionView(CardFormView):
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         if form.is_valid():
-            msg = "A new question has been suggested on the site:\n\n" + form.data['suggestion']
+            p = request.user
+            msg = f"A new question has been suggested on the site:\n\n" \
+                  f"Player display name: {p.display_name}\n" \
+                  f"Player name (first & last): {p.first_name} {p.last_name}\n" \
+                  f"Player email: {p.email}\n\n" + form.data['suggestion']
             subject = "New Question Suggestion"
             email = "concierge@commonologygame.com"
             send_mail(subject=subject, message=msg,
                       from_email=None, recipient_list=[email])
-            self.custom_message = f"Your question has successfully been submitted. Feel free to " \
-                                  f"suggest another!"
+            messages.info(request, message=f"Your question has successfully been submitted. "
+                                           f"Feel free to suggest another.")
+            return redirect('game:question-suggest')
         return self.get(request, *args, **kwargs)
