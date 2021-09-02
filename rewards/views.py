@@ -12,6 +12,7 @@ class ClaimView(LoginRequiredMixin, CardFormView):
     button_label = 'Submit'
 
     def get(self, request, *args, **kwargs):
+        messages.info(request, "Please fill out this form so you can enjoy a hot drink in this beautiful mug.")
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -25,11 +26,11 @@ class ClaimView(LoginRequiredMixin, CardFormView):
         address = form.save(commit=False)
         address.player = request.user
         form.save()
-        messages.info(request, "Your changes have been saved, we'll send your prize ASAP!")
 
-        self.custom_message = f"Congratulations, we'll send your prize out to ASAP."
+        m = "We'll send your prize ASAP!"
+
         self.header = "Claim staked!"
         return self.info(request,
-                         message=self.custom_message,
+                         message=m,
                          form=None,
                          form_method='get')

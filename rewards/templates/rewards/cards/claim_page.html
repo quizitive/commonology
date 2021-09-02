@@ -1,1 +1,16 @@
 {% extends 'single_card_view.html' %}
+
+{% block content %}
+      <div class="content card-content">
+        <br/><br/>
+
+        <p>
+        Congratulations, you have earned this beautiful coffee mug.
+        </p>
+
+        {# --- Simple card-on-screen view with default card --- #}
+        {% block card %}
+        {% include card_template|default:"cards/base_card.html" %}
+        {% endblock %}
+      </div>
+{% endblock %}
