@@ -24,7 +24,7 @@ class ClaimView(LoginRequiredMixin, CardFormView):
 
     def get(self, request, *args, **kwargs):
         player = request.user
-        n = len(player.players_referred)
+        n = player.players_referred.count()
         if n < 10:
             m = f"It seems you have not made 10 referrals yet and are not entitled to a mug." \
                 f" Keep trying, you can do it."
