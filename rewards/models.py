@@ -3,10 +3,13 @@ from users.models import Player
 
 
 class Claim(models.Model):
-    player = models.OneToOneField(Player, on_delete=models.CASCADE, primary_key=True)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
     reward = models.CharField(max_length=150, default='First edition coffee mug', help_text="ex. Coffee mug")
     claim_date = models.DateField(name='Claim date', auto_now=True)
     sent_date = models.DateField(name='Sent date', blank=True, null=True)
+
+    class Meta:
+        unique_together = ['player', 'reward']
 
     def __str__(self):
         return f"{self.player} claimed reward {self.reward}"
