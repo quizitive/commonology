@@ -1,12 +1,13 @@
 {% extends 'single_card_view.html' %}
-
+{% load static %}
 {% block content %}
       <div class="content card-content">
         <br/><br/>
 
-        <p>
-        Congratulations, you have earned this beautiful coffee mug.
-        </p>
+        <div class="w3-modal-content">
+            <p>Congratulations, you have earned this beautiful coffee mug.</p>
+            <p><img src={% static "img/mug.jpeg" %}></p>
+        </div>
 
         {# --- Simple card-on-screen view with default card --- #}
         {% block card %}
