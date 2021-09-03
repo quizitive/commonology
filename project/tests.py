@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
 from game.tests import suppress_hidden_error_logs
+from project.utils import slackit
 
 
 class TestContact(TestCase):
@@ -19,3 +20,8 @@ class TestContact(TestCase):
         self.assertEqual(msg,
                          'Contact Form -- ms@quizitive.com sent this message with subject: Investor Relations\nhello')
         mail.outbox = []
+
+
+class TestSlack(TestCase):
+    def test_slackit(self):
+        slackit('Message from unit test - ignore this.')
