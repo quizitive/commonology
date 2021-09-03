@@ -556,7 +556,9 @@ def tabulator_form_view(request):
 class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
     form_class = QuestionSuggestionForm
     header = "Suggest a Question"
-    custom_message = "Suggest a question for a future game!"
+    custom_message = f"Suggest a question for a future game! Please supply " \
+                     f"some example answers."
+    button_label = "Submit"
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -570,7 +572,7 @@ class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
             email = "concierge@commonologygame.com"
             send_mail(subject=subject, message=msg,
                       from_email=None, recipient_list=[email])
-            messages.info(request, message=f"Your question has successfully been submitted. "
+            messages.info(request, message=f"Thank you, your question has successfully been submitted. "
                                            f"Feel free to suggest another.")
             return redirect('game:question-suggest')
         return self.get(request, *args, **kwargs)
