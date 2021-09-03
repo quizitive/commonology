@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from project.card_views import CardFormView
+from project.utils import slackit
 from rewards.forms import ClaimForm
 from rewards.models import MailingAddress, Claim
 
@@ -57,8 +58,10 @@ class ClaimView(LoginRequiredMixin, CardFormView):
         c = Claim(player=player)
         c.save()
 
-        m = "We'll send your prize ASAP!"
+        slack_msg = f"{player} just claimed a coffee mug."
+        slackit(slack_msg)
 
+        m = "We'll send your prize ASAP!"
         self.header = "Claim staked!"
         return self.info(request,
                          message=m,
