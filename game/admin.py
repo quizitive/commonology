@@ -67,7 +67,7 @@ class GameAdmin(admin.ModelAdmin):
     def clear_cache(self, request, queryset):
         lb_prefixes = [f'leaderboard_{q[0]}_{q[1]}' for q in queryset.values_list('series__slug', 'game_id')]
         lbs_deleted = redis_delete_patterns(*lb_prefixes)
-        at_prefixes = [f'answertally_{q[0]}_{q[1]}' for q in queryset.values_list('series__slug', 'game_id')]
+        at_prefixes = [f'build_answer_tally:{repr(q)}' for q in queryset]
         ats_deleted = redis_delete_patterns(*at_prefixes)
         self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
         self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
