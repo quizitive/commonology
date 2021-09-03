@@ -23,15 +23,19 @@ class ClaimView(LoginRequiredMixin, CardFormView):
 
     def get(self, request, *args, **kwargs):
         player = request.user
+        n = len(player.players_referred)
+        if n < 10:
+            m = f"It seems you have not made 10 referrals yet and are not entitled to a mug." \
+                f" Keep trying, you can do it."
+            self.header = "Not eligible for claim yet."
+            return self.info(request, message=m, form=None, form_method='get',
+                             form_action=f'/', button_label='Thank you!')
+
         if Claim.objects.filter(player=player).exists():
             m = "You have already claimed your mug.  Sorry, but we are limited one per customer."
             self.header = "Claim staked!"
-            return self.info(request,
-                             message=m,
-                             form=None,
-                             form_method='get',
-                             form_action=f'/',
-                             button_label='Thank you!')
+            return self.info(request, message=m, form=None, form_method='get',
+                             form_action=f'/', button_label='Thank you!')
 
         messages.info(request, "Please fill out this form so you can enjoy a hot drink in this beautiful mug.")
         return super().get(request, *args, **kwargs)
