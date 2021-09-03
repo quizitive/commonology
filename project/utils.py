@@ -3,6 +3,7 @@ import pytz
 import functools
 from django.conf import settings
 from django.core.cache import caches
+import requests
 
 
 REDIS = caches['default']
@@ -57,3 +58,11 @@ def quick_cache(ttl=600):
             return res
         return wrapper
     return inner
+
+
+def slackit(msg):
+    url = f"https://hooks.slack.com/services/{settings.SLACK_TOKEN}"
+    headers = {'content-type': 'application/json'}
+    data = {'text': msg}
+    result = requests.post(url, headers=headers, json=data)
+    return result
