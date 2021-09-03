@@ -22,6 +22,6 @@ class TestContact(TestCase):
         mail.outbox = []
 
 
-class TestSlack(TestCase):
-    def test_slackit(self):
-        slackit('Message from unit test - ignore this.')
+# class TestSlack(TestCase):
+#     def test_slackit(self):
+#         slackit('Message from unit test - ignore this.')
