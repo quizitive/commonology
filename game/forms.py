@@ -77,3 +77,16 @@ class GameDisplayNameForm(forms.Form):
         super().__init__(*args, **kwargs)
         if not editable:
             self.fields['display_name'].disabled = True
+
+
+class QuestionSuggestionForm(forms.Form):
+    suggestion = forms.CharField(
+        label="",
+        widget=forms.Textarea(attrs={
+            'placeholder': 'Is a hamburger a sandwich?',
+            'rows': 4,
+            'style': 'border: 1px solid lightgrey;border-radius: 4px;'
+        }),
+        max_length=1000,
+        error_messages={'required': 'This is a required question'}
+    )
