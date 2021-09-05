@@ -307,3 +307,5 @@ CKEDITOR_CONFIGS = {
         ]),
     }
 }
+
+REWARD_THRESHOLD = 10

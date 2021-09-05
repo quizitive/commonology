@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from project import settings
 from project.card_views import CardFormView
 from project.utils import slackit
 from rewards.forms import ClaimForm
@@ -25,8 +26,8 @@ class ClaimView(LoginRequiredMixin, CardFormView):
     def get(self, request, *args, **kwargs):
         player = request.user
         n = player.players_referred.count()
-        if n < 10:
-            m = f"It seems you have not made 10 referrals yet and are not entitled to a mug." \
+        if n < settings.REWARD_THRESHOLD:
+            m = f"It seems you have not made {settings.REWARD_THRESHOLD} referrals yet and are not entitled to a mug." \
                 f" Keep trying, you can do it."
             self.header = "Not eligible for claim yet."
             return self.info(request, message=m, form=None, form_method='get',
