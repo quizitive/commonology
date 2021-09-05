@@ -1,8 +1,8 @@
 from django.urls import reverse
 
 import project.utils
-from users.models import Player
-from django.test import TestCase, Client
+from project import settings
+from django.test import TestCase
 from users.tests import get_local_user, get_local_client
 from game.models import Series, Answer, Question
 
@@ -12,13 +12,14 @@ def slackit(msg):
 
 
 project.utils.slackit = slackit
+project.settings.REWARD_THRESHOLD = 3
 
 
 class RewardTests(TestCase):
     def setUp(self):
         self.player = get_local_user()
         self.q = Question.objects.create(text='question text')
-        for i in range(9):
+        for i in range(settings.REWARD_THRESHOLD - 1):
             self.make_referee(i)
 
     def make_referee(self, i):
@@ -34,9 +35,9 @@ class RewardTests(TestCase):
 
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
-        self.assertContains(response, "It seems you have not made 10 referrals yet")
+        self.assertContains(response, f"It seems you have not made {settings.REWARD_THRESHOLD} referrals yet")
 
-        self.make_referee(10)
+        self.make_referee(settings.REWARD_THRESHOLD)
 
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
