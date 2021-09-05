@@ -43,8 +43,8 @@ class RewardTests(TestCase):
         self.assertEqual(response.reason_phrase, 'OK')
         self.assertContains(response, "Please fill out this form so you can enjoy a hot drink in this beautiful mug.")
 
-        data = {'Full Name': 'NORMAL', 'Address line 1': '1 First Street', 'City': 'Patchogue',
-                'State': 'NY', 'ZIP / Postal code': '12345'}
+        data = {'name': 'NORMAL', 'address1': '1 First Street', 'city': 'Patchogue',
+                'state': 'NY', 'zip_code': '12345'}
         response = client.post(path, data=data)
         self.assertEqual(response.reason_phrase, 'OK')
         self.assertContains(response, "We&#x27;ll send your prize ASAP!")

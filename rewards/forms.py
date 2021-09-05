@@ -6,4 +6,4 @@ class ClaimForm(forms.ModelForm):
 
     class Meta:
         model = MailingAddress
-        fields = ('Full Name', 'Address line 1', 'Address line 2', 'City', 'State', 'ZIP / Postal code')
+        fields = ('name', 'address1', 'address2', 'city', 'state', 'zip_code')
