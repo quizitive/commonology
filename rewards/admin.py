@@ -23,3 +23,4 @@ class SentFilter(SimpleListFilter):
 class ClaimAdmin(admin.ModelAdmin):
     readonly_fields = ('claim_date',)
     list_filter = (SentFilter,)
+    list_display = ('player', 'claim_date', 'sent_date')
