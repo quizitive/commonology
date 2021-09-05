@@ -28,9 +28,6 @@ class RewardTests(TestCase):
         p.save()
         Answer.objects.create(player=p, raw_string='answer', question=self.q)
 
-    def test_referrer_count(self):
-        self.assertEqual(self.player.players_referred.count(), 10)
-
     def test_claim(self):
         client = get_local_client()
         path = reverse('claim')
