@@ -23,3 +23,9 @@ class MailingAddress(models.Model):
     city = models.CharField(verbose_name="City", max_length=128)
     state = models.CharField(verbose_name="State", max_length=2)
     zip_code = models.CharField(verbose_name="ZIP / Postal code", max_length=12)
+
+    def __str__(self):
+        return f"{self.name}<br>" \
+               f"{self.address1}<br>" \
+               f"{self.address2}<br>" \
+               f"{self.city}, {self.state}, {self.zip_code}"
