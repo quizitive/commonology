@@ -28,13 +28,14 @@ class SentFilter(SimpleListFilter):
 class ClaimAdmin(admin.ModelAdmin):
     readonly_fields = ('claim_date',)
     list_filter = (SentFilter,)
-    list_display = ('player', 'claim_date', 'sent_date', 'address')
+    list_display = ('player', 'claim_date', 'sent_date')  # , 'address')
     readonly_fields = ['address']
 
     def address(self, obj):
         try:
             a = MailingAddress.objects.get(player=obj.player)
-            return mark_safe(f"<a href='/admin/rewards/mailingaddress/{a.pk}/change/'>address</a>")
+            return mark_safe(f"<a href='/admin/rewards/mailingaddress/{a.pk}/change/'>address</a><br>"
+                             f"{a}")
         except MailingAddress.DoesNotExist:
             return "missing"
 
