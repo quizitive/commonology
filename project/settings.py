@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'leaderboard',
     'mail',
     'quizitive',
+    'rewards',
 ]
 
 if DEBUG_TOOLBAR:
@@ -306,3 +307,5 @@ CKEDITOR_CONFIGS = {
         ]),
     }
 }
+
+REWARD_THRESHOLD = 100000
