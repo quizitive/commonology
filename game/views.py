@@ -31,6 +31,7 @@ from users.views import remove_pending_email_invitations
 from users.utils import get_player
 from mail.sendgrid_utils import sendgrid_send
 from mail.models import Component
+from rewards.utils import check_for_reward
 
 
 class SeriesPermissionMixin(UserPassesTestMixin):
@@ -176,6 +177,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         self._save_forms(forms)
         self.email_player_success(request, game, player)
         write_new_responses_to_gdrive.delay(game.id)
+
+        check_for_reward(player)
 
         return self.render_answers_submitted_card(request, 'success', player, game)
 
