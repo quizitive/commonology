@@ -36,6 +36,7 @@ class ClaimView(LoginRequiredMixin, CardFormView):
                              form_action=f'/', button_label='Thank you!')
 
         if Claim.objects.filter(player=player).exists():
+            self.congrat_message = ""
             m = "You have already claimed your mug.  Sorry, but we are limited one per customer."
             self.header = "Claim staked!"
             return self.info(request, message=m, form=None, form_method='get',
