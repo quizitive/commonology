@@ -13,6 +13,7 @@ class ClaimView(LoginRequiredMixin, CardFormView):
     page_template = 'rewards/cards/claim_page.html'
     header = "Claim Reward"
     button_label = 'Submit'
+    congrat_message = f'Congratulations, you have earned this beautiful coffee mug.'
 
     def get_form(self, form_class=None):
         player = self.request.user
@@ -27,6 +28,7 @@ class ClaimView(LoginRequiredMixin, CardFormView):
         player = request.user
         n = player.players_referred.count()
         if n < settings.REWARD_THRESHOLD:
+            self.congrat_message = ""
             m = f"It seems you have not made {settings.REWARD_THRESHOLD} referrals yet and are not entitled to a mug." \
                 f" Keep trying, you can do it."
             self.header = "Not eligible for claim yet."
@@ -70,3 +72,10 @@ class ClaimView(LoginRequiredMixin, CardFormView):
                          form_method='get',
                          form_action=f'/',
                          button_label='Thank you!')
+
+    def get_context_data(self, *args, **kwargs):
+        return super().get_context_data(
+            *args,
+            congrat_message=self.congrat_message,
+            **kwargs
+        )
