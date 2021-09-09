@@ -20,7 +20,7 @@ urlpatterns = [
     path('', include('mail.urls')),
     path('', include('quizitive.urls')),
     path('', include('leaderboard.urls')),
-    path('', include('rewards.urls')),
+    # path('', include('rewards.urls')),
     path('c/<slug:series_slug>/', include('leaderboard.urls', namespace='series-leaderboard')),
     path('c/<slug:series_slug>/', include('game.urls', namespace='series-game')),
     path('chat/', include('chat.urls')),
