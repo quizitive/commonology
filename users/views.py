@@ -16,6 +16,7 @@ from django.core.validators import validate_email
 from django.template.loader import render_to_string
 from project.card_views import recaptcha_check, BaseCardView, CardFormView
 import django_tables2 as tables
+from django_tables2 import SingleTableView
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
@@ -450,18 +451,17 @@ class ReferralTable(tables.Table):
     class Meta:
         model = Player
         template_name = 'django_tables2/bootstrap.html'
-        fields = ("email", "display_name")  # , "referrer")
+        fields = ("email", "display_name", "referrer")
 
 
-class ReferralStatsView(PermissionRequiredMixin, ListView):
+class ReferralStatsView(PermissionRequiredMixin, SingleTableView):
     model = Player
-    # table_class = ReferralTable
-    # table = ReferralTable(Player.objects.all())
+    table_class = ReferralTable
     template_name = 'users/referrals.html'
     permission_required = 'is_staff'
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super(ReferralStatsView, self).get_context_data(**kwargs)
-        qs = Player.objects.filter(first_name='Marc').all()
-        context['table'] = ReferralTable(qs)
-        return context
+    # def get_context_data(self, *, object_list=None, **kwargs):
+    #     context = super(ReferralStatsView, self).get_context_data(**kwargs)
+    #     qs = Player.objects.filter(first_name='Marc').all()
+    #     context['table'] = ReferralTable(qs)
+    #     return context
