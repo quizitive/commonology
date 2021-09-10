@@ -247,8 +247,14 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         else:
             recaptcha_key = settings.RECAPTCHA3_KEY
 
+        try:
+            game_rules = Component.objects.get(name='Game Rules')
+        except Component.DoesNotExist:
+            game_rules = None
+
         context.update({
             'game': game,
+            'game_rules': game_rules,
             'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
