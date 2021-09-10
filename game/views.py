@@ -182,6 +182,9 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
         return self.render_answers_submitted_card(request, 'success', player, game)
 
+    def game_success_flow(self):
+        pass
+
     @transaction.atomic
     def _save_forms(self, forms):
         for form in forms.values():
@@ -301,6 +304,15 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             editable=editable,
             initial={'display_name': display_name}
         )
+
+
+class GameReplayView(GameFormView):
+
+    def _game_complete_flow(self):
+        return
+
+    def _save_forms(self, forms):
+        return
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
