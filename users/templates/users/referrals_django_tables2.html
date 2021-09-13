@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load render_table from django_tables2 %}
+
+{% block page_style %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+{% endblock %}
+
+{% block navbar %}
+  {% include 'components/navbar.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+    <p><h2>Referrers</h2></p>
+    {% render_table table %}
+    </div>
+{% endblock %}
