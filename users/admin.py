@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.admin import SimpleListFilter
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from .forms import PlayerCreationForm, PlayerChangeForm
 from .models import Player, PendingEmail, Team
@@ -65,17 +65,23 @@ class Referrer(Player):
     class Meta:
         proxy = True
 
-    @property
-    def referral_count(self):
-        return len(self.referrers.all())
 
+def referral_filter_ids(low=None, high=None):
+    # Really want to do this:
+    # select B.*, count(A.*) as n from users_player A, users_player B where A.referrer_id=B.id
+    #   group by B.id, B.* order by B.id
+    # BUT ... Django ORM does NOT support self joins
 
-def referral_filter_ids(low, high):
-    ids = [i['referrer'] for i in
-           Player.objects.values('referrer').
-           annotate(n=Count('referrer')).
-           filter(n__lte=high).filter(n__gte=low).
-           all()]
+    active_players = Player.objects.filter(referrer__isnull=False).filter(answers__isnull=False).distinct()
+    f = Q(id__in=[i.id for i in active_players])
+    qs = Player.objects.values('referrer').annotate(n=Count('referrer', filter=f))
+
+    if low:
+        qs = qs.filter(n__gte=low)
+    if high:
+        qs = qs.filter(n__lte=high)
+
+    ids = [i['referrer'] for i in qs.all()]
     return ids
 
 
@@ -90,17 +96,17 @@ class ReferrerFilter(SimpleListFilter):
     def queryset(self, request, qs):
         v = self.value()
         if 'less5' == v:
-            qs = qs.filter(id__in=referral_filter_ids(0, 4))
+            qs = qs.filter(id__in=referral_filter_ids(high=4))
         if 'five' == v:
-            qs = qs.filter(id__in=referral_filter_ids(5, 5))
+            qs = qs.filter(id__in=referral_filter_ids(low=5, high=5))
         elif 'less10' == v:
-            qs = qs.filter(id__in=referral_filter_ids(6, 9))
+            qs = qs.filter(id__in=referral_filter_ids(low=6, high=9))
         if 'ten' == v:
-            qs = qs.filter(id__in=referral_filter_ids(10, 10))
+            qs = qs.filter(id__in=referral_filter_ids(low=10, high=10))
         elif 'less15' == v:
-            qs = qs.filter(id__in=referral_filter_ids(11, 15))
+            qs = qs.filter(id__in=referral_filter_ids(low=11, high=15))
         elif 'more' == v:
-            qs = qs.filter(id__in=referral_filter_ids(16, 1000000))
+            qs = qs.filter(id__in=referral_filter_ids(low=16))
 
         return qs
 
@@ -130,10 +136,7 @@ class ReferrersAdmin(PlayerUserAdmin):
     ordering = None
 
     def get_queryset(self, request):
-        ids = [i['referrer'] for i in
-               Player.objects.values('referrer').
-               annotate(n=Count('referrer')).
-               filter(n__gte=0).
-               all()]
+
+        ids = referral_filter_ids()
         qs = super(PlayerUserAdmin, self).get_queryset(request).filter(id__in=ids)
         return qs

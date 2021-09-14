@@ -125,9 +125,13 @@ class Player(CustomUser):
         return Player.objects.filter(referrer=self, answers__isnull=False).distinct()
 
     @property
+    def referral_count(self):
+        return len(self.players_referred.all())
+
+    @property
     def referrals(self):
         r = [f'<a href="/admin/users/player/{r.id}/change">{r.email} {r.display_name}</a>' for r in
-             self.referrers.all()]
+             self.players_referred]
         if r:
             r = '<br>'.join(r)
         else:
