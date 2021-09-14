@@ -67,7 +67,7 @@ class Referrer(Player):
 
     @property
     def referral_count(self):
-        return len(self.referrals_qs)
+        return len(self.referrers.all())
 
 
 class ReferrerFilter(SimpleListFilter):
