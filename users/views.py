@@ -454,7 +454,7 @@ class ReferralTable(tables.Table):
         fields = ("email", "display_name", "referrer")
 
 
-class ReferralStatsView(PermissionRequiredMixin, SingleTableView):
+class _ReferralStatsView(PermissionRequiredMixin, SingleTableView):
     model = Player
     table_class = ReferralTable
     template_name = 'users/referrals.html'
@@ -465,3 +465,11 @@ class ReferralStatsView(PermissionRequiredMixin, SingleTableView):
     #     qs = Player.objects.filter(first_name='Marc').all()
     #     context['table'] = ReferralTable(qs)
     #     return context
+
+
+class ReferralStatsView(PermissionRequiredMixin, ListView):
+    permission_required = 'is_staff'
+    model = Player
+    context_object_name = 'referrers_list'
+    template_name = 'users/referrals.html'
+    paginate_by = 10
