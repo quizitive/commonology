@@ -105,9 +105,27 @@ class ReferrerFilter(SimpleListFilter):
         return qs
 
 
+class ReferrerClaimFilter(SimpleListFilter):
+    title = "Claims"
+    parameter_name = 'claims'
+
+    def lookups(self, request, model_admin):
+        return [("not_claimed", "Not claimed"), ("claimed", "Claimed"), ("sent", "Sent")]
+
+    def queryset(self, request, qs):
+        v = self.value()
+        if 'not_claimed' == v:
+            qs = qs.filter(claim__isnull=True)
+        elif 'claimed' == v:
+            qs = qs.filter(claim__isnull=False)
+        elif 'sent' == v:
+            qs = qs.filter(claim__sent_date__isnull=False)
+        return qs
+
+
 @admin.register(Referrer)
 class ReferrersAdmin(PlayerUserAdmin):
-    list_filter = (ReferrerFilter, 'date_joined', 'subscribed')
+    list_filter = (ReferrerFilter, ReferrerClaimFilter, 'date_joined', 'subscribed')
     list_display = ('email', 'date_joined', 'referral_count')
     ordering = None
 
