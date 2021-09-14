@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.admin import SimpleListFilter
+from django.db.models import Count
 
 from .forms import PlayerCreationForm, PlayerChangeForm
 from .models import Player, PendingEmail, Team
@@ -56,3 +58,55 @@ class PendingEmailAdmin(admin.ModelAdmin):
 class TeamAdmin(admin.ModelAdmin):
     list_display = ('name', 'id')
     search_field = ('name', 'id', 'players__email', 'players__display_name')
+
+
+class Referrer(Player):
+    class Meta:
+        proxy = True
+
+    @property
+    def referral_count(self):
+        qs = Player.objects.filter(referrer=self).distinct()
+        return len(qs)
+
+
+class ReferrerFilter(SimpleListFilter):
+    title = "Referrals"
+    parameter_name = 'n_referrals'
+
+    def lookups(self, request, model_admin):
+        return [("less", "Less"), ('more', 'More')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'less':
+            ids = [i['referrer'] for i in
+                   Player.objects.values('referrer').
+                   annotate(n=Count('referrer')).
+                   filter(n__lt=10).
+                   all()]
+            return queryset.filter(id__in=ids)
+
+        if self.value() == 'more':
+            ids = [i['referrer'] for i in
+                   Player.objects.values('referrer').
+                   annotate(n=Count('referrer')).
+                   filter(n__gte=10).
+                   all()]
+            return queryset.filter(id__in=ids)
+
+        return queryset
+
+
+@admin.register(Referrer)
+class ReferrersAdmin(PlayerUserAdmin):
+    list_filter = (ReferrerFilter, 'date_joined', 'subscribed')
+    list_display = ('email', 'date_joined', 'referral_count')
+
+    def get_queryset(self, request):
+        ids = [i['referrer'] for i in
+               Player.objects.values('referrer').
+               annotate(n=Count('referrer')).
+               filter(n__gte=0).
+               all()]
+        qs = super(PlayerUserAdmin, self).get_queryset(request).filter(id__in=ids)
+        return qs
