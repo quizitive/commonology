@@ -35,5 +35,4 @@ urlpatterns = [
     path('htmx/', PlayersHTMXView.as_view(), name='users-htmx'),
     path('unsubscribe/<token>', views.UnsubscribeView.as_view(), name='unsubscribe'),
     path('subscribe/<token>', views.SubscribeView.as_view(), name='subscribe'),
-    path("referral_stats/", views.ReferralStatsView.as_view(), name="referral_stats"),
 ]
