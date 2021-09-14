@@ -11,6 +11,7 @@ from django.contrib.postgres.fields import CIEmailField
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.safestring import mark_safe
 
 from .managers import CustomUserManager
 from django.utils import timezone
@@ -121,6 +122,20 @@ class Player(CustomUser):
     @property
     def players_referred(self):
         return Player.objects.filter(referrer=self, answers__isnull=False).distinct()
+
+    @property
+    def referrals_qs(self):
+        return Player.objects.filter(referrer=self).distinct()
+
+    @property
+    def referrals(self):
+        r = [f'<a href="/admin/users/player/{r.id}/change">{r.email} {r.display_name}</a>' for r in
+             self.referrals_qs]
+        if r:
+            r = '<br>'.join(r)
+        else:
+            r = 'None'
+        return mark_safe(r)
 
 
 class PendingEmail(models.Model):
