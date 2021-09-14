@@ -106,7 +106,7 @@ class ReferrerFilter(SimpleListFilter):
 
 
 class ReferrerClaimFilter(SimpleListFilter):
-    title = "Claims"
+    title = "Referral prize claims"
     parameter_name = 'claims'
 
     def lookups(self, request, model_admin):
