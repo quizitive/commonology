@@ -74,7 +74,7 @@ def code_player():
 class Player(CustomUser):
     _code = models.CharField(max_length=5, db_index=True, null=True,
                              help_text="Unique identifier useful for url parameters like referrer.")
-    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
+    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='referrers')
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
     is_member = models.BooleanField(
@@ -124,13 +124,9 @@ class Player(CustomUser):
         return Player.objects.filter(referrer=self, answers__isnull=False).distinct()
 
     @property
-    def referrals_qs(self):
-        return Player.objects.filter(referrer=self).distinct()
-
-    @property
     def referrals(self):
         r = [f'<a href="/admin/users/player/{r.id}/change">{r.email} {r.display_name}</a>' for r in
-             self.referrals_qs]
+             self.referrers.all()]
         if r:
             r = '<br>'.join(r)
         else:
