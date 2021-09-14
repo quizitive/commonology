@@ -70,37 +70,46 @@ class Referrer(Player):
         return len(self.referrers.all())
 
 
+def referral_filter_ids(low, high):
+    ids = [i['referrer'] for i in
+           Player.objects.values('referrer').
+           annotate(n=Count('referrer')).
+           filter(n__lte=high).filter(n__gte=low).
+           all()]
+    return ids
+
+
 class ReferrerFilter(SimpleListFilter):
     title = "Referrals"
     parameter_name = 'n_referrals'
 
     def lookups(self, request, model_admin):
-        return [("less", "Less"), ('more', 'More')]
+        return [("less5", "Less than 5"), ("five", "Five"), ("less10", "6 to 9"),
+                ("ten", "Ten"), ("less15", "11 to 15"), ('more', 'More than 15')]
 
-    def queryset(self, request, queryset):
-        if self.value() == 'less':
-            ids = [i['referrer'] for i in
-                   Player.objects.values('referrer').
-                   annotate(n=Count('referrer')).
-                   filter(n__lt=10).
-                   all()]
-            return queryset.filter(id__in=ids)
+    def queryset(self, request, qs):
+        v = self.value()
+        if 'less5' == v:
+            qs = qs.filter(id__in=referral_filter_ids(0, 4))
+        if 'five' == v:
+            qs = qs.filter(id__in=referral_filter_ids(5, 5))
+        elif 'less10' == v:
+            qs = qs.filter(id__in=referral_filter_ids(6, 9))
+        if 'ten' == v:
+            qs = qs.filter(id__in=referral_filter_ids(10, 10))
+        elif 'less15' == v:
+            qs = qs.filter(id__in=referral_filter_ids(11, 15))
+        elif 'more' == v:
+            qs = qs.filter(id__in=referral_filter_ids(16, 1000000))
 
-        if self.value() == 'more':
-            ids = [i['referrer'] for i in
-                   Player.objects.values('referrer').
-                   annotate(n=Count('referrer')).
-                   filter(n__gte=10).
-                   all()]
-            return queryset.filter(id__in=ids)
-
-        return queryset
+        return qs
 
 
 @admin.register(Referrer)
 class ReferrersAdmin(PlayerUserAdmin):
     list_filter = (ReferrerFilter, 'date_joined', 'subscribed')
     list_display = ('email', 'date_joined', 'referral_count')
+    ordering = None
 
     def get_queryset(self, request):
         ids = [i['referrer'] for i in
