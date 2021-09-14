@@ -32,6 +32,7 @@ class BaseCardView(ContextMixin, View):
     card_template = 'cards/base_card.html'
     page_template = 'single_card_view.html'
     recaptcha_key = None
+    card_footnote = None
 
     def get(self, request, *args, **kwargs):
         return self.render(request, *args, **kwargs)
@@ -50,7 +51,8 @@ class BaseCardView(ContextMixin, View):
             'card_template': self.card_template,
             'button_label': self.button_label,
             'recaptcha_key': self.recaptcha_key,
-            'custom_message': self.custom_message
+            'custom_message': self.custom_message,
+            'card_footnote': self.card_footnote
             }
         context.update(kwargs)
         return super().get_context_data(**context)

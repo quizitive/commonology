@@ -38,3 +38,9 @@ ul.nonfield {
 .w3-check {
   margin: 0 8px 0 4px;
 }
+.card_footnote {
+  color: grey;
+  font-size: 12px;
+  font-style: italic;
+  display: block;
+}

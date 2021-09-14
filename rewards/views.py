@@ -14,6 +14,7 @@ class ClaimView(LoginRequiredMixin, CardFormView):
     header = "Claim Reward"
     button_label = 'Submit'
     congrat_message = f'Congratulations, you have earned this beautiful coffee mug.'
+    card_footnote = "We will not share your address information."
 
     def get_form(self, form_class=None):
         player = self.request.user

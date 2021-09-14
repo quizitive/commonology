@@ -68,6 +68,12 @@
     </form>
   {% endblock %}
 
+  {% block card_footnote %}
+    {% if card_footnote %}
+          <div class="card_footnote w3-padding-16">{{ card_footnote }}</div>
+    {% endif %}
+  {% endblock %}
+
   {% block card_extras %}{% endblock %}
 
   </div>
