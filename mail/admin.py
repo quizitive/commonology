@@ -80,6 +80,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == 'components':
+            kwargs['queryset'] = Component.objects.filter(mail_component=True)
             kwargs['widget'] = SortedFilteredSelectMultiple()
         return super(MailMessageAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
@@ -87,4 +88,4 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
 @admin.register(Component)
 class MailComponentAdmin(admin.ModelAdmin):
     list_display = ('name', 'template')
-    fields = ('name', 'location', 'message', 'template', 'context')
+    fields = ('name', 'message', 'mail_component', 'location', 'template', 'context')
