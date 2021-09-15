@@ -10,8 +10,7 @@ logger = logging.getLogger(__name__)
 
 def check_for_reward(player):
     if player.referrer:
-        p = Player.objects.get(player.referrer)
-        if settings.REWARD_THRESHOLD == p.players_referred.count():
+        if settings.REWARD_THRESHOLD == player.referrer.players_referred.count():
             slackit(f"{player} earned a coffee mug.")
             try:
                 send_one(player, 'You earned a coffee mug.!',
