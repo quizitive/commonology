@@ -20,7 +20,7 @@ from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
 from game.utils import next_wed_noon, next_friday_1159
 from game.models import Series, Question, Answer
-from game.views import find_latest_public_game
+from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
 from game.gsheets_api import *
 from game.tasks import game_to_db, questions_to_db, players_to_db, \
@@ -559,3 +559,27 @@ class TestViews(TestCase):
             data={"suggestion": "A question suggestion"}
         )
         self.assertEqual(len(mail.outbox), 1)
+
+
+class TestGameForm(BaseGameDataTestCase, PSIDMixin):
+
+    def setUp(self):
+        self.player = get_local_user()
+        self.client = get_local_client()
+        self.game_form_url = reverse('series-game:game-form',
+                                     kwargs={'series_slug': self.series.slug, 'game_id': self.game.game_id})
+
+    def test_game_form_view(self):
+        # can't render game form directly (needs to go through GameValidationView)
+        response = self.client.get(self.game_form_url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, f'/play/{self.game.uuid}')
+
+    def test_game_form_post(self):
+        psid = self.sign_game_player(self.game, self.player)
+        game_data = {
+            'psid': psid,
+            'display_name': 'test_guy'
+        }
+        response = self.client.post(self.game_form_url, data=game_data)
+        self.assertEqual(response.status_code, 200)
