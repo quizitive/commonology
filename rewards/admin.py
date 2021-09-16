@@ -1,4 +1,4 @@
-from rewards.models import MailingAddress, Claim
+from rewards.models import Claim
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.utils.safestring import mark_safe
