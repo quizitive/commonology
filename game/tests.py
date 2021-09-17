@@ -4,6 +4,7 @@ import string
 import random
 import json
 import logging
+from urllib.parse import quote_plus
 from copy import deepcopy
 from csv import reader
 from dateutil.relativedelta import relativedelta
@@ -568,6 +569,7 @@ class TestGameForm(BaseGameDataTestCase, PSIDMixin):
         self.client = get_local_client()
         self.game_form_url = reverse('series-game:game-form',
                                      kwargs={'series_slug': self.series.slug, 'game_id': self.game.game_id})
+        self.psid = self.sign_game_player(self.game, self.player)
 
     def test_game_form_view(self):
         # can't render game form directly (needs to go through GameValidationView)
@@ -575,11 +577,50 @@ class TestGameForm(BaseGameDataTestCase, PSIDMixin):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, f'/play/{self.game.uuid}')
 
-    def test_game_form_post(self):
-        psid = self.sign_game_player(self.game, self.player)
-        game_data = {
-            'psid': psid,
-            'display_name': 'test_guy'
-        }
-        response = self.client.post(self.game_form_url, data=game_data)
+    def test_game_form_post_success(self):
+        form_data = self._valid_game_form_data()
+        self._test_game_form_post_response(form_data, 'Your answers have been submitted.')
+
+    def test_incomplete_form_post_fail(self):
+        form_data = self._psid_display_name_form_data()
+        # bad game data redirects to game form
+        self._test_game_form_post_response(form_data, self.game.questions.first().text)
+
+    def test_valid_string_not_in_choices(self):
+        # if an answer isn't in choices, redirect to game form
+        q = self.game.questions.first()
+        q.choices = ['foo', 'bar']
+        q.save()
+        form_data = self._valid_game_form_data()
+        self._test_game_form_post_response(form_data, self.game.questions.first().text)
+        self._test_game_form_post_response(form_data, 'div class="errors"')
+
+    def _psid_display_name_form_data(self) -> list:
+        return [
+            (('psid', self.psid),),
+            (('display_name', 'test_guy'),)
+        ]
+
+    def _valid_game_form_data(self) -> list:
+        form_data = self._psid_display_name_form_data()
+        form_data.extend([
+            (('question', str(q.id)), ('raw_string', f'test_{q.id}')) for q in self.game.questions.all()
+        ])
+        return form_data
+
+    def _url_encode_form_data(self, form_data):
+        # accepts a list of tuples (representing a form) which contains key value pair tuples representing
+        # field name and value e.g. ('form_field', 'value') and outputs as encoded form data
+        url_encoded = f'?'
+        for form in form_data:
+            url_encoded += '&' + '&'.join([f'{k}={quote_plus(v)}' for k, v in form])
+        return url_encoded
+
+    def _test_game_form_post_response(self, game_data, expected_text):
+        response = self.client.post(
+            self.game_form_url,
+            data=self._url_encode_form_data(game_data),
+            content_type="application/x-www-form-urlencoded"
+        )
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, expected_text)
