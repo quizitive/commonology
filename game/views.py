@@ -167,7 +167,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
 
         forms = self.get_game_forms(self.game, form_data, player)
-        if any([f.errors for f in forms.values()]):
+        if any([not f.is_valid() for f in forms.values()]):
             context = self.get_context(self.game, psid, dn_form, forms)
             return render(request, 'game/game_form.html', context)
 
