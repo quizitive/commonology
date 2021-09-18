@@ -4,10 +4,12 @@ from numpy import base_repr
 
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.db import transaction
 from django.shortcuts import render, redirect
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib import messages
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
@@ -18,7 +20,7 @@ from django.conf import settings
 from project.views import CardFormView
 from project.card_views import recaptcha_check
 from game.charts import PlayerTrendChart, PlayersAndMembersDataset
-from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm
+from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
 from game.utils import find_latest_public_game
@@ -29,6 +31,7 @@ from users.views import remove_pending_email_invitations
 from users.utils import get_player
 from mail.sendgrid_utils import sendgrid_send
 from mail.models import Component
+from rewards.utils import check_for_reward
 
 
 class SeriesPermissionMixin(UserPassesTestMixin):
@@ -175,6 +178,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         self.email_player_success(request, game, player)
         write_new_responses_to_gdrive.delay(game.id)
 
+        check_for_reward(player)
+
         return self.render_answers_submitted_card(request, 'success', player, game)
 
     @transaction.atomic
@@ -186,13 +191,14 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         msgs = {
             'success': {
                 "header": "Success!",
-                "custom_message": mark_safe(f"<b>Your answers have been submitted.</b> You can see them now by clicking "
-                                  f"the button below, and we've emailed the link to <b>{player.email}</b>.<br/>"),
+                "custom_message": mark_safe(
+                    f"<b>Your answers have been submitted.</b> You can see them now by clicking "
+                    f"the button below, and we've emailed the link to <b>{player.email}</b>.<br/>"),
             },
             'duplicate': {
                 "header": "You've already played!",
                 "custom_message": mark_safe(f"You have already submitted answers for this game. "
-                                  f"You can see them again by clicking the button below.\n<br/>"),
+                                            f"You can see them again by clicking the button below.\n<br/>"),
             }
         }
         return CardFormView(
@@ -241,8 +247,14 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         else:
             recaptcha_key = settings.RECAPTCHA3_KEY
 
+        try:
+            game_rules = Component.objects.get(name='Game Rules')
+        except Component.DoesNotExist:
+            game_rules = None
+
         context.update({
             'game': game,
+            'game_rules': game_rules,
             'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
@@ -332,15 +344,15 @@ class GameEntryView(PSIDMixin, CardFormView):
 
     def message(self, request, msg):
         return self.render_message(request, msg, form=None, button_label='Ok',
-                           form_method="get", form_action='/')
+                                   form_method="get", form_action='/')
 
     def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
         return self.render_message(request, msg, form=None, button_label='Leaderboard',
-                           form_method="get", form_action=f'/c/{slug}/leaderboard/')
+                                   form_method="get", form_action=f'/c/{slug}/leaderboard/')
 
     def join(self, request, msg):
         return self.render_message(request, msg, form=None, button_label='Join',
-                           form_method="get", form_action='/join/')
+                                   form_method="get", form_action='/join/')
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
@@ -354,11 +366,13 @@ class GameEntryView(PSIDMixin, CardFormView):
 
         if g is None:
             if user.is_authenticated:
-                return self.message(request, 'Cannot find an active game.  We will let you know when the next game begins.')
+                return self.message(request,
+                                    'Cannot find an active game.  We will let you know when the next game begins.')
             elif game_uuid:
                 return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
             else:
-                return self.join(request, 'Cannot find an active game.  Join so we can let you know when the next game begins.')
+                return self.join(request,
+                                 'Cannot find an active game.  Join so we can let you know when the next game begins.')
 
         slug = g.series.slug
 
@@ -431,8 +445,8 @@ class GameEntryView(PSIDMixin, CardFormView):
 
         send_confirm(request, g, email, referrer_id)
         custom_message = mark_safe(f"<b>We sent a game link to {email}. </b>"
-                              f"Don't forget to check your spam or junk folder if need be. "
-                              f"By the way, if you were logged in you'd be playing already.")
+                                   f"Don't forget to check your spam or junk folder if need be. "
+                                   f"By the way, if you were logged in you'd be playing already.")
 
         self.header = "Game link sent!"
         return self.render_message(request, custom_message, form=None,
@@ -458,12 +472,13 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
 
         g = Game.objects.filter(uuid=game_uuid).first()
         if not g:
-            return self.warning(request, 'That game does not exist.  Perhaps you are using the wrong link.', keep_form=False)
+            return self.warning(request, 'That game does not exist.  Perhaps you are using the wrong link.',
+                                form=None)
 
         if not g.is_active:
             # This should rarely happy because GameEntryView.get() confirmed there is an active game.
             # However, someone could try to use a confirm link too late.
-            return self.warning(request, 'Sorry the next game is no longer active.', keep_form=False)
+            return self.warning(request, 'Sorry the next game is no longer active.', form=None)
 
         if request.user.is_authenticated:
             if g.user_played(request.user):
@@ -545,3 +560,28 @@ def tabulator_form_view(request):
 
     context['form'] = form
     return render(request, 'game/tabulator_form.html', context)
+
+
+class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
+    form_class = QuestionSuggestionForm
+    header = "Suggest a Question"
+    custom_message = f"Suggest a question for a future game! Please supply " \
+                     f"some example answers."
+    button_label = "Submit"
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            p = request.user
+            msg = f"A new question has been suggested on the site:\n\n" \
+                  f"Player display name: {p.display_name}\n" \
+                  f"Player name (first & last): {p.first_name} {p.last_name}\n" \
+                  f"Player email: {p.email}\n\n" + form.data['suggestion']
+            subject = "New Question Suggestion"
+            email = "concierge@commonologygame.com"
+            send_mail(subject=subject, message=msg,
+                      from_email=None, recipient_list=[email])
+            messages.info(request, message=f"Thank you, your question has successfully been submitted. "
+                                           f"Feel free to suggest another.")
+            return redirect('game:question-suggest')
+        return self.get(request, *args, **kwargs)

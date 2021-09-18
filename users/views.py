@@ -128,7 +128,7 @@ class JoinView(CardFormView):
         self.header = "Invitation Sent!"
         return self.info(request,
                          message=self.custom_message,
-                         keep_form=False,
+                         form=None,
                          form_method='get',
                          button_label='Ok')
 

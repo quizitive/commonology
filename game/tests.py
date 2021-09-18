@@ -534,3 +534,28 @@ class TestPlayRequest(TestCase):
         response = client.get(path)
 
         self.assertContains(response, '<button id="submit-button"')
+
+
+class TestViews(TestCase):
+
+    def test_suggest_question(self):
+        # anonymous user redirects to login
+        client = Client()
+        response = client.get(reverse('game:question-suggest'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, '/login/?next=/suggest-a-question/')
+
+        # logged in user renders form
+        get_local_user()
+        client = get_local_client()
+        response = client.get(reverse('game:question-suggest'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Suggest a Question")
+
+        # post form sends email
+        mail.outbox = []
+        client.post(
+            reverse('game:question-suggest'),
+            data={"suggestion": "A question suggestion"}
+        )
+        self.assertEqual(len(mail.outbox), 1)
