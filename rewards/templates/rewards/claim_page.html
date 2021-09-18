@@ -1,0 +1,16 @@
+{% extends 'single_card_view.html' %}
+{% load static %}
+{% block content %}
+      <div class="content card-content">
+
+{#        <div class="w3-modal-content">#}
+{#            <p>{{ congrat_message }}</p>#}
+{#            <p><img src={% static "img/mug.jpeg" %}></p>#}
+{#        </div>#}
+
+        {# --- Simple card-on-screen view with default card --- #}
+        {% block card %}
+        {% include card_template|default:"cards/base_card.html" %}
+        {% endblock %}
+      </div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.template.loader import render_to_string
 from project import settings
 from project.card_views import CardFormView
 from project.utils import slackit
@@ -10,10 +11,11 @@ from rewards.models import MailingAddress, Claim
 class ClaimView(LoginRequiredMixin, CardFormView):
 
     form_class = ClaimForm
-    page_template = 'rewards/cards/claim_page.html'
+    # page_template = 'cards/base_card.html'
+    card_template = 'rewards/cards/claim_card.html'
     header = "Claim Reward"
     button_label = 'Submit'
-    congrat_message = f'Congratulations, you have earned this beautiful coffee mug.'
+    custom_message_template = 'rewards/components/congrats_message.html'
 
     def get_form(self, form_class=None):
         player = self.request.user
@@ -42,7 +44,6 @@ class ClaimView(LoginRequiredMixin, CardFormView):
             return self.info(request, message=m, form=None, form_method='get',
                              form_action=f'/', button_label='Thank you!')
 
-        messages.info(request, "Please fill out this form so you can enjoy a hot drink in this beautiful mug.")
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -73,10 +74,3 @@ class ClaimView(LoginRequiredMixin, CardFormView):
                          form_method='get',
                          form_action=f'/',
                          button_label='Thank you!')
-
-    def get_context_data(self, *args, **kwargs):
-        return super().get_context_data(
-            *args,
-            congrat_message=self.congrat_message,
-            **kwargs
-        )
