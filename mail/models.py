@@ -12,6 +12,9 @@ class Component(models.Model):
     message = RichTextUploadingField(null=True, blank=True)
     template = models.CharField(max_length=150, default='mail/simple_component.html')
     context = models.JSONField(default=dict, blank=True)
+    mail_component = models.BooleanField(
+        default=True, help_text=f'Check this if this component is being used in emails, '
+                                f'otherwise it will not appear in the MailMessage admin.')
 
     top = 'top'
     btm = 'btm'
@@ -19,7 +22,9 @@ class Component(models.Model):
         (top, 'Top'),
         (btm, 'Bottom'),
     ]
-    location = models.CharField(max_length=3, choices=LOCATION_CHOICES, default='btm')
+    location = models.CharField(max_length=3, choices=LOCATION_CHOICES, default='btm',
+                                help_text=f'Only used in emails. This determines whether the component is placed '
+                                          f'above or below the main MailMessage.')
 
     def __str__(self):
         return f"{self.name} ({next(l for l in self.LOCATION_CHOICES if l[0] == self.location)[1]})"
