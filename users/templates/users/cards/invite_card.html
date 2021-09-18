@@ -32,6 +32,7 @@
           <img src="{% static 'img/lucci-mug-meme.png' %}" width="100%">
       </div>
 
+      {% if can_claim %}
       <div class="w3-padding-16 w3-center">
         <a href="{% url 'claim' %}">
           <button class="w3-button cg-salmon w3-round-xxlarge" style="width:60%">
@@ -39,6 +40,7 @@
           </button>
         </a>
       </div>
+      {% endif %}
 
     </div>
   </div>
