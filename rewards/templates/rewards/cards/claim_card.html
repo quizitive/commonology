@@ -1,11 +1,15 @@
 {% extends 'cards/base_card.html' %}
 
 {% block card_top %}
-  {% include 'rewards/components/congrats_message.html' %}
+  {% if can_claim %}
+    {% include 'rewards/components/congrats_message.html' %}
+  {% endif %}
 {% endblock %}
 
 {% block card_extras %}
+  {% if can_claim %}
   <div id="claim-disclaimer" class="w3-padding-16 sm-grey-italic">
-    Your address information will not be shared.
+    Your address information will not be shared. This offer is only valid for players in the United States.
   </div>
+  {% endif %}
 {% endblock %}
