@@ -28,11 +28,11 @@ class ClaimView(LoginRequiredMixin, CardFormView):
 
     def get(self, request, *args, **kwargs):
         player = request.user
-        n = player.players_referred.count()
-        if n < settings.REWARD_THRESHOLD:
+        can_claim = player.players_referred.count() >= settings.REWARD_THRESHOLD
+        if not can_claim:
             self.congrat_message = ""
             m = f"It seems you have not made {settings.REWARD_THRESHOLD} referrals yet and are not entitled to a mug." \
-                f" Keep trying, you can do it."
+                f" Keep going, you can do it!"
             self.header = "Not eligible for claim yet."
             return self.info(request, message=m, form=None, form_method='get',
                              form_action=f'/', button_label='Thank you!')
