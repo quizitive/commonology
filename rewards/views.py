@@ -44,7 +44,7 @@ class ClaimView(LoginRequiredMixin, CardFormView):
             return self.info(request, message=m, form=None, form_method='get',
                              form_action=f'/', button_label='Thank you!')
 
-        return super().get(request, *args, **kwargs)
+        return super().get(request, can_claim=can_claim, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
 
