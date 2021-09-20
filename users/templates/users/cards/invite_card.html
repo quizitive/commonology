@@ -21,7 +21,7 @@
           <i class="fas fa-mug-hot fa-2x" style="color:#f26649;"></i>
         </div>
         <div class="w3-cell">
-        When you refer 10 friends we'll send you this groovy Commonology coffee mug!
+        When you refer {{ reward_threshold }} friends we'll send you this groovy Commonology coffee mug!
           <div class="supplies-note sm-grey-italic" style="margin-top: 4px;">
             Only while supplies last - act fast!
           </div>
@@ -62,7 +62,7 @@
       <div id="referral-note" class="w3-padding-16 sm-grey-italic">
         Friends you refer will appear here after they play.
         A referral only counts after they play at least one game.
-        We'll email you after you hit 10 referrals. Haven't heard from us?
+        We'll email you once you hit {{ reward_threshold }} referrals. Haven't heard from us?
         Think we're missing someone?
         <a href="{% url 'contact' %}" style="white-space: nowrap">Contact Us</a>
       </div>
