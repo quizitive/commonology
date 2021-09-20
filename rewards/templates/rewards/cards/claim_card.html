@@ -3,6 +3,8 @@
 {% block card_top %}
   {% if can_claim %}
     {% include 'rewards/components/congrats_message.html' %}
+  {% else %}
+    {{ block.super }}
   {% endif %}
 {% endblock %}
 

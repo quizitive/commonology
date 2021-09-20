@@ -1,9 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
 from project import settings
 from project.card_views import CardFormView
 from project.utils import slackit
+from mail.utils import send_one
 from rewards.forms import ClaimForm
 from rewards.models import MailingAddress, Claim
 
@@ -11,7 +13,6 @@ from rewards.models import MailingAddress, Claim
 class ClaimView(LoginRequiredMixin, CardFormView):
 
     form_class = ClaimForm
-    # page_template = 'cards/base_card.html'
     card_template = 'rewards/cards/claim_card.html'
     header = "Claim Reward"
     button_label = 'Submit'
@@ -30,7 +31,6 @@ class ClaimView(LoginRequiredMixin, CardFormView):
         player = request.user
         can_claim = player.players_referred.count() >= settings.REWARD_THRESHOLD
         if not can_claim:
-            self.congrat_message = ""
             m = f"It seems you have not made {settings.REWARD_THRESHOLD} referrals yet and are not entitled to a mug." \
                 f" Keep going, you can do it!"
             self.header = "Not eligible for claim yet."
@@ -38,11 +38,11 @@ class ClaimView(LoginRequiredMixin, CardFormView):
                              form_action=f'/', button_label='Thank you!')
 
         if Claim.objects.filter(player=player).exists():
-            self.congrat_message = ""
-            m = "You have already claimed your mug.  Sorry, but we are limited one per customer."
+            m = f"We've received your claim and you will receive your mug soon. " \
+                f"Feel free to contact us with any questions."
             self.header = "Claim staked!"
             return self.info(request, message=m, form=None, form_method='get',
-                             form_action=f'/', button_label='Thank you!')
+                             form_action=f'/contact/', button_label='Contact us')
 
         return super().get(request, can_claim=can_claim, *args, **kwargs)
 
@@ -66,10 +66,13 @@ class ClaimView(LoginRequiredMixin, CardFormView):
         slack_msg = f"{player} just claimed a coffee mug."
         slackit(slack_msg)
 
-        m = "We'll send your prize ASAP!"
+        claim_msg = render_to_string('rewards/emails/reward_claimed.html', {'address': address}).replace("\n", "")
+        send_one(player, 'Order confirmation', claim_msg)
+
+        self.custom_message = mark_safe(f"Thanks! We'll send your prize ASAP. "
+                                        f"We've sent a confirmation email to <b>{player.email}.</b>")
         self.header = "Claim staked!"
-        return self.info(request,
-                         message=m,
+        return self.render(request,
                          form=None,
                          form_method='get',
                          form_action=f'/',
