@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.forms import HiddenInput
 from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
@@ -130,7 +131,7 @@ class JoinView(CardFormView):
         self.header = "Invitation Sent!"
         return self.info(request,
                          message=self.custom_message,
-                         keep_form=False,
+                         form=None,
                          form_method='get',
                          button_label='Ok')
 
@@ -212,6 +213,8 @@ class InviteFriendsView(LoginRequiredMixin, BaseCardView):
             player_code=f'r={self.request.user.code}',
             players_referred=players_referred,
             referral_count=players_referred.count(),
+            reward_threshold=settings.REWARD_THRESHOLD,
+            can_claim=players_referred.count() > settings.REWARD_THRESHOLD,
             **kwargs
         )
 
