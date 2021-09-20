@@ -1,0 +1,43 @@
+
+{% autoescape off %}
+
+{% block email-content %}
+
+  <div style="padding:16px 0;">
+    <span style="font-size:20px;font-weight:bold;font-style:italic;color:#0095da;">
+      Congratulations!
+    </span>
+    <br/><br/>You have referred 10 friends and earned your very own Commonology coffee mug.
+    To claim your mug, click the button below.
+
+    <div style="padding:16px;max-width:400px;margin:auto;">
+        <img src='https://commonologygame.com/static/img/lucci-mug-canhaz.png' width="100%">
+    </div>
+  </div>
+
+  <div id="button-holder">
+    <button class="w3-button cg-blue" style="display: block;">
+      <a href="{{ url }}">Claim you Mug!</a>
+    </button>
+  </div>
+
+  <div style="padding:16px 0;">
+  Thank you for spreading the word about Commonology, it means the world to us! Keep an eye out for
+  future promotions and more features coming soon.
+  </div>
+
+  <p>
+    Cheers,
+    <br/>
+    The Commonology Team
+  </p>
+  <div id="footer" style="margin-bottom:-24px">
+    <p>
+    Button not working? Try pasting the url directly into your browser:
+      <a href="{{ url }}">{{ url }}</a>
+    </p>
+  </div>
+
+{% endblock %}
+
+{% endautoescape %}
