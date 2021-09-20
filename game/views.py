@@ -124,7 +124,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             psid = ''
             dn_form = self.display_name_form('Reviewer')
 
-        self.requested_slug = game.series.slug
+        self.requested_slug = self.slug = game.series.slug
         self.game = game
         return render(request, 'game/game_form.html', self.get_context(game, psid, dn_form, editable=editable))
 
@@ -167,7 +167,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
 
         forms = self.get_game_forms(self.game, form_data, player)
-        if any([f.errors for f in forms.values()]):
+        if any([not f.is_valid() for f in forms.values()]):
             context = self.get_context(self.game, psid, dn_form, forms)
             return render(request, 'game/game_form.html', context)
 
@@ -248,7 +248,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             recaptcha_key = settings.RECAPTCHA3_KEY
 
         try:
-            game_rules = Component.objects.get(name='Game Rules')
+            game_rules = Component.objects.get(name=f'Game Rules | {self.slug}')
         except Component.DoesNotExist:
             game_rules = None
 
