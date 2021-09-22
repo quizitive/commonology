@@ -65,6 +65,7 @@ def slackit(msg):
     # App ID: A02D8J3T1S9
     # Manage App here: https://api.slack.com/apps/A02D8J3T1S9/general
     # Can get oath token here: https://api.slack.com/apps/A02D8J3T1S9/oauth
+    print(settings.SLACK_TOKEN)
     url = f"https://hooks.slack.com/services/{settings.SLACK_TOKEN}"
     headers = {'content-type': 'application/json'}
     data = {'text': msg}
