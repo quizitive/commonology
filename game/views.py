@@ -17,8 +17,10 @@ from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from django.conf import settings
+
 from project.views import CardFormView
 from project.card_views import recaptcha_check
+from project.utils import slackit
 from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
 from game.models import Game, Series, Answer
@@ -579,6 +581,7 @@ class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
                   f"Player email: {p.email}\n\n" + form.data['suggestion']
             subject = "New Question Suggestion"
             email = "concierge@commonologygame.com"
+            slackit(msg)
             send_mail(subject=subject, message=msg,
                       from_email=None, recipient_list=[email])
             messages.info(request, message=f"Thank you, your question has successfully been submitted. "
