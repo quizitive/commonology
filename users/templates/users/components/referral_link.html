@@ -1,0 +1,29 @@
+<div class="share-section" style="padding:16px;">
+
+  <div style="padding:16px 0">
+    <b>Love playing Commonology? Refer your friends by sharing your personalized link!</b>
+  </div>
+
+  <div id="share-link" style="padding:8px;border:1px solid #0095da;margin:4px 0;background:white;border-radius: 4px;color:black; text-decoration: none;">https://commonologygame.com/play/?{{ player_code }}</div>
+
+  {% if not no_button %}
+  <button id="copy-button" class="w3-button w3-round cg-blue w3-border cg-border-blue" onclick="copyToClipboard('#share-link');">
+    Copy Link&nbsp&nbsp&nbsp<i class="far fa-copy"></i>
+  </button>
+  <div id="copy-msg" style="display:none;">Link copied!</div>
+  <script>
+  function copyToClipboard(tgt) {
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val($(tgt).text()).select();
+    document.execCommand("copy");
+    $temp.remove();
+    $("#copy-msg").css("display", "inline");
+  }
+  </script>
+  {% endif %}
+
+  <div class="refer-help" style="font-style:italic;font-size: 12px;padding-top:24px">
+    <span style="font-weight:bold;font-size:18px;color:#0095da">YES!</span> forwarding the game email still works and will count toward your total referrals!
+  </div>
+</div>

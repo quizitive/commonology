@@ -17,8 +17,10 @@ from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from django.conf import settings
+
 from project.views import CardFormView
 from project.card_views import recaptcha_check
+from project.utils import slackit
 from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
 from game.models import Game, Series, Answer
@@ -124,7 +126,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             psid = ''
             dn_form = self.display_name_form('Reviewer')
 
-        self.requested_slug = game.series.slug
+        self.requested_slug = self.slug = game.series.slug
         self.game = game
         return render(request, 'game/game_form.html', self.get_context(game, psid, dn_form, editable=editable))
 
@@ -167,7 +169,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
 
         forms = self.get_game_forms(self.game, form_data, player)
-        if any([f.errors for f in forms.values()]):
+        if any([not f.is_valid() for f in forms.values()]):
             context = self.get_context(self.game, psid, dn_form, forms)
             return render(request, 'game/game_form.html', context)
 
@@ -247,8 +249,14 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         else:
             recaptcha_key = settings.RECAPTCHA3_KEY
 
+        try:
+            game_rules = Component.objects.get(name=f'Game Rules | {self.slug}')
+        except Component.DoesNotExist:
+            game_rules = None
+
         context.update({
             'game': game,
+            'game_rules': game_rules,
             'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
@@ -573,6 +581,7 @@ class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
                   f"Player email: {p.email}\n\n" + form.data['suggestion']
             subject = "New Question Suggestion"
             email = "concierge@commonologygame.com"
+            slackit(msg)
             send_mail(subject=subject, message=msg,
                       from_email=None, recipient_list=[email])
             messages.info(request, message=f"Thank you, your question has successfully been submitted. "
