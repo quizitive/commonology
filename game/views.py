@@ -519,19 +519,6 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
         )
 
 
-@staff_member_required
-def stats_view(request):
-    chart_1 = PlayerTrendChart(
-        PlayersAndMembersDataset, slug='commonology', name="chart_3", since_game=38)
-    chart_2 = PlayerTrendChart(
-        PlayersAndMembersDataset, slug='commonology', name="chart_2", since_game=38, agg_period=4)
-    context = {
-        "chart_1": chart_1,
-        "chart_2": chart_2,
-    }
-    return render(request, 'game/stats.html', context)
-
-
 # ---- To be deprecated once we host forms ---- #
 @staff_member_required
 def tabulator_form_view(request):
