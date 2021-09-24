@@ -211,9 +211,9 @@ def find_by_name(name):
 def process_column(w, c):
     r = 1
     referrer = w.active.cell(row=r, column=c).value.strip()
-    u = find_by_name(referrer)
+    referrer_obj = find_by_name(referrer)
 
-    if not u:
+    if not referrer_obj:
         print('Cannot resolve ', referrer)
         return
 
@@ -222,6 +222,17 @@ def process_column(w, c):
         referee = w.active.cell(row=r, column=c).value
         if not referee:
             break
+
+        print('referee email:', referee)
+        p = find_by_name(referee)
+        if p:
+            if p.referrer:
+                print(referee, 'already referred by', p.referrer)
+            else:
+                p.referrer = referrer_obj
+                p.save()
+        else:
+            print('Referee', referee, 'does not exist.')
 
 
 def read_sheet(w):
@@ -233,8 +244,7 @@ def read_sheet(w):
         referrer = w.active.cell(row=1, column=c).value
 
 
-fn = '/Users/ms/Downloads/Kingdoms.xlsx'
-ws = openpyxl.load_workbook(fn)
+ws = openpyxl.load_workbook('Kingdoms.xlsx')
 
 for sheet_name in ws.sheetnames:
     ws.active = ws.sheetnames.index(sheet_name)
