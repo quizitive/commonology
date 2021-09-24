@@ -223,11 +223,10 @@ def process_column(w, c):
         if not referee:
             break
 
-        print('referee email:', referee)
         p = find_by_name(referee)
         if p:
             if p.referrer:
-                print(referee, 'already referred by', p.referrer)
+                print(referee, 'already referred by', p.referrer, 'not changing it to', referrer_obj)
             else:
                 p.referrer = referrer_obj
                 p.save()
@@ -250,4 +249,10 @@ for sheet_name in ws.sheetnames:
     ws.active = ws.sheetnames.index(sheet_name)
     read_sheet(ws)
 
-# who has 10 or more?
+# Move all from ms@quizitive.com to ms@koplon.com
+k = Player.objects.get(email='ms@koplon.com')
+q = Player.objects.get(email='ms@quizitive.com')
+for p in Player.objects.all():
+    if p.referrer == q:
+        p.referrer = k
+        p.save()
