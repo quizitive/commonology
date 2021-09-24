@@ -21,7 +21,6 @@ from django.conf import settings
 from project.views import CardFormView
 from project.card_views import recaptcha_check
 from project.utils import slackit
-from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
