@@ -5,7 +5,13 @@
     </caption>
     <tr class="model-group">
       <th scope="row">
-        <a href="google.com">BAR</a>
+        <a href="{% url 'admin:mail_component_changelist' %}?q=Game+Rules">Game Rules</a>
+        <td></td>
+      </th>
+    </tr>
+    <tr class="model-group">
+      <th scope="row">
+        <a href="{% url 'game:game-stats' %}">Stats</a>
         <td></td>
       </th>
     </tr>

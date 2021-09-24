@@ -4,7 +4,7 @@
 {% block content %}
 <div id="content-main">
 
-  {% include "admin/quick_links.html" %}
+  {% include "admin/quick_links.html" with show_changelinks=True %}
   {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
 
 </div>
