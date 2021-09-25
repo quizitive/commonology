@@ -10,7 +10,8 @@
       <input type="hidden" name="thread-id" value="thread-{{ thread.id }}">
       <div class="w3-cell-row">
         <div class="w3-cell w3-rest">
-          <textarea id="text-{{ thread.id }}" name="comment" class="comment-text" placeholder="Add comment..."></textarea>
+          <textarea id="text-{{ thread.id }}" name="comment" class="comment-text"
+                    placeholder="Add comment..." maxlength="255"></textarea>
         </div>
         <div class="w3-cell w3-cell-middle" style="width:45px">
           <button id="post-{{ thread.id }}" class="post-button w3-button w3-round cg-blue cg-border-blue" disabled type="submit" style="display:inline-block;">Post</button>
