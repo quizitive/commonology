@@ -16,33 +16,45 @@
 
 <div class="content">
 
-{% include 'leaderboard/components/game_header.html' with view="results" %}
-
-{{ room_name|json_script:"room-name" }}
-{{ user.get_username|json_script:"user-name" }}
-<div id="comment-connection" hx-ws="connect:/ws/chat/{{ game_id }}/">
-
-  <div class="card-content">
-    {% if game_top_commentary %}
-    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
-      {{ game_top_commentary|safe }}
-    </div>
-    {% endif %}
-
-    {# Results objs go here #}
-    {% for q in questions %}
-      {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
-    {% endfor %}
-    </div>
-
-    {% if game_top_commentary %}
-    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
-      {{ game_bottom_commentary|safe }}
-    </div>
-    {% endif %}
-
-    <div class="w3-row w3-padding-large"></div>
-
+  <div class="series-header w3-round w3-padding-large w3-border w3-margin-top w3-margin-bottom"
+       style="background: white;">
+  <img src="{% static 'img/logo.svg' %}">
   </div>
+
+  {# todo: make this look for a game component #}
+  {% include 'mail/sponsor_component.html' %}
+
+  {{ room_name|json_script:"room-name" }}
+  {{ user.get_username|json_script:"user-name" }}
+  <div id="comment-connection" hx-ws="connect:/ws/chat/{{ game_id }}/">
+
+    <div class="card-content">
+
+      <div class="w3-round w3-round" style="position: relative;background: white; border: 1px solid lightgrey; border-top: 5px solid #0095da;">
+
+        {% include 'leaderboard/components/game_header.html' with view="results" %}
+        {% if game_top_commentary %}
+        <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+          {{ game_top_commentary|safe }}
+        </div>
+        {% endif %}
+      </div>
+
+
+      {# Results objs go here #}
+      {% for q in questions %}
+        {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
+      {% endfor %}
+      </div>
+
+      {% if game_top_commentary %}
+      <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+        {{ game_bottom_commentary|safe }}
+      </div>
+      {% endif %}
+
+      <div class="w3-row w3-padding-large"></div>
+
+    </div>
 </div>
 {% endblock content %}
