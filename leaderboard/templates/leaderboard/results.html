@@ -16,10 +16,10 @@
 
 <div class="content">
 
-  <div class="series-header w3-round w3-padding-large w3-border w3-margin-top w3-margin-bottom"
-       style="background: white;">
-  <img src="{% static 'img/logo.svg' %}">
-  </div>
+{#  <div class="series-header w3-round w3-padding-large w3-border w3-margin-top w3-margin-bottom"#}
+{#       style="background: white;">#}
+{#  <img src="{% static 'img/logo.svg' %}">#}
+{#  </div>#}
 
   {# todo: make this look for a game component #}
   {% include 'mail/sponsor_component.html' %}
@@ -47,11 +47,17 @@
       {% endfor %}
       </div>
 
-      {% if game_top_commentary %}
-      <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
-        {{ game_bottom_commentary|safe }}
-      </div>
-      {% endif %}
+    {% if game_bottom_commentary %}
+    <style>
+    #bottom-commentary img {
+      max-width: 100%!important;
+      height: auto!important;
+    }
+    </style>
+    <div id="bottom-commentary" class="w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+      {{ game_bottom_commentary|safe }}
+    </div>
+    {% endif %}
 
       <div class="w3-row w3-padding-large"></div>
 
