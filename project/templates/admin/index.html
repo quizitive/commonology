@@ -4,6 +4,12 @@
 {% block content %}
 <div id="content-main">
 
+  {% block content_title %}{% endblock %}
+  <h1 style="padding: 16px 0;">
+    {% current_game_overview %}
+  </h1>
+
+
   {% include "admin/quick_links.html" with show_changelinks=True %}
   {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
 
