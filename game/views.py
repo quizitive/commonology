@@ -21,7 +21,6 @@ from django.conf import settings
 from project.views import CardFormView
 from project.card_views import recaptcha_check
 from project.utils import slackit
-from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
@@ -517,19 +516,6 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
             message=f"You have already submitted answers for this game. "
                     f"You can see them again by clicking the button below.",
         )
-
-
-@staff_member_required
-def stats_view(request):
-    chart_1 = PlayerTrendChart(
-        PlayersAndMembersDataset, slug='commonology', name="chart_3", since_game=38)
-    chart_2 = PlayerTrendChart(
-        PlayersAndMembersDataset, slug='commonology', name="chart_2", since_game=38, agg_period=4)
-    context = {
-        "chart_1": chart_1,
-        "chart_2": chart_2,
-    }
-    return render(request, 'game/stats.html', context)
 
 
 # ---- To be deprecated once we host forms ---- #
