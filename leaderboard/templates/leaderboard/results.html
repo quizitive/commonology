@@ -35,8 +35,14 @@
     {% endfor %}
     </div>
 
-    {% if game_top_commentary %}
-    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+    {% if game_bottom_commentary %}
+    <style>
+    img.pet-pics {
+      width: 100%;
+      max-width:500px;
+    }
+    </style>
+    <div id="bottom-commentary" class="w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
       {{ game_bottom_commentary|safe }}
     </div>
     {% endif %}
