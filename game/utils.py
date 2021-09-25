@@ -29,6 +29,13 @@ def find_latest_public_game(slug):
     return g
 
 
+def most_recently_started_game(slug):
+    t = our_now()
+    g = Game.objects.filter(series__slug=slug, start__lte=t).order_by('start').reverse().first()
+    is_active = True if g.end > t else False
+    return g, is_active
+
+
 # Get next game start or game end
 def next_event():
     now = our_now()
