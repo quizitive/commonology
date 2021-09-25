@@ -16,4 +16,4 @@ def current_game_overview():
     cur, prev, pct_chg = players_vs_previous(current_game)
     action_terms = ('so far', 'at this point') if current_game else ('', '')
     return f'{cur} players {action_terms[0]} this week, compared to {prev} {action_terms[1]} last week. ' \
-           f'That represents a change of {pct_chg:.2f}%'
+           f'That represents a change of {pct_chg:.2f}%.'
