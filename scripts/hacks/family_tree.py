@@ -31,13 +31,15 @@ def player_str(p):
     return result
 
 
-graph = pydot.Dot(graph_type='digraph')
+graph = pydot.Dot(graph_type='digraph', rankdir='LR')
 for p in Player.objects.all():
     if p.referrer:
         referrer = player_str(p.referrer)
         referee = player_str(p)
+
         graph.add_edge(pydot.Edge(referrer, referee))
 
-print('About to write png file.')
+print('About to write file.')
 
-graph.write_pdf("family_tree.pdf")
+fn = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'family_tree.pdf')
+graph.write_pdf(fn)
