@@ -243,7 +243,10 @@ def read_sheet(w):
         referrer = w.active.cell(row=1, column=c).value
 
 
-ws = openpyxl.load_workbook('Kingdoms.xlsx')
+fn = os.path.join(os.path.join(os.path.expanduser('~')),
+                  'commonology/scripts/hacks/',
+                  'Kingdoms.xlsx')
+ws = openpyxl.load_workbook(fn)
 
 for sheet_name in ws.sheetnames:
     ws.active = ws.sheetnames.index(sheet_name)
