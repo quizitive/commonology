@@ -12,7 +12,7 @@ from project import settings_utils
 
 
 BASE_DIR = settings_utils.BASE_DIR
-BUILD_NUMBER = settings_utils.find_latest_css()
+# BUILD_NUMBER = settings_utils.find_latest_css()
 
 IS_TEST = 'test' in sys.argv
 
