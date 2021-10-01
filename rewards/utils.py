@@ -1,7 +1,7 @@
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from project import settings
-from users.models import Player
+from rewards.models import Claim
 from mail.utils import send_one
 from project.utils import slackit
 
@@ -12,7 +12,13 @@ logger = logging.getLogger(__name__)
 
 def check_for_reward(player):
     referrer = player.referrer
+
     if referrer:
+        claim = Claim.objects.filter(player=referrer).first()
+        if claim:
+            # Don't send reward notice email if claim was already made.
+            return
+
         if settings.REWARD_THRESHOLD == referrer.players_referred.count():
             slackit(f"{referrer} earned a coffee mug.")
             try:
