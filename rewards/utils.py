@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 def check_for_reward(player):
     referrer = player.referrer
 
-
     if referrer:
         claim = Claim.objects.filter(player=referrer).first()
         if claim:
