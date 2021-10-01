@@ -3,7 +3,7 @@
 
 {% block app_style %}
   <link rel="icon" href="{% static "img/favicon.ico" %}">
-  <link rel="stylesheet" href="{% static 'leaderboard/css/base.css' %}?v={% bn %}">
+  <link rel="stylesheet" href="{% v_static 'leaderboard/css/base.css' %}">
 {% endblock %}
 {% block navbar %}
   {% include 'components/navbar.html' %}
