@@ -1,7 +1,5 @@
-from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from project import settings
-from users.models import Player
 from mail.utils import send_one
 from project.utils import slackit
 

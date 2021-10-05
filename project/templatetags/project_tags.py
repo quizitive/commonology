@@ -2,18 +2,13 @@ import os
 from pathlib import Path
 from django import template
 from django.contrib.staticfiles import finders
-# from project.settings import BUILD_NUMBER
+from project.settings import STATIC_VERSIONS
 from django.templatetags.static import StaticNode
 from game.utils import players_vs_previous, most_recently_started_game
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 register = template.Library()
-
-
-# @register.simple_tag(takes_context=True)
-# def bn(context):
-#     return BUILD_NUMBER
 
 
 @register.simple_tag
@@ -23,9 +18,13 @@ def v_static(format_string):
 
     path = StaticNode.handle_simple(format_string)
 
-    fn = finders.find(format_string)
-    t = os.path.getmtime(fn)
-    v = int(t)
+    if path in STATIC_VERSIONS:
+        v = STATIC_VERSIONS[path]
+    else:
+        fn = finders.find(format_string)
+        t = os.path.getmtime(fn)
+        v = int(t)
+        STATIC_VERSIONS[path] = v
 
     path = f"{path}?v={v}"
     return path
