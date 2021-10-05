@@ -1,4 +1,3 @@
-from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from project import settings
 from rewards.models import Claim
