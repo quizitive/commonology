@@ -10,6 +10,12 @@ logger = logging.getLogger(__name__)
 
 
 def check_for_reward(player):
+    if player.game_ids.count() > 1:
+        # This prevents a player with 10 referees who has not claimed
+        # a reward yet from getting a multiple notices when referees
+        # play again.
+        return
+
     referrer = player.referrer
 
     if referrer:
