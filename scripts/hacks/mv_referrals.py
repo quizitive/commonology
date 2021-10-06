@@ -10,6 +10,7 @@ django.setup()
 
 
 from users.models import Player
+from rewards.utils import send_reward_notice
 
 if False:
     from_player = Player.objects.get(email='bluesutf201@gnail.com')
@@ -33,6 +34,9 @@ if True:
 
     for p in to_player.players_referred:
         print(p)
+
+    # BEWARE - ONLY CALL THIS WHEN RUNNING IN PRODUCTION
+    send_reward_notice(to_player)
 
     # Rose Mendoza
     # Kelly Mendoza, kellydawnmendoza@gmail.com
