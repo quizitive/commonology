@@ -1,6 +1,5 @@
 from django.template.loader import render_to_string
 from project import settings
-from rewards.models import Claim
 from mail.utils import send_one
 from project.utils import slackit
 
@@ -13,17 +12,12 @@ def check_for_reward(player):
     if player.game_ids.count() > 1:
         # This prevents a player with 10 referees who has not claimed
         # a reward yet from getting a multiple notices when referees
-        # play again.
+        # play again.  i.e. this a new player and a new referral.
         return
 
     referrer = player.referrer
 
     if referrer:
-        claim = Claim.objects.filter(player=referrer).first()
-        if claim:
-            # Don't send reward notice email if claim was already made.
-            return
-
         if settings.REWARD_THRESHOLD == referrer.players_referred.count():
             slackit(f"{referrer} earned a coffee mug.")
             try:
