@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def check_for_reward(player):
     referrer = player.referrer
 
-    if referrer:
+    if referrer and referrer.subscribed:
         claim = Claim.objects.filter(player=referrer).first()
         if claim:
             # Don't send reward notice email if claim was already made.
