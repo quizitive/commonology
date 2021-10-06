@@ -2,6 +2,7 @@ from rewards.models import Claim
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.utils.safestring import mark_safe
+from project.utils import our_now
 from rewards.models import MailingAddress
 
 
@@ -30,6 +31,7 @@ class ClaimAdmin(admin.ModelAdmin):
     list_filter = (SentFilter,)
     list_display = ('player', 'claim_date', 'sent_date')  # , 'address')
     readonly_fields = ['address']
+    actions = ('mark_selected_as_shipped',)
 
     def address(self, obj):
         try:
@@ -41,3 +43,9 @@ class ClaimAdmin(admin.ModelAdmin):
 
     # the following is necessary if 'link' method is also used in list_display
     address.allow_tags = True
+
+    def mark_selected_as_shipped(self, request, queryset):
+        for q in queryset:
+            q.sent_date = our_now()
+            q.save()
+        self.message_user(request, f"{queryset.count()} claims were just marked as shipped!")
