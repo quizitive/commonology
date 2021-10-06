@@ -32,7 +32,6 @@ class RewardTests(TestCase):
         Answer.objects.create(player=p, raw_string='answer', question=self.q)
         return p
 
-    # def do_not_test_claim(self):
     def test_claim(self):
         client = get_local_client()
         path = reverse('claim')
