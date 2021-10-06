@@ -60,6 +60,3 @@ class RewardTests(TestCase):
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
         self.assertContains(response, "Claim staked!")
-
-    # def test_claim(self):
-    #     self.assertTrue(True)
