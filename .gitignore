@@ -17,5 +17,7 @@ django.ssh
 local_settings.py
 foo.py
 --logfile
+junk.txt
+
 
 
