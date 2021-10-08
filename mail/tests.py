@@ -1,4 +1,4 @@
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.core import mail
 from users.tests import get_local_user
 from game.models import Series
@@ -77,3 +77,14 @@ class MassMailTests(TestCase):
         msg_loc = rendered_msg.find('this is the mail message body')
         c1_new_loc = rendered_msg.find('<b>bolded string</b>')
         self.assertLess(c1_new_loc, msg_loc)
+
+    def test_reminder(self):
+        p = self.series.players.first()
+        p.reminder = False
+        p.save()
+        mail.outbox = []
+        n = mass_mail('test', 'hello', 'ms@quizitive.com', players=self.series.players, reminder=True)
+        self.assertEqual(n, 1)
+        self.assertEqual(len(mail.outbox), 1)
+        p.reminder = True
+        p.save()

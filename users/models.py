@@ -74,6 +74,8 @@ def code_player():
 class Player(CustomUser):
     _code = models.CharField(max_length=5, db_index=True, null=True,
                              help_text="Unique identifier useful for url parameters like referrer.")
+    reminder = models.BooleanField(default=True,
+                                   help_text="Send game reminder email even if the player played this weeks game already.")
     referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='referrers')
     goofy = models.OneToOneField
     display_name = models.CharField(max_length=100)
