@@ -18,7 +18,7 @@ from project.card_views import recaptcha_check, BaseCardView, CardFormView
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
-from mail.sendgrid_utils import sendgrid_send
+from mail.utils import sendgrid_send
 from project.utils import redis_delete_patterns
 from game.models import Series
 from .utils import remove_pending_email_invitations
