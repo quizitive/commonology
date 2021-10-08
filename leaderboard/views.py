@@ -99,7 +99,7 @@ class PlayerHomeView(LoginRequiredMixin, View):
             return "Looks like you missed last weeks game... You'll get 'em this week!"
 
         latest_rank, percentile = player_rank_and_percentile_in_game(player.id, latest_game_id)
-        player_count = Game.objects.get(game_id=latest_game_id, series__slug=series_slug).players.count()
+        player_count = Game.objects.get(game_id=latest_game_id, series__slug=series_slug).players_dict.count()
 
         follow_up = "This is gonna be your week!"
         if percentile <= 0.1:

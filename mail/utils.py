@@ -93,7 +93,7 @@ def mass_mail(obj):
 
     if obj.reminder:
         g = find_latest_active_game(obj.series.slug)
-        played_dont_remind = g.players_objs.filter(reminder=False)
+        played_dont_remind = g.players.filter(reminder=False)
         if played_dont_remind:
             qs = qs.exclude(id__in=played_dont_remind)
 

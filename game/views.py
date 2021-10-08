@@ -156,7 +156,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             raise PermissionDenied
         game, player = self.unsign_game_player(psid)
 
-        if player.id in self.game.players.values_list('player', flat=True):
+        if player.id in self.game.players_dict.values_list('player', flat=True):
             return self.render_answers_submitted_card(request, 'duplicate', player, game)
 
         dn_form = self.display_name_form(self.request.POST.get('display_name'))

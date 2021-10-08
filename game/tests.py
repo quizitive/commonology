@@ -166,7 +166,7 @@ class TestGameTabulation(BaseGameDataTestCase):
         self.assertEqual(len(self.questions), 12)
 
     def test_players_to_db(self):
-        players = self.game.players
+        players = self.game.players_dict
         self.assertEqual(len(players), 29)
 
         new_disply_name_df = pd.DataFrame(
