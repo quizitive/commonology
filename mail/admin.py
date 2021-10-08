@@ -48,7 +48,8 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
                 players = obj.series.players
 
             n = mass_mail(obj.subject, message, from_email, players=players,
-                          categories=obj.categories, components=obj.components.all())
+                          categories=obj.categories, components=obj.components.all(),
+                          reminder=obj.reminder)
             obj.sent = True
             obj.save()
             if n:

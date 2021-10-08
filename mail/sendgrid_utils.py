@@ -57,11 +57,14 @@ def sendgrid_send(subject, msg, email_list,
     return len(to_emails), msg
 
 
-def mass_mail(subject, msg, from_email, players, categories=None, components=()):
+def mass_mail(subject, msg, from_email, players, categories=None, components=(), reminder=False):
     if categories:
         categories = categories.split(', ')
 
-    qs = players.filter(subscribed=True).all()
+    if reminder:
+        qs = players.filter(subscribed=True, reminder=True).all()
+    else:
+        qs = players.filter(subscribed=True).all()
 
     # First batch in 10 seconds to be sure api call is received before that time.
     send_at = int(time.time()) + 10
