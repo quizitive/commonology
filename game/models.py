@@ -98,6 +98,10 @@ class Game(models.Model):
             )
         )
 
+    @property
+    def players_objs(self):
+        return Player.objects.filter(id__in=self.game_questions.first().raw_answers.values('player'))
+
     def user_played(self, player):
         q = self.questions.filter(type=Question.ga).first()
         if q:
