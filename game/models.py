@@ -88,7 +88,7 @@ class Game(models.Model):
         return f"/play/{self.uuid}"
 
     @cached_property
-    def players(self):
+    def players_dict(self):
         return self.game_questions.first().raw_answers.values(
             'player', 'player__display_name').annotate(
             is_host=models.Case(
@@ -99,7 +99,7 @@ class Game(models.Model):
         )
 
     @property
-    def players_objs(self):
+    def players(self):
         return Player.objects.filter(id__in=self.game_questions.first().raw_answers.values('player'))
 
     def user_played(self, player):
