@@ -57,9 +57,13 @@ class HomePage(TestCase):
 
 
 class BaseGameDataTestCase(TestCase):
-
     @classmethod
     def setUpTestData(cls):
+        # Need this so that derived classes can add to setup test data
+        cls.mySetUpTestData()
+
+    @classmethod
+    def mySetUpTestData(cls, is_active_game=False):
         cls.resp_fp = f'{LOCAL_DIR}/test_data/test_data.csv'
         cls.rollup_fp = f'{LOCAL_DIR}/test_data/test_rollups.csv'
         cls.sheet_name = "Test Commonology Game (Responses)"
@@ -76,8 +80,16 @@ class BaseGameDataTestCase(TestCase):
         cls.series_owner = get_local_user(e='series@owner.com')
         cls.game_player = get_local_user()
         cls.series = Series.objects.create(name="Commonology", owner=cls.series_owner, public=True)
-        cls.game = game_to_db(cls.series, cls.sheet_name)
+
+        if is_active_game:
+            t = our_now()
+            et = t + relativedelta(hours=1)
+        else:
+            t = et = None
+        cls.game = game_to_db(cls.series, cls.sheet_name, start=t, end=et)
+
         cls.questions = questions_to_db(cls.game, cls.resp_df)
+
         players_to_db(cls.series, cls.resp_df)
         answers_to_db(cls.game, cls.resp_df)
         cls.answer_codes = build_answer_codes(cls.resp_df, cls.rollups)
