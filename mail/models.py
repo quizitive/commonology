@@ -54,7 +54,7 @@ class MailMessage(models.Model):
     test_recipient = models.EmailField('test recipient email address')
     categories = models.CharField(max_length=50, blank=True,
                                   help_text="A comma separated list of categories. i.e GameOn|Reminder|Results + Week#")
-    reminder = models.BooleanField(default=True,
+    reminder = models.BooleanField(default=False,
                                    help_text="This is a game reminder messsage.  Only players opting for reminders will get it")
     subject = models.CharField(max_length=150, blank=False)
     message = RichTextUploadingField(blank=True,
