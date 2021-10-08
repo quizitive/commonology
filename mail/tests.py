@@ -76,7 +76,7 @@ class MassMailTests(BaseGameDataTestCase):
         self.assertLess(c1_new_loc, msg_loc)
 
     def test_reminder(self):
-        p = self.game.players_objs[0]
+        p = self.game.players[0]
         p.reminder = False
         p.save()
         mail.outbox = []
