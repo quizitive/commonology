@@ -53,7 +53,9 @@ class MailMessage(models.Model):
     from_email = models.EmailField('from email address', choices=FROM_ADDRS, default=settings.ALEX_FROM_EMAIL)
     test_recipient = models.EmailField('test recipient email address')
     categories = models.CharField(max_length=50, blank=True,
-                                  help_text="A comma separated list of categories. i.e GameOn|Reminder|Resuts + Week#")
+                                  help_text="A comma separated list of categories. i.e GameOn|Reminder|Results + Week#")
+    reminder = models.BooleanField(default=True,
+                                   help_text="This is a game reminder messsage.  Only players opting for reminders will get it")
     subject = models.CharField(max_length=150, blank=False)
     message = RichTextUploadingField(blank=True,
                                      help_text='Play link example: https://commonologygame.com/play?-game_url_args-')
