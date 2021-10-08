@@ -30,7 +30,7 @@ from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
 from users.utils import get_player
-from mail.sendgrid_utils import sendgrid_send
+from mail.utils import sendgrid_send
 from mail.models import Component
 from rewards.utils import check_for_reward
 

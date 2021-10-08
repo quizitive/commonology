@@ -1,38 +1,35 @@
 from django.test import TestCase
 from django.core import mail
+from dateutil.relativedelta import relativedelta
+from project.utils import our_now
 from users.tests import get_local_user
-from game.models import Series
-from mail.sendgrid_utils import mass_mail, sendgrid_send
+from game.models import Series, Game, Question
+from game.tests import BaseGameDataTestCase
+from mail.utils import mass_mail, sendgrid_send
 from mail.models import MailMessage, Component
 
 
-class MassMailTests(TestCase):
+class MassMailTests(BaseGameDataTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # data is written from api
-        cls.series_owner = get_local_user(e='series@owner.com')
-        cls.game_player = get_local_user()
+        cls.mySetUpTestData(is_active_game=True)
         cls.game_player_not = get_local_user(e='someone@noplayer.com', subscribed=False)
-        cls.series = Series.objects.create(name="Commonology", owner=cls.series_owner, public=True)
-        for p in cls.series_owner, cls.game_player, cls.game_player_not:
-            cls.series.players.add(p)
+        cls.mm = MailMessage.objects.create(series=cls.series,
+                                            from_name='test',
+                                            from_email='test@quizitive.com',
+                                            test_recipient='test@quizitive.com',
+                                            subject='testing_template',
+                                            message='this is the mail message body')
 
     def test_bad_series_test(self):
         mail.outbox = []
-        n = mass_mail('test', 'hello', 'ms@quizitive.com', players=self.series.players)
-        self.assertEqual(n, 2)
+        n = mass_mail(self.mm)
+        self.assertEqual(n, 30)
         self.assertEqual(len(mail.outbox), 1)
 
     def test_template_component_order(self):
-        mm = MailMessage.objects.create(
-            series=self.series,
-            from_name='test',
-            from_email='test@quizitive.com',
-            test_recipient='test@quizitive.com',
-            subject='testing_template',
-            message='this is the mail message body'
-        )
+        mm = self.mm
         c1 = Component.objects.create(
             name='component1',
             template='mail/simple_component.html',
@@ -79,12 +76,17 @@ class MassMailTests(TestCase):
         self.assertLess(c1_new_loc, msg_loc)
 
     def test_reminder(self):
-        p = self.series.players.first()
+        p = self.game.players_objs[0]
         p.reminder = False
         p.save()
         mail.outbox = []
-        n = mass_mail('test', 'hello', 'ms@quizitive.com', players=self.series.players, reminder=True)
-        self.assertEqual(n, 1)
+        mm = self.mm
+        mm.reminder = True
+        mm.save()
+        n = mass_mail(self.mm)
+        self.assertEqual(n, 29)
         self.assertEqual(len(mail.outbox), 1)
         p.reminder = True
         p.save()
+        mm.reminder = False
+        mm.save()

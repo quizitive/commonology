@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='mailmessage',
             name='reminder',
-            field=models.BooleanField(default=True, help_text='This is a game reminder messsage.  Only players opting for reminders will get it'),
+            field=models.BooleanField(default=False, help_text='This is a game reminder messsage.  Only players opting for reminders will get it'),
         ),
         migrations.AlterField(
             model_name='mailmessage',
