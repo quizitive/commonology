@@ -69,7 +69,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             current_game, answer_tally, player_ids, search_term, team_id)
 
         try:
-            total_players = current_game.players.count()
+            total_players = current_game.players_dict.count()
         except AttributeError:
             # a game has no questions or answers yet
             total_players = 0
