@@ -251,7 +251,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             game_rules = None
         return game_rules
 
-    def get_context(self, game, psid, dn_form, forms=None, editable=True):
+    def get_context(self, game, psid=None, dn_form=None, forms=None, editable=True, replay=False):
         context = super().get_context()
         if settings.RECAPTCHA3_INHIBIT:
             recaptcha_key = False
@@ -265,6 +265,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
             'editable': editable,  # flag to disable forms and js and hide submit button
+            'replay': replay,
             'recaptcha_key': recaptcha_key,
         })
         return context
@@ -313,7 +314,7 @@ class GameReplayView(GameFormView):
 
     def get(self, request, *args, **kwargs):
         forms = self._build_game_forms(self.game)
-        context = self.get_context(self.game, None, None, forms, True)
+        context = self.get_context(self.game, forms=forms, editable=True, replay=True)
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -324,7 +325,6 @@ class GameReplayView(GameFormView):
         #     return render(request, 'game/game_form.html', context)
         context = self.get_context(self.game, None, None, game_forms)
         return render(request, 'game/game_form.html', context)
-
 
     def get_game(self):
         uuid = self.kwargs['uuid']
