@@ -41,12 +41,16 @@
 
     <div class="cg-border-blue">
 
-      <form id="game_form" method="post" action="{% url 'series-game:game-form' series_slug game.game_id %}" novalidate>
+
+      <form id="game_form" method="post" {% if not replay %}action="{% url 'series-game:game-form' series_slug game.game_id %}"{% endif %} novalidate>
+
        {% csrf_token %}
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
        <!-- Display Name Form -->
-      {% include 'game/cards/display_name_card.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
+      {% if dn_form %}
+        {% include 'game/cards/display_name_card.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
+      {% endif %}
 
         {% for q, form in questions %}
           {% include 'game/cards/question_form_card.html' with text=q.text q=q responses=q.choices%}
