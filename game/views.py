@@ -144,7 +144,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
                 player=player
             ).values_list('question', 'raw_string')
         }
-        forms = self.get_game_forms(game, form_data, editable=False)
+        forms = self._build_game_forms(game, form_data, editable=False)
         context = self.get_context(game, None, dn_form, forms, False)
         return render(request, 'game/game_form.html', context)
 
@@ -160,28 +160,31 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             return self.render_answers_submitted_card(request, 'duplicate', player, game)
 
         dn_form = self.display_name_form(self.request.POST.get('display_name'))
-        # build a dict with the form inputs
-        form_data = {
-            qid: answer
-            for qid, answer in
-            zip(self.request.POST.getlist('question'), self.request.POST.getlist('raw_string'))
-        }
+        game_forms = self._build_game_forms_post(player)
 
-        forms = self.get_game_forms(self.game, form_data, player)
-        if any([not f.is_valid() for f in forms.values()]):
-            context = self.get_context(self.game, psid, dn_form, forms)
+        if any([not f.is_valid() for f in game_forms.values()]):
+            context = self.get_context(self.game, psid, dn_form, game_forms)
             return render(request, 'game/game_form.html', context)
 
         player.display_name = self.request.POST.get('display_name')
         player.save()
 
-        self._save_forms(forms)
+        self._save_forms(game_forms)
         self.email_player_success(request, game, player)
         write_new_responses_to_gdrive.delay(game.id)
 
         check_for_reward(player)
 
         return self.render_answers_submitted_card(request, 'success', player, game)
+
+    def _build_game_forms_post(self, player):
+        # build a dict with the form inputs from POST request
+        form_data = {
+            qid: answer
+            for qid, answer in
+            zip(self.request.POST.getlist('question'), self.request.POST.getlist('raw_string'))
+        }
+        return self._build_game_forms(self.game, form_data, player)
 
     @transaction.atomic
     def _save_forms(self, forms):
@@ -241,31 +244,34 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         except Game.DoesNotExist:
             raise Http404("Game does not exist")
 
-    def get_context(self, game, psid, dn_form, forms=None, editable=True):
+    def get_game_rules(self):
+        try:
+            game_rules = Component.objects.get(name=f'Game Rules | {self.slug}')
+        except Component.DoesNotExist:
+            game_rules = None
+        return game_rules
+
+    def get_context(self, game, psid=None, dn_form=None, forms=None, editable=True, replay=False):
         context = super().get_context()
         if settings.RECAPTCHA3_INHIBIT:
             recaptcha_key = False
         else:
             recaptcha_key = settings.RECAPTCHA3_KEY
 
-        try:
-            game_rules = Component.objects.get(name=f'Game Rules | {self.slug}')
-        except Component.DoesNotExist:
-            game_rules = None
-
         context.update({
             'game': game,
-            'game_rules': game_rules,
+            'game_rules': self.get_game_rules(),
             'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
             'editable': editable,  # flag to disable forms and js and hide submit button
+            'replay': replay,
             'recaptcha_key': recaptcha_key,
         })
         return context
 
-    def get_game_forms(self, game, form_data=(), player=None, editable=True):
-        """Get all the game question forms, empty or populated with form_data from post.
+    def _build_game_forms(self, game, form_data=(), player=None, editable=True):
+        """Build all the game question forms, empty or populated with form_data from post.
            Any form data submitted with a question not in this game will be ignored,
            likewise any question without data (e.g. incomplete forms) will be handled"""
         form_data = form_data or {}
@@ -291,7 +297,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         return forms
 
     def questions_with_forms(self, game, forms=None):
-        forms = forms or self.get_game_forms(game)
+        forms = forms or self._build_game_forms(game)
         questions_with_forms = [
             (q, forms[q.id]) for q in game.questions.order_by('number')
         ]
@@ -302,6 +308,38 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             editable=editable,
             initial={'display_name': display_name}
         )
+
+
+class GameReplayView(GameFormView):
+
+    def get(self, request, *args, **kwargs):
+        forms = self._build_game_forms(self.game)
+        context = self.get_context(self.game, forms=forms, editable=True, replay=True)
+        return render(request, 'game/game_form.html', context)
+
+    def post(self, request, *args, **kwargs):
+        game_forms = self._build_game_forms_post(None)
+        context = self.get_context(self.game, None, None, game_forms)
+
+        if any([not f.is_valid() for f in game_forms.values()]):
+            return render(request, 'game/game_form.html', context)
+
+        # todo: render corresponding results page with current player answers
+        return render(request, 'game/game_form.html', context)
+
+    def get_game(self):
+        uuid = self.kwargs['uuid']
+        try:
+            return Game.objects.get(uuid=uuid)
+        except Game.DoesNotExist:
+            raise Http404
+
+    def get_game_rules(self):
+        try:
+            game_rules = Component.objects.get(name=f'Game Replay Rules | {self.slug}')
+        except Component.DoesNotExist:
+            game_rules = None
+        return game_rules
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
@@ -319,7 +357,7 @@ def send_confirm(request, g, email, referrer_id=None):
     game_uuid = g.uuid
 
     domain = get_current_site(request)
-    url = (f'https://{domain}/c/{slug}/play/{game_uuid}/{pe.uuid}')
+    url = f'https://{domain}/c/{slug}/play/{game_uuid}/{pe.uuid}/'
 
     msg = render_to_string('game/validate_email.html', {'join_url': url})
 
