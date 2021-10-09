@@ -11,6 +11,7 @@ from django.contrib.postgres.fields import CIEmailField
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.safestring import mark_safe
 
 from .managers import CustomUserManager
 from django.utils import timezone
@@ -73,7 +74,8 @@ def code_player():
 class Player(CustomUser):
     _code = models.CharField(max_length=5, db_index=True, null=True,
                              help_text="Unique identifier useful for url parameters like referrer.")
-    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
+    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='referrers')
+    goofy = models.OneToOneField
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
     is_member = models.BooleanField(
@@ -121,6 +123,20 @@ class Player(CustomUser):
     @property
     def players_referred(self):
         return Player.objects.filter(referrer=self, answers__isnull=False).distinct()
+
+    @property
+    def referral_count(self):
+        return len(self.players_referred.all())
+
+    @property
+    def referrals(self):
+        r = [f'<a href="/admin/users/player/{r.id}/change">{r.email} {r.display_name}</a>' for r in
+             self.players_referred]
+        if r:
+            r = '<br>'.join(r)
+        else:
+            r = 'None'
+        return mark_safe(r)
 
 
 class PendingEmail(models.Model):

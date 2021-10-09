@@ -68,5 +68,7 @@ def slackit(msg):
     url = f"https://hooks.slack.com/services/{settings.SLACK_TOKEN}"
     headers = {'content-type': 'application/json'}
     data = {'text': msg}
+    if settings.IS_TEST:
+        return
     result = requests.post(url, headers=headers, json=data)
     return result

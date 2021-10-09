@@ -1,0 +1,30 @@
+
+{% autoescape off %}
+
+{% block email-content %}
+
+  <div style="padding:16px 0;">
+    We have received your claim for a Commonology coffee mug. We'll get it shipped out to you soon.
+  </div>
+
+  <div style="padding:16px 0;">
+    <b>Ship to:</b><br/>
+    {{ address.name }}<br/>
+    {{ address.address1 }}<br/>
+    {% if address.address2 %}{{ address.address2 }}<br/>{% endif %}
+    {{ address.city }}, {{ address.state }} {{ address.zip_code }}
+  </div>
+
+  <div style="padding:16px 0;">
+   Feel free to reply to this email with any questions, and thanks again for sharing the game!
+  </div>
+
+  <p>
+    Cheers,
+    <br/>
+    The Commonology Team
+  </p>
+
+{% endblock %}
+
+{% endautoescape %}

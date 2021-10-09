@@ -17,9 +17,10 @@ from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from django.conf import settings
+
 from project.views import CardFormView
 from project.card_views import recaptcha_check
-from game.charts import PlayerTrendChart, PlayersAndMembersDataset
+from project.utils import slackit
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
@@ -124,7 +125,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             psid = ''
             dn_form = self.display_name_form('Reviewer')
 
-        self.requested_slug = game.series.slug
+        self.requested_slug = self.slug = game.series.slug
         self.game = game
         return render(request, 'game/game_form.html', self.get_context(game, psid, dn_form, editable=editable))
 
@@ -167,7 +168,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
 
         forms = self.get_game_forms(self.game, form_data, player)
-        if any([f.errors for f in forms.values()]):
+        if any([not f.is_valid() for f in forms.values()]):
             context = self.get_context(self.game, psid, dn_form, forms)
             return render(request, 'game/game_form.html', context)
 
@@ -251,7 +252,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             recaptcha_key = settings.RECAPTCHA3_KEY
 
         try:
-            game_rules = Component.objects.get(name='Game Rules')
+            game_rules = Component.objects.get(name=f'Game Rules | {self.slug}')
         except Component.DoesNotExist:
             game_rules = None
 
@@ -529,19 +530,6 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
         )
 
 
-@staff_member_required
-def stats_view(request):
-    chart_1 = PlayerTrendChart(
-        PlayersAndMembersDataset, slug='commonology', name="chart_3", since_game=38)
-    chart_2 = PlayerTrendChart(
-        PlayersAndMembersDataset, slug='commonology', name="chart_2", since_game=38, agg_period=4)
-    context = {
-        "chart_1": chart_1,
-        "chart_2": chart_2,
-    }
-    return render(request, 'game/stats.html', context)
-
-
 # ---- To be deprecated once we host forms ---- #
 @staff_member_required
 def tabulator_form_view(request):
@@ -591,6 +579,7 @@ class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
                   f"Player email: {p.email}\n\n" + form.data['suggestion']
             subject = "New Question Suggestion"
             email = "concierge@commonologygame.com"
+            slackit(msg)
             send_mail(subject=subject, message=msg,
                       from_email=None, recipient_list=[email])
             messages.info(request, message=f"Thank you, your question has successfully been submitted. "
