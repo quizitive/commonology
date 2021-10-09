@@ -341,12 +341,6 @@ class GameReplayView(GameFormView):
             game_rules = None
         return game_rules
 
-    def _game_complete_flow(self):
-        return
-
-    def _save_forms(self, forms):
-        return
-
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
 def game_url(google_form_url, email):
