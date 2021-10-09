@@ -46,7 +46,9 @@
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
        <!-- Display Name Form -->
-      {% include 'game/cards/display_name_card.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
+      {% if dn_form %}
+        {% include 'game/cards/display_name_card.html' with text='Name (First & Last - this appears on results leaderboard!)  ' form=dn_form %}
+      {% endif %}
 
         {% for q, form in questions %}
           {% include 'game/cards/question_form_card.html' with text=q.text q=q responses=q.choices%}
