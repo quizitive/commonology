@@ -29,6 +29,13 @@ def find_latest_public_game(slug):
     return g
 
 
+def most_recently_started_game(slug):
+    t = our_now()
+    g = Game.objects.filter(series__slug=slug, start__lte=t).order_by('start').reverse().first()
+    is_active = True if g.end > t else False
+    return g, is_active
+
+
 # Get next game start or game end
 def next_event():
     now = our_now()
@@ -49,3 +56,13 @@ def next_friday_1159(now):
     while next_fri.weekday() != 4:
         next_fri = next_fri + datetime.timedelta(1)
     return next_fri.replace(hour=23, minute=59, second=59)
+
+
+def players_vs_previous(game):
+    prev = Game.objects.get(game_id=game.game_id - 1, series__slug='commonology')
+    now = our_now()
+    players_so_far = game.game_questions.first().raw_answers.filter(timestamp__lte=now).count()
+    this_time_last_week = now - datetime.timedelta(7)
+    players_so_far_last_week = prev.game_questions.first().raw_answers.filter(
+        timestamp__lte=this_time_last_week).count()
+    return players_so_far, players_so_far_last_week, 100 * (players_so_far / players_so_far_last_week - 1)
