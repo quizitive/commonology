@@ -10,5 +10,6 @@ urlpatterns = [
     path('play/<game_uuid>/<pending_uuid>', views.GameEntryValidationView.as_view(), name='player_confirm'),
     path('game/<int:game_id>/', views.GameFormView.as_view(), name='game-form'),
     path('game/<int:game_id>/<str:player_signed_id>/', views.GameFormView.as_view(), name='game-view'),
+    path('replay/<uuid:uuid>/', views.GameReplayView.as_view(), name='game-replay'),
     path('suggest-a-question/', views.QuestionSuggestionView.as_view(), name='question-suggest')
 ]
