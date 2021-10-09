@@ -384,13 +384,13 @@ class TestPlayRequest(TestCase):
         game.save()
 
         client = get_local_client()
-        path = f'/play/{game.uuid}'
+        path = f'/play/{game.uuid}/'
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Seems like the game finished but has not been scored yet.')
 
         self.series.hosts.add(self.player)
-        path = f'/play/{game.uuid}'
+        path = f'/play/{game.uuid}/'
         response = client.get(path)
         self.assertContains(response, self.game.questions.first().text)
 
@@ -511,7 +511,7 @@ class TestPlayRequest(TestCase):
         game = self.game
 
         client = get_local_client()
-        path = f'/play/{game.uuid}'
+        path = f'/play/{game.uuid}/'
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.game.questions.first().text)
@@ -522,7 +522,7 @@ class TestPlayRequest(TestCase):
         game.save()
 
         client = get_local_client()
-        path = f'/play/{game.uuid}'
+        path = f'/play/{game.uuid}/'
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.game.questions.first().text)
@@ -531,7 +531,7 @@ class TestPlayRequest(TestCase):
 
     def test_submit_button_id(self):
         client = get_local_client()
-        path = f'/play/{self.game.uuid}'
+        path = f'/play/{self.game.uuid}/'
         response = client.get(path)
 
         self.assertContains(response, '<button id="submit-button"')
@@ -575,7 +575,7 @@ class TestGameForm(BaseGameDataTestCase, PSIDMixin):
         # can't render game form directly (needs to go through GameValidationView)
         response = self.client.get(self.game_form_url)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, f'/play/{self.game.uuid}')
+        self.assertEqual(response.url, f'/play/{self.game.uuid}/')
 
     def test_game_form_post_success(self):
         form_data = self._valid_game_form_data()
