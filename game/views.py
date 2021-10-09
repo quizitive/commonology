@@ -357,7 +357,7 @@ def send_confirm(request, g, email, referrer_id=None):
     game_uuid = g.uuid
 
     domain = get_current_site(request)
-    url = (f'https://{domain}/c/{slug}/play/{game_uuid}/{pe.uuid}')
+    url = f'https://{domain}/c/{slug}/play/{game_uuid}/{pe.uuid}/'
 
     msg = render_to_string('game/validate_email.html', {'join_url': url})
 
