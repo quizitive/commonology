@@ -41,7 +41,9 @@
 
     <div class="cg-border-blue">
 
-      <form id="game_form" method="post" action="{% url 'series-game:game-form' series_slug game.game_id %}" novalidate>
+
+      <form id="game_form" method="post" {% if not replay %}action="{% url 'series-game:game-form' series_slug game.game_id %}"{% endif %} novalidate>
+
        {% csrf_token %}
         <input type="hidden" id="psid" name="psid" value="{{ psid }}">
 
