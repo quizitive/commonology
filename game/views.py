@@ -319,11 +319,12 @@ class GameReplayView(GameFormView):
 
     def post(self, request, *args, **kwargs):
         game_forms = self._build_game_forms_post(None)
-
-        # if any([not f.is_valid() for f in game_forms.values()]):
-        #     context = self.get_context(self.game, None, None, game_forms)
-        #     return render(request, 'game/game_form.html', context)
         context = self.get_context(self.game, None, None, game_forms)
+
+        if any([not f.is_valid() for f in game_forms.values()]):
+            return render(request, 'game/game_form.html', context)
+
+        # todo: render corresponding results page with current player answers
         return render(request, 'game/game_form.html', context)
 
     def get_game(self):
