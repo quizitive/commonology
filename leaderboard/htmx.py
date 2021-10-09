@@ -146,7 +146,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
                 "followers": "players that follow you.",
                 "new_players": "first time players!"
             }
-            filter_msg = msg_map.get(id_filter, "total players.")
+            filter_msg = msg_map.get(id_filter, "results.")
             msg = f"Showing {lb_page_start + 1}-{lb_page_end} out of {filtered_player_count} {filter_msg}"
         elif self.request.user.is_authenticated:
             msg_map = {
@@ -154,7 +154,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
                 "followers": "Nobody is following you yet :( Tell you friends you're awesome!",
                 "new_players": "No first time players :("
             }
-            msg = msg_map.get(id_filter, "total players")
+            msg = msg_map.get(id_filter, f"Showing 0 out of {filtered_player_count} results.")
         else:
             msg = mark_safe(f"<a href='/login'>Login</a> or <a href='/join'>Join</a> to follow your friends!")
 

@@ -1,8 +1,9 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
+from project.settings import STATIC_VERSIONS
 from game.tests import suppress_hidden_error_logs
-from project.utils import slackit
+# from project.utils import slackit
 
 
 class TestContact(TestCase):
@@ -20,6 +21,15 @@ class TestContact(TestCase):
         self.assertEqual(msg,
                          'Contact Form -- ms@quizitive.com sent this message with subject: Investor Relations\nhello')
         mail.outbox = []
+
+
+class TestVStatic(TestCase):
+
+    def test_vstatic(self):
+        c = Client()
+        path = reverse('home')
+        response = c.get(path)
+        self.assertIn('/static/css/base.css', STATIC_VERSIONS)
 
 
 # class TestSlack(TestCase):

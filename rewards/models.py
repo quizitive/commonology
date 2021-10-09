@@ -5,7 +5,7 @@ from users.models import Player
 class Claim(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     reward = models.CharField(max_length=150, default='First edition coffee mug', help_text="ex. Coffee mug")
-    claim_date = models.DateField(verbose_name='Claim date', auto_now=True)
+    claim_date = models.DateField(verbose_name='Claim date', auto_now_add=True)
     sent_date = models.DateField(verbose_name='Sent date', blank=True, null=True)
 
     class Meta:
