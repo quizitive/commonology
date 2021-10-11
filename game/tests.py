@@ -57,9 +57,13 @@ class HomePage(TestCase):
 
 
 class BaseGameDataTestCase(TestCase):
-
     @classmethod
     def setUpTestData(cls):
+        # Need this so that derived classes can add to setup test data
+        cls.mySetUpTestData()
+
+    @classmethod
+    def mySetUpTestData(cls):
         cls.resp_fp = f'{LOCAL_DIR}/test_data/test_data.csv'
         cls.rollup_fp = f'{LOCAL_DIR}/test_data/test_rollups.csv'
         cls.sheet_name = "Test Commonology Game (Responses)"
@@ -76,8 +80,12 @@ class BaseGameDataTestCase(TestCase):
         cls.series_owner = get_local_user(e='series@owner.com')
         cls.game_player = get_local_user()
         cls.series = Series.objects.create(name="Commonology", owner=cls.series_owner, public=True)
-        cls.game = game_to_db(cls.series, cls.sheet_name)
+
+        t = our_now()
+        cls.game = game_to_db(cls.series, cls.sheet_name, start=t, end=t)
+
         cls.questions = questions_to_db(cls.game, cls.resp_df)
+
         players_to_db(cls.series, cls.resp_df)
         answers_to_db(cls.game, cls.resp_df)
         cls.answer_codes = build_answer_codes(cls.resp_df, cls.rollups)
@@ -91,6 +99,15 @@ class BaseGameDataTestCase(TestCase):
     def tearDownClass(cls):
         REDIS.delete(lb_cache_key(cls.game, cls.answer_tally))
         super().tearDownClass()
+
+    def activate_game(self):
+        t = our_now()
+        self.game.start = t
+        self.game.end = t + relativedelta(hours=1)
+        self.game.save()
+
+    def deactivate_game(self):
+        cls.game.end = cls.game.start
 
 
 class TestGameTabulation(BaseGameDataTestCase):
@@ -154,7 +171,7 @@ class TestGameTabulation(BaseGameDataTestCase):
         self.assertEqual(len(self.questions), 12)
 
     def test_players_to_db(self):
-        players = self.game.players
+        players = self.game.players_dict
         self.assertEqual(len(players), 29)
 
         new_disply_name_df = pd.DataFrame(

@@ -179,7 +179,7 @@ def player_rank_and_percentile_in_game(player_id, series_slug, game_id):
         rank = build_filtered_leaderboard(game, answer_tally, player_ids=[player_id])['Rank'].values[0]
     except IndexError:
         raise IndexError("The player id does not exist for this game.")
-    percentile = rank / game.players.count()
+    percentile = rank / game.players_dict.count()
     if rank == 1:
         rank_str = "1st"
     elif rank == 2:

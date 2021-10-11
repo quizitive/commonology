@@ -5,9 +5,11 @@ from users.models import Player
 
 
 def fix(apps, schema_editor):
-    for p in Player.objects.all():
-        # save will set unique codes
-        p.save()
+    # comment this out because it no longer works with new migrations.
+    pass
+    # for p in Player.objects.all():
+    #     # save will set unique codes
+    #     p.save()
 
 
 class Migration(migrations.Migration):
