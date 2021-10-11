@@ -1,9 +1,6 @@
-from django.test import TestCase
+
 from django.core import mail
-from dateutil.relativedelta import relativedelta
-from project.utils import our_now
 from users.tests import get_local_user
-from game.models import Series, Game, Question
 from game.tests import BaseGameDataTestCase
 from mail.utils import mass_mail, sendgrid_send
 from mail.models import MailMessage, Component
@@ -13,7 +10,7 @@ class MassMailTests(BaseGameDataTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.mySetUpTestData(is_active_game=True)
+        cls.mySetUpTestData()
         cls.game_player_not = get_local_user(e='someone@noplayer.com', subscribed=False)
         cls.mm = MailMessage.objects.create(series=cls.series,
                                             from_name='test',
@@ -21,6 +18,9 @@ class MassMailTests(BaseGameDataTestCase):
                                             test_recipient='test@quizitive.com',
                                             subject='testing_template',
                                             message='this is the mail message body')
+
+    def setUp(self):
+        self.activate_game()
 
     def test_bad_series_test(self):
         mail.outbox = []
