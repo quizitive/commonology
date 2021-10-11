@@ -46,7 +46,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             if n:
                 messages.add_message(request, messages.INFO, f'Blast message sent to {n} players.')
             else:
-                messages.add_message(request, messages.WARNING, 'No players found in that series.')
+                messages.add_message(request, messages.WARNING, 'No valid recipients found, message not sent.')
         else:
             messages.add_message(request, messages.WARNING,
                                  "Cannot send blast until message is tested.")
