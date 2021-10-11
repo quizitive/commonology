@@ -63,7 +63,7 @@ class BaseGameDataTestCase(TestCase):
         cls.mySetUpTestData()
 
     @classmethod
-    def mySetUpTestData(cls, is_active_game=False):
+    def mySetUpTestData(cls):
         cls.resp_fp = f'{LOCAL_DIR}/test_data/test_data.csv'
         cls.rollup_fp = f'{LOCAL_DIR}/test_data/test_rollups.csv'
         cls.sheet_name = "Test Commonology Game (Responses)"
@@ -81,12 +81,8 @@ class BaseGameDataTestCase(TestCase):
         cls.game_player = get_local_user()
         cls.series = Series.objects.create(name="Commonology", owner=cls.series_owner, public=True)
 
-        if is_active_game:
-            t = our_now()
-            et = t + relativedelta(hours=1)
-        else:
-            t = et = None
-        cls.game = game_to_db(cls.series, cls.sheet_name, start=t, end=et)
+        t = our_now()
+        cls.game = game_to_db(cls.series, cls.sheet_name, start=t, end=t)
 
         cls.questions = questions_to_db(cls.game, cls.resp_df)
 
@@ -103,6 +99,15 @@ class BaseGameDataTestCase(TestCase):
     def tearDownClass(cls):
         REDIS.delete(lb_cache_key(cls.game, cls.answer_tally))
         super().tearDownClass()
+
+    def activate_game(self):
+        t = our_now()
+        self.game.start = t
+        self.game.end = t + relativedelta(hours=1)
+        self.game.save()
+
+    def deactivate_game(self):
+        cls.game.end = cls.game.start
 
 
 class TestGameTabulation(BaseGameDataTestCase):
