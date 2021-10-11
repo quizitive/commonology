@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from mail.sendgrid_utils import deactivate_blocked_addresses
+from mail.utils import deactivate_blocked_addresses
 
 
 class Command(BaseCommand):

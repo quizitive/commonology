@@ -63,7 +63,7 @@ class GamePlayerCount(BaseChartData):
         for p in self.periods():
             this_period = games.filter(game_id__gte=p[0], game_id__lte=p[1])
             try:
-                this_pd_avg = sum([g.players.filter(**self.player_filters).count() for g in this_period]) / this_period.count()
+                this_pd_avg = sum([g.players_dict.filter(**self.player_filters).count() for g in this_period]) / this_period.count()
             except ZeroDivisionError:
                 break
             data.append(this_pd_avg)

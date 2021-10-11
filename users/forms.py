@@ -23,9 +23,10 @@ class PlayerProfileForm(forms.ModelForm):
     class Meta:
         model = Player
         fields = ('email', 'first_name', 'last_name', 'display_name', 'location',
-                  'birth_date', 'subscribed')
+                  'birth_date', 'subscribed', 'reminder')
         help_texts = {
             'subscribed': 'Unchecking this will remove you from the game emails.',
+            'reminder': 'You will be receive game play reminders even if you played the game this week.',
             'display_name': 'This is what displays on the public leaderboard.'
         }
 

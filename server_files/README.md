@@ -241,6 +241,7 @@ set +a
   postgres=# ALTER ROLE postgres SET timezone TO 'UTC';
   postgres=# GRANT ALL PRIVILEGES ON DATABASE commonology TO postgres;
   postgres=# alter user postgres PASSWORD 'postgres';
+  postgres=# alter user postgres createdb;
   postgres=# 
   postgres=# \q
   ```
