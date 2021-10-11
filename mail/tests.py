@@ -1,38 +1,35 @@
-from django.test import TestCase, Client
+
 from django.core import mail
 from users.tests import get_local_user
-from game.models import Series
-from mail.sendgrid_utils import mass_mail, sendgrid_send
+from game.tests import BaseGameDataTestCase
+from mail.utils import mass_mail, sendgrid_send
 from mail.models import MailMessage, Component
 
 
-class MassMailTests(TestCase):
+class MassMailTests(BaseGameDataTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # data is written from api
-        cls.series_owner = get_local_user(e='series@owner.com')
-        cls.game_player = get_local_user()
+        cls.mySetUpTestData()
         cls.game_player_not = get_local_user(e='someone@noplayer.com', subscribed=False)
-        cls.series = Series.objects.create(name="Commonology", owner=cls.series_owner, public=True)
-        for p in cls.series_owner, cls.game_player, cls.game_player_not:
-            cls.series.players.add(p)
+        cls.mm = MailMessage.objects.create(series=cls.series,
+                                            from_name='test',
+                                            from_email='test@quizitive.com',
+                                            test_recipient='test@quizitive.com',
+                                            subject='testing_template',
+                                            message='this is the mail message body')
+
+    def setUp(self):
+        self.activate_game()
 
     def test_bad_series_test(self):
         mail.outbox = []
-        n = mass_mail('test', 'hello', 'ms@quizitive.com', players=self.series.players)
-        self.assertEqual(n, 2)
+        n = mass_mail(self.mm)
+        self.assertEqual(n, 30)
         self.assertEqual(len(mail.outbox), 1)
 
     def test_template_component_order(self):
-        mm = MailMessage.objects.create(
-            series=self.series,
-            from_name='test',
-            from_email='test@quizitive.com',
-            test_recipient='test@quizitive.com',
-            subject='testing_template',
-            message='this is the mail message body'
-        )
+        mm = self.mm
         c1 = Component.objects.create(
             name='component1',
             template='mail/simple_component.html',
@@ -77,3 +74,19 @@ class MassMailTests(TestCase):
         msg_loc = rendered_msg.find('this is the mail message body')
         c1_new_loc = rendered_msg.find('<b>bolded string</b>')
         self.assertLess(c1_new_loc, msg_loc)
+
+    def test_reminder(self):
+        p = self.game.players[0]
+        p.reminder = False
+        p.save()
+        mail.outbox = []
+        mm = self.mm
+        mm.reminder = True
+        mm.save()
+        n = mass_mail(self.mm)
+        self.assertEqual(n, 29)
+        self.assertEqual(len(mail.outbox), 1)
+        p.reminder = True
+        p.save()
+        mm.reminder = False
+        mm.save()

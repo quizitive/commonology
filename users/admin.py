@@ -24,7 +24,7 @@ class PlayerUserAdmin(UserAdmin):
                    'series')
     fieldsets = (
         (None, {'fields': ('email', 'password', 'code')}),
-        ('Personal', {'fields': ('first_name', 'last_name', 'display_name', 'birth_date', 'is_member', 'subscribed')}),
+        ('Personal', {'fields': ('first_name', 'last_name', 'display_name', 'birth_date', 'is_member', 'subscribed', 'reminder')}),
         ('Other', {'fields': ('date_joined', 'location')}),
         ('Referrals', {'fields': ('referrer', 'referrals',)}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser',
