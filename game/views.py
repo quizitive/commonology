@@ -30,7 +30,7 @@ from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
 from users.utils import get_player
-from mail.sendgrid_utils import sendgrid_send
+from mail.utils import sendgrid_send
 from mail.models import Component
 from rewards.utils import check_for_reward
 
@@ -156,7 +156,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             raise PermissionDenied
         game, player = self.unsign_game_player(psid)
 
-        if player.id in self.game.players.values_list('player', flat=True):
+        if player.id in self.game.players_dict.values_list('player', flat=True):
             return self.render_answers_submitted_card(request, 'duplicate', player, game)
 
         dn_form = self.display_name_form(self.request.POST.get('display_name'))

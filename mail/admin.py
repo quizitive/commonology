@@ -6,7 +6,7 @@ from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultipl
 from .models import MailMessage, Component
 from users.models import Player
 from .utils import make_absolute_urls
-from .sendgrid_utils import mass_mail, sendgrid_send
+from .utils import mass_mail, sendgrid_send
 
 
 @admin.register(MailMessage)
@@ -36,19 +36,11 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             messages.add_message(request, messages.WARNING,
                                  "This blast was already sent.  You can send again by unchecking the sent box below.")
         elif obj.tested:
-            message = make_absolute_urls(obj.message)
-            from_email = (obj.from_email, obj.from_name)
             if obj.series is None:
                 messages.add_message(request, messages.WARNING, 'You must choose a series.')
                 return
 
-            if obj.series.slug == 'everyone':
-                players = Player.objects
-            else:
-                players = obj.series.players
-
-            n = mass_mail(obj.subject, message, from_email, players=players,
-                          categories=obj.categories, components=obj.components.all())
+            n = mass_mail(obj)
             obj.sent = True
             obj.save()
             if n:
