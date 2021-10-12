@@ -5,8 +5,15 @@
 
 {% block content %}
 
-<div class="content">
+<div class="content" >
+
+  <div class="w3-round w3-round w3-margin-top w3-margin-bottom" style="position: relative;background: white; border: 1px solid lightgrey; border-top: 5px solid #0095da;">
   {% include 'leaderboard/components/game_header.html' with view="leaderboard" %}
+  </div>
+
+  {% include 'leaderboard/components/my_score.html' %}
+
+  <div class="w3-round w3-round" style="position: relative;background: white; border: 1px solid lightgrey; border-top: 5px solid #0095da;">
   {% include 'leaderboard/components/leaderboard_search.html' %}
 
   {# Lazy Leaderboard #}
@@ -15,6 +22,7 @@
        hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}"
        hx-trigger="load">
     <img class="htmx-indicator" width="50" style="margin-top: 100px;" src="{% static 'img/spinners/puff.svg' %}"/>
+  </div>
   </div>
 
 </div>
