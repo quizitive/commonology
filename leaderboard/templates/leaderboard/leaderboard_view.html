@@ -1,4 +1,4 @@
-{% extends 'leaderboard/base.html' %}
+{% extends 'leaderboard/base_leaderboard_view.html' %}
 {% load static %}
 
 {% block title %}Commonology | Leaderboard{% endblock %}
@@ -7,13 +7,9 @@
 
 <div class="content" >
 
-  <div class="w3-round w3-round w3-margin-top w3-margin-bottom" style="position: relative;background: white; border: 1px solid lightgrey; border-top: 5px solid #0095da;">
-  {% include 'leaderboard/components/game_header.html' with view="leaderboard" %}
-  </div>
+  {% include 'leaderboard/components/leaderboard_header.html' with view='leaderboard' %}
 
-  {% include 'leaderboard/components/my_score.html' %}
-
-  <div class="w3-round w3-round" style="position: relative;background: white; border: 1px solid lightgrey; border-top: 5px solid #0095da;">
+  <div class="cg-card cg-border-grey cg-top-blue">
   {% include 'leaderboard/components/leaderboard_search.html' %}
 
   {# Lazy Leaderboard #}
