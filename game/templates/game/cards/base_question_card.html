@@ -1,9 +1,9 @@
 {% load leadeboard_tags %}
 
-<div class="question-container w3-margin-top w3-margin-bottom w3-card-0 w3-round cg-border-grey"
+<div class="cg-card cg-top-blue"
      style="background: white; {% if form.errors %}border-color:#ec1c24!important;{% endif %}">
 
-  <div class="question-card w3-container w3-padding-top" style="position:relative;border-top:5px solid #0095da;border-radius:3px;">
+  <div class="question-card w3-container w3-padding-top" >
 
     <p class="question-text" style="font-size:1rem"><b>{{ text }}</b></p>
     {% if not q.hide_default_results %}
