@@ -39,12 +39,17 @@ header.w3-container {
     color: white!important;
     background: #0090ce!important;
 }
+
 /* base card implementation */
 .cg-card {
   margin: auto auto 16px auto;
   background: white;
   border: 1px solid lightgrey;
   border-radius: 4px;
+}
+
+.cg-padding {
+  padding: 16px;
 }
 
 
