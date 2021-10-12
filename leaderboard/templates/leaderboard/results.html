@@ -16,24 +16,32 @@
 
 <div class="content">
 
-{% include 'leaderboard/components/game_header.html' with view="results" %}
-
 {{ room_name|json_script:"room-name" }}
 {{ user.get_username|json_script:"user-name" }}
 <div id="comment-connection" hx-ws="connect:/ws/chat/{{ game_id }}/">
 
   <div class="card-content">
+
+   <div class="w3-round w3-round w3-margin-bottom w3-margin-top" style="position: relative;background: white; border: 1px solid lightgrey; border-top: 5px solid #0095da;">
+    {% include 'leaderboard/components/game_header.html' with view="results" %}
+   </div>
+
+    {% include 'leaderboard/components/my_score.html' %}
+
+    <div class="w3-round w3-round w3-margin-bottom" style="position: relative;background: white; border: 1px solid lightgrey; border-top: 5px solid #0095da;">
     {% if game_top_commentary %}
     <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
       {{ game_top_commentary|safe }}
     </div>
     {% endif %}
+    </div></div>
 
     {# Results objs go here #}
     {% for q in questions %}
       {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
     {% endfor %}
-    </div>
+
+  </div>
 
     {% if game_bottom_commentary %}
     <style>

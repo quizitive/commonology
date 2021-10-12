@@ -1,4 +1,7 @@
 /* Leaderboard, Results, Dashboard Style */
+body {
+  background: #f1f2f3;
+}
 div.content {
   max-width: 640px;
 }
