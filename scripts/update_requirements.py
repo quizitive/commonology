@@ -15,8 +15,6 @@ git_packages = [i.strip() for i in lines if 'git+http' in i]
 
 required_packages = [i.split('=')[0].strip() for i in lines if i.strip()]
 
-print('Required: ', required_packages)
-
 subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'])
 
 for package_name in required_packages:
@@ -25,9 +23,7 @@ for package_name in required_packages:
 reqs = subprocess.check_output([sys.executable, '-m', 'pip', 'freeze'])
 installed_packages = [r.decode() for r in reqs.split()]
 
-print('Installed packages ', installed_packages)
-
-new_required_packages = {i.split('=')[0].strip():i for i in installed_packages}
+new_required_packages = {i.split('=')[0].strip(): i for i in installed_packages}
 for i in required_packages:
     if i in git_packages:
         print(i)
@@ -36,4 +32,3 @@ for i in required_packages:
             print(new_required_packages[i])
         except KeyError:
             print('KeyError', i)
-
