@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from game.models import Game, Question
 from game.views import BaseGameView
 from users.models import Player
-from leaderboard.leaderboard import build_answer_tally, player_rank_and_percentile_in_game
+from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, player_rank_and_percentile_in_game
 
 
 class LeaderboardView(BaseGameView):
@@ -34,6 +34,14 @@ class LeaderboardView(BaseGameView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context()
+        if request.user.is_authenticated:
+            player_rank, player_percentile = \
+                player_rank_and_percentile_in_game(request.user, self.game)
+            context.update({
+                'player_rank': player_rank,
+                'player_percentile': player_percentile,
+                'player_message': player_latest_game_message(self.game, player_rank, player_percentile)
+            })
         messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, 'leaderboard/leaderboard_view.html', context)
 
@@ -84,7 +92,7 @@ class PlayerHomeView(LoginRequiredMixin, View):
 
         context = {
             'display_name': user.first_name or user.email,
-            'message': self._dashboard_message(player, 'commonology', latest_game_id),
+            'message': player_latest_game_message(player, 'commonology', latest_game_id),
             'latest_game_id': latest_game_id,
             'games': player.game_ids,
             'teams': player.teams.all(),
@@ -92,21 +100,3 @@ class PlayerHomeView(LoginRequiredMixin, View):
         }
         return context
 
-    @staticmethod
-    def _dashboard_message(player, series_slug, latest_game_id):
-
-        if latest_game_id not in player.game_ids.values_list('game_id', flat=True):
-            return "Looks like you missed last weeks game... You'll get 'em this week!"
-
-        latest_rank, percentile = player_rank_and_percentile_in_game(player.id, latest_game_id)
-        player_count = Game.objects.get(game_id=latest_game_id, series__slug=series_slug).players_dict.count()
-
-        follow_up = "This is gonna be your week!"
-        if percentile <= 0.1:
-            follow_up = "That puts you in the top 10%!"
-        elif percentile <= 0.25:
-            follow_up = "That puts you in the top 25%!"
-        elif percentile <= 0.5:
-            follow_up = "That puts you in the top half!"
-
-        return f"Last week you ranked {latest_rank} out of {player_count} players. {follow_up}"
