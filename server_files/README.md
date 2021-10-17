@@ -531,3 +531,7 @@ $ mkdir /home/django/pg_dumps/
 
 
 # Try it!
+
+
+## Upgrade Notes
+[Upgrade Notes](server_files/upgrade.md)
