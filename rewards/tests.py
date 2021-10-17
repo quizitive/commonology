@@ -6,7 +6,7 @@ from project import settings
 from django.test import TestCase
 from users.tests import get_local_user, get_local_client
 from game.models import Answer, Question
-from rewards.utils import check_for_reward
+from rewards.utils import check_for_reward, write_certificate
 
 
 def slackit(msg):
@@ -59,3 +59,8 @@ class RewardTests(TestCase):
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
         self.assertContains(response, "Claim staked!")
+
+
+class CertificateTests(TestCase):
+    def test_write(self):
+        write_certificate()
