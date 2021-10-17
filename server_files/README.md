@@ -168,6 +168,7 @@ Reference: [pyenv-installer](https://github.com/pyenv/pyenv-installer)
 ```
 
 That command will give you a few lines to add to `/home/django/.bashrc` do that.
+See the end of the `staging.bashrc` file in this repo.
 Then logout and log back in again.  It could take a long time, 5-10 minutes, for the `pyenv install` line.
 
 ```
