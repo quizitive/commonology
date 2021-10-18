@@ -29,7 +29,8 @@ class SentFilter(SimpleListFilter):
 class ClaimAdmin(admin.ModelAdmin):
     readonly_fields = ('claim_date',)
     list_filter = (SentFilter,)
-    list_display = ('player', 'claim_date', 'sent_date')  # , 'address')
+    search_fields = ('player__email', 'player__display_name', 'player__first_name', 'player__last_name')
+    list_display = ('player', 'claim_date', 'sent_date')
     readonly_fields = ['address']
     actions = ('mark_selected_as_shipped',)
 
