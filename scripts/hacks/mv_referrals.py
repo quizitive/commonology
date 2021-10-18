@@ -22,10 +22,11 @@ def mv_referrals(from_email, to_email):
         referee.save()
 
 
-if False:
+def blusurf():
     mv_referrals('bluesutf201@gnail.com', 'bluesurf201@gmail.com')
 
-if False:
+
+def tessa():
     to_player = Player.objects.get(email='tessa.burke@meltwater.com')
     froms = [Player.objects.get(email=e) for e in ['kellydawnmendoza@gmail.com',
                                                    'maggiestanford20@gmail.com',
@@ -57,6 +58,11 @@ if False:
     # Andres Ferret -- OK
 
 
-alex_emails = ['alex@quizitive.com', 'alexandrafruin@gmail.com']
-for e in alex_emails:
-    mv_referrals(e, 'alex@commonologygame.com')
+def alex():
+    alex_emails = ['alex@quizitive.com', 'alexandrafruin@gmail.com']
+    for e in alex_emails:
+        mv_referrals(e, 'alex@commonologygame.com')
+
+
+def entwisht():
+    mv_referrals('entwishy@gmail.com', 'entwisht@gmail.com')
