@@ -57,6 +57,6 @@ if False:
     # Andres Ferret -- OK
 
 
-alex_emails = ['alex@quizitive.com', 'alexandrafruin@gmail.com', 'alexsquarantinegames@gmail.com']
+alex_emails = ['alex@quizitive.com', 'alexandrafruin@gmail.com']
 for e in alex_emails:
     mv_referrals(e, 'alex@commonologygame.com')
