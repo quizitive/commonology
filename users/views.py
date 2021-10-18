@@ -212,7 +212,7 @@ class InviteFriendsView(LoginRequiredMixin, BaseCardView):
             players_referred=players_referred,
             referral_count=players_referred.count(),
             reward_threshold=settings.REWARD_THRESHOLD,
-            can_claim=players_referred.count() > settings.REWARD_THRESHOLD,
+            can_claim=players_referred.count() >= settings.REWARD_THRESHOLD,
             **kwargs
         )
 
