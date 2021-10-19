@@ -17,14 +17,16 @@ from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponse, HttpResponseNotFound
 
 from project.views import CardFormView
 from project.card_views import recaptcha_check
-from project.utils import slackit
+from project.utils import slackit, our_now
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
-from game.utils import find_latest_public_game
+from game.utils import find_latest_public_game, write_winner_certificate
 from leaderboard.leaderboard import tabulate_results
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
@@ -612,3 +614,25 @@ class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
                                            f"Feel free to suggest another.")
             return redirect('game:question-suggest')
         return self.get(request, *args, **kwargs)
+
+
+class AwardCertificate(LoginRequiredMixin, BaseGameView):
+    def get_game(self):
+        return Game.objects.get(game_id=self.requested_game_id, series__slug=self.slug)
+
+    def get(self, request, game_id, *args, **kwargs):
+        player = request.user
+        game_number = kwargs.get('n')
+        game = self.game
+        name = player.display_name
+        date = our_now()
+
+        filename = write_winner_certificate(name, date, str(game_number))
+        fs = FileSystemStorage(location=settings.WINNER_ROOT)
+        if fs.exists(filename):
+            with fs.open(filename) as pdf:
+                response = HttpResponse(pdf, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename={filename}'
+                return response
+        else:
+            return HttpResponseNotFound('The requested pdf was not found in our server.')
