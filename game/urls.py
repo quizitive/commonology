@@ -11,5 +11,6 @@ urlpatterns = [
     path('game/<int:game_id>/', views.GameFormView.as_view(), name='game-form'),
     path('game/<int:game_id>/<str:player_signed_id>/', views.GameFormView.as_view(), name='game-view'),
     path('replay/<uuid:uuid>/', views.GameReplayView.as_view(), name='game-replay'),
-    path('suggest-a-question/', views.QuestionSuggestionView.as_view(), name='question-suggest')
+    path('suggest-a-question/', views.QuestionSuggestionView.as_view(), name='question-suggest'),
+    path("award_certificate/<int:game_id>/", views.AwardCertificate.as_view(), name='award_certificate'),
 ]
