@@ -64,4 +64,3 @@ class RewardTests(TestCase):
 class CertificateTests(TestCase):
     def test_write(self):
         write_winner_certificate(name='Marc Schwarzschild', date='October 21, 2021', game_number=59)
-
