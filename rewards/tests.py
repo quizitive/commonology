@@ -63,4 +63,5 @@ class RewardTests(TestCase):
 
 class CertificateTests(TestCase):
     def test_write(self):
-        write_winner_certificate(name='Marc Schwarzschild', date='October 21, 2021', game_number=59)
+        fn = write_winner_certificate(name='Marc Schwarzschild', date='October 21, 2021', game_number=59)
+        self.assertEqual(fn, 'MarcSchwarzschildOctober21202159.pdf')
