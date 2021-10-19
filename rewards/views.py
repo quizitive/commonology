@@ -1,4 +1,7 @@
 from django.contrib import messages
+from django.core.files.storage import FileSystemStorage
+from django.views.generic.base import View
+from django.http import HttpResponse, HttpResponseNotFound
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -8,6 +11,7 @@ from project.utils import slackit
 from mail.utils import send_one
 from rewards.forms import ClaimForm
 from rewards.models import MailingAddress, Claim
+from rewards.utils import write_winner_certificate
 
 
 class ClaimView(LoginRequiredMixin, CardFormView):
@@ -77,3 +81,19 @@ class ClaimView(LoginRequiredMixin, CardFormView):
                          form_method='get',
                          form_action=f'/',
                          button_label='Thank you!')
+
+
+class AwardCertificate(View):
+    def get(self, request, n, *args, **kwargs):
+        game_number = kwargs.get('n')
+        name = 'foo'
+        date = name
+        filename = write_winner_certificate(name, date, str(game_number))
+        fs = FileSystemStorage(location=settings.WINNER_ROOT)
+        if fs.exists(filename):
+            with fs.open(filename) as pdf:
+                response = HttpResponse(pdf, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename={filename}'
+                return response
+        else:
+            return HttpResponseNotFound('The requested pdf was not found in our server.')
