@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.test import Client
 
 from project.utils import REDIS, our_now
-from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key
+from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key, winners_of_game
 from game.models import Game
 from game.tests import BaseGameDataTestCase, suppress_hidden_error_logs
 
@@ -258,3 +258,8 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         data = {'display_name': 'new_display_name'}
         client.post(path, data=data)
         self.assertEqual(REDIS.keys(f'leaderboard_{self.game.series.slug}_{self.game.game_id}'), [])
+
+    def test_winner_of_game(self):
+        expected_winner = Player.objects.get(id=24)
+        winner = winners_of_game(self.game).first()
+        self.assertEqual(winner.email, expected_winner.email)
