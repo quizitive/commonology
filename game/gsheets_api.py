@@ -163,15 +163,24 @@ def make_rollups_sheet(rollups_and_tallies):
     # the rollups used in this game
     sheet_data = []
     for question, data in rollups_and_tallies.items():
-        unique_strings = [question, 'Answer']
-        resulting_codes = ['', 'Coding']
-        rollup_score = ['', 'Score']
         tallies, merges = data
+        unique_strings = []
+        resulting_codes = []
+        rollup_score = []
         for coding, unique_string_list in merges.items():
             for u in unique_string_list:
                 unique_strings.append(u)
                 resulting_codes.append(coding)
                 rollup_score.append(int(tallies[coding]))
+
+        z = zip(unique_strings, resulting_codes, rollup_score)
+        z = sorted(z, key=lambda x: x[2], reverse=True)
+        unique_strings, resulting_codes, rollup_score = zip(*z)
+
+        unique_strings = [question, 'Answer'] + list(unique_strings)
+        resulting_codes = ['', 'Coding'] + list(resulting_codes)
+        rollup_score = ['', 'Score'] + list(rollup_score)
+
         sheet_data.extend((unique_strings, resulting_codes, rollup_score, []))
     return sheet_data
 
