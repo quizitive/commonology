@@ -19,7 +19,7 @@ from project.utils import REDIS, our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
-from game.utils import next_wed_noon, next_friday_1159
+from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate
 from game.models import Series, Question, Answer
 from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
@@ -641,3 +641,9 @@ class TestGameForm(BaseGameDataTestCase, PSIDMixin):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_text)
+
+
+class CertificateTests(TestCase):
+    def test_write(self):
+        fn = write_winner_certificate(name='Marc Schwarzschild', date='October 21, 2021', game_number=59)
+        self.assertEqual(fn, 'MarcSchwarzschildOctober21202159.pdf')
