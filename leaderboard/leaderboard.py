@@ -172,19 +172,17 @@ def _answer_tally_from_cache(game):
 
 
 @quick_cache()
-def player_rank_and_percentile_in_game(player, game):
+def player_score_rank_percentile(player, game):
 
-    if game.id not in player.game_ids.values_list('game_id', flat=True):
-        return None, None
+    if game.game_id not in player.game_ids.values_list('game_id', flat=True):
+        return None, None, None
 
     answer_tally = build_answer_tally(game)
-    try:
-        rank = build_filtered_leaderboard(game, answer_tally, player_ids=[player.id])['Rank'].values[0]
-    except IndexError:
-        raise IndexError("The player id does not exist for this game.")
-
+    filtered_leaderboard = build_filtered_leaderboard(game, answer_tally, player_ids=[player.id])
+    score = filtered_leaderboard['Score'].values[0]
+    rank = filtered_leaderboard['Rank'].values[0]
     percentile = rank / game.players_dict.count()
-    return rank, percentile
+    return score, rank, percentile
 
 
 @quick_cache()
@@ -193,7 +191,7 @@ def player_rank_in_all_games(player, series):
     ranks = OrderedDict()
     for game in games:
         try:
-            rank, _ = player_rank_and_percentile_in_game(player, game)
+            _, rank, _ = player_score_rank_percentile(player, game)
         except IndexError:
             rank = None
         ranks[game.game_id] = rank
@@ -212,6 +210,8 @@ def player_top_game_rank(player, series):
 
 
 def rank_string(rank):
+    if not rank:
+        return "N/A"
     if rank == 1:
         rank_str = "1st"
     elif rank == 2:
@@ -223,10 +223,16 @@ def rank_string(rank):
     return rank_str
 
 
+def score_string(score):
+    if not score:
+        return "N/A"
+    return f"{score}"
+
+
 def player_latest_game_message(game, rank, percentile):
 
     if not rank:
-        return "Looks like you missed last weeks game... You'll get 'em this week!"
+        return "Looks like you missed this game... you'll get 'em next time!"
 
     player_count = game.players_dict.count()
     follow_up = "This is gonna be your week!"
@@ -237,4 +243,4 @@ def player_latest_game_message(game, rank, percentile):
     elif percentile <= 0.5:
         follow_up = "That puts you in the top half!"
 
-    return f"Last week you ranked {rank} out of {player_count} players. {follow_up}"
+    return f"This game you ranked {rank} out of {player_count} players. {follow_up}"
