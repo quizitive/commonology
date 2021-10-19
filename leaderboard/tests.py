@@ -259,7 +259,7 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         client.post(path, data=data)
         self.assertEqual(REDIS.keys(f'leaderboard_{self.game.series.slug}_{self.game.game_id}'), [])
 
-    def test_winner_of_game(self):
+    def test_winners_of_game(self):
         expected_winner = Player.objects.get(id=24)
         winner = winners_of_game(self.game).first()
         self.assertEqual(winner.email, expected_winner.email)
