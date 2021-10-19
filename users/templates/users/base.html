@@ -1,14 +1,12 @@
 <!--users/templates/users/base.html-->
 
 {% extends 'base.html' %}
-{% load static %}
 
 {% block navbar %}
   {% include 'components/navbar.html' %}
 {% endblock %}
 
 {% block app_style %}
-  <link rel="stylesheet" href="{% static 'css/users/base.css' %}">
   <link rel="stylesheet" href="{% v_static 'users/css/form_style.css' %}">
 {% endblock %}
 
