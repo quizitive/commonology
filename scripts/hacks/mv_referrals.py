@@ -12,16 +12,21 @@ django.setup()
 from users.models import Player
 from rewards.utils import send_reward_notice
 
-if False:
-    from_player = Player.objects.get(email='bluesutf201@gnail.com')
-    to_player = Player.objects.get(email='bluesurf201@gmail.com')
+
+def mv_referrals(from_email, to_email):
+    from_player = Player.objects.get(email=from_email)
+    to_player = Player.objects.get(email=to_email)
 
     for referee in from_player.players_referred:
         referee.referrer = to_player
         referee.save()
 
 
-if True:
+def blusurf():
+    mv_referrals('bluesutf201@gnail.com', 'bluesurf201@gmail.com')
+
+
+def tessa():
     to_player = Player.objects.get(email='tessa.burke@meltwater.com')
     froms = [Player.objects.get(email=e) for e in ['kellydawnmendoza@gmail.com',
                                                    'maggiestanford20@gmail.com',
@@ -51,3 +56,13 @@ if True:
     # Zach Baker -- zach.baker@meltwater.com
     # Gail Robertson -- OK
     # Andres Ferret -- OK
+
+
+def alex():
+    alex_emails = ['alex@quizitive.com', 'alexandrafruin@gmail.com']
+    for e in alex_emails:
+        mv_referrals(e, 'alex@commonologygame.com')
+
+
+def entwisht():
+    mv_referrals('entwishy@gmail.com', 'entwisht@gmail.com')
