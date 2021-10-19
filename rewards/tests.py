@@ -6,7 +6,7 @@ from project import settings
 from django.test import TestCase
 from users.tests import get_local_user, get_local_client
 from game.models import Answer, Question
-from rewards.utils import check_for_reward, write_certificate
+from rewards.utils import check_for_reward, write_winner_certificate
 
 
 def slackit(msg):
@@ -63,4 +63,5 @@ class RewardTests(TestCase):
 
 class CertificateTests(TestCase):
     def test_write(self):
-        write_certificate()
+        write_winner_certificate(name='Marc Schwarzschild', date='October 21, 2021', game_number=59)
+
