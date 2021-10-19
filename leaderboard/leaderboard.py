@@ -9,7 +9,7 @@ from django.db.models import Sum, Subquery, OuterRef
 from django.conf import settings
 
 from project.utils import REDIS, quick_cache
-from users.models import Team
+from users.models import Player, Team
 from game.models import Game, AnswerCode
 from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
 from game.tasks import api_to_db
@@ -189,3 +189,10 @@ def player_rank_and_percentile_in_game(player_id, series_slug, game_id):
     else:
         rank_str = f"{rank}th"
     return rank_str, percentile
+
+
+def winners_of_game(game):
+    answer_tally = build_answer_tally(game)
+    leaderboard = build_filtered_leaderboard(game, answer_tally)
+    player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
+    return Player.objects.filter(id__in=player_ids)
