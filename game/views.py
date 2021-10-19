@@ -27,7 +27,7 @@ from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, Q
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
 from game.utils import find_latest_public_game, write_winner_certificate
-from leaderboard.leaderboard import tabulate_results
+from leaderboard.leaderboard import tabulate_results, winners_of_game
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
@@ -622,17 +622,20 @@ class AwardCertificate(LoginRequiredMixin, BaseGameView):
 
     def get(self, request, game_id, *args, **kwargs):
         player = request.user
-        game_number = kwargs.get('n')
-        game = self.game
-        name = player.display_name
-        date = our_now()
+        if player in winners_of_game(self.game):
+            # game_number = kwargs.get('game_id')
+            game_number = self.game.game_id
+            name = player.display_name
+            date = our_now().date()
 
-        filename = write_winner_certificate(name, date, str(game_number))
-        fs = FileSystemStorage(location=settings.WINNER_ROOT)
-        if fs.exists(filename):
-            with fs.open(filename) as pdf:
-                response = HttpResponse(pdf, content_type='application/pdf')
-                response['Content-Disposition'] = f'attachment; filename={filename}'
-                return response
+            filename = write_winner_certificate(name, date, str(game_number))
+            fs = FileSystemStorage(location=settings.WINNER_ROOT)
+            if fs.exists(filename):
+                with fs.open(filename) as pdf:
+                    response = HttpResponse(pdf, content_type='application/pdf')
+                    response['Content-Disposition'] = f'attachment; filename={filename}'
+                    return response
+            else:
+                return HttpResponseNotFound('The requested pdf was not found in our server.')
         else:
-            return HttpResponseNotFound('The requested pdf was not found in our server.')
+            return HttpResponse(f'You did not win game number {game_id}', content_type='text/plain')
