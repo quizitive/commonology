@@ -9,7 +9,7 @@ from game.models import Game, Question
 from game.views import BaseGameView
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
-    player_rank_and_percentile_in_game, rank_string
+    player_score_rank_percentile, rank_string, score_string
 
 
 class LeaderboardView(BaseGameView):
@@ -33,18 +33,22 @@ class LeaderboardView(BaseGameView):
 
         return game
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context()
-        if request.user.is_authenticated:
-            player_rank, player_percentile = \
-                player_rank_and_percentile_in_game(request.user, self.game)
+    def get_context(self, *args, **kwargs):
+        context = super().get_context(*args, **kwargs)
+        if self.request.user.is_authenticated:
+            # get the logged in player's stats for the game
+            player_score, player_rank, player_percentile = \
+                player_score_rank_percentile(self.request.user, self.game)
             context.update({
-                'player_score': self.game.player_score(request.user),
+                'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
                 'player_message': player_latest_game_message(self.game, player_rank, player_percentile)
             })
+        return context
+
+    def get(self, request, *args, **kwargs):
         messages.info(request, "Login to follow your friends and join the conversation!")
-        return render(request, 'leaderboard/leaderboard_view.html', context)
+        return render(request, 'leaderboard/leaderboard_view.html', self.get_context(*args, **kwargs))
 
 
 class ResultsView(LeaderboardView):
@@ -100,4 +104,3 @@ class PlayerHomeView(LoginRequiredMixin, View):
             'invite_message': "Enter your friends' emails to invite them to Commonology!"
         }
         return context
-
