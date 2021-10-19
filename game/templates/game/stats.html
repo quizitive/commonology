@@ -1,12 +1,12 @@
 {% extends "admin/base_site.html" %}
 {% load i18n %}
-{% load static %}
+
 
 {% block extrastyle %}{{ block.super }}
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-  <script src="{% static 'js/charts.js' %}" type="text/javascript"></script>
-  <link rel="stylesheet" href="{% static 'css/w3.css' %}">
+  <script src="{% v_static 'js/charts.js' %}" type="text/javascript"></script>
+  <link rel="stylesheet" href="{% v_static 'css/w3.css' %}">
   <style>
   h1 {
     font-family: "Roboto","Lucida Grande","DejaVu Sans","Bitstream Vera Sans",Verdana,Arial,sans-serif;
