@@ -622,7 +622,7 @@ class AwardCertificate(LoginRequiredMixin, BaseGameView):
 
     def get(self, request, game_id, *args, **kwargs):
         player = request.user
-        if  player in winners_of_game(self.game):
+        if player in winners_of_game(self.game):
             game_number = self.game.game_id
             name = player.display_name
             date = our_now().date()
