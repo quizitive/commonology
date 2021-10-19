@@ -2,7 +2,6 @@ import os
 import subprocess
 from django.template.loader import render_to_string
 from project import settings
-from project.utils import our_now
 from mail.utils import send_one
 from project.utils import slackit
 
@@ -40,11 +39,16 @@ def check_for_reward(player):
 
 
 def write_winner_certificate(name, date, game_number):
+    # On Mac: brew install pdfk-java
     path = settings.WINNER_ROOT
+    os.makedirs(path, exist_ok=True)
+
     pdf_template = "rewards/templates/rewards/WinnerCertificate.pdf"
 
-    fn_base = f"{name}{date}{game_number}.{our_now()}".replace(',', '').replace(' ', '').strip()
-    fn_base = os.path.join(path, fn_base)
+    base = f"{name}{date}{game_number}".replace(',', '').replace(' ', '').strip()
+    fn_fdf = os.path.join(path, f"{base}.fdf")
+    filename = f"{base}.pdf"
+    fn = os.path.join(path, filename)
 
     fdf = f'''
         %FDF-1.2
@@ -59,11 +63,9 @@ def write_winner_certificate(name, date, game_number):
         %%EOF
     '''
 
-    fn_fdf = fn_base + '.fdf'
     with open(fn_fdf, 'w') as fh:
         fh.write(fdf)
 
-    fn = fn_base + '.pdf'
-    p = subprocess.run(['pdftk', pdf_template, 'fill_form', fn_fdf, 'output',  fn, 'flatten'])
-    print(p.returncode == 0)
-    print(f'open {fn}')
+    subprocess.run(['pdftk', pdf_template, 'fill_form', fn_fdf, 'output', fn, 'flatten'])
+
+    return filename
