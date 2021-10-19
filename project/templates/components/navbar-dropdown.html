@@ -1,11 +1,11 @@
 {% load navbar_extras %}
-{% load static %}
+
 {% load leadeboard_tags %}
 
 {% if user.is_authenticated %}
 
 <div class="navbar-dropdown w3-cell w3-cell-middle w3-dropdown-click w3-center w3-hover-none">
-  <img id="navbar-dropdown-icon" class="navbar-icon" src="{% static 'img/caret-square-down-solid.svg' %}">
+  <img id="navbar-dropdown-icon" class="navbar-icon" src="{% v_static 'img/caret-square-down-solid.svg' %}">
   <div id="navbar-dropdown-content"
        class="navbar-dropdown w3-dropdown-content w3-bar-block w3-border w3-round" style="overflow: hidden;">
     <a href="{% url 'profile' %}">
