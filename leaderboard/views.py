@@ -8,7 +8,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from game.models import Game, Question
 from game.views import BaseGameView
 from users.models import Player
-from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, player_rank_and_percentile_in_game
+from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
+    player_rank_and_percentile_in_game, rank_string
 
 
 class LeaderboardView(BaseGameView):
@@ -38,8 +39,8 @@ class LeaderboardView(BaseGameView):
             player_rank, player_percentile = \
                 player_rank_and_percentile_in_game(request.user, self.game)
             context.update({
-                'player_rank': player_rank,
-                'player_percentile': player_percentile,
+                'player_score': self.game.player_score(request.user),
+                'player_rank': rank_string(player_rank),
                 'player_message': player_latest_game_message(self.game, player_rank, player_percentile)
             })
         messages.info(request, "Login to follow your friends and join the conversation!")
