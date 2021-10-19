@@ -54,6 +54,8 @@ if env.get('EAGER_CELERY', False):
     CELERY_TASK_EAGER_PROPAGATES = True
     BROKER_BACKEND = 'memory'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 INSTALLED_APPS = [
     'channels',
     'sslserver',
