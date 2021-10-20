@@ -94,10 +94,7 @@ def write_winner_certificate(name, date, game_number):
         %%EOF
     '''
 
-    x = env.get('GITHUB_COMMONOLOGY_CI_TEST')
-    print('Marc Schwarzschild 1', x)
-
-    if not x:
+    if not env.get('GITHUB_COMMONOLOGY_CI_TEST'):
         with open(fn_fdf, 'w') as fh:
             fh.write(fdf)
 
