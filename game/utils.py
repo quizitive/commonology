@@ -1,4 +1,5 @@
 import os
+from os import environ as env
 import subprocess
 import datetime
 
@@ -93,9 +94,13 @@ def write_winner_certificate(name, date, game_number):
         %%EOF
     '''
 
-    with open(fn_fdf, 'w') as fh:
-        fh.write(fdf)
+    x = env.get('GITHUB_COMMONOLOGY_CI_TEST')
+    print('Marc Schwarzschild', x)
 
-    subprocess.run(['pdftk', WINNER_TEMPLATE_PDF, 'fill_form', fn_fdf, 'output', fn, 'flatten'])
+    if not x:
+        with open(fn_fdf, 'w') as fh:
+            fh.write(fdf)
+
+        subprocess.run(['pdftk', WINNER_TEMPLATE_PDF, 'fill_form', fn_fdf, 'output', fn, 'flatten'])
 
     return filename
