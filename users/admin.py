@@ -136,7 +136,6 @@ class ReferrersAdmin(PlayerUserAdmin):
     ordering = None
 
     def get_queryset(self, request):
-
         ids = referral_filter_ids()
         qs = super(PlayerUserAdmin, self).get_queryset(request).filter(id__in=ids)
         return qs
