@@ -628,7 +628,9 @@ class AwardCertificate(LoginRequiredMixin, BaseGameView):
             name = player.display_name
             date = our_now().date()
 
-            if not env.get('GITHUB_COMMONOLOGY_CI_TEST'):
+            x = env.get('GITHUB_COMMONOLOGY_CI_TEST')
+            print('Marc Schwarzschild', x)
+            if not x:
                 filename = write_winner_certificate(name, date, str(game_number))
                 fs = FileSystemStorage(location=settings.WINNER_ROOT)
                 if fs.exists(filename):
