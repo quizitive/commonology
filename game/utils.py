@@ -3,7 +3,7 @@ import subprocess
 import datetime
 
 from django.db.models import Min
-from project.settings import WINNER_ROOT
+from project.settings import WINNER_ROOT, WINNER_TEMPLATE_PDF
 from project.utils import our_now, quick_cache
 from game.models import Game, Answer
 
@@ -75,8 +75,6 @@ def write_winner_certificate(name, date, game_number):
     path = WINNER_ROOT
     os.makedirs(path, exist_ok=True)
 
-    pdf_template = "game/templates/game/WinnerCertificate.pdf"
-
     base = f"{name}{date}{game_number}".replace(',', '').replace(' ', '').strip()
     fn_fdf = os.path.join(path, f"{base}.fdf")
     filename = f"{base}.pdf"
@@ -98,6 +96,6 @@ def write_winner_certificate(name, date, game_number):
     with open(fn_fdf, 'w') as fh:
         fh.write(fdf)
 
-    subprocess.run(['pdftk', pdf_template, 'fill_form', fn_fdf, 'output', fn, 'flatten'])
+    subprocess.run(['pdftk', WINNER_TEMPLATE_PDF, 'fill_form', fn_fdf, 'output', fn, 'flatten'])
 
     return filename
