@@ -629,6 +629,7 @@ class AwardCertificate(LoginRequiredMixin, BaseGameView):
             date = our_now().date()
 
             x = env.get('GITHUB_COMMONOLOGY_CI_TEST')
+            print('Marc Schwarzschild 2', x)
             if not x:
                 filename = write_winner_certificate(name, date, str(game_number))
                 fs = FileSystemStorage(location=settings.WINNER_ROOT)
@@ -640,9 +641,8 @@ class AwardCertificate(LoginRequiredMixin, BaseGameView):
                 else:
                     response = HttpResponseNotFound('The requested pdf was not found in our server.')
             else:
-                with open(settings.WINNER_TEMPLATE_PDF, 'r') as pdf:
-                    response = HttpResponse(pdf, content_type='application/pdf')
-                    response['Content-Disposition'] = f'attachment; filename=test.pdf'
+                response = HttpResponse('pdf', content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename=test.pdf'
         else:
             response = HttpResponse(f'You did not win game number {game_id}', content_type='text/plain')
 
