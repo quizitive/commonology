@@ -21,8 +21,13 @@ def v_static(format_string):
     if path in STATIC_VERSIONS:
         v = STATIC_VERSIONS[path]
     else:
-        fn = finders.find(format_string)
-        t = os.path.getmtime(fn)
+        try:
+            fn = finders.find(format_string)
+            t = os.path.getmtime(fn)
+        except Exception as e:
+            print('v_static cannot find this file: ', format_string)
+            raise e
+
         v = int(t)
         STATIC_VERSIONS[path] = v
 
