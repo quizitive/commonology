@@ -1,5 +1,5 @@
 {% load navbar_extras %}
-{% load static %}
+
 
 <div class="w3-top">
     <div id="navbar" class="w3-bar w3-medium">
@@ -7,8 +7,8 @@
         <div class="w3-cell w3-mobile" style="width:6%;"></div>
         <div class="w3-cell w3-cell-middle">
           <a href="{% url 'home' %}">
-            <img class="navbar-logo-large" src="{% static 'img/logo.svg' %}">
-            <img class="navbar-logo-small" src="{% static 'img/icon.svg' %}">
+            <img class="navbar-logo-large" src="{% v_static 'img/logo.svg' %}">
+            <img class="navbar-logo-small" src="{% v_static 'img/icon.svg' %}">
           </a>
         </div>
         <div class="w3-cell w3-right w3-cell-middle">
@@ -23,4 +23,4 @@
 
 {% login_modal request %}
 
-<script src="{% static 'js/navbar.js' %}"></script>
+<script src="{% v_static 'js/navbar.js' %}"></script>
