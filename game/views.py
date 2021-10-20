@@ -1,3 +1,4 @@
+from os import environ as env
 import gspread
 import logging
 from numpy import base_repr
@@ -627,14 +628,21 @@ class AwardCertificate(LoginRequiredMixin, BaseGameView):
             name = player.display_name
             date = our_now().date()
 
-            filename = write_winner_certificate(name, date, str(game_number))
-            fs = FileSystemStorage(location=settings.WINNER_ROOT)
-            if fs.exists(filename):
-                with fs.open(filename) as pdf:
-                    response = HttpResponse(pdf, content_type='application/pdf')
-                    response['Content-Disposition'] = f'attachment; filename={filename}'
-                    return response
+            if not env.get('GITHUB_COMMONOLOGY_CI_TEST'):
+                filename = write_winner_certificate(name, date, str(game_number))
+                fs = FileSystemStorage(location=settings.WINNER_ROOT)
+                if fs.exists(filename):
+                    with fs.open(filename) as pdf:
+                        response = HttpResponse(pdf, content_type='application/pdf')
+                        response['Content-Disposition'] = f'attachment; filename={filename}'
+
+                else:
+                    response = HttpResponseNotFound('The requested pdf was not found in our server.')
             else:
-                return HttpResponseNotFound('The requested pdf was not found in our server.')
+                with open(settings.WINNER_TEMPLATE_PDF, 'r') as pdf:
+                    response = HttpResponse(pdf, content_type='application/pdf')
+                    response['Content-Disposition'] = f'attachment; filename=test.pdf'
         else:
-            return HttpResponse(f'You did not win game number {game_id}', content_type='text/plain')
+            response = HttpResponse(f'You did not win game number {game_id}', content_type='text/plain')
+
+        return response
