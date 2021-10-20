@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+
 
 {% block title %}Commonology | About{% endblock %}
 
@@ -28,7 +28,7 @@
   <div class="content">
 
   <h2 class="w3-margin-bottom w3-container" style="vertical-align:bottom;">
-  <img src="{% static 'img/logo.svg' %}" class="w3-padding-24"> is a <span style="font-weight:bold;font-style:italic;font-size:1.2em;">fun</span> and <span style="font-weight:bold;font-style:italic;font-size:1.2em;">simple</span> battle of the minds that only takes 2 minutes to play.
+  <img src="{% v_static 'img/logo.svg' %}" class="w3-padding-24"> is a <span style="font-weight:bold;font-style:italic;font-size:1.2em;">fun</span> and <span style="font-weight:bold;font-style:italic;font-size:1.2em;">simple</span> battle of the minds that only takes 2 minutes to play.
 </h2>
 
   <div class="w3-row" style="padding: 16pt"></div>
