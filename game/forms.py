@@ -90,3 +90,8 @@ class QuestionSuggestionForm(forms.Form):
         max_length=1000,
         error_messages={'required': 'This is a required question'}
     )
+
+
+class AwardCertificateForm(forms.Form):
+    name = forms.CharField(required=True, max_length=75)
+    game_number = forms.IntegerField(required=True)

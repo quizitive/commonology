@@ -25,7 +25,7 @@ from django.http import HttpResponse, HttpResponseNotFound
 from project.views import CardFormView
 from project.card_views import recaptcha_check
 from project.utils import slackit, our_now
-from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
+from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
 from game.utils import find_latest_public_game, write_winner_certificate
@@ -618,7 +618,7 @@ class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
         return self.get(request, *args, **kwargs)
 
 
-class AwardCertificate(LoginRequiredMixin, BaseGameView):
+class AwardCertificateView(LoginRequiredMixin, BaseGameView):
     def get_game(self):
         try:
             return Game.objects.get(game_id=self.requested_game_id, series__slug=self.slug)
@@ -656,3 +656,38 @@ class AwardCertificate(LoginRequiredMixin, BaseGameView):
             response['Content-Disposition'] = f'attachment; filename={filename}'
 
         return response
+
+
+class AwardCertificateFormView(UserPassesTestMixin, CardFormView):
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    form_class = AwardCertificateForm
+    header = "Award Certificate Form"
+    button_label = 'Submit'
+
+    def post(self, request, *args, **kwargs):
+
+        form = self.get_form()
+
+        if form.is_valid():
+            name = form.data['name']
+            n = form.data['game_number']
+            date = our_now().date()
+
+            filename = write_winner_certificate(name, date, n)
+            fs = FileSystemStorage(location=settings.WINNER_ROOT)
+
+            if not fs.exists(filename):
+                self.custom_message = f'For some reason we could not make the award certificate.'
+                return self.render(request, form=None, button_label='OK',
+                                   form_method="get", form_action='/award_certifiate')
+
+            with fs.open(filename) as pdf:
+                response = HttpResponse(pdf, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename={filename}'
+
+            return response
+
+        return self.render(request)
