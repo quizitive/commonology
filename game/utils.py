@@ -5,7 +5,7 @@ import datetime
 
 from django.db.models import Min
 from project.settings import WINNER_ROOT, WINNER_TEMPLATE_PDF
-from project.utils import our_now, quick_cache
+from project.utils import our_now, quick_cache, to_ascii
 from game.models import Game, Answer
 
 
@@ -81,6 +81,9 @@ def write_winner_certificate(name, date, game_number):
     filename = f"{base}.pdf"
     fn = os.path.join(path, filename)
 
+    name = to_ascii(name)
+
+
     fdf = f'''
         %FDF-1.2
         1 0 obj << /FDF << /Fields [
@@ -98,6 +101,7 @@ def write_winner_certificate(name, date, game_number):
         with open(fn_fdf, 'w') as fh:
             fh.write(fdf)
 
-        subprocess.run(['pdftk', WINNER_TEMPLATE_PDF, 'fill_form', fn_fdf, 'output', fn, 'flatten'])
+        subprocess.run(['pdftk', WINNER_TEMPLATE_PDF, 'fill_form', fn_fdf,
+                        'output', fn, 'need_appearances', 'flatten'])
 
     return filename
