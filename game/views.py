@@ -29,6 +29,7 @@ from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, Q
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
 from game.utils import find_latest_public_game, write_winner_certificate
+from game.mail import send_winner_notice
 from leaderboard.leaderboard import tabulate_results, winners_of_game
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
@@ -668,26 +669,24 @@ class AwardCertificateFormView(UserPassesTestMixin, CardFormView):
     button_label = 'Submit'
 
     def post(self, request, *args, **kwargs):
-
+        self.custom_message = ''
         form = self.get_form()
 
         if form.is_valid():
             name = form.data['name']
             n = form.data['game_number']
+
             date = our_now().date()
 
             filename = write_winner_certificate(name, date, n)
             fs = FileSystemStorage(location=settings.WINNER_ROOT)
 
-            if not fs.exists(filename):
+            try:
+                with fs.open(filename) as pdf:
+                    response = HttpResponse(pdf, content_type='application/pdf')
+                    response['Content-Disposition'] = f'attachment; filename={filename}'
+                return response
+            except IOError:
                 self.custom_message = f'For some reason we could not make the award certificate.'
-                return self.render(request, form=None, button_label='OK',
-                                   form_method="get", form_action='/award_certifiate')
-
-            with fs.open(filename) as pdf:
-                response = HttpResponse(pdf, content_type='application/pdf')
-                response['Content-Disposition'] = f'attachment; filename={filename}'
-
-            return response
 
         return self.render(request)
