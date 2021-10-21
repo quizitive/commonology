@@ -3,6 +3,7 @@ import gspread
 import logging
 from numpy import base_repr
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
@@ -619,29 +620,39 @@ class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
 
 class AwardCertificate(LoginRequiredMixin, BaseGameView):
     def get_game(self):
-        return Game.objects.get(game_id=self.requested_game_id, series__slug=self.slug)
+        try:
+            return Game.objects.get(game_id=self.requested_game_id, series__slug=self.slug)
+        except ObjectDoesNotExist:
+            return None
 
     def get(self, request, game_id, *args, **kwargs):
+        if not self.game:
+            msg = f'That game does not exist.'
+            return render(request, 'single_card_view.html', context={'custom_message': msg})
+
         player = request.user
-        if player in winners_of_game(self.game):
-            game_number = self.game.game_id
-            name = player.display_name
-            date = our_now().date()
 
-            if not env.get('GITHUB_COMMONOLOGY_CI_TEST'):
-                filename = write_winner_certificate(name, date, str(game_number))
-                fs = FileSystemStorage(location=settings.WINNER_ROOT)
-                if fs.exists(filename):
-                    with fs.open(filename) as pdf:
-                        response = HttpResponse(pdf, content_type='application/pdf')
-                        response['Content-Disposition'] = f'attachment; filename={filename}'
+        if player not in winners_of_game(self.game):
+            msg = f'You did not win game number {game_id}'
+            return render(request, 'single_card_view.html', context={'custom_message': msg})
 
-                else:
-                    response = HttpResponseNotFound('The requested pdf was not found in our server.')
-            else:
-                response = HttpResponse('pdf', content_type='application/pdf')
-                response['Content-Disposition'] = f'attachment; filename=test.pdf'
-        else:
-            response = HttpResponse(f'You did not win game number {game_id}', content_type='text/plain')
+        if env.get('GITHUB_COMMONOLOGY_CI_TEST'):
+            response = HttpResponse('pdf', content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=test.pdf'
+
+        game_number = self.game.game_id
+        name = player.display_name
+        date = our_now().date()
+
+        filename = write_winner_certificate(name, date, str(game_number))
+        fs = FileSystemStorage(location=settings.WINNER_ROOT)
+
+        if not fs.exists(filename):
+            msg = f'For some reason we could not make the award certificate.'
+            return render(request, 'single_card_view.html', context={'custom_message': msg})
+
+        with fs.open(filename) as pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename={filename}'
 
         return response
