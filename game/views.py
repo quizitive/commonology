@@ -639,7 +639,7 @@ class AwardCertificateView(LoginRequiredMixin, BaseGameView):
 
         if env.get('GITHUB_COMMONOLOGY_CI_TEST'):
             response = HttpResponse('pdf', content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename=test.pdf'
+            return(response)
 
         game_number = self.game.game_id
         name = player.display_name
