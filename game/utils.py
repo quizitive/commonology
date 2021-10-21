@@ -83,7 +83,6 @@ def write_winner_certificate(name, date, game_number):
 
     name = to_ascii(name)
 
-
     fdf = f'''
         %FDF-1.2
         1 0 obj << /FDF << /Fields [
