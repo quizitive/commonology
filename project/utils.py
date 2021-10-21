@@ -76,7 +76,7 @@ def slackit(msg):
 
 def to_ascii(s):
     # 8217 is found by ord(x) where x is the character on the original string.
-    table = {8217: "'", 9728: "*"}
+    table = {8217: "'", 9728: "*", 233: "e"}
     s = s.translate(s.maketrans(table))
     s = str(s.encode('utf-8').decode('ascii', 'ignore'))
     return s
