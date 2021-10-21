@@ -93,5 +93,5 @@ class QuestionSuggestionForm(forms.Form):
 
 
 class AwardCertificateForm(forms.Form):
-    name = forms.CharField(required=True, max_length=75)
+    name = forms.CharField(max_length=75)
     game_number = forms.IntegerField(required=True)
