@@ -97,7 +97,7 @@ class GameAdmin(admin.ModelAdmin):
         for game in queryset:
             game_number = game.game_id
             n = 0
-            winners = winners_of_game(self.game)
+            winners = winners_of_game(game)
             for winner in winners:
                 send_winner_notice(winner, game_number)
                 n += 1
