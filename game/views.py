@@ -20,7 +20,7 @@ from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse
 
 from project.views import CardFormView
 from project.card_views import recaptcha_check
