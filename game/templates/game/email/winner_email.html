@@ -1,0 +1,41 @@
+
+{% autoescape off %}
+
+{% block email-content %}
+
+  <div style="padding:16px 0;">
+    <span style="font-size:20px;font-weight:bold;font-style:italic;color:#0095da;">
+      Congratulations!
+    </span>
+
+    <div style="padding:16px 0;">You won game {{ game_number }}.  Please use the link below to download your certifcate.
+    </div>
+  </div>
+
+  <div id="button-holder">
+    <button class="w3-button cg-blue" style="display: block;">
+      <a href="{{ url }}">Download Winner Certificate!</a>
+    </button>
+  </div>
+
+  <div style="padding:16px 0;">
+  We are so proud of our winners and you are no exception.  Please send us a picture of your
+  favorite pet or friend and include your cerficate in the picture.  You can email it
+  to concierge@commonologygame.com.
+  </div>
+
+  <p>
+    Cheers,
+    <br/>
+    The Commonology Team
+  </p>
+  <div id="footer" style="margin-bottom:-24px">
+    <p>
+    Button not working? Try pasting the url directly into your browser:
+      <a href="{{ url }}">{{ url }}</a>
+    </p>
+  </div>
+
+{% endblock %}
+
+{% endautoescape %}
