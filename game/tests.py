@@ -670,9 +670,11 @@ class CertificateTests(BaseGameDataTestCase):
         path = reverse('game:award_certificate', kwargs={'game_id': self.game.game_id})
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.headers['Content-Type'], 'application/pdf')
-        fn = response.headers['Content-Disposition'].replace('attachment; filename=', '')
-        self.remove_winner_files(fn)
+        headers = response.headers
+        self.assertEqual(headers['Content-Type'], 'application/pdf')
+        if 'Content-Disposition' in headers:
+            fn = headers['Content-Disposition'].replace('attachment; filename=', '')
+            self.remove_winner_files(fn)
 
         player.set_password('')
         player.save()
