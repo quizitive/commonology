@@ -1,3 +1,4 @@
+from os import environ as env
 import re
 import datetime
 import string
@@ -14,8 +15,10 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
 from django.db import IntegrityError
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
 
-from project.utils import REDIS, our_now, redis_delete_patterns
+from project.utils import our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
@@ -644,9 +647,19 @@ class TestGameForm(BaseGameDataTestCase, PSIDMixin):
 
 
 class CertificateTests(BaseGameDataTestCase):
+    def remove_winner_files(self, fn):
+        if env.get('GITHUB_COMMONOLOGY_CI_TEST'):
+            return
+
+        fs = FileSystemStorage(location=settings.WINNER_ROOT)
+        fs.delete(fn)
+        fn = fn.removesuffix('.pdf') + '.fdf'
+        fs.delete(fn)
+
     def test_write(self):
         fn = write_winner_certificate(name='Marc Schwarzschild', date='October 21, 2021', game_number=59)
         self.assertEqual(fn, 'MarcSchwarzschildOctober21202159.pdf')
+        self.remove_winner_files(fn)
 
     def test_award_certificate(self):
         player = winners_of_game(self.game)[0]
@@ -658,6 +671,8 @@ class CertificateTests(BaseGameDataTestCase):
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers['Content-Type'], 'application/pdf')
+        fn = response.headers['Content-Disposition'].replace('attachment; filename=', '')
+        self.remove_winner_files(fn)
 
         player.set_password('')
         player.save()
