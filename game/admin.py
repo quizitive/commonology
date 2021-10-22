@@ -94,14 +94,14 @@ class GameAdmin(admin.ModelAdmin):
             logging.error("Exception occurred", exc_info=True)
 
     def email_winner_certificates(self, request, queryset):
+        n = 0
         for game in queryset:
             game_number = game.game_id
-            n = 0
             winners = winners_of_game(game)
             for winner in winners:
                 send_winner_notice(winner, game_number)
                 n += 1
-            self.message_user(request, f"{n} winner certifictes sent.")
+        self.message_user(request, f"{n} winner certifictes sent.")
 
     def get_readonly_fields(self, request, obj=None):
         # This will list model fields with editable=False in the admin.
