@@ -26,4 +26,5 @@ python-is-python3
 redis-server
 python3-pip
 apache2-utils
+pdftk
 
