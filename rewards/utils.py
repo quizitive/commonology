@@ -1,7 +1,9 @@
+
 from django.template.loader import render_to_string
 from project import settings
 from mail.utils import send_one
 from project.utils import slackit
+
 
 import logging
 

@@ -12,7 +12,7 @@ class CommonologyAdmin(admin.AdminSite):
 
     def get_urls(self):
         urls = super().get_urls()
-        other_urls = [path('stats/', self.admin_view(self.stats_view), name='game-stats')]
+        other_urls = [path('stats/', self.admin_view(self.stats_view), name='game-stats'), ]
         return other_urls + urls
 
     def stats_view(self, request):
