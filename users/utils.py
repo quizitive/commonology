@@ -32,7 +32,7 @@ def unsubscribe(email, reason='user asked'):
             u.save()
             player_log_entry(u, f"{email} unsubscribed because {reason}.")
     except User.DoesNotExist:
-        print(f"Trying to unsubscribe but {email} does not exit.")
+        print(f"Trying to unsubscribe but {email} does not exist.")
 
 
 def subscribe(email):

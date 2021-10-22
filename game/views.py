@@ -1,7 +1,9 @@
+from os import environ as env
 import gspread
 import logging
 from numpy import base_repr
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
@@ -17,15 +19,18 @@ from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponse
 
 from project.views import CardFormView
 from project.card_views import recaptcha_check
-from project.utils import slackit
-from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm
+from project.utils import slackit, our_now
+from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
-from game.utils import find_latest_public_game
-from leaderboard.leaderboard import tabulate_results
+from game.utils import find_latest_public_game, write_winner_certificate
+from game.mail import send_winner_notice
+from leaderboard.leaderboard import tabulate_results, winners_of_game
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
@@ -612,3 +617,76 @@ class QuestionSuggestionView(LoginRequiredMixin, CardFormView):
                                            f"Feel free to suggest another.")
             return redirect('game:question-suggest')
         return self.get(request, *args, **kwargs)
+
+
+class AwardCertificateView(LoginRequiredMixin, BaseGameView):
+    def get_game(self):
+        try:
+            return Game.objects.get(game_id=self.requested_game_id, series__slug=self.slug)
+        except ObjectDoesNotExist:
+            return None
+
+    def get(self, request, game_id, *args, **kwargs):
+        if not self.game:
+            msg = f'That game does not exist.'
+            return render(request, 'single_card_view.html', context={'custom_message': msg})
+
+        player = request.user
+
+        if player not in winners_of_game(self.game):
+            msg = f'You did not win game number {game_id}'
+            return render(request, 'single_card_view.html', context={'custom_message': msg})
+
+        if env.get('GITHUB_COMMONOLOGY_CI_TEST'):
+            response = HttpResponse('pdf', content_type='application/pdf')
+            return(response)
+
+        game_number = self.game.game_id
+        name = player.display_name
+        date = our_now().date()
+
+        filename = write_winner_certificate(name, date, str(game_number))
+        fs = FileSystemStorage(location=settings.WINNER_ROOT)
+
+        if not fs.exists(filename):
+            msg = f'For some reason we could not make the award certificate.'
+            return render(request, 'single_card_view.html', context={'custom_message': msg})
+
+        with fs.open(filename) as pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename={filename}'
+
+        return response
+
+
+class AwardCertificateFormView(UserPassesTestMixin, CardFormView):
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    form_class = AwardCertificateForm
+    header = "Award Certificate Form"
+    button_label = 'Submit'
+
+    def post(self, request, *args, **kwargs):
+        self.custom_message = ''
+        form = self.get_form()
+
+        if form.is_valid():
+            name = form.data['name']
+            n = form.data['game_number']
+
+            date = our_now().date()
+
+            filename = write_winner_certificate(name, date, n)
+            fs = FileSystemStorage(location=settings.WINNER_ROOT)
+
+            try:
+                with fs.open(filename) as pdf:
+                    response = HttpResponse(pdf, content_type='application/pdf')
+                    response['Content-Disposition'] = f'attachment; filename={filename}'
+                return response
+            except IOError:
+                self.custom_message = f'For some reason we could not make the award certificate.'
+
+        return self.render(request)

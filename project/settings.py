@@ -211,6 +211,8 @@ CKEDITOR_UPLOAD_PATH = "ckeditor_uploads/"
 CKEDITOR_IMAGE_BACKEND = "pillow"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = 'media/'
+WINNER_ROOT = os.path.join(MEDIA_ROOT, 'WinnerCertificates/')
+WINNER_TEMPLATE_PDF = "game/templates/game/WinnerCertificate.pdf"
 
 if env.get("ENABLE_MAIL"):
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
