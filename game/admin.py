@@ -9,7 +9,8 @@ from django.db import models
 from django.utils.html import format_html
 
 from game.models import Series, Game, Question, Answer, AnswerCode
-from leaderboard.leaderboard import tabulate_results
+from game.mail import send_winner_notice
+from leaderboard.leaderboard import tabulate_results, winners_of_game
 from project.utils import redis_delete_patterns
 
 
@@ -61,7 +62,8 @@ class GameAdmin(admin.ModelAdmin):
     filter_horizontal = ('hosts',)
     list_filter = ('series',)
     inlines = (QuestionAdmin,)
-    actions = ('clear_cache', 'score_selected_games', 'score_selected_games_update_existing')
+    actions = ('clear_cache', 'score_selected_games',
+               'score_selected_games_update_existing', 'email_winner_certificates')
     view_on_site = True
 
     def clear_cache(self, request, queryset):
@@ -90,6 +92,16 @@ class GameAdmin(admin.ModelAdmin):
             self.message_user(request, "An unexpected error occurred. Ping Ted.",
                               level=messages.ERROR)
             logging.error("Exception occurred", exc_info=True)
+
+    def email_winner_certificates(self, request, queryset):
+        n = 0
+        for game in queryset:
+            game_number = game.game_id
+            winners = winners_of_game(game)
+            for winner in winners:
+                send_winner_notice(winner, game_number)
+                n += 1
+        self.message_user(request, f"{n} winner certifictes sent.")
 
     def get_readonly_fields(self, request, obj=None):
         # This will list model fields with editable=False in the admin.

@@ -1,8 +1,11 @@
+import os
+from os import environ as env
+import subprocess
 import datetime
 
 from django.db.models import Min
-
-from project.utils import our_now, quick_cache
+from project.settings import WINNER_ROOT, WINNER_TEMPLATE_PDF
+from project.utils import our_now, quick_cache, to_ascii
 from game.models import Game, Answer
 
 
@@ -66,3 +69,38 @@ def players_vs_previous(game):
     players_so_far_last_week = prev.game_questions.first().raw_answers.filter(
         timestamp__lte=this_time_last_week).count()
     return players_so_far, players_so_far_last_week, 100 * (players_so_far / players_so_far_last_week - 1)
+
+
+def write_winner_certificate(name, date, game_number):
+    # On Mac: brew install pdfk-java
+    path = WINNER_ROOT
+    os.makedirs(path, exist_ok=True)
+
+    base = f"{name}{date}{game_number}".replace(',', '').replace(' ', '').strip()
+    fn_fdf = os.path.join(path, f"{base}.fdf")
+    filename = f"{base}.pdf"
+    fn = os.path.join(path, filename)
+
+    name = to_ascii(name)
+
+    fdf = f'''
+        %FDF-1.2
+        1 0 obj << /FDF << /Fields [
+        << /T(Name) /V({name}) >>
+        << /T(Date) /V({date}) >>
+        << /T(Game \#) /V({game_number}) >>
+        ] >> >>
+        endobj
+        trailer
+        << /Root 1 0 R >>
+        %%EOF
+    '''
+
+    if not env.get('GITHUB_COMMONOLOGY_CI_TEST'):
+        with open(fn_fdf, 'w') as fh:
+            fh.write(fdf)
+
+        subprocess.run(['pdftk', WINNER_TEMPLATE_PDF, 'fill_form', fn_fdf,
+                        'output', fn, 'need_appearances', 'flatten'])
+
+    return filename
