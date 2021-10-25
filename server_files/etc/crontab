@@ -21,4 +21,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/snap/bin
 52 6	1 * *	root	test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
 #
 0 21 * * * django /home/django/commonology/scripts/pg_backup.bash
-15 15 * * * root /usr/bin/certbot renew --renew-hook 'service nginx reload'
+# Note it may be /snap/sbin/certbot or /usr/local/bin/certbot depending on how certbot was installed
+15 15 * * * root /snap/bin/certbot renew --renew-hook 'service nginx reload'
+39 22 * * * root /usr/local/sbin/update-ngxblocker -e ms@quizitive.com
