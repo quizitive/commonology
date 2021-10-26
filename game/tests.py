@@ -16,7 +16,6 @@ from django.urls import reverse
 from django.core import mail
 from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
-from django.conf import settings
 
 from project.utils import our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
