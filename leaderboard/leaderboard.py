@@ -235,13 +235,15 @@ def player_latest_game_message(game, rank, percentile):
         return "Looks like you missed this game... you'll get 'em next time!"
 
     player_count = game.players_dict.count()
-    follow_up = "This is gonna be your week!"
+    follow_up = "Well, there's always next time."
     if percentile <= 0.1:
         follow_up = "That puts you in the top 10%!"
     elif percentile <= 0.25:
         follow_up = "That puts you in the top 25%!"
+    elif percentile <= 0.34:
+        follow_up = "That puts you in the top 33%!"
     elif percentile <= 0.5:
-        follow_up = "That puts you in the top half!"
+        follow_up = "That puts you in the top 50%!"
 
     return f"This game you ranked {rank} out of {player_count} players. {follow_up}"
 
