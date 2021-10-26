@@ -15,15 +15,16 @@
 
 <div class="content">
 
-{% include 'leaderboard/components/game_header.html' with view="results" %}
-
 {{ room_name|json_script:"room-name" }}
 {{ user.get_username|json_script:"user-name" }}
 <div id="comment-connection" hx-ws="connect:/ws/chat/{{ game_id }}/">
 
   <div class="card-content">
+
+    {% include 'leaderboard/components/leaderboard_header.html' with view='results' %}
+
     {% if game_top_commentary %}
-    <div class="answer-slides w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+    <div class="cg-card cg-top-blue w3-padding-large" >
       {{ game_top_commentary|safe }}
     </div>
     {% endif %}
@@ -32,7 +33,6 @@
     {% for q in questions %}
       {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
     {% endfor %}
-    </div>
 
     {% if game_bottom_commentary %}
     <style>
@@ -41,13 +41,14 @@
       height: auto!important;
     }
     </style>
-    <div id="bottom-commentary" class="w3-card-0 w3-round w3-container w3-padding w3-margin-bottom" style="position: relative;">
+    <div id="bottom-commentary" class="cg-card cg-top-blue w3-padding-large">
       {{ game_bottom_commentary|safe }}
     </div>
     {% endif %}
 
     <div class="w3-row w3-padding-large"></div>
 
+  </div>
   </div>
 </div>
 {% endblock content %}
