@@ -229,11 +229,6 @@ DEFAULT_FROM_EMAIL_NAME = 'Commonology'
 ALEX_FROM_EMAIL = 'alex@commonologygame.com'
 ALEX_FROM_NAME = 'Alex Fruin'
 
-MAILCHIMP_API_KEY = env.get('MAILCHIMP_APIKEY')
-MAILCHIMP_HOOK_UUID = env.get('MAILCHIMP_HOOK_UUID')
-MAILCHIMP_SERVER = 'us2'
-MAILCHIMP_EMAIL_LIST_ID = env.get("MAILCHIMP_EMAIL_LIST_ID")
-
 SLACK_TOKEN = env.get('SLACK_TOKEN')
 
 GOOGLE_GSPREAD_API_CONFIG = os.path.join(BASE_DIR, '.config/gspread/commonology_service_account.json')
