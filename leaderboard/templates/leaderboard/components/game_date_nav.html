@@ -3,18 +3,18 @@
 <div class="w3-row" style="padding: 8px 0;"></div>
   <div class="w3-row">
 
-    <div class="game-header w3-padding w3-round" style="max-width:640px; margin:auto;">
+    <div class="game-header w3-padding-large w3-round" style="max-width:640px; margin:auto;">
 
     <!-- header text -->
     {% if team %}
       <h1 class="w3-padding leaderboard"><b>{{ team.name }}</b></h1>
     {% endif %}
-      <h1 class="leaderboard">{{ game_name }} </h1>
-      <h3 class="leaderboard">{{ date_range }}</h3>
+      <div class="leaderboard"><span style="font-size: 28px">{{ game_name }} </span> </div>
+      <h4 class="leaderboard">{{ date_range }}</h4>
 
       {% if not hide_navigation %}
       <!-- header buttons -->
-      <div class="game-buttons w3-row w3-center">
+      <div class="game-buttons w3-row w3-center w3-margin-bottom">
         <div class="leaderboard-results-button-container w3-col m6">
           <a class="game-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard"
              href="{% series_or_default_url 'leaderboard' 'current-leaderboard' %}{{ requested_game_id|default:'' }}">
