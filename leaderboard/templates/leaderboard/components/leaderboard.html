@@ -1,6 +1,6 @@
 
   <div class="w3-row">
-    <div class="w3-padding-16 w3-col">
+    <div class="w3-padding-bottom w3-col">
       <table class="leaderboard w3-table w3-striped w3-bordered">
         <thead>
           <th class="w3-center rank" style="vertical-align: bottom;">Rank</th>
@@ -30,10 +30,18 @@
         </thead>
         <tbody>
           {% for player in leaderboard %}
-            <tr>
+            <tr {% if player.id == request.user.id %}
+              style="font-weight:bold;"
+            {% endif %}>
               <td class="w3-center">{{ player.Rank }}</td>
-              <td class="name">{{ player.Name }}</td>
-              <td>{{ player.Score }}</td>
+              <td class="name" style="color:black;">{{ player.Name }}
+                {% if player.id == request.user.id %}
+                  <span style="font-size:12px;">(me)</span>
+                {% endif %}
+              </td>
+              <td {% if player.id == request.user.id %}style="color:#f26649;"{% endif %}>
+                {{ player.Score }}
+              </td>
 
               {#      Follow Buttons      #}
               <td class="w3-center">
