@@ -1,0 +1,11 @@
+<br/>
+
+<div class="cg-card cg-top-blue">
+  {% include 'leaderboard/components/game_date_nav.html' with view=view %}
+</div>
+
+{% if user.is_authenticated %}
+<div class="cg-card cg-top-blue cg-padding" style="font-size: 16px;font-weight:bold;font-style: normal">
+  {% include 'leaderboard/components/my_score.html' %}
+</div>
+{% endif %}

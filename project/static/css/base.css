@@ -40,6 +40,18 @@ header.w3-container {
     background: #0090ce!important;
 }
 
+/* base card implementation */
+.cg-card {
+  margin: auto auto 16px auto;
+  background: white;
+  border: 1px solid lightgrey;
+  border-radius: 4px;
+}
+
+.cg-padding {
+  padding: 16px;
+}
+
 
 /* For Django messages */
 .warning {
@@ -52,6 +64,9 @@ header.w3-container {
 }
 .cg-border-grey {
     border: 1px solid #cecece;
+}
+.cg-top-blue {
+    border-top: 3px solid #0095da!important;
 }
 
 /* --- Colors --- */
