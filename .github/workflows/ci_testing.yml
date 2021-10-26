@@ -53,7 +53,5 @@ jobs:
         EAGER_CELERY: True
         API_KEY: ${{secrets.API_KEY}}
         SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
-        MAILCHIMP_APIKEY: ${{secrets.MAILCHIMP_APIKEY}}
-        MAILCHIMP_HOOK_UUID: ${{secrets.MAILCHIMP_HOOK_UUID}}
         TEST_CLIENT_PW: ${{secrets.TEST_CLIENT_PW}}
       run: python manage.py migrate && python manage.py test
