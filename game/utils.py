@@ -101,6 +101,6 @@ def write_winner_certificate(name, date, game_number):
             fh.write(fdf)
 
         subprocess.run(['pdftk', WINNER_TEMPLATE_PDF, 'fill_form', fn_fdf,
-                        'output', fn, 'need_appearances'])
+                        'output', fn, 'need_appearances', 'flatten'])
 
     return filename
