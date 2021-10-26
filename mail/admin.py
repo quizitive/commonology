@@ -3,6 +3,7 @@ from django_object_actions import DjangoObjectActions
 
 from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
 
+from project.utils import our_now
 from .models import MailMessage, Component
 from users.models import Player
 from .utils import make_absolute_urls
@@ -42,6 +43,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
 
             n = mass_mail(obj)
             obj.sent = True
+            obj.sent_date = our_now()
             obj.save()
             if n:
                 messages.add_message(request, messages.INFO, f'Blast message sent to {n} players.')
@@ -56,10 +58,10 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
 
     change_actions = ('send_test', 'blast')
 
-    list_display = ('created', 'subject', 'test_recipient')
+    list_display = ('subject', 'sent_date', 'test_recipient')
     list_filter = ('created',)
     search_fields = ('subject',)
-    ordering = ('-created',)
+    ordering = ('-sent_date',)
     filter_horizontal = ('components',)
     save_on_top = True
 
