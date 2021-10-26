@@ -1,12 +1,11 @@
 import re
 import json
+import math
 from collections import OrderedDict, deque
 
 import pandas as pd
-import gspread
 
 from django.db.models import Sum, Subquery, OuterRef
-from django.conf import settings
 
 from project.utils import REDIS, quick_cache
 from users.models import Player, Team
@@ -172,14 +171,47 @@ def _answer_tally_from_cache(game):
     return json.loads(at_json)
 
 
-def player_rank_and_percentile_in_game(player_id, series_slug, game_id):
-    game = Game.objects.get(game_id=game_id, series__slug=series_slug)
+@quick_cache()
+def player_score_rank_percentile(player, game):
+
+    if game.game_id not in player.game_ids.values_list('game_id', flat=True):
+        return None, None, None
+
     answer_tally = build_answer_tally(game)
-    try:
-        rank = build_filtered_leaderboard(game, answer_tally, player_ids=[player_id])['Rank'].values[0]
-    except IndexError:
-        raise IndexError("The player id does not exist for this game.")
+    filtered_leaderboard = build_filtered_leaderboard(game, answer_tally, player_ids=[player.id])
+    score = filtered_leaderboard['Score'].values[0]
+    rank = filtered_leaderboard['Rank'].values[0]
     percentile = rank / game.players_dict.count()
+    return score, rank, percentile
+
+
+@quick_cache()
+def player_rank_in_all_games(player, series):
+    games = Game.objects.filter(series=series, publish=True)
+    ranks = OrderedDict()
+    for game in games:
+        try:
+            _, rank, _ = player_score_rank_percentile(player, game)
+        except IndexError:
+            rank = None
+        ranks[game.game_id] = rank
+    return ranks
+
+
+@quick_cache()
+def player_top_game_rank(player, series):
+    best = math.inf
+    best_game_id = None
+    for game_id, rank in player_rank_in_all_games(player, series).items():
+        if rank and rank < best:
+            best = rank
+            best_game_id = game_id
+    return best_game_id, best
+
+
+def rank_string(rank):
+    if not rank:
+        return "N/A"
     if rank == 1:
         rank_str = "1st"
     elif rank == 2:
@@ -188,7 +220,32 @@ def player_rank_and_percentile_in_game(player_id, series_slug, game_id):
         rank_str = "3rd"
     else:
         rank_str = f"{rank}th"
-    return rank_str, percentile
+    return rank_str
+
+
+def score_string(score):
+    if not score:
+        return "N/A"
+    return f"{score}"
+
+
+def player_latest_game_message(game, rank, percentile):
+
+    if not rank:
+        return "Looks like you missed this game... you'll get 'em next time!"
+
+    player_count = game.players_dict.count()
+    follow_up = "Well, there's always next time."
+    if percentile <= 0.1:
+        follow_up = "That puts you in the top 10%!"
+    elif percentile <= 0.25:
+        follow_up = "That puts you in the top 25%!"
+    elif percentile <= 0.34:
+        follow_up = "That puts you in the top 33%!"
+    elif percentile <= 0.5:
+        follow_up = "That puts you in the top 50%!"
+
+    return f"This game you ranked {rank} out of {player_count} players. {follow_up}"
 
 
 def winners_of_game(game):

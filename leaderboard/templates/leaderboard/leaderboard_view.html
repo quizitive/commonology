@@ -1,12 +1,14 @@
-{% extends 'leaderboard/base.html' %}
-
+{% extends 'leaderboard/base_leaderboard_view.html' %}
 
 {% block title %}Commonology | Leaderboard{% endblock %}
 
 {% block content %}
 
-<div class="content">
-  {% include 'leaderboard/components/game_header.html' with view="leaderboard" %}
+<div class="content" >
+
+  {% include 'leaderboard/components/leaderboard_header.html' with view='leaderboard' %}
+
+  <div class="cg-card cg-border-grey cg-top-blue">
   {% include 'leaderboard/components/leaderboard_search.html' %}
 
   {# Lazy Leaderboard #}
@@ -15,6 +17,7 @@
        hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}"
        hx-trigger="load">
     <img class="htmx-indicator" width="50" style="margin-top: 100px;" src="{% v_static 'img/spinners/puff.svg' %}"/>
+  </div>
   </div>
 
 </div>
