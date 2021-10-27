@@ -40,10 +40,10 @@ class Component(models.Model):
 
 
 FROM_ADDRS = [(i, i) for i in [
+    "concierge@commonologygame.com",
     "alex@commonologygame.com",
     "ms@commonologygame.com",
-    "ted@commonologygame.com",
-    "concierge@commonologygame.com"]]
+    "ted@commonologygame.com"]]
 
 
 class MailMessage(models.Model):
