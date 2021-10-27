@@ -5,6 +5,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.core.mail import send_mail
+from project.utils import slackit
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, To, Category, Header
 from users.models import Player
@@ -77,6 +78,11 @@ def sendgrid_send(subject, msg, email_list,
 
 
 def mass_mail(obj):
+    try:
+        deactivate_blocked_addresses()
+    except Exception as e:
+        slackit(f"FAILED to deactivate blocked addresses: {e}")
+
     msg = make_absolute_urls(obj.message)
     from_email = (obj.from_email, obj.from_name)
 
