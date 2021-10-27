@@ -157,5 +157,4 @@ def deactivate_blocked_addresses():
         print(f"removing {emails} from Sendgrid suppressions: {response.status_code}")
 
     for name in 'spam_reports', 'bounces', 'invalid_emails', 'blocks':
-        emails = do()
-        remove(emails)
+        remove(do())
