@@ -133,7 +133,7 @@ def deactivate_blocked_addresses():
 
     sg = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
 
-    def do(name):
+    def do():
         response = sg.client.suppression._(name).get()
         assert (response.status_code == 200)
         emails = []
@@ -143,7 +143,7 @@ def deactivate_blocked_addresses():
             emails.append(email)
         return emails
 
-    def remove(name, emails):
+    def remove(emails):
         if not emails:
             return
 
@@ -157,5 +157,5 @@ def deactivate_blocked_addresses():
         print(f"removing {emails} from Sendgrid suppressions: {response.status_code}")
 
     for name in 'spam_reports', 'bounces', 'invalid_emails', 'blocks':
-        emails = do(name)
-        remove(name, emails)
+        emails = do()
+        remove(emails)
