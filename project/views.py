@@ -25,6 +25,10 @@ def product_view(request, *args, **kwargs):
     return document_render(request, 'product.html', 'Product Description')
 
 
+def testimonials_view(request, *args, **kwargs):
+    return document_render(request, 'testimonials.html', 'Testimonials')
+
+
 def tos_view(request, *args, **kwargs):
     return document_render(request, 'tos.html', 'Terms of Service')
 
