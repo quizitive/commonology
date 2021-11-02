@@ -76,6 +76,9 @@ def write_winner_certificate(name, date, game_number):
     path = WINNER_ROOT
     os.makedirs(path, exist_ok=True)
 
+    if datetime.datetime == type(date):
+        date = date.date()
+
     base = f"{name}{date}{game_number}".replace(',', '').replace(' ', '').strip()
     fn_fdf = os.path.join(path, f"{base}.fdf")
     filename = f"{base}.pdf"
