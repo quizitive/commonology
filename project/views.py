@@ -33,6 +33,10 @@ def testimonials_view(request, *args, **kwargs):
     return document_render(request, 'testimonials.html', 'Testimonials')
 
 
+def raffle_rules_view(request, *args, **kwargs):
+    return document_render(request, 'raffle_rules.html', 'raffle_rules')
+
+
 def tos_view(request, *args, **kwargs):
     return document_render(request, 'tos.html', 'Terms of Service')
 
