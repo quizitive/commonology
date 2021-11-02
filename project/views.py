@@ -46,6 +46,10 @@ def privacy_view(request, *args, **kwargs):
 
 
 def index(request):
+    r = request.GET.get('r')
+    if r:
+        request.session['referral_code'] = r
+
     if request.user.is_authenticated:
         return redirect('leaderboard:current-leaderboard')
     context = next_game_context()
