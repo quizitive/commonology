@@ -120,7 +120,10 @@ class JoinView(CardFormView):
         except User.DoesNotExist:
             pass
 
-        send_invite(request, email)
+        referrer = request.session.get('referral_code')
+        if referrer:
+            referrer = Player.objects.filter(_code=referrer).first()
+        send_invite(request, email, referrer=referrer)
 
         self.custom_message = f"We sent your unique join link to {email}. " \
                               f"Don't forget to check your spam or junk folder if need be. " \
@@ -146,6 +149,7 @@ def make_uuid_url(request, uuid=None, name='/join/', slug=None):
 
 def send_invite(request, email, referrer=None):
     remove_pending_email_invitations()
+
     pe = PendingEmail(email=email, referrer=referrer)
     pe.save()
 
