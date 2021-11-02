@@ -47,8 +47,7 @@ class OneMailView(UserPassesTestMixin, CardFormView):
             try:
                 sendgrid_send(subject, message,
                               from_email=from_email,
-                              email_list=[(email, 'UNKNOWN')],
-                              force_sendgrid=True)
+                              email_list=[(email, 'UNKNOWN')])
             except IOError:
                 self.custom_message = f'For some reason we could not make the award certificate.'
 
