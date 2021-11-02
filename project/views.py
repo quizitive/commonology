@@ -29,6 +29,10 @@ def our_story_view(request, *args, **kwargs):
     return document_render(request, 'our_story.html', 'Our Story')
 
 
+def testimonials_view(request, *args, **kwargs):
+    return document_render(request, 'testimonials.html', 'Testimonials')
+
+
 def tos_view(request, *args, **kwargs):
     return document_render(request, 'tos.html', 'Terms of Service')
 
