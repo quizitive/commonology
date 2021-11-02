@@ -214,7 +214,7 @@ data = [(i[1], i[2]) for i in data]
 
 
 def do(winner, game_number):
-    filename = write_winner_certificate(winner.display_name, our_now(), 1)
+    filename = write_winner_certificate(winner.display_name, our_now(), game_number)
     send_prior_winner_notice(winner, game_number, filename)
 
 
