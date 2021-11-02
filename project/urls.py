@@ -3,7 +3,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib import admin
-from .views import index, about_view, product_view, our_story_view,\
+from .views import index, about_view, product_view, our_story_view, testimonials_view, \
     tos_view, privacy_view, ContactView
 
 admin.site.site_header = "Commonology Administration"
@@ -14,6 +14,7 @@ urlpatterns = [
     path('about/', about_view, name='about'),
     path('product/', product_view, name='product'),
     path('our_story/', our_story_view, name='our_story'),
+    path('testimonials/', testimonials_view, name='testimonials'),
     path('tos/', tos_view, name='tos'),
     path('privacy/', privacy_view, name='privacy'),
     path('contact/', ContactView.as_view(), name='contact'),
