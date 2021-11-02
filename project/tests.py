@@ -3,7 +3,6 @@ from django.urls import reverse
 from django.core import mail
 from project.settings import STATIC_VERSIONS
 from game.tests import suppress_hidden_error_logs
-# from project.utils import slackit
 
 
 class TestContact(TestCase):
