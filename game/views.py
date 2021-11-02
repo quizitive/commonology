@@ -482,6 +482,8 @@ class GameEntryView(PSIDMixin, CardFormView):
         email = request.POST['email']
 
         referrer_id = request.GET.get('r')
+        if not referrer_id:
+            referrer_id = request.session.get('referral_code', None)
 
         p = get_player(referrer_id)
         if p and (p.email == email):
