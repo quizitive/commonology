@@ -35,7 +35,10 @@ def send_one(player, subject, note):
 def make_substitutions(e, code):
     x = sign_user(e, code)
     url = mark_safe(f"https://{settings.DOMAIN}/unsubscribe/{x}")
-    game_url_args = f'r={code}'
+    if code:
+        game_url_args = f'r={code}'
+    else:
+        game_url_args = ''
     return {'-email-': e, '-unsubscribelink-': url, '-game_url_args-': game_url_args}
 
 
