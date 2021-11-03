@@ -285,6 +285,7 @@ class PendingUsersTests(TestCase):
         remove_abinormal()
 
     def join_test_helper(self, data, taint_uuid_flag=False):
+        client = Client()
         response = client.post(reverse('join'), data={"email": data['email']})
         self.assertEqual(response.reason_phrase, 'OK')
 
