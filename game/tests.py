@@ -718,6 +718,19 @@ class SessionReferralTests(BaseGameDataTestCase):
     def test_play_from_referral_rules(self):
         self.url_tester('raffle_rules')
 
+    def test_play_from_play(self):
+        # Special case: click play link but don't submit. Leave page.  Then use play link on sise somewhere.
+        client = self.start_session('game:play')
+        response = client.get(reverse('about'))
+        self.assertEqual(response.status_code, 200)
+
+        email = 'button_player@commonologygame.com'
+        response = client.post(reverse('game:play'), data={"email": email})
+        self.assertEqual(response.status_code, 200)
+
+        pe = PendingEmail.objects.filter(email=email).first()
+        self.assertEqual(pe.referrer, self.user1)
+
     def test_join(self):
         client = self.start_session()
         email = 'button_player@commonologygame.com'
