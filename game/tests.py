@@ -677,3 +677,54 @@ class CertificateTests(BaseGameDataTestCase):
 
         player.set_password('')
         player.save()
+
+
+class SessionReferralTests(BaseGameDataTestCase):
+    # In these tests the referral code was introduced to the session as an argument on the home page.
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.game.end = our_now() + relativedelta(hours=1)
+        cls.game.save()
+
+    def start_session(self, name='home'):
+        self.user1 = get_local_user()
+        client = Client()
+        path = reverse(name) + f'?r={self.user1.code}'
+        client.get(path)
+        self.assertEqual(self.user1.code, client.session.get('referral_code'))
+        return client
+
+    def url_tester(self, name='home'):
+        client = self.start_session(name)
+        mail.outbox = []
+        email = 'button_player@commonologygame.com'
+        response = client.post(reverse('game:play'), data={"email": email})
+        self.assertEqual(response.status_code, 200)
+
+        pe = PendingEmail.objects.filter(email=email).first()
+        self.assertEqual(pe.referrer, self.user1)
+
+        msg = mail.outbox[0].body
+        url = re.search("(?P<url>https?://[^\s]+)\"\>Click", msg).group("url")
+        mail.outbox = []
+
+        pe.delete()
+
+    def test_play_from_home(self):
+        self.url_tester('home')
+
+    def test_play_from_referral_rules(self):
+        self.url_tester('raffle_rules')
+
+    def test_join(self):
+        client = self.start_session()
+        email = 'button_player@commonologygame.com'
+
+        mail.outbox = []
+        response = client.post(reverse('join'), data={"email": email})
+        self.assertEqual(response.reason_phrase, 'OK')
+
+        pe = PendingEmail.objects.filter(email=email).first()
+        self.assertEqual(pe.referrer, self.user1)
