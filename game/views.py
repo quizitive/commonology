@@ -219,7 +219,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             form_class=None,
             form_method='get',
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
-            player_code=f'r={player.code}',
+            player_code=f'?r={player.code}',
             **msgs[msg]
         )
 
