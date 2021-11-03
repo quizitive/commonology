@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='mailmessage',
             name='message',
-            field=ckeditor_uploader.fields.RichTextUploadingField(blank=True, help_text='Play link example: https://commonologygame.com/play?-game_url_args-'),
+            field=ckeditor_uploader.fields.RichTextUploadingField(blank=True, help_text='Play link example: https://commonologygame.com/play-game_url_args-'),
         ),
     ]
