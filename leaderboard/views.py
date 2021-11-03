@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from game.models import Game, Question
 from game.views import BaseGameView
+from game.utils import find_latest_published_game
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
     player_score_rank_percentile, rank_string, score_string
@@ -24,12 +25,22 @@ class LeaderboardView(BaseGameView):
         else:
             game = Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
 
-        # todo: maybe change this to is_authenticated to allow access to historical leaderboards
-        if self.requested_game_id is not None and not (
-                self.request.user.is_staff
-                or self.request.user in game.hosts.all()
-        ):
+        # staff and hosts can view unpublished games
+        if self.request.user.is_staff or self.request.user in game.hosts.all():
+            return game
+
+        # no one else can
+        if not game.publish:
+            return Http404()
+
+        # anonymous users cannot view other games at all
+        if self.requested_game_id is not None and not self.request.user.is_authenticated:
             raise Http404()
+
+        # for now, limit leaderboards and results to last 10 games
+        latest_game_id = find_latest_published_game(self.slug).game_id
+        if game.game_id + 10 < latest_game_id:
+            raise Http404("Only the results for most recent 10 games can be viewed.")
 
         return game
 
