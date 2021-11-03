@@ -36,8 +36,9 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         if not self.game.publish:
             return False
 
-        # used while we're only showing most recent game
-        if self.game_id != max(self.game.series.games.filter(publish=True).values_list('game_id', flat=True)):
+        # anonymous users may only see most recent published game
+        if not self.request.user.is_authenticated and \
+                self.game_id != max(self.game.series.games.filter(publish=True).values_list('game_id', flat=True)):
             return False
 
         # super() will test if the user has access to this series
