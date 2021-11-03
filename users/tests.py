@@ -319,7 +319,7 @@ class PendingUsersTests(TestCase):
         self.join_test_helper(data)
         data['password2'] = data['password1']
 
-        self.join_test_helper(client, data)
+        self.join_test_helper(data)
 
     def test_join_email_exists(self):
         data = self.data
