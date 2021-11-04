@@ -123,11 +123,27 @@ class GameAdmin(admin.ModelAdmin):
 class AnswerAdmin(admin.ModelAdmin):
     list_display = ('raw_string', 'question', 'player', 'game')
     search_fields = ('raw_string', 'question__text', 'question__game__name', 'player__email')
-
+    actions = ('remove_selected_answers',)
     list_filter = ('question__game__name', )
 
     def game(self, obj):
         return obj.game
+
+    def remove_selected_answers(self, request, queryset):
+        already_published = 0
+        for q in queryset:
+            if q.question.game.publish:
+                already_published += 1
+                continue
+            q.removed = True
+            q.save()
+        self.message_user(request, f"{queryset.count()} answers were removed from the game")
+        if already_published:
+            self.message_user(
+                request,
+                f"{queryset.count()} answers could not be removed because the game has already been published.",
+                level=messages.WARNING
+            )
 
 
 @admin.register(AnswerCode)
