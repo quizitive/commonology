@@ -9,8 +9,15 @@
     {% if team %}
       <h1 class="w3-padding leaderboard"><b>{{ team.name }}</b></h1>
     {% endif %}
-      <div class="leaderboard"><span style="font-size: 28px">{{ game_name }} </span> </div>
-      <h4 class="leaderboard">{{ date_range }}</h4>
+      <div class="leaderboard"><span style="font-size: 28px">{{ game_name }}</span></div>
+      <div id="change-game" class="w3-dropdown-click" style="font-size: 20px">
+        {{ date_range }}<i class="fas fa-caret-down" style="margin-left:8px;"></i>
+      </div>
+        <div id="change-game-content"
+            {# todo: add older game links here #}
+             class="w3-dropdown-content w3-bar-block w3-border w3-round" style="overflow: hidden;">
+          <div class="w3-bar-item w3-button w3-border-bottom" style="padding:8px"><b>{{ user.name }}</b></div>
+        </div>
 
       {% if not hide_navigation %}
       <!-- header buttons -->
