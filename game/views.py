@@ -540,9 +540,6 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
         email = pe.email
         try:
             p = Player.objects.get(email=email)
-            if not p.is_active:
-                p.is_active = True
-                p.save()
         except Player.DoesNotExist:
             p = Player(email=email, referrer=pe.referrer)
             p.save()
