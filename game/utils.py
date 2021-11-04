@@ -1,5 +1,4 @@
 import os
-import random
 from os import environ as env
 import subprocess
 import datetime
