@@ -488,6 +488,15 @@ class GameEntryView(PSIDMixin, CardFormView):
             referrer_id = request.session.get('referral_code')
 
         p = get_player(referrer_id)
+        if p and not p.is_active:
+            return self.render_message(
+                request,
+                f"The account associated with this email has been deactivated. For more information, "
+                f"please contact us using the contact form.",
+                form=None,
+                button_label=None
+            )
+
         if p and (p.email == email):
             return render_game(request, g, p)
 
