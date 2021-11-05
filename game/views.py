@@ -403,7 +403,11 @@ class GameEntryView(PSIDMixin, CardFormView):
         game_uuid = kwargs.get('game_uuid')
         user = request.user
 
-        request.session['referral_code'] = request.GET.get('r')
+        r = request.GET.get('r')
+        if not r:
+            r = request.GET.get('?r')
+
+        request.session['referral_code'] = r
 
         if not game_uuid:
             g = find_latest_public_game(slug)
@@ -484,6 +488,8 @@ class GameEntryView(PSIDMixin, CardFormView):
         email = request.POST['email']
 
         referrer_id = request.GET.get('r')
+        if not referrer_id:
+            referrer_id = request.GET.get('?r')
         if not referrer_id:
             referrer_id = request.session.get('referral_code')
 
