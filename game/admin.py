@@ -12,6 +12,7 @@ from game.models import Series, Game, Question, Answer, AnswerCode
 from game.mail import send_winner_notice
 from leaderboard.leaderboard import tabulate_results, winners_of_game
 from project.utils import redis_delete_patterns
+from users.utils import player_log_entry
 
 
 @admin.register(Series)
@@ -100,6 +101,7 @@ class GameAdmin(admin.ModelAdmin):
             winners = winners_of_game(game)
             for winner in winners:
                 send_winner_notice(winner, game_number)
+                player_log_entry(winner, f"Award Certificate sent for game {game_number}.")
                 n += 1
         self.message_user(request, f"{n} winner certifictes sent.")
 
