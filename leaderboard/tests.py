@@ -4,9 +4,9 @@ import pandas as pd
 from django.urls import reverse
 from django.test import Client
 
-from project.utils import REDIS, our_now
+from project.utils import REDIS, our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key, winners_of_game
-from game.models import Game
+from game.models import Game, Answer
 from game.tests import BaseGameDataTestCase, suppress_hidden_error_logs
 
 from users.models import Player
@@ -263,3 +263,10 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         expected_winner_email = 'user7@fakeemail.com'
         winner = winners_of_game(self.game).first()
         self.assertEqual(winner.email, expected_winner_email)
+
+    def test_removed_answers_arent_counted(self):
+        player = Player.objects.get(email='user1@fakeemail.com')
+        Answer.objects.filter(player=player).update(removed=True)
+        redis_delete_patterns('*')
+        leaderboard = build_filtered_leaderboard(self.game, self.answer_tally)
+        self.assertEqual(len(leaderboard), len(self.leaderboard) - 1)
