@@ -10,8 +10,7 @@ from django.utils.html import format_html
 
 from game.models import Series, Game, Question, Answer, AnswerCode
 from game.mail import send_winner_notice
-from leaderboard.leaderboard import tabulate_results, winners_of_game
-from project.utils import redis_delete_patterns
+from leaderboard.leaderboard import tabulate_results, winners_of_game, clear_game_cache
 
 
 @admin.register(Series)
@@ -67,10 +66,7 @@ class GameAdmin(admin.ModelAdmin):
     view_on_site = True
 
     def clear_cache(self, request, queryset):
-        lb_prefixes = [f'leaderboard_{q[0]}_{q[1]}' for q in queryset.values_list('series__slug', 'game_id')]
-        lbs_deleted = redis_delete_patterns(*lb_prefixes)
-        at_prefixes = [f'build_answer_tally:{repr(q)}' for q in queryset]
-        ats_deleted = redis_delete_patterns(*at_prefixes)
+        lbs_deleted, ats_deleted = clear_game_cache(queryset)
         self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
         self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
 
@@ -131,19 +127,26 @@ class AnswerAdmin(admin.ModelAdmin):
 
     def remove_selected_answers(self, request, queryset):
         already_published = 0
+        successes = 0
+        games = set()
         for q in queryset:
             if q.question.game.publish:
                 already_published += 1
                 continue
             q.removed = True
             q.save()
-        self.message_user(request, f"{queryset.count()} answers were removed from the game")
+            games.add(self.game(q))
+            successes += 1
+        clear_game_cache(games)
+        if successes:
+            self.message_user(request, f"{successes} answers were removed from the game")
         if already_published:
             self.message_user(
                 request,
                 f"{queryset.count()} answers could not be removed because the game has already been published.",
                 level=messages.WARNING
             )
+    remove_selected_answers.short_description = "Remove select answers (USE THIS ONE)"
 
 
 @admin.register(AnswerCode)
