@@ -44,6 +44,7 @@ fi
 
 echo "About to run pip install."
 cd /home/django/commonology
+pip install --upgrade pip
 pip install -q -r requirements.txt
 if [ $? -eq 0 ]; then
     echo OK
