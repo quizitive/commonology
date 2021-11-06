@@ -494,6 +494,15 @@ class GameEntryView(PSIDMixin, CardFormView):
             referrer_id = request.session.get('referral_code')
 
         p = get_player(referrer_id)
+        if p and not p.is_active:
+            return self.render_message(
+                request,
+                f"The account associated with this email has been deactivated. For more information, "
+                f"please contact us using the contact form.",
+                form=None,
+                button_label=None
+            )
+
         if p and (p.email == email):
             return render_game(request, g, p)
 
@@ -546,9 +555,6 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
         email = pe.email
         try:
             p = Player.objects.get(email=email)
-            if not p.is_active:
-                p.is_active = True
-                p.save()
         except Player.DoesNotExist:
             p = Player(email=email, referrer=pe.referrer)
             p.save()
