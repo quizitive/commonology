@@ -48,7 +48,7 @@ def quick_cache(ttl=600):
     def inner(func):
         @functools.wraps(func)
         def wrapper(*args, force_refresh=False, **kwargs):
-            redis_key = f'{func.__name__}:' + "_".join([repr(a) for a in args]) + "_".join(repr(k) for k in kwargs.values())
+            redis_key = quick_cache_key(func, *args, **kwargs)
             if not force_refresh:
                 cached_res = REDIS.get(redis_key)
                 if cached_res:
@@ -58,6 +58,10 @@ def quick_cache(ttl=600):
             return res
         return wrapper
     return inner
+
+
+def quick_cache_key(func, *args, **kwargs):
+    return f'{func.__name__}:' + "_".join([repr(a) for a in args]) + "_".join(repr(k) for k in kwargs.values())
 
 
 def slackit(msg):

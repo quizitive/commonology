@@ -7,7 +7,7 @@ import pandas as pd
 
 from django.db.models import Sum, Subquery, OuterRef
 
-from project.utils import REDIS, quick_cache
+from project.utils import REDIS, quick_cache, quick_cache_key, redis_delete_patterns
 from users.models import Player, Team
 from game.models import Game, AnswerCode
 from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
@@ -132,6 +132,15 @@ def _leaderboard_from_cache(game, answer_tally):
 
 def lb_cache_key(game, answer_tally):
     return '_'.join(('leaderboard', game.series.slug, str(game.game_id), str(hash(json.dumps(answer_tally)))))
+
+
+def clear_game_cache(games):
+    """Deletes all leaderboards and answer tallies for the given games"""
+    lb_prefixes = [f'leaderboard_{g.series.slug}_{g.game_id}' for g in games]
+    lbs_deleted = redis_delete_patterns(*lb_prefixes)
+    at_prefixes = [quick_cache_key(build_answer_tally, g) for g in games]
+    ats_deleted = redis_delete_patterns(*at_prefixes)
+    return lbs_deleted, ats_deleted
 
 
 def _score_and_rank(leaderboard, lb_cols):
