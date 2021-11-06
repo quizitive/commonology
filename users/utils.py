@@ -67,12 +67,12 @@ def is_validated(email):
 
 
 def player_log_entry(player, message):
-    LogEntry.objects.log_action(user_id=player.id,
-                                content_type_id=ContentType.objects.get_for_model(player).pk,
-                                object_id=player.id,
-                                object_repr=str(player.email),
-                                action_flag=CHANGE,
-                                change_message=message)
+    return LogEntry.objects.log_action(user_id=player.id,
+                                       content_type_id=ContentType.objects.get_for_model(player).pk,
+                                       object_id=player.id,
+                                       object_repr=str(player.email),
+                                       action_flag=CHANGE,
+                                       change_message=message)
 
 
 def get_player(code):
