@@ -1,4 +1,5 @@
 import logging
+import random
 
 from django.contrib import admin
 from django.contrib.messages import constants as messages
@@ -11,6 +12,8 @@ from django.utils.html import format_html
 from game.models import Series, Game, Question, Answer, AnswerCode
 from game.mail import send_winner_notice
 from leaderboard.leaderboard import tabulate_results, winners_of_game, clear_game_cache
+from project.utils import redis_delete_patterns, slackit
+from users.utils import player_log_entry
 
 
 @admin.register(Series)
@@ -62,7 +65,7 @@ class GameAdmin(admin.ModelAdmin):
     list_filter = ('series',)
     inlines = (QuestionAdmin,)
     actions = ('clear_cache', 'score_selected_games',
-               'score_selected_games_update_existing', 'email_winner_certificates')
+               'score_selected_games_update_existing', 'email_winner_certificates', 'find_raffle_winner')
     view_on_site = True
 
     def clear_cache(self, request, queryset):
@@ -96,8 +99,20 @@ class GameAdmin(admin.ModelAdmin):
             winners = winners_of_game(game)
             for winner in winners:
                 send_winner_notice(winner, game_number)
+                player_log_entry(winner, f"Award Certificate sent for game {game_number}.")
                 n += 1
         self.message_user(request, f"{n} winner certifictes sent.")
+
+    def find_raffle_winner(self, request, queryset):
+        for game in queryset:
+            if game.publish:
+                raffle_winner = random.choice(game.players.filter(is_active=True))
+                msg = f"Raffle Winner for {game} is {raffle_winner} referred by {raffle_winner.referrer}"
+                player_log_entry(raffle_winner, msg)
+                slackit(msg)
+            else:
+                msg = f"{game} not published so we cannot choose a raffle winner."
+            self.message_user(request, msg)
 
     def get_readonly_fields(self, request, obj=None):
         # This will list model fields with editable=False in the admin.
