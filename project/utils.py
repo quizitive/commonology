@@ -84,3 +84,9 @@ def to_ascii(s):
     s = s.translate(s.maketrans(table))
     s = str(s.encode('utf-8').decode('ascii', 'ignore'))
     return s
+
+
+def parameters_to_session(request):
+    for key, value in request.GET.items():
+        parameter = key.strip('?')
+        request.session[parameter] = value
