@@ -120,7 +120,7 @@ class JoinView(CardFormView):
         except User.DoesNotExist:
             pass
 
-        referrer = request.session.get('referral_code')
+        referrer = request.session.get('r')
         if referrer:
             referrer = Player.objects.filter(_code=referrer).first()
         send_invite(request, email, referrer=referrer)
