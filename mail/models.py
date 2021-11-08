@@ -40,10 +40,10 @@ class Component(models.Model):
 
 
 FROM_ADDRS = [(i, i) for i in [
+    "concierge@commonologygame.com",
     "alex@commonologygame.com",
     "ms@commonologygame.com",
-    "ted@commonologygame.com",
-    "concierge@commonologygame.com"]]
+    "ted@commonologygame.com"]]
 
 
 class MailMessage(models.Model):
@@ -58,7 +58,7 @@ class MailMessage(models.Model):
                                    help_text="This is a game reminder messsage.  Only players opting for reminders will get it")
     subject = models.CharField(max_length=150, blank=False)
     message = RichTextUploadingField(blank=True,
-                                     help_text='Play link example: https://commonologygame.com/play?-game_url_args-')
+                                     help_text='Play link example: https://commonologygame.com/play-game_url_args-')
     components = SortedManyToManyField(Component, blank=True, related_name='messages')
     created = models.DateTimeField(default=timezone.now)
     sent_date = models.DateTimeField(null=True, blank=True)
