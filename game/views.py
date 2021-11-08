@@ -219,7 +219,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             form_class=None,
             form_method='get',
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
-            player_code=f'r={player.code}',
+            player_code=f'?r={player.code}',
             **msgs[msg]
         )
 
@@ -403,6 +403,12 @@ class GameEntryView(PSIDMixin, CardFormView):
         game_uuid = kwargs.get('game_uuid')
         user = request.user
 
+        r = request.GET.get('r')
+        if not r:
+            r = request.GET.get('?r')
+
+        request.session['referral_code'] = r
+
         if not game_uuid:
             g = find_latest_public_game(slug)
         else:
@@ -482,8 +488,21 @@ class GameEntryView(PSIDMixin, CardFormView):
         email = request.POST['email']
 
         referrer_id = request.GET.get('r')
+        if not referrer_id:
+            referrer_id = request.GET.get('?r')
+        if not referrer_id:
+            referrer_id = request.session.get('referral_code')
 
         p = get_player(referrer_id)
+        if p and not p.is_active:
+            return self.render_message(
+                request,
+                f"The account associated with this email has been deactivated. For more information, "
+                f"please contact us using the contact form.",
+                form=None,
+                button_label=None
+            )
+
         if p and (p.email == email):
             return render_game(request, g, p)
 
@@ -536,9 +555,6 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
         email = pe.email
         try:
             p = Player.objects.get(email=email)
-            if not p.is_active:
-                p.is_active = True
-                p.save()
         except Player.DoesNotExist:
             p = Player(email=email, referrer=pe.referrer)
             p.save()

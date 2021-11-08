@@ -25,6 +25,20 @@ def product_view(request, *args, **kwargs):
     return document_render(request, 'product.html', 'Product Description')
 
 
+def our_story_view(request, *args, **kwargs):
+    return document_render(request, 'our_story.html', 'Our Story')
+
+
+def testimonials_view(request, *args, **kwargs):
+    return document_render(request, 'testimonials.html', 'Testimonials')
+
+
+def raffle_rules_view(request, *args, **kwargs):
+    request.session['referral_code'] = request.GET.get('r')
+
+    return document_render(request, 'raffle_rules.html', 'raffle_rules')
+
+
 def tos_view(request, *args, **kwargs):
     return document_render(request, 'tos.html', 'Terms of Service')
 
@@ -34,6 +48,8 @@ def privacy_view(request, *args, **kwargs):
 
 
 def index(request):
+    request.session['referral_code'] = request.GET.get('r')
+
     if request.user.is_authenticated:
         return redirect('leaderboard:current-leaderboard')
     context = next_game_context()
