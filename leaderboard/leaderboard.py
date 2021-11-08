@@ -264,6 +264,6 @@ def winners_of_game(game):
     return Player.objects.filter(id__in=player_ids)
 
 
-def historical_leaderboards(slug='commonology', limit=10):
-    """The most recent N published leaderboards for a given slug"""
+def visible_leaderboards(slug='commonology', limit=10):
+    """The most recent N published leaderboards for a given slug are viewable by members"""
     return Game.objects.filter(series__slug=slug, publish=True).order_by('-game_id')[:limit]
