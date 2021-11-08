@@ -31,6 +31,15 @@ class TestVStatic(TestCase):
         self.assertIn('/static/css/base.css', STATIC_VERSIONS)
 
 
+class TestParametersMiddleWare(TestCase):
+    def test_parameter(self):
+        c = Client()
+        path = reverse('home') + '?one=1'
+        response = c.get(path)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual('1', c.session.get('one'))
+
+
 # class TestSlack(TestCase):
 #     def test_slackit(self):
 #         slackit('Message from unit test - ignore this.')
