@@ -10,7 +10,7 @@ from game.views import BaseGameView
 from game.utils import find_latest_published_game
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
-    player_score_rank_percentile, rank_string, score_string
+    player_score_rank_percentile, rank_string, score_string, historical_leaderboards
 
 
 class LeaderboardView(BaseGameView):
@@ -53,7 +53,8 @@ class LeaderboardView(BaseGameView):
             context.update({
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
-                'player_message': player_latest_game_message(self.game, player_rank, player_percentile)
+                'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
+                'historical_leaderboards': historical_leaderboards(self.slug)
             })
         return context
 

@@ -262,3 +262,8 @@ def winners_of_game(game):
     leaderboard = build_filtered_leaderboard(game, answer_tally)
     player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
     return Player.objects.filter(id__in=player_ids)
+
+
+def historical_leaderboards(slug='commonology', limit=10):
+    """The most recent N published leaderboards for a given slug"""
+    return Game.objects.filter(series__slug=slug, publish=True).order_by('-game_id')[:limit]
