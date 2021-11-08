@@ -23,6 +23,7 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 
 from project.views import CardFormView
+from project.utils import slackit
 from project.card_views import recaptcha_check
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
 from game.models import Game, Series, Answer
