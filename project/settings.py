@@ -63,7 +63,6 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'django_object_actions',
-    # 'django.contrib.admin',
     'project.apps.CommonologyAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -120,6 +119,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'project.middleware.ParametersMiddleware',
 ]
 
 if DEBUG_TOOLBAR:

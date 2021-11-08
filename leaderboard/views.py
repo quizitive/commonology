@@ -5,7 +5,6 @@ from django.contrib import messages
 from django.db.models import Max
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from project.utils import parameters_to_session
 from game.models import Game, Question
 from game.views import BaseGameView
 from users.models import Player
@@ -48,7 +47,6 @@ class LeaderboardView(BaseGameView):
         return context
 
     def get(self, request, *args, **kwargs):
-        parameters_to_session(request)
         messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, 'leaderboard/leaderboard_view.html', self.get_context(*args, **kwargs))
 
@@ -56,7 +54,6 @@ class LeaderboardView(BaseGameView):
 class ResultsView(LeaderboardView):
 
     def get(self, request, *args, **kwargs):
-        parameters_to_session(request)
         game = self.get_game()
         answer_tally = build_answer_tally(game)
         context = self.get_context()
