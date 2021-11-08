@@ -7,10 +7,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from game.models import Game, Question
 from game.views import BaseGameView
-from game.utils import find_latest_published_game
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
-    player_score_rank_percentile, rank_string, score_string, historical_leaderboards
+    player_score_rank_percentile, rank_string, score_string, visible_leaderboards
 
 
 class LeaderboardView(BaseGameView):
@@ -38,8 +37,7 @@ class LeaderboardView(BaseGameView):
             raise Http404()
 
         # for now, limit leaderboards and results to last 10 games
-        latest_game_id = find_latest_published_game(self.slug).game_id
-        if game.game_id + 10 < latest_game_id:
+        if game not in visible_leaderboards(slug=self.slug):
             raise Http404("Only the results for most recent 10 games can be viewed.")
 
         return game
@@ -54,7 +52,7 @@ class LeaderboardView(BaseGameView):
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
                 'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
-                'historical_leaderboards': historical_leaderboards(self.slug)
+                'historical_leaderboards': visible_leaderboards(self.slug)
             })
         return context
 
