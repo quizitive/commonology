@@ -32,10 +32,6 @@ def find_latest_public_game(slug):
     return g
 
 
-def find_latest_published_game(slug):
-    return Game.objects.filter(series__slug=slug, publish=True).order_by('-start').first()
-
-
 def most_recently_started_game(slug):
     t = our_now()
     g = Game.objects.filter(series__slug=slug, start__lte=t).order_by('start').reverse().first()
