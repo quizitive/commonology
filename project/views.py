@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django import forms
 from django.core.mail import send_mail
-from project.utils import parameters_to_session
 from project.card_views import CardFormView, recaptcha_check
 from game.utils import next_event, find_latest_public_game
 
@@ -34,7 +33,6 @@ def testimonials_view(request, *args, **kwargs):
 
 
 def raffle_rules_view(request, *args, **kwargs):
-    parameters_to_session(request)
     return document_render(request, 'raffle_rules.html', 'raffle_rules')
 
 
@@ -47,8 +45,6 @@ def privacy_view(request, *args, **kwargs):
 
 
 def index(request):
-    parameters_to_session(request)
-
     if request.user.is_authenticated:
         return redirect('leaderboard:current-leaderboard')
     context = next_game_context()
