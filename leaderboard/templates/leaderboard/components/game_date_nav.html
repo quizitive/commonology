@@ -18,12 +18,12 @@
       <div id="change-game-content"
            class="w3-dropdown-content w3-bar-block w3-border w3-round" style="overflow: hidden;">
         {% for hlb in historical_leaderboards %}
-        <div class="w3-bar-item w3-button w3-border-bottom" style="padding:8px">
-          <a href="{% series_or_default_url 'leaderboard' view_name='game-id-'|add:view game_id=hlb.game_id %}"
-             style="text-decoration:none;">
+        <a href="{% series_or_default_url 'leaderboard' view_name='game-id-'|add:view game_id=hlb.game_id %}"
+           style="text-decoration:none;">
+          <div class="w3-bar-item w3-button w3-border-bottom" style="padding:8px">
             <b>Game {{ hlb.game_id }} </b><span style="font-size:13px;"> ({{ hlb.date_range_pretty }})</span>
-          </a>
-        </div>
+          </div>
+        </a>
         {% endfor %}
       </div>
 
