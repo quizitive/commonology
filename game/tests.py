@@ -693,7 +693,7 @@ class SessionReferralTests(BaseGameDataTestCase):
         client = Client()
         path = reverse(name) + f'?r={self.user1.code}'
         client.get(path)
-        self.assertEqual(self.user1.code, client.session.get('referral_code'))
+        self.assertEqual(self.user1.code, client.session.get('r'))
         return client
 
     def url_tester(self, name='home'):
