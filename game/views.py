@@ -23,8 +23,8 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 
 from project.views import CardFormView
+from project.utils import slackit
 from project.card_views import recaptcha_check
-from project.utils import slackit, our_now
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
@@ -403,12 +403,6 @@ class GameEntryView(PSIDMixin, CardFormView):
         game_uuid = kwargs.get('game_uuid')
         user = request.user
 
-        r = request.GET.get('r')
-        if not r:
-            r = request.GET.get('?r')
-
-        request.session['referral_code'] = r
-
         if not game_uuid:
             g = find_latest_public_game(slug)
         else:
@@ -487,11 +481,7 @@ class GameEntryView(PSIDMixin, CardFormView):
 
         email = request.POST['email']
 
-        referrer_id = request.GET.get('r')
-        if not referrer_id:
-            referrer_id = request.GET.get('?r')
-        if not referrer_id:
-            referrer_id = request.session.get('referral_code')
+        referrer_id = request.session.get('r')
 
         p = get_player(referrer_id)
         if p and not p.is_active:
