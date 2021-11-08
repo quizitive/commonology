@@ -4,9 +4,9 @@ import pandas as pd
 from django.urls import reverse
 from django.test import Client
 
-from project.utils import REDIS, our_now
+from project.utils import REDIS, our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key, winners_of_game
-from game.models import Game
+from game.models import Game, Answer
 from game.tests import BaseGameDataTestCase, suppress_hidden_error_logs
 
 from users.models import Player
@@ -163,63 +163,6 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         expected_leaderboard = expected_leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + q_list]
         return expected_leaderboard.reset_index(drop=True)
 
-    # --------------- DEPRECATED --------------------- #
-    # - Host results are no longer excluded fro score - #
-
-    # def test_host_exclusion(self):
-    #
-    #     player = self._add_host()
-    #
-    #     # test that the admin is excluded from game answer tally (28 answers per question v 29)
-    #     at_excl_hosts = build_answer_tally(self.game)
-    #     self.assertTrue(all([sum([r for r in resp.values()]) == 28 for resp in at_excl_hosts.values()]))
-    #
-    #     # and excluded from the leaderboard
-    #     # leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts)
-    #     # self.assertEqual(sum(leaderboard["Name"] == "User 1"), 0)
-    #
-    #     # unless it's a team view
-    #     team = Team.objects.create()
-    #     team.players.add(player)
-    #     leaderboard = build_filtered_leaderboard(self.game, at_excl_hosts, team_id=team.id)
-    #     self.assertEqual(sum(leaderboard["Name"] == "User 1"), 1)
-
-    # ------------------------------------------------- #
-
-    # --------------- DEPRECATED --------------------- #
-    # the only way of "omitting" a player at this point is to make them
-    # a host, but per the above note, this functionality has been deprecated.
-    # when there is a way of omitting an answer by any other means, make sure
-    # this test passes
-    # def test_omitted_unique_answer(self):
-    #     # test that if an omitted answer (e.g. a host or something offensive) is a unique string
-    #     # leaderboard can still be rendered
-    #     player = self._add_host()
-    #
-    #     # change an answer to something unique
-    #     unique_string = 'foo-999-xxx-unique'
-    #     an_answer = player.answers.first()
-    #     an_answer.raw_string = unique_string
-    #     an_answer.save()
-    #
-    #     # give the answer a unique coding
-    #     AnswerCode.objects.create(
-    #         raw_string=unique_string,
-    #         question=an_answer.question,
-    #         coded_answer=unique_string
-    #     )
-    #
-    #     # recreate the answer tally and leaderboard
-    #     new_answer_tally = build_answer_tally(self.game)
-    #     REDIS.delete(lb_cache_key(self.game, new_answer_tally))
-    #     new_leaderboard = build_filtered_leaderboard(self.game, new_answer_tally)
-    #
-    #     # make sure they get 0 points
-    #     self.assertEqual(
-    #         new_leaderboard.loc[new_leaderboard['Name'] == player.display_name,
-    #                             an_answer.question.text].values[0], 0)
-    # ------------------------------------------------- #
-
     def _add_host(self, email="user1@fakeemail.com"):
         # make user a game host
         player = Player.objects.get(email=email)
@@ -263,3 +206,10 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         expected_winner_email = 'user7@fakeemail.com'
         winner = winners_of_game(self.game).first()
         self.assertEqual(winner.email, expected_winner_email)
+
+    def test_removed_answers_arent_counted(self):
+        player = Player.objects.get(email='user1@fakeemail.com')
+        Answer.objects.filter(player=player).update(removed=True)
+        redis_delete_patterns('*')
+        leaderboard = build_filtered_leaderboard(self.game, self.answer_tally)
+        self.assertEqual(len(leaderboard), len(self.leaderboard) - 1)
