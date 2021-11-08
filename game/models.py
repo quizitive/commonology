@@ -89,7 +89,7 @@ class Game(models.Model):
 
     @cached_property
     def players_dict(self):
-        return self.game_questions.first().raw_answers.values(
+        return self.game_questions.first().raw_answers.filter(removed=False).values(
             'player', 'player__display_name').annotate(
             is_host=models.Case(
                 models.When(player__in=self.hosts.values_list('id', flat=True), then=True),
@@ -100,7 +100,9 @@ class Game(models.Model):
 
     @property
     def players(self):
-        return Player.objects.filter(id__in=self.game_questions.first().raw_answers.values('player'))
+        return Player.objects.filter(
+            id__in=self.game_questions.first().raw_answers.filter(removed=False).values('player')
+        )
 
     def user_played(self, player):
         q = self.questions.filter(type=Question.ga).first()
@@ -128,13 +130,17 @@ class Game(models.Model):
         return Answer.objects.values(
             'question_id', 'raw_string'
         ).filter(
+            removed=False,
             question__game=self,
             question__type=Question.ga,
         ).annotate(count=models.Count('raw_string')).order_by()
 
     @property
     def raw_player_answers(self):
-        return Answer.objects.filter(question__game=self).order_by('player', 'question__number')
+        return Answer.objects.filter(
+            question__game=self,
+            removed=False,
+        ).order_by('player', 'question__number')
 
     @property
     def coded_player_answers(self):
@@ -144,7 +150,9 @@ class Game(models.Model):
             question=models.OuterRef('question')
         ).values('question', 'coded_answer')
         return Answer.objects.filter(
-            question__game=self).exclude(
+            question__game=self,
+            removed=False
+        ).exclude(
             question__type__in=(Question.op, Question.ov)
         ).values_list('player', 'player__display_name', 'question__text').annotate(
             coded_answer=models.Subquery(answer_code_subquery.values('coded_answer')),
@@ -234,6 +242,8 @@ class Answer(models.Model):
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, related_name='raw_answers', db_index=True)
     raw_string = models.CharField(max_length=1000)
+    removed = models.BooleanField(default=False,
+                                  help_text='This answer should be removed from the thread')
 
     class Meta:
         unique_together = ('player', 'question')

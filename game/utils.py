@@ -68,10 +68,12 @@ def next_friday_1159(now):
 def players_vs_previous(game):
     prev = Game.objects.get(game_id=game.game_id - 1, series__slug='commonology')
     now = our_now()
-    players_so_far = game.game_questions.first().raw_answers.filter(timestamp__lte=now).count()
+    players_so_far = game.game_questions.first().raw_answers.filter(timestamp__lte=now, removed=False).count()
     this_time_last_week = now - datetime.timedelta(7)
     players_so_far_last_week = prev.game_questions.first().raw_answers.filter(
-        timestamp__lte=this_time_last_week).count()
+        timestamp__lte=this_time_last_week,
+        removed=False
+    ).count()
     return players_so_far, players_so_far_last_week, 100 * (players_so_far / players_so_far_last_week - 1)
 
 
@@ -79,6 +81,9 @@ def write_winner_certificate(name, date, game_number):
     # On Mac: brew install pdfk-java
     path = WINNER_ROOT
     os.makedirs(path, exist_ok=True)
+
+    if datetime.datetime == type(date):
+        date = date.date()
 
     base = f"{name}{date}{game_number}".replace(',', '').replace(' ', '').strip()
     fn_fdf = os.path.join(path, f"{base}.fdf")

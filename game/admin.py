@@ -1,4 +1,5 @@
 import logging
+import random
 
 from django.contrib import admin
 from django.contrib.messages import constants as messages
@@ -10,8 +11,9 @@ from django.utils.html import format_html
 
 from game.models import Series, Game, Question, Answer, AnswerCode
 from game.mail import send_winner_notice
-from leaderboard.leaderboard import tabulate_results, winners_of_game
-from project.utils import redis_delete_patterns
+from leaderboard.leaderboard import tabulate_results, winners_of_game, clear_game_cache
+from project.utils import redis_delete_patterns, slackit
+from users.utils import player_log_entry
 
 
 @admin.register(Series)
@@ -63,14 +65,11 @@ class GameAdmin(admin.ModelAdmin):
     list_filter = ('series',)
     inlines = (QuestionAdmin,)
     actions = ('clear_cache', 'score_selected_games',
-               'score_selected_games_update_existing', 'email_winner_certificates')
+               'score_selected_games_update_existing', 'email_winner_certificates', 'find_raffle_winner')
     view_on_site = True
 
     def clear_cache(self, request, queryset):
-        lb_prefixes = [f'leaderboard_{q[0]}_{q[1]}' for q in queryset.values_list('series__slug', 'game_id')]
-        lbs_deleted = redis_delete_patterns(*lb_prefixes)
-        at_prefixes = [f'build_answer_tally:{repr(q)}' for q in queryset]
-        ats_deleted = redis_delete_patterns(*at_prefixes)
+        lbs_deleted, ats_deleted = clear_game_cache(queryset)
         self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
         self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
 
@@ -100,8 +99,20 @@ class GameAdmin(admin.ModelAdmin):
             winners = winners_of_game(game)
             for winner in winners:
                 send_winner_notice(winner, game_number)
+                player_log_entry(winner, f"Award Certificate sent for game {game_number}.")
                 n += 1
         self.message_user(request, f"{n} winner certifictes sent.")
+
+    def find_raffle_winner(self, request, queryset):
+        for game in queryset:
+            if game.publish:
+                raffle_winner = random.choice(game.players.filter(is_active=True))
+                msg = f"Raffle Winner for {game} is {raffle_winner} referred by {raffle_winner.referrer}"
+                player_log_entry(raffle_winner, msg)
+                slackit(msg)
+            else:
+                msg = f"{game} not published so we cannot choose a raffle winner."
+            self.message_user(request, msg)
 
     def get_readonly_fields(self, request, obj=None):
         # This will list model fields with editable=False in the admin.
@@ -123,11 +134,34 @@ class GameAdmin(admin.ModelAdmin):
 class AnswerAdmin(admin.ModelAdmin):
     list_display = ('raw_string', 'question', 'player', 'game')
     search_fields = ('raw_string', 'question__text', 'question__game__name', 'player__email')
-
+    actions = ('remove_selected_answers',)
     list_filter = ('question__game__name', )
 
     def game(self, obj):
         return obj.game
+
+    def remove_selected_answers(self, request, queryset):
+        already_published = 0
+        successes = 0
+        games = set()
+        for q in queryset:
+            if q.question.game.publish:
+                already_published += 1
+                continue
+            q.removed = True
+            q.save()
+            games.add(self.game(q))
+            successes += 1
+        clear_game_cache(games)
+        if successes:
+            self.message_user(request, f"{successes} answers were removed from the game")
+        if already_published:
+            self.message_user(
+                request,
+                f"{queryset.count()} answers could not be removed because the game has already been published.",
+                level=messages.WARNING
+            )
+    remove_selected_answers.short_description = "Remove select answers (USE THIS ONE)"
 
 
 @admin.register(AnswerCode)

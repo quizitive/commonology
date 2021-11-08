@@ -1,9 +1,12 @@
 import time
 
+import python_http_client.exceptions
+import socket
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.core.mail import send_mail
+from project.utils import slackit
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, To, Category, Header
 from users.models import Player
@@ -32,21 +35,26 @@ def send_one(player, subject, note):
 def make_substitutions(e, code):
     x = sign_user(e, code)
     url = mark_safe(f"https://{settings.DOMAIN}/unsubscribe/{x}")
-    game_url_args = f'r={code}'
+    if code:
+        game_url_args = f'?r={code}'
+    else:
+        game_url_args = ''
     return {'-email-': e, '-unsubscribelink-': url, '-game_url_args-': game_url_args}
 
 
 #
 # Really good examples: https://github.com/sendgrid/sendgrid-python/blob/main/examples/helpers/mail_example.py
 #
+#
 def sendgrid_send(subject, msg, email_list,
                   from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME),
-                  send_at=None, categories=None, unsub_link=False, components=()):
+                  send_at=None, categories=None, unsub_link=False, components=(),
+                  force_sendgrid=False):
 
     msg = render_to_string('mail/mail_base.html', context={'message': mark_safe(msg), 'components': components, 'unsub_link': unsub_link})
 
     # don't use sendgrid backend for tests
-    if 'console' in settings.EMAIL_BACKEND or 'locmem' in settings.EMAIL_BACKEND:
+    if (not force_sendgrid) and ('console' in settings.EMAIL_BACKEND or 'locmem' in settings.EMAIL_BACKEND):
         to_emails = [e for e, _ in email_list]
         send_mail(subject, msg, None, to_emails, html_message=msg)
         return len(to_emails), msg
@@ -74,6 +82,12 @@ def sendgrid_send(subject, msg, email_list,
 
 
 def mass_mail(obj):
+    if socket.gethostname() == settings.DOMAIN:
+        try:
+            deactivate_blocked_addresses()
+        except Exception as e:
+            slackit(f"FAILED to deactivate blocked addresses: {e}")
+
     msg = make_absolute_urls(obj.message)
     from_email = (obj.from_email, obj.from_name)
 
@@ -130,31 +144,28 @@ def deactivate_blocked_addresses():
 
     sg = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
 
-    response = sg.client.suppression.blocks.get()
-    assert(response.status_code == 200)
+    def do():
+        response = sg.client.suppression._(name).get()
+        assert (response.status_code == 200)
+        emails = []
+        for i in response.to_dict:
+            email = i['email']
+            unsubscribe(email, f'our mail was reported in SendGrid {name} suppressions.')
+            emails.append(email)
+        return emails
 
-    for i in response.to_dict:
-        unsubscribe(i['email'], i['reason'])
+    def remove(emails):
+        if not emails:
+            return
 
-    response = sg.client.suppression.spam_reports.get()
-    assert (response.status_code == 200)
-    for i in response.to_dict:
-        unsubscribe(i['email'], 'our mail was reported as spam')
+        try:
+            response = sg.client.suppression._(name).delete(
+                request_body={'delete_all': True})
+        except python_http_client.exceptions.NotFoundError:
+            f"removing {emails} from Sendgrid suppressions: NOT FOUND"
+            return
 
-    response = sg.client.suppression.invalid_emails.get()
-    assert (response.status_code == 200)
-    for i in response.to_dict:
-        unsubscribe(i['email'], 'invalid address')
+        print(f"removing {emails} from Sendgrid suppressions: {response.status_code}")
 
-    response = sg.client.suppression.bounces.get()
-    assert (response.status_code == 200)
-    for i in response.to_dict:
-        unsubscribe(i['email'], i['reason'])
-
-    return
-    # only do this in production --- doing this manually for now
-    data = {'delete_all': False, 'emails': bad_emails}
-    response = sg.client.supression.blocks.delete(request_body=data)
-    assert(response.status_code == 200)
-
-    # Need to repeat for spam_reports, invalid_emails, and bounces
+    for name in 'spam_reports', 'bounces', 'invalid_emails', 'blocks':
+        remove(do())
