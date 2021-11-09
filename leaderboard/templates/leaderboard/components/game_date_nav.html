@@ -9,12 +9,12 @@
     {% if team %}
       <h1 class="w3-padding leaderboard"><b>{{ team.name }}</b></h1>
     {% endif %}
+
+      <!-- date dropdown with historical leaderboards -->
       <div class="leaderboard"><span style="font-size: 28px">{{ game_name }}</span></div>
       <div id="change-game" class="w3-dropdown-click" style="font-size:20px;padding-top:4px;">
         {{ date_range }}<i class="fas fa-caret-down" style="margin-left:8px;"></i>
       </div>
-
-      <!-- historical leaderboards -->
       <div id="change-game-content"
            class="w3-dropdown-content w3-bar-block w3-border w3-card-4 w3-round" style="overflow:hidden">
         {% if not user.is_authenticated %}
