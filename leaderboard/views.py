@@ -32,10 +32,6 @@ class LeaderboardView(BaseGameView):
         if not game.publish:
             return Http404()
 
-        # anonymous users cannot view other games at all
-        if self.requested_game_id is not None and not self.request.user.is_authenticated:
-            raise Http404()
-
         # for now, limit leaderboards and results to last 10 games
         if game not in visible_leaderboards(slug=self.slug):
             raise Http404("Only the results for most recent 10 games can be viewed.")
@@ -44,6 +40,7 @@ class LeaderboardView(BaseGameView):
 
     def get_context(self, *args, **kwargs):
         context = super().get_context(*args, **kwargs)
+        context['historical_leaderboards'] = visible_leaderboards(self.slug)
         if self.request.user.is_authenticated:
             # get the logged in player's stats for the game
             player_score, player_rank, player_percentile = \
@@ -52,7 +49,6 @@ class LeaderboardView(BaseGameView):
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
                 'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
-                'historical_leaderboards': visible_leaderboards(self.slug)
             })
         return context
 
