@@ -9,7 +9,7 @@ from game.models import Game, Question
 from game.views import BaseGameView
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
-    player_score_rank_percentile, rank_string, score_string
+    player_score_rank_percentile, rank_string, score_string, visible_leaderboards
 
 
 class LeaderboardView(BaseGameView):
@@ -24,17 +24,23 @@ class LeaderboardView(BaseGameView):
         else:
             game = Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
 
-        # todo: maybe change this to is_authenticated to allow access to historical leaderboards
-        if self.requested_game_id is not None and not (
-                self.request.user.is_staff
-                or self.request.user in game.hosts.all()
-        ):
-            raise Http404()
+        # staff and hosts can view unpublished games
+        if self.request.user.is_staff or self.request.user in game.hosts.all():
+            return game
+
+        # no one else can
+        if not game.publish:
+            return Http404()
+
+        # for now, limit leaderboards and results to last 10 games
+        if game not in visible_leaderboards(slug=self.slug):
+            raise Http404("Only the results for most recent 10 games can be viewed.")
 
         return game
 
     def get_context(self, *args, **kwargs):
         context = super().get_context(*args, **kwargs)
+        context['historical_leaderboards'] = visible_leaderboards(self.slug)
         if self.request.user.is_authenticated:
             # get the logged in player's stats for the game
             player_score, player_rank, player_percentile = \
@@ -42,7 +48,7 @@ class LeaderboardView(BaseGameView):
             context.update({
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
-                'player_message': player_latest_game_message(self.game, player_rank, player_percentile)
+                'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
             })
         return context
 

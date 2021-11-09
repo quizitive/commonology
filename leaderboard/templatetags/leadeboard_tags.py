@@ -24,11 +24,12 @@ def button_highlight(context, dest_link):
 
 
 @register.simple_tag(takes_context=True)
-def series_or_default_url(context, app_name, view_name):
+def series_or_default_url(context, app_name, view_name, **kwargs):
     if context.get('series_slug'):
-        return reverse(f'series-{app_name}:{view_name}', kwargs={'series_slug': context['series_slug']})
+        kwargs.update({'series_slug': context['series_slug']})
+        return reverse(f'series-{app_name}:{view_name}', kwargs=kwargs)
     else:
-        return reverse(f'{app_name}:{view_name}')
+        return reverse(f'{app_name}:{view_name}', kwargs=kwargs)
 
 
 @register.simple_tag(takes_context=True)
