@@ -1,12 +1,16 @@
 // --- use this function to register listeners --- //
 $(function() {
-  // click anywhere closes dropdown
-    $(document).bind("click", (event) => {
-    showHideElement(event, "#navbar-dropdown-content")
+  // close content elements by clicking anywhere
+  $(document).bind("click", (event) => {
+  showHideElement(event, "#navbar-dropdown-content");
+  showHideElement(event, "#change-game-content");
   })
-  // clicking on caret can open or close dropdown
+  // clicking triggering elements opens or closes
   $("#navbar-dropdown-icon").bind("click", (event) => {
     showHideElement(event,"#navbar-dropdown-content",true)
+  });
+  $("#change-game").bind("click", (event) => {
+    showHideElement(event,"#change-game-content",true)
   });
 })
 
