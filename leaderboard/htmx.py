@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from game.models import Game, Answer
 from game.views import SeriesPermissionMixin
 from game.utils import new_players_for_game
-from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard
+from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard, visible_leaderboards
 
 
 class LeaderboardHTMXView(SeriesPermissionMixin, View):
@@ -36,9 +36,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
         if not self.game.publish:
             return False
 
-        # anonymous users may only see most recent published game
-        if not self.request.user.is_authenticated and \
-                self.game_id != max(self.game.series.games.filter(publish=True).values_list('game_id', flat=True)):
+        if self.game not in visible_leaderboards(self.slug):
             return False
 
         # super() will test if the user has access to this series

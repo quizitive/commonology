@@ -17,14 +17,6 @@
       </div>
       <div id="change-game-content"
            class="w3-dropdown-content w3-bar-block w3-border w3-card-4 w3-round" style="overflow:hidden">
-        {% if not user.is_authenticated %}
-          <a href="{% url 'login' %}"
-            class="w3-bar-item w3-button" style="text-decoration:none;">
-          <div class="w3-bar-item w3-button" style="padding:2px 0;">
-            Login or join to see past results!
-          </div>
-        </a>
-        {% endif %}
         {% for hlb in historical_leaderboards %}
         <a href="{% series_or_default_url 'leaderboard' view_name='game-id-'|add:view game_id=hlb.game_id %}"
             class="w3-bar-item w3-button" style="text-decoration:none;">
