@@ -221,14 +221,17 @@ def player_top_game_rank(player, series):
 def rank_string(rank):
     if not rank:
         return "N/A"
-    if rank == 1:
-        rank_str = "1st"
-    elif rank == 2:
-        rank_str = "2nd"
-    elif rank == 3:
-        rank_str = "3rd"
+    if rank % 100 in (11, 12, 13):
+        suffix = 'th'
+    elif rank % 10 == 1:
+        suffix = "st"
+    elif rank % 10 == 2:
+        suffix = "nd"
+    elif rank % 10 == 3:
+        suffix = "rd"
     else:
-        rank_str = f"{rank}th"
+        suffix = "th"
+    rank_str = f"{rank}{suffix}"
     return rank_str
 
 
