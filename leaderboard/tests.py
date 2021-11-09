@@ -35,12 +35,6 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         url = reverse('leaderboard:current-leaderboard')
         self._assert_code(url, 200)
 
-    @suppress_hidden_error_logs
-    def test_leaderboard_game_view(self):
-        # non-staff user can't see other weeks directly
-        url = reverse('leaderboard:game-id-leaderboard', kwargs={'game_id': 1})
-        self._assert_code(url, 404)
-
     def test_htmx_leaderboard_resp(self):
         game_id = max(Game.objects.values_list('game_id'))[0]
 
