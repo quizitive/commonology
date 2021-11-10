@@ -20,21 +20,15 @@
 
           <div class="w3-cell w3-cell-middle w3-right-align" style="font-size:0.8rem;width:35%;">
 
-            <div class="w3-cell-row w3-mobile" style="width:65%;float:right;">
-                <div class="w3-container" style="line-height: 0">
-                    <table class="w3-table" style="white-space: nowrap;">
-                    <tr>
-                        <th><a class="bottombar w3-cell w3-mobile" href="{% url 'about' %}">About</a></th>
-                        <th><a class="bottombar w3-cell w3-mobile" href="{% url 'our_story' %}">Our Story</a></th>
-                        <th><a class="bottombar w3-cell w3-mobile" href="{% url 'testimonials' %}">Testimonials</a></th>
-                    </tr>
-                    <tr>
-                        <th><a class="bottombar w3-cell w3-mobile" href="{% url 'product' %}">Product</a></th>
-                        <th><a class="bottombar w3-cell w3-mobile" href="{% url 'tos' %}">Terms</a></th>
-                        <th><a class="bottombar w3-cell w3-mobile" href="{% url 'contact' %}">Contact</a></th>
-                    </tr>
-                    </table>
-                </div>
+            <div class="w3-row" style="float:right;">
+              <div class="w3-col">
+                <a class="bottombar w3-row" href="{% url 'about' %}">About</a>
+                <a class="bottombar w3-row" href="{% url 'our_story' %}">Our Story</a>
+                <a class="bottombar w3-row" href="{% url 'testimonials' %}">Testimonials</a>
+                <a class="bottombar w3-row" href="{% url 'product' %}">Product</a>
+                <a class="bottombar w3-row" href="{% url 'tos' %}">Terms</a>
+                <a class="bottombar w3-row" href="{% url 'contact' %}">Contact</a>
+              </div>
             </div>
 
           </div>

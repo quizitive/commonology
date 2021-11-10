@@ -2,7 +2,7 @@
   overflow: hidden;
   bottom: 0;
   width: 100%;
-  margin-top: -83px;
+  margin-top: -164px;
 }
 #footer {
   background: #fafbfc;
@@ -12,8 +12,11 @@ a.bottombar {
   text-decoration: None;
   color: #f26649;
 }
+a.bottombar::before {
+  content: None;
+}
 #copyright {
   color:#aaaaaa;
   font-size:0.7rem;
-  margin:4px 3px -6px 0;
+  margin:-4px 3px -6px 0;
 }
