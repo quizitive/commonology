@@ -1,5 +1,5 @@
 from celery import shared_task
-from utils import sendgrid_send
+from mail.utils import sendgrid_send
 
 
 @shared_task(queue='serial')
