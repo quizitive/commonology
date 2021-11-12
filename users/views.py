@@ -18,7 +18,7 @@ from project.card_views import recaptcha_check, BaseCardView, CardFormView
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
-from mail.utils import sendgrid_send
+from mail.tasks import mail_task
 from project.utils import redis_delete_patterns
 from game.models import Series
 from .utils import remove_pending_email_invitations
@@ -89,7 +89,7 @@ class ProfileView(LoginRequiredMixin, CardFormView):
         context = {'confirm_url': confirm_url}
         msg = render_to_string('users/email_change.html', context)
 
-        return sendgrid_send('Email confirmation', msg, [(email, None)])
+        return mail_task('Email confirmation', msg, [(email, None)])
 
 
 class JoinView(CardFormView):
@@ -178,7 +178,7 @@ def send_invite(request, email, referrer=None):
     context = {'referrer_str': referrer_str, 'join_url': join_url, 'more_info_str': more_info_str}
     msg = render_to_string('emails/invite_email.html', context)
 
-    return sendgrid_send("You're Invited to Commonology", msg, [(email, None)])
+    return mail_task("You're Invited to Commonology", msg, [(email, None)])
 
 
 class InviteFriendsView(LoginRequiredMixin, BaseCardView):
@@ -379,7 +379,7 @@ def send_unsubscribed_notice(request, player):
     context = {'signed_code': signed_code, 'protocol': protocol, 'domain': domain}
     msg = render_to_string('emails/unsubscribe_email.html', context)
 
-    return sendgrid_send("Unsubscribed", msg, [(email, None)])
+    return mail_task("Unsubscribed", msg, [(email, None)])
 
 
 class UnsubscribeView(View):
