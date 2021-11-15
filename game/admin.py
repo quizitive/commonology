@@ -12,8 +12,9 @@ from django.utils.html import format_html
 from game.models import Series, Game, Question, Answer, AnswerCode
 from game.mail import send_winner_notice
 from leaderboard.leaderboard import tabulate_results, winners_of_game, clear_game_cache
-from project.utils import redis_delete_patterns, slackit
+from project.utils import slackit
 from users.utils import player_log_entry
+from game.utils import game_log_entry
 
 
 @admin.register(Series)
@@ -109,6 +110,7 @@ class GameAdmin(admin.ModelAdmin):
                 raffle_winner = random.choice(game.players.filter(is_active=True))
                 msg = f"Raffle Winner for {game} is {raffle_winner} referred by {raffle_winner.referrer}"
                 player_log_entry(raffle_winner, msg)
+                game_log_entry(game, msg)
                 slackit(msg)
             else:
                 msg = f"{game} not published so we cannot choose a raffle winner."
