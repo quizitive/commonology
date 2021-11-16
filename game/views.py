@@ -35,7 +35,7 @@ from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
 from users.utils import get_player
-from mail.utils import sendgrid_send
+from mail.tasks import mail_task
 from mail.models import Component
 from rewards.utils import check_for_reward
 
@@ -232,7 +232,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
         answers_msg = render_to_string('game/game_complete_email.html', email_context)
         referral_link = Component.objects.filter(name="Referral Link").first()
-        sendgrid_send(f'{game.name}', answers_msg, [(player.email, player.code)], components=(referral_link,))
+        mail_task(f'{game.name}', answers_msg, [(player.email, player.code)], components=(referral_link,))
 
     def test_func(self):
         # override super method, which requires users to be logged in
@@ -366,7 +366,7 @@ def send_confirm(request, g, email, referrer_id=None):
 
     msg = render_to_string('game/validate_email.html', {'join_url': url})
 
-    return sendgrid_send("Let's play Commonology", msg, [(email, None)])
+    return mail_task("Let's play Commonology", msg, [(email, None)])
 
 
 def render_game(request, game, user=None, editable=True):
