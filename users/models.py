@@ -6,6 +6,8 @@ import string
 
 from django.db import connection
 from django.db import models
+from django.core.validators import EmailValidator
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import CIEmailField
 from django.utils.translation import ugettext_lazy as _
@@ -34,9 +36,16 @@ class CustomCIEmailField(CIEmailField):
             return value
 
 
+def custom_validate_email(value):
+    EmailValidator()(value)
+    if value.endswith('.con'):
+        raise ValidationError(_(f"{value} ends with .con and probably should be .com"),
+                              params={'value': value})
+
+
 class CustomUser(AbstractUser):
     username = None
-    email = CustomCIEmailField(_('email address'), unique=True)
+    email = CustomCIEmailField(_('email address'), unique=True, validators=[custom_validate_email])
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
     location = models.CharField(max_length=MAX_LOCATION_LEN, choices=LOCATIONS, blank=True)
@@ -144,7 +153,7 @@ class Player(CustomUser):
 class PendingEmail(models.Model):
     referrer = models.ForeignKey(Player, null=True, on_delete=models.CASCADE)
     uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField()
+    email = models.EmailField(validators=[custom_validate_email])
     created = models.DateTimeField(default=timezone.now)
 
 
