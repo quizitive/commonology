@@ -107,7 +107,11 @@ class JoinView(CardFormView):
     def post(self, request, *args, **kwargs):
         recaptcha_check(request)
 
-        email = request.POST.get('email')
+        if not self.get_form().is_valid():
+            return self.render(request, *args, **kwargs)
+
+        email = request.POST['email']
+
         if not email:
             return redirect('login')
 
