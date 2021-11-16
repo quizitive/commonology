@@ -479,6 +479,9 @@ class GameEntryView(PSIDMixin, CardFormView):
         if g is None:
             return self.message(request, 'Cannot find game.  Perhaps you have a bad link.')
 
+        if not self.get_form().is_valid():
+            return self.render(request, *args, **kwargs)
+
         email = request.POST['email']
 
         referrer_id = request.session.get('r')
