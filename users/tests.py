@@ -275,12 +275,8 @@ class PendingUsersTests(TestCase):
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
 
-        data = self.data
-        data['password2'] = test_pw
-        self.assert_user_was_created(path, data, False)
-
-        data['password2'] = data['password1']
-        self.assert_user_was_created(path, data, True)
+        x = User.objects.filter(email__exact=ABINORMAL).exists()
+        self.assertEqual(x, True)
 
         remove_abinormal()
 
