@@ -20,6 +20,9 @@ def reorg_componenets(apps, schema_editor):
         del model_dict['location']
         del model_dict['mail_component']
         c = Component.objects.create(**model_dict)
+        if c.template == 'mail/simple_component.html':
+            c.template = 'components/simple_component.html'
+            c.save()
         if mc.mail_component:
             c.locations.add(mail_loc)
         if 'Rules' in mc.name:
