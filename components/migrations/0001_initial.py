@@ -9,7 +9,7 @@ from django.db import migrations, models
 from django.forms.models import model_to_dict
 
 
-def reorg_componenets(apps, schema_editor):
+def reorg_components(apps, schema_editor):
     MailComponent = apps.get_model('mail', 'Component')
     Component = apps.get_model('components', 'Component')
     Location = apps.get_model('components', 'Location')
@@ -71,8 +71,8 @@ class Migration(migrations.Migration):
                 ('message', ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True)),
                 ('template', models.CharField(default='components/simple_component.html', max_length=150)),
                 ('context', models.JSONField(blank=True, default=dict)),
-                ('locations', models.ManyToManyField(related_name='components', to='components.Location', help_text='Make this componenet available to these apps/locations. NOTE: This does not automatically make the component appear in these locations, that must be configured explicitly.')),
+                ('locations', models.ManyToManyField(related_name='components', to='components.Location', help_text='Make this component available to these apps/locations. NOTE: This does not automatically make the component appear in these locations, that must be configured explicitly.')),
             ],
         ),
-        migrations.RunPython(reorg_componenets, undo_reorg)
+        migrations.RunPython(reorg_components, undo_reorg)
     ]
