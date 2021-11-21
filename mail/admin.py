@@ -23,7 +23,8 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         msg = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
         sendgrid_send(obj.subject, msg=msg, email_list=[(email, user_code)],
-                      from_email=from_email, unsub_link=True, components=obj.components.all())
+                      from_email=from_email, unsub_link=True,
+                      top_components=obj.top_components.all(), bottom_components=obj.bottom_components.all())
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
