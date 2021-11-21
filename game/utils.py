@@ -4,6 +4,8 @@ import subprocess
 import datetime
 
 from django.db.models import Min
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.admin.models import LogEntry, CHANGE
 from project.settings import WINNER_ROOT, WINNER_TEMPLATE_PDF
 from project.utils import our_now, quick_cache, to_ascii
 from game.models import Game, Answer
@@ -109,3 +111,12 @@ def write_winner_certificate(name, date, game_number):
                         'output', fn, 'need_appearances', 'flatten'])
 
     return filename
+
+
+def game_log_entry(game, message):
+    return LogEntry.objects.log_action(user_id=game.id,
+                                       content_type_id=ContentType.objects.get_for_model(game).pk,
+                                       object_id=game.id,
+                                       object_repr=str(game.name),
+                                       action_flag=CHANGE,
+                                       change_message=message)
