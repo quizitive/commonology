@@ -108,7 +108,7 @@ def mass_mail(obj):
         categories = []
 
     top_components = obj.top_components.all()
-    bottom_components = obj.bottom_componenets.all()
+    bottom_components = obj.bottom_components.all()
 
     qs = players.filter(subscribed=True)
 
