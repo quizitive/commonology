@@ -168,6 +168,9 @@ def make_rollups_sheet(rollups_and_tallies):
         resulting_codes = []
         rollup_score = []
         for coding, unique_string_list in merges.items():
+            if not coding:
+                # blanks on optional questions don't need to be writte to sheet
+                continue
             for u in unique_string_list:
                 unique_strings.append(u)
                 resulting_codes.append(coding)
