@@ -99,9 +99,9 @@
       </div>
 
       {#  BOTTOM COMPONENTS  #}
-      {% for componenet in bottom_components %}
+      {% for component in bottom_components %}
         <div id="{{ component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px">
-          {{ componenet.render }}
+          {{ component.render }}
         </div>
       {% endfor %}
 
