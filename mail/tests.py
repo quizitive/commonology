@@ -3,7 +3,8 @@ from django.core import mail
 from users.tests import get_local_user
 from game.tests import BaseGameDataTestCase
 from mail.utils import mass_mail, sendgrid_send
-from mail.models import MailMessage, Component
+from mail.models import MailMessage
+from components.models import Component
 
 
 class MassMailTests(BaseGameDataTestCase):
@@ -32,13 +33,13 @@ class MassMailTests(BaseGameDataTestCase):
         mm = self.mm
         c1 = Component.objects.create(
             name='component1',
-            template='mail/simple_component.html',
+            template='components/simple_component.html',
             message='<b>bolded string</b>',
             context={'name': 'component_1'}
         )
         c2 = Component.objects.create(
             name='component2',
-            template='mail/simple_component.html',
+            template='components/simple_component.html',
             message='<i>italic string</i>',
             context={'name': 'component_2'}
         )
@@ -62,7 +63,7 @@ class MassMailTests(BaseGameDataTestCase):
         self.assertLess(c2_loc, c1_loc)
 
         # move c1 to top, make sure it's above message
-        c1.location = Component.top
+        # c1.location = Component.top
         c1.save()
         _, rendered_msg = sendgrid_send(
             subject=mm.subject,

@@ -85,7 +85,7 @@
 
       {#  TOP COMPONENTS  #}
       {% for component in components %}
-        {% if component.location == 'top' %}
+        {% if 'top' in component.locations.all %}
         <div id="{{ component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px">
           {{ component.render }}
         </div>
@@ -93,7 +93,7 @@
       {% endfor %}
 
       {# EMAIL MESSAGE #}
-        <div id="email-content" style="background:#fff;border: 1px solid lightgrey;border-top:4px solid #0095da;border-radius:4px">
+        <div id="email-content" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;border: 1px solid lightgrey;border-top:4px solid #0095da;border-radius:4px">
           {% block email-content %}
             {{ message }}
           {% endblock %}
@@ -101,10 +101,10 @@
       </div>
 
       {#  BOTTOM COMPONENTS  #}
-      {% for component in components %}
-        {% if component.location == 'btm' %}
-        <div id="{{ component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px">
-          {{ component.render }}
+      {% for componenet in components %}
+        {% if componenet.location == 'btm' %}
+        <div id="{{ componenet.component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px">
+          {{ componenet.component.render }}
         </div>
         {% endif %}
       {% endfor %}

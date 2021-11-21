@@ -1,0 +1,9 @@
+{# Call from parent template with location specified as loc #}
+
+{% for comp in components %}
+  {% if loc in comp.locations.all %}
+  <div id="{{ comp.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius:4px">
+    {{ comp.render }}
+  </div>
+  {% endif %}
+{% endfor %}
