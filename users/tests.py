@@ -362,6 +362,12 @@ class PendingUsersTests(TestCase):
 
         remove_abinormal()
 
+    def test_join_bad_email(self):
+        client = Client()
+        response = client.post(reverse('join'), data={"email": 'foo@goo.con'})
+        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertContains(response, "ends with .con and probably should be .com")
+
     def test_referral_count(self):
         user1 = get_local_user()
         user2 = get_local_user(e='igot@referred.com')
