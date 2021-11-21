@@ -138,6 +138,7 @@ class JoinView(CardFormView):
                          message=self.custom_message,
                          form=None,
                          form_method='get',
+                         form_action='/',
                          button_label='Ok')
 
 
@@ -243,6 +244,8 @@ class EmailConfirmedView(View):
                 display_name = user.display_name
             except User.DoesNotExist:
                 display_name = ''
+                user = User(email=email)
+                user.save()
 
             form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer, 'display_name': display_name})
             messages.info(request, mark_safe(f"Email: {pe.email}<br/>(you can change this after signing up)"))
