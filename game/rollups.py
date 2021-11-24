@@ -121,7 +121,7 @@ def process_rollups(col_name, raw_counts, user_rollups):
 def build_answer_codes(df, rollups_dict):
     answer_codes = {}
     optional_cols = [c for c in df.columns if c.startswith('OPTIONAL: ')]
-    for col in df.drop(columns=optional_cols).iloc[:, 3:]:
+    for col in df.iloc[:, 3:]:
         counts = df[col].value_counts()
         _, col_answer_codes = process_rollups(col, counts, rollups_dict)
         answer_codes[col] = col_answer_codes
