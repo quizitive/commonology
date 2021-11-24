@@ -155,7 +155,8 @@ def build_answer_tally(game):
     raw_string_counts = game.valid_raw_string_counts
     answer_subquery = raw_string_counts.filter(raw_string=OuterRef('raw_string')).filter(question=OuterRef('question'))
     answer_counts = AnswerCode.objects.filter(
-        question__game=game).order_by('question_id').values('question__text', 'coded_answer').annotate(
+        question__game=game).order_by('question__number', 'question_id').values(
+        'question__text', 'coded_answer').annotate(
         score=Sum(Subquery(answer_subquery.values('count')))
     )
     answer_tally = {}
