@@ -151,7 +151,7 @@ def make_answers_sheet(rollups_and_tallies):
     for question, data in rollups_and_tallies.items():
         responses = [question]
         counts = [""]
-        for resp_count in sorted(data[0].items(), key=lambda x: -x[1]):
+        for resp_count in sorted(data[0].items(), key=lambda x: (-x[1], x[0])):
             responses.append(resp_count[0])
             counts.append(resp_count[1])
         sheet_data.append(responses)
@@ -168,6 +168,9 @@ def make_rollups_sheet(rollups_and_tallies):
         resulting_codes = []
         rollup_score = []
         for coding, unique_string_list in merges.items():
+            if not coding:
+                # blanks on optional questions don't need to be written to sheet
+                continue
             for u in unique_string_list:
                 unique_strings.append(u)
                 resulting_codes.append(coding)

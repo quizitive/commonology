@@ -239,7 +239,7 @@ class TestGameTabulation(BaseGameDataTestCase):
     def test_answer_codes(self):
         # test coded answers (one for each unique string)
         answer_code_objs = AnswerCode.objects.all()
-        self.assertEqual(answer_code_objs.count(), 70)
+        self.assertEqual(answer_code_objs.count(), 104)
 
         # test codes are updated if they're changed
         a_question = Question.objects.get(text="Excluding Forest Gump, name a Tom Hanks movie.")

@@ -132,7 +132,6 @@ class Game(models.Model):
         ).filter(
             removed=False,
             question__game=self,
-            question__type=Question.ga,
         ).annotate(count=models.Count('raw_string')).order_by()
 
     @property
