@@ -9,7 +9,7 @@ from components.models import Component
 
 
 class Leaderboard(models.Model):
-    game = models.ForeignKey(Game, related_name='leaderboards', unique=True, on_delete=models.CASCADE)
+    game = models.OneToOneField(Game, related_name='leaderboard', unique=True, on_delete=models.CASCADE)
     sheet_name = models.CharField(
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data."
