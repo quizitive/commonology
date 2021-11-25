@@ -265,6 +265,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
         context.update({
             'game': game,
+            'top_components': game.top_components.all(),
             'game_rules': self.get_game_rules(),
             'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
