@@ -14,7 +14,7 @@ class Leaderboard(models.Model):
         max_length=10000,
         help_text="The name of the Google Sheet which contains response data."
     )
-    live_after = models.DateTimeField(
+    publish_date = models.DateTimeField(
         verbose_name="When the leaderboard can be published to the website.", null=False, blank=False)
     top_components = SortedManyToManyField(
         Component,
@@ -27,4 +27,4 @@ class Leaderboard(models.Model):
 
     @property
     def publish(self):
-        return our_now() > self.live_after
+        return our_now() > self.publish_date

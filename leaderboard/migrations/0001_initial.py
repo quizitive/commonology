@@ -14,7 +14,7 @@ def create_leaderboards_from_games(apps, schema_editor):
         Leaderboard.objects.create(
             game=game,
             sheet_name=game.sheet_name,
-            live_after=game.end + timedelta(days=2, hours=12),
+            publish_date=game.end + timedelta(days=2, hours=12),
             top_commentary=game.top_commentary,
             bottom_commentary=game.bottom_commentary
         )
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('sheet_name', models.CharField(help_text='The name of the Google Sheet which contains response data.', max_length=10000)),
-                ('live_after', models.DateTimeField(verbose_name='When the leaderboard can be published to the website.')),
+                ('publish_date', models.DateTimeField(verbose_name='When the leaderboard can be published to the website.')),
                 ('top_commentary', ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True)),
                 ('bottom_commentary', ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True)),
                 ('game', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='leaderboard', to='game.game')),
