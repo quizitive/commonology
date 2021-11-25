@@ -21,7 +21,7 @@
         <a href="{% series_or_default_url 'leaderboard' view_name='game-id-'|add:view game_id=hlb.game_id %}"
             class="w3-bar-item w3-button" style="text-decoration:none;">
           <div class="w3-bar-item w3-button" style="padding:2px 0;">
-            <b>Game {{ hlb.game_id }} </b><span style="font-size:13px;"> ({{ hlb.date_range_pretty }})</span>
+            <b>Game {{ hlb.game_id }} </b><span style="font-size:13px;"> ({{ hlb.game.date_range_pretty }})</span>
           </div>
         </a>
         {% endfor %}
