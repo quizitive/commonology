@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db.models import Max
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from project.utils import our_now
 from game.models import Game, Question
 from game.views import BaseGameView
 from users.models import Player
@@ -20,7 +21,7 @@ class LeaderboardView(BaseGameView):
         # if no id is specified get the most recent published game for this series
         if not self.requested_game_id:
             game = Game.objects.filter(
-                publish=True, series__slug=self.slug).order_by('-game_id').first()
+                leaderboard__publish_date__lte=our_now(), series__slug=self.slug).order_by('-game_id').first()
         else:
             game = Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
 
