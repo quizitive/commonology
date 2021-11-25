@@ -1,10 +1,6 @@
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
-from sortedm2m.fields import SortedManyToManyField
-from django.utils import timezone
-from django.conf import settings
 from django.template.loader import render_to_string
-from game.models import Series
 
 
 class Location(models.Model):
