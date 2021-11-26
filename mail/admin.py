@@ -4,10 +4,11 @@ from django_object_actions import DjangoObjectActions
 from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
 
 from project.utils import our_now
-from .models import MailMessage, Component
-from users.models import Player
+from .models import MailMessage
 from .utils import make_absolute_urls
 from .utils import mass_mail, sendgrid_send
+from users.models import Player
+from components.models import Component
 
 
 @admin.register(MailMessage)
@@ -22,7 +23,8 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         msg = make_absolute_urls(obj.message)
         from_email = (obj.from_email, obj.from_name)
         sendgrid_send(obj.subject, msg=msg, email_list=[(email, user_code)],
-                      from_email=from_email, unsub_link=True, components=obj.components.all())
+                      from_email=from_email, unsub_link=True,
+                      top_components=obj.top_components.all(), bottom_components=obj.bottom_components.all())
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
@@ -62,7 +64,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     list_filter = ('created',)
     search_fields = ('subject',)
     ordering = ('-sent_date',)
-    filter_horizontal = ('components',)
+    filter_horizontal = ('top_components', 'bottom_components')
     save_on_top = True
 
     def save_model(self, request, obj, form, change):
@@ -73,14 +75,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             obj.save()
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        if db_field.name == 'components':
-            kwargs['queryset'] = Component.objects.filter(mail_component=True)
+        if db_field.name in ('top_components', 'bottom_components'):
+            kwargs['queryset'] = Component.objects.filter(locations__app_name='mail')
             kwargs['widget'] = SortedFilteredSelectMultiple()
         return super(MailMessageAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
-
-
-@admin.register(Component)
-class MailComponentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'template')
-    fields = ('name', 'message', 'mail_component', 'location', 'template', 'context')
-    search_fields = ('name', 'mail_component', 'location')
