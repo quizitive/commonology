@@ -18,6 +18,7 @@ class Leaderboard(models.Model):
         verbose_name="When the leaderboard can be published to the website.", null=False, blank=False)
     top_components = SortedManyToManyField(
         Component,
+        blank=True,
         related_name='leaderboards',
         help_text="These components will appear immediately below the logo on both the "
                   "leaderboard and results pages."
