@@ -135,7 +135,7 @@ def lb_cache_key(game, answer_tally):
     return '_'.join(('leaderboard', game.series.slug, str(game.game_id), str(hash(json.dumps(answer_tally)))))
 
 
-def clear_game_cache(games):
+def clear_leaderboard_cache(games):
     """Deletes all leaderboards and answer tallies for the given games"""
     lb_prefixes = [f'leaderboard_{g.series.slug}_{g.game_id}' for g in games]
     lbs_deleted = redis_delete_patterns(*lb_prefixes)

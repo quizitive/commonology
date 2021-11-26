@@ -25,6 +25,9 @@ class Leaderboard(models.Model):
     top_commentary = RichTextUploadingField(null=True, blank=True)
     bottom_commentary = RichTextUploadingField(null=True, blank=True)
 
+    def __str__(self):
+        return f"Game {self.game.game_id} Leaderboard"
+
     @property
     def publish(self):
         return our_now() > self.publish_date
