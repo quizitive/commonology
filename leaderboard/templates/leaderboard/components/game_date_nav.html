@@ -1,9 +1,9 @@
 {% load leadeboard_tags %}
 
-<div class="w3-row" style="padding: 8px 0;"></div>
+{#<div class="w3-row" style="padding: 8px 0;"></div>#}
   <div class="w3-row">
 
-    <div class="game-header w3-padding-large w3-round" style="max-width:640px; margin:auto;">
+    <div class="game-header cg-padding w3-round" style="max-width:640px; margin:auto;">
 
     <!-- header text -->
     {% if team %}
@@ -18,10 +18,10 @@
       <div id="change-game-content"
            class="w3-dropdown-content w3-bar-block w3-border w3-card-4 w3-round" style="overflow:hidden">
         {% for hlb in historical_leaderboards %}
-        <a href="{% series_or_default_url 'leaderboard' view_name='game-id-'|add:view game_id=hlb.game_id %}"
+        <a href="{% series_or_default_url 'leaderboard' view_name='game-id-'|add:view game_id=hlb.game.game_id %}"
             class="w3-bar-item w3-button" style="text-decoration:none;">
           <div class="w3-bar-item w3-button" style="padding:2px 0;">
-            <b>Game {{ hlb.game_id }} </b><span style="font-size:13px;"> ({{ hlb.game.date_range_pretty }})</span>
+            <b>Game {{ hlb.game.game_id }} </b><span style="font-size:13px;"> ({{ hlb.game.date_range_pretty }})</span>
           </div>
         </a>
         {% endfor %}
@@ -29,7 +29,7 @@
 
       {% if not hide_navigation %}
       <!-- header buttons -->
-      <div class="game-buttons w3-row w3-center w3-margin-bottom">
+      <div class="game-buttons w3-row w3-center">
         <div class="leaderboard-results-button-container w3-col m6">
           <a class="game-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard"
              href="{% series_or_default_url 'leaderboard' 'current-leaderboard' %}{{ requested_game_id|default:'' }}">
