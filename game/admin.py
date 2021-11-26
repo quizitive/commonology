@@ -72,6 +72,12 @@ class GameAdmin(admin.ModelAdmin):
                'score_selected_games_update_existing', 'email_winner_certificates', 'find_raffle_winner')
     view_on_site = True
 
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name in ('top_components',):
+            kwargs['queryset'] = Component.objects.filter(locations__app_name='leaderboard')
+            kwargs['widget'] = SortedFilteredSelectMultiple()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
     def clear_cache(self, request, queryset):
         lbs_deleted, ats_deleted = clear_leaderboard_cache(queryset)
         self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
