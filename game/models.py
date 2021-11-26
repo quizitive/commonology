@@ -1,6 +1,7 @@
 import uuid
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
 from django.utils.functional import cached_property
@@ -57,6 +58,7 @@ class Game(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     top_components = SortedManyToManyField(
         Component,
+        blank=True,
         related_name='games_top',
         help_text=f"Components that will appear at the top of the game form."
     )
@@ -183,6 +185,14 @@ class Game(models.Model):
     def not_started_yet(self):
         now = our_now()
         return self.start > now
+
+    @property
+    def has_leaderboard(self):
+        try:
+            _ = self.leaderboard
+            return True
+        except ObjectDoesNotExist:
+            return False
 
 
 @receiver(m2m_changed, sender=Game.hosts.through)

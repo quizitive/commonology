@@ -30,11 +30,11 @@ class LeaderboardView(BaseGameView):
             return game
 
         # no one else can
-        if not game.publish:
-            return Http404()
+        if not game.has_leaderboard or not game.leaderboard.publish:
+            raise Http404()
 
         # for now, limit leaderboards and results to last 10 games
-        if game not in visible_leaderboards(slug=self.slug):
+        if game.leaderboard not in visible_leaderboards(slug=self.slug):
             raise Http404("Only the results for most recent 10 games can be viewed.")
 
         return game
