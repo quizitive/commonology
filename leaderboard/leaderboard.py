@@ -32,8 +32,7 @@ def tabulate_results(game, update=False):
 
     # write to database
     api_to_db(
-        game.series.slug,
-        game.sheet_name,
+        game,
         responses.to_json(),
         answer_codes,
         update

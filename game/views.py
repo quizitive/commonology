@@ -432,7 +432,7 @@ class GameEntryView(PSIDMixin, CardFormView):
             # May be a host previewing a game
             return render_game(request, g)
 
-        if not is_active and g.publish:
+        if not is_active and g.has_leaderboard and g.leaderboard.publish:
             return self.leaderboard(request, slug=slug)
 
         if g.user_played(user):
