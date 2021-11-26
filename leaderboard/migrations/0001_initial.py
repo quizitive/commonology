@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('top_commentary', ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True)),
                 ('bottom_commentary', ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True)),
                 ('game', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='leaderboard', to='game.game')),
-                ('top_components', sortedm2m.fields.SortedManyToManyField(help_text='These components will appear immediately below the logo on both the leaderboard and results pages.', related_name='leaderboards', to='components.Component')),
+                ('top_components', sortedm2m.fields.SortedManyToManyField(blank=True, help_text='These components will appear immediately below the logo on both the leaderboard and results pages.', related_name='leaderboards', to='components.Component')),
             ],
         ),
         migrations.RunPython(create_leaderboards_from_games, undo_leaderboards)

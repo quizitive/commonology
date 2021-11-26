@@ -32,6 +32,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='game',
             name='top_components',
-            field=sortedm2m.fields.SortedManyToManyField(help_text='Components that will appear at the top of the game form.', related_name='games_top', to='components.Component'),
+            field=sortedm2m.fields.SortedManyToManyField(blank=True, help_text='Components that will appear at the top of the game form.', related_name='games_top', to='components.Component'),
         ),
     ]
