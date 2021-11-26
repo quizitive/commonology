@@ -8,6 +8,8 @@ from datetime import timedelta
 
 
 def create_leaderboards_from_games(apps, schema_editor):
+    Location = apps.get_model('components', 'Location')
+    Location.objects.create(app_name='leaderboard')
     Game = apps.get_model('game', 'Game')
     Leaderboard = apps.get_model('leaderboard', 'Leaderboard')
     for game in Game.objects.all():
@@ -21,7 +23,6 @@ def create_leaderboards_from_games(apps, schema_editor):
 
 
 def undo_leaderboards(apps, schema_editor):
-    Game = apps.get_model('game', 'Game')
     Leaderboard = apps.get_model('leaderboard', 'Leaderboard')
     for lb in Leaderboard.objects.all():
         game = lb.game
