@@ -5,38 +5,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.template.loader import render_to_string
 from game.models import Series
-
-
-class Component(models.Model):
-    name = models.CharField(max_length=150, unique=True)
-    message = RichTextUploadingField(null=True, blank=True)
-    template = models.CharField(max_length=150, default='mail/simple_component.html')
-    context = models.JSONField(default=dict, blank=True)
-    mail_component = models.BooleanField(
-        default=True, help_text=f'Check this if this component is being used in emails, '
-                                f'otherwise it will not appear in the MailMessage admin.')
-
-    top = 'top'
-    btm = 'btm'
-    LOCATION_CHOICES = [
-        (top, 'Top'),
-        (btm, 'Bottom'),
-    ]
-    location = models.CharField(max_length=3, choices=LOCATION_CHOICES, default='btm',
-                                help_text=f'Only used in emails. This determines whether the component is placed '
-                                          f'above or below the main MailMessage.')
-
-    def __str__(self):
-        return f"{self.name} ({next(l for l in self.LOCATION_CHOICES if l[0] == self.location)[1]})"
-
-    @property
-    def render(self):
-        self.context['component'] = self
-        return render_to_string(self.template, self.context)
-
-    @property
-    def css_name(self):
-        return self.name.lower().replace(' ', '-')
+from components.models import Component
 
 
 FROM_ADDRS = [(i, i) for i in [
@@ -59,7 +28,12 @@ class MailMessage(models.Model):
     subject = models.CharField(max_length=150, blank=False)
     message = RichTextUploadingField(blank=True,
                                      help_text='Play link example: https://commonologygame.com/play-game_url_args-')
-    components = SortedManyToManyField(Component, blank=True, related_name='messages')
+    top_components = SortedManyToManyField(
+        Component, blank=True, related_name='messages_top',
+        help_text=f"These appear just below the header image, above the main message")
+    bottom_components = SortedManyToManyField(
+        Component, blank=True, related_name='messages_bottom',
+        help_text=f"These appear below the the main message")
     created = models.DateTimeField(default=timezone.now)
     sent_date = models.DateTimeField(null=True, blank=True)
     tested = models.BooleanField(default=False,
