@@ -3,7 +3,8 @@ from django.core import mail
 from users.tests import get_local_user
 from game.tests import BaseGameDataTestCase
 from mail.utils import mass_mail, sendgrid_send
-from mail.models import MailMessage, Component
+from mail.models import MailMessage
+from components.models import Component
 
 
 class MassMailTests(BaseGameDataTestCase):
@@ -32,23 +33,23 @@ class MassMailTests(BaseGameDataTestCase):
         mm = self.mm
         c1 = Component.objects.create(
             name='component1',
-            template='mail/simple_component.html',
+            template='components/simple_component.html',
             message='<b>bolded string</b>',
             context={'name': 'component_1'}
         )
         c2 = Component.objects.create(
             name='component2',
-            template='mail/simple_component.html',
+            template='components/simple_component.html',
             message='<i>italic string</i>',
             context={'name': 'component_2'}
         )
-        mm.components.add(c2, c1)
+        mm.bottom_components.add(c2, c1)
         _, rendered_msg = sendgrid_send(
             subject=mm.subject,
             msg=mm.message,
             email_list=[],
             from_email=mm.from_email,
-            components=mm.components.all()
+            bottom_components=mm.bottom_components.all()
         )
 
         c1_loc = rendered_msg.find('<b>bolded string</b>')
@@ -62,14 +63,15 @@ class MassMailTests(BaseGameDataTestCase):
         self.assertLess(c2_loc, c1_loc)
 
         # move c1 to top, make sure it's above message
-        c1.location = Component.top
-        c1.save()
+        mm.bottom_components.remove(c1)
+        mm.top_components.add(c1)
         _, rendered_msg = sendgrid_send(
             subject=mm.subject,
             msg=mm.message,
             email_list=[],
             from_email=mm.from_email,
-            components=mm.components.all()
+            top_components=mm.top_components.all(),
+            bottom_components=mm.bottom_components.all()
         )
         msg_loc = rendered_msg.find('this is the mail message body')
         c1_new_loc = rendered_msg.find('<b>bolded string</b>')

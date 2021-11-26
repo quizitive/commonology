@@ -48,10 +48,16 @@ def make_substitutions(e, code):
 #
 def sendgrid_send(subject, msg, email_list,
                   from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME),
-                  send_at=None, categories=None, unsub_link=False, components=(),
-                  force_sendgrid=False):
+                  send_at=None, categories=None, unsub_link=False, top_components=(),
+                  bottom_components=(), force_sendgrid=False):
 
-    msg = render_to_string('mail/mail_base.html', context={'message': mark_safe(msg), 'components': components, 'unsub_link': unsub_link})
+    msg = render_to_string('mail/mail_base.html',
+                           context={
+                               'message': mark_safe(msg),
+                               'top_components': top_components,
+                               'bottom_components': bottom_components,
+                               'unsub_link': unsub_link}
+                           )
 
     # don't use sendgrid backend for tests
     if (not force_sendgrid) and ('console' in settings.EMAIL_BACKEND or 'locmem' in settings.EMAIL_BACKEND):
@@ -101,7 +107,8 @@ def mass_mail(obj):
     else:
         categories = []
 
-    components = obj.components.all()
+    top_components = obj.top_components.all()
+    bottom_components = obj.bottom_components.all()
 
     qs = players.filter(subscribed=True)
 
@@ -123,7 +130,8 @@ def mass_mail(obj):
         if 0 == count % 500:
             total_count += 500
             sendgrid_send(obj.subject, msg, email_list, from_email,
-                          send_at=send_at, categories=categories, unsub_link=True, components=components)
+                          send_at=send_at, categories=categories, unsub_link=True,
+                          top_components=top_components, bottom_components=bottom_components)
             send_at += 100
             count = 0
             email_list = []
@@ -131,7 +139,8 @@ def mass_mail(obj):
     if email_list:
         total_count += len(email_list)
         sendgrid_send(obj.subject, msg, email_list, from_email,
-                      send_at=send_at, categories=categories, unsub_link=True, components=components)
+                      send_at=send_at, categories=categories, unsub_link=True,
+                      top_components=top_components, bottom_components=bottom_components)
 
     logger.info(f"{total_count} recipients were just sent a blast with subject = {obj.subject}.")
     return total_count
