@@ -72,8 +72,8 @@ class ResultsView(LeaderboardView):
         context.update({
             'answer_tally': answer_tally,
             'player_answers': player_answers,
-            'game_top_commentary': game.top_commentary,
-            'game_bottom_commentary': game.bottom_commentary,
+            'game_top_commentary': game.leaderboard.top_commentary,
+            'game_bottom_commentary': game.leaderboard.bottom_commentary,
             'questions': questions,
             'host': game.hosts.filter(email="alex@commonologygame.com").first() or game.hosts.first(),
             'visible_comments': 5
