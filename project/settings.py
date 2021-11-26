@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'mail',
     'quizitive',
     'rewards',
+    'components'
 ]
 
 if DEBUG_TOOLBAR:

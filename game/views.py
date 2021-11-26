@@ -36,8 +36,8 @@ from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
 from users.utils import get_player
 from mail.tasks import mail_task
-from mail.models import Component
 from rewards.utils import check_for_reward
+from components.models import Component
 
 
 class SeriesPermissionMixin(UserPassesTestMixin):
@@ -231,8 +231,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             'url': f'https://{domain}{answers_url}'
         }
         answers_msg = render_to_string('game/game_complete_email.html', email_context)
-        referral_link = Component.objects.filter(name="Referral Link").first()
-        mail_task(f'{game.name}', answers_msg, [(player.email, player.code)], components=(referral_link,))
+        referral_link = Component.objects.filter(name="Referral Link", locations__app_name='mail').first()
+        mail_task(f'{game.name}', answers_msg, [(player.email, player.code)], bottom_components=(referral_link,))
 
     def test_func(self):
         # override super method, which requires users to be logged in
