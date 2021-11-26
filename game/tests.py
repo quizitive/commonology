@@ -18,6 +18,7 @@ from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
 from project.utils import our_now, redis_delete_patterns
+from leaderboard.models import Leaderboard
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
@@ -26,7 +27,7 @@ from game.models import Series, Question, Answer
 from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
 from game.gsheets_api import *
-from game.tasks import game_to_db, questions_to_db, players_to_db, \
+from game.tasks import questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
 from game.forms import QuestionAnswerForm
 
@@ -84,8 +85,7 @@ class BaseGameDataTestCase(TestCase):
         cls.series = Series.objects.create(name="Commonology", owner=cls.series_owner, public=True)
 
         t = our_now()
-        cls.game = game_to_db(cls.series, cls.sheet_name, start=t, end=t)
-
+        cls.game = Game.objects.create(series=cls.series, start=t, end=t)
         cls.questions = questions_to_db(cls.game, cls.resp_df)
 
         players_to_db(cls.series, cls.resp_df)
@@ -96,6 +96,8 @@ class BaseGameDataTestCase(TestCase):
         # calculation methods
         cls.answer_tally = build_answer_tally(cls.game)
         cls.leaderboard = build_filtered_leaderboard(cls.game, cls.answer_tally)
+        cls.leaderboard_obj = Leaderboard.objects.create(
+            game=cls.game, sheet_name="Test Commonology Game", publish_date=t)
 
     @classmethod
     def tearDownClass(cls):
@@ -156,17 +158,20 @@ class TestGameTabulation(BaseGameDataTestCase):
         # this won't work if any answers don't have an associated code
         build_filtered_leaderboard(self.game, mr_answer_tally)
 
-    def test_game_to_db(self):
-        self.assertEqual(self.game.sheet_name, self.sheet_name)
-        self.assertEqual(self.game.name, "Test Commonology Game")
-
-        # test new game of same name is not created on save
-        game = self.game
-        game2 = game_to_db(self.series, self.sheet_name, start=game.start, end=game.end)
-        self.assertEqual(self.game, game2)
+    # DEPERECATED!! We don't do this anymore
+    # def test_game_to_db(self):
+    #     self.assertEqual(self.game.sheet_name, self.sheet_name)
+    #     self.assertEqual(self.game.name, "Test Commonology Game")
+    #
+    #     # test new game of same name is not created on save
+    #     game = self.game
+    #     game2 = game_to_db(self.series, self.sheet_name, start=game.start, end=game.end)
+    #     self.assertEqual(self.game, game2)
 
     def test_game_id_increments(self):
-        game2 = game_to_db(self.series, 'game2')
+        t = our_now()
+        e = t + relativedelta(hours=1)
+        game2 = Game.objects.create(series=self.series, start=t, end=e)
         self.assertEqual(game2.game_id, 2)
 
     def test_questions_to_db(self):
@@ -344,13 +349,12 @@ class TestModels(TestCase):
 
 
 def make_test_series(series_name='Commonology', hour_window=False):
-    sheet_name = "Test Commonology Game (Responses)"
     series_owner = get_local_user(e='series@owner.com')
     series = Series.objects.create(name=series_name, owner=series_owner, public=True)
     t = et = our_now()
     if hour_window:
         et = t + relativedelta(hours=1)
-    game = game_to_db(series, sheet_name, start=t, end=et)
+    game = Game.objects.create(series=series, start=t, end=et)
     game.save()
     question = Question.objects.create(text="Are you my mother?", number=1)
     game.questions.add(question)
@@ -360,6 +364,9 @@ def make_test_series(series_name='Commonology', hour_window=False):
 class TestPlayRequest(TestCase):
     def setUp(self):
         self.series, self.game = make_test_series(series_name='Commonology', hour_window=True)
+        pub_date = self.game.end + relativedelta(days=1)
+        self.leaderboard = Leaderboard.objects.create(
+            game=self.game, sheet_name="Test Commonology Game", publish_date=pub_date)
         self.player = get_local_user()
 
     def test_find_latest_public_game(self):
@@ -440,8 +447,8 @@ class TestPlayRequest(TestCase):
         response = client.get(path)
         self.assertContains(response, 'Seems like the game finished but has not been scored yet.')
 
-        game.publish = True
-        game.save()
+        self.leaderboard.publish_date = our_now()
+        self.leaderboard.save()
         path = reverse('game:uuidplay', kwargs={'game_uuid': game.uuid})
         response = client.get(path)
         self.assertContains(response, 'Seems like the game finished.  See the leaderboard.')
