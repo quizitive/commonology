@@ -57,8 +57,10 @@ class ValidatedEmailFilter(SimpleListFilter):
 
     def queryset(self, request, qs):
         v = self.value()
-        if 'yes' == v:
+        if 'no' == v:
             qs = qs.exclude(email__in=Player.objects.values_list('email', flat=True))
+        elif 'yes' == v:
+            qs = qs.filter(email__in=Player.objects.values_list('email', flat=True))
 
         return qs
 
