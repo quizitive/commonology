@@ -48,10 +48,27 @@ class PlayerUserAdmin(UserAdmin):
     get_series.short_description = 'Series'
 
 
+class ValidatedEmailFilter(SimpleListFilter):
+    title = "Validated"
+    parameter_name = 'validated'
+
+    def lookups(self, request, model_admin):
+        return [("yes", "Validated"), ("no", "Not validated")]
+
+    def queryset(self, request, qs):
+        v = self.value()
+        if 'no' == v:
+            qs = qs.exclude(email__in=Player.objects.values_list('email', flat=True))
+        elif 'yes' == v:
+            qs = qs.filter(email__in=Player.objects.values_list('email', flat=True))
+
+        return qs
+
+
 @admin.register(PendingEmail)
 class PendingEmailAdmin(admin.ModelAdmin):
     list_display = ('email', 'created', 'referrer', 'uuid')
-    list_filter = ('created',)
+    list_filter = ('created', ValidatedEmailFilter)
     search_fields = ('email', 'uuid')
 
 
