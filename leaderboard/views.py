@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db.models import Max
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from project.utils import our_now
 from game.models import Game, Question
 from game.views import BaseGameView
 from users.models import Player
@@ -20,7 +21,7 @@ class LeaderboardView(BaseGameView):
         # if no id is specified get the most recent published game for this series
         if not self.requested_game_id:
             game = Game.objects.filter(
-                publish=True, series__slug=self.slug).order_by('-game_id').first()
+                leaderboard__publish_date__lte=our_now(), series__slug=self.slug).order_by('-game_id').first()
         else:
             game = Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
 
@@ -29,11 +30,11 @@ class LeaderboardView(BaseGameView):
             return game
 
         # no one else can
-        if not game.publish:
-            return Http404()
+        if not game.has_leaderboard or not game.leaderboard.publish:
+            raise Http404()
 
         # for now, limit leaderboards and results to last 10 games
-        if game not in visible_leaderboards(slug=self.slug):
+        if game.leaderboard not in visible_leaderboards(slug=self.slug):
             raise Http404("Only the results for most recent 10 games can be viewed.")
 
         return game
@@ -71,8 +72,8 @@ class ResultsView(LeaderboardView):
         context.update({
             'answer_tally': answer_tally,
             'player_answers': player_answers,
-            'game_top_commentary': game.top_commentary,
-            'game_bottom_commentary': game.bottom_commentary,
+            'game_top_commentary': game.leaderboard.top_commentary,
+            'game_bottom_commentary': game.leaderboard.bottom_commentary,
             'questions': questions,
             'host': game.hosts.filter(email="alex@commonologygame.com").first() or game.hosts.first(),
             'visible_comments': 5

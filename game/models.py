@@ -1,15 +1,18 @@
 import uuid
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
-from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.postgres.fields import ArrayField
 from django.utils.text import slugify
 from django.utils.functional import cached_property
 from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 
+from sortedm2m.fields import SortedManyToManyField
+
 from users.models import Player
 from chat.models import Thread
+from components.models import Component
 
 from project.utils import our_now
 
@@ -53,16 +56,12 @@ class Game(models.Model):
     google_form_url = models.CharField(max_length=255, blank=True,
                                        help_text="Enter the form url")
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-    sheet_name = models.CharField(
-        max_length=10000,
-        help_text="The name of the Google Sheet which contains response data"
+    top_components = SortedManyToManyField(
+        Component,
+        blank=True,
+        related_name='games_top',
+        help_text=f"Components that will appear at the top of the game form."
     )
-    publish = models.BooleanField(
-        default=False,
-        help_text="This game can be published to the dashboard"
-    )
-    top_commentary = RichTextUploadingField(null=True, blank=True)
-    bottom_commentary = RichTextUploadingField(null=True, blank=True)
 
     class Meta:
         unique_together = ('series', 'game_id')
@@ -185,6 +184,14 @@ class Game(models.Model):
     def not_started_yet(self):
         now = our_now()
         return self.start > now
+
+    @property
+    def has_leaderboard(self):
+        try:
+            _ = self.leaderboard
+            return True
+        except ObjectDoesNotExist:
+            return False
 
 
 @receiver(m2m_changed, sender=Game.hosts.through)
