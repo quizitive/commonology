@@ -4,7 +4,7 @@
     {% include 'leaderboard/components/comment_thread.html' %}
 </div>
 
-  <div class="question-comment-form w3-row w3-border-top w3-padding-large" style="margin:auto;font-size:14px">
+  <div class="question-comment-form w3-row w3-border-top w3-padding" style="margin:auto;font-size:14px">
     <form hx-ws="send">
       {% csrf_token %}
       <input type="hidden" name="thread-id" value="thread-{{ thread.id }}">

@@ -265,6 +265,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
         context.update({
             'game': game,
+            'top_components': game.top_components.all(),
             'game_rules': self.get_game_rules(),
             'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
@@ -431,7 +432,7 @@ class GameEntryView(PSIDMixin, CardFormView):
             # May be a host previewing a game
             return render_game(request, g)
 
-        if not is_active and g.publish:
+        if not is_active and g.has_leaderboard and g.leaderboard.publish:
             return self.leaderboard(request, slug=slug)
 
         if g.user_played(user):
