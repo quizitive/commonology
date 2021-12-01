@@ -76,7 +76,7 @@ def players_vs_previous(game):
     if players_so_far_last_week:
         growth = 100 * (players_so_far / players_so_far_last_week - 1)
     else:
-        growth = 0
+        growth = float('inf')
 
     return players_so_far, players_so_far_last_week, growth
 
