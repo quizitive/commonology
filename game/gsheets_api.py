@@ -44,9 +44,9 @@ def get_or_create_gdrive_token():
 def get_sheet_doc(game):
     gc = gspread.service_account(settings.GOOGLE_GSPREAD_API_CONFIG)
     try:
-        sheet_doc = gc.open(game.sheet_name)
+        sheet_doc = gc.open(game.leaderboard.sheet_name)
     except gspread.exceptions.SpreadsheetNotFound:
-        sheet_doc = gc.create(game.sheet_name, settings.GOOGLE_DRIVE_FOLDER_ID)
+        sheet_doc = gc.create(game.leaderboard.sheet_name, settings.GOOGLE_DRIVE_FOLDER_ID)
     return sheet_doc
 
 
