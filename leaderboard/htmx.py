@@ -33,10 +33,10 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
     def test_func(self):
         if self.request.user.is_staff or self.request.user in self.game.hosts.all():
             return True
-        if not self.game.publish:
+        if not self.game.has_leaderboard or not self.game.leaderboard.publish:
             return False
 
-        if self.game not in visible_leaderboards(self.slug):
+        if self.game.leaderboard not in visible_leaderboards(self.slug):
             return False
 
         # super() will test if the user has access to this series

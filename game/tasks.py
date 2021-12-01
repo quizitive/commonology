@@ -14,37 +14,18 @@ from django.contrib.auth import get_user_model
 
 
 @shared_task
-def api_to_db(series_slug, filename, responses, answer_codes, update):
+def api_to_db(game, responses, answer_codes, update):
     # convert back to dataframe from json (needed for celery)
     if not isinstance(responses, pd.DataFrame):
         responses = pd.read_json(responses)
         responses['Timestamp'] = responses['Timestamp'].astype('string')
 
     print("starting logging to db")
-    series = Series.objects.get(slug=series_slug)
-    game = game_to_db(series, filename)
     questions_to_db(game, responses)
-    players_to_db(series, responses)
+    players_to_db(game.series, responses)
     answers_to_db(game, responses, update)
     answers_codes_to_db(game, answer_codes)
     print("finished logging to db")
-
-
-@transaction.atomic
-def game_to_db(series, filename, start=None, end=None):
-    if start is None:
-        start = our_now()
-    if end is None:
-        end = our_now()
-    game, _ = Game.objects.get_or_create(
-        sheet_name=filename,
-        series=series,
-        defaults={
-            'name': filename.replace(" (Responses)", ""),
-            'start': start, 'end': end
-        },
-    )
-    return game
 
 
 @transaction.atomic
