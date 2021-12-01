@@ -9,9 +9,12 @@ from django.forms import Textarea, ModelForm
 from django.db import models
 from django.utils.html import format_html
 
+from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
+
+from components.models import Component
 from game.models import Series, Game, Question, Answer, AnswerCode
 from game.mail import send_winner_notice
-from leaderboard.leaderboard import tabulate_results, winners_of_game, clear_game_cache
+from leaderboard.leaderboard import tabulate_results, winners_of_game, clear_leaderboard_cache
 from project.utils import slackit
 from users.utils import player_log_entry
 from game.utils import game_log_entry
@@ -62,15 +65,21 @@ class GameAdmin(admin.ModelAdmin):
     list_display = ('name', 'game_id', 'series', 'start', 'end', 'play')
     ordering = ('-game_id', )
     search_fields = ('game_id', 'name', 'series__slug')
-    filter_horizontal = ('hosts',)
+    filter_horizontal = ('hosts', 'top_components')
     list_filter = ('series',)
     inlines = (QuestionAdmin,)
     actions = ('clear_cache', 'score_selected_games',
                'score_selected_games_update_existing', 'email_winner_certificates', 'find_raffle_winner')
     view_on_site = True
 
+    def formfield_for_manytomany(self, db_field, request=None, **kwargs):
+        if db_field.name in ('top_components',):
+            kwargs['queryset'] = Component.objects.filter(locations__app_name='leaderboard')
+            kwargs['widget'] = SortedFilteredSelectMultiple()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
     def clear_cache(self, request, queryset):
-        lbs_deleted, ats_deleted = clear_game_cache(queryset)
+        lbs_deleted, ats_deleted = clear_leaderboard_cache(queryset)
         self.message_user(request, f"{lbs_deleted} cached leaderboards were deleted")
         self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
 
@@ -154,7 +163,7 @@ class AnswerAdmin(admin.ModelAdmin):
             q.save()
             games.add(self.game(q))
             successes += 1
-        clear_game_cache(games)
+        clear_leaderboard_cache(games)
         if successes:
             self.message_user(request, f"{successes} answers were removed from the game")
         if already_published:

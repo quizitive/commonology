@@ -27,13 +27,15 @@
 {% block content %}
   <div class="content">
 
-  <div class="series-header w3-round w3-padding-large w3-border w3-margin-top w3-margin-bottom"
-       style="background: white;">
-  <img src="{% v_static 'img/logo.svg' %}">
-  </div>
+    <div class="series-header w3-round w3-padding-large w3-border w3-margin-top w3-margin-bottom"
+         style="background: white;">
+    <img src="{% v_static 'img/logo.svg' %}">
+    </div>
+
+    {% include 'components/card_component_stream.html' with components=top_components %}
 
     {% if game_rules %}
-    <div class="cg-card cg-top-blue">
+    <div class="cg-card cg-top-blue" style="padding:0 16px;">
       {{ game_rules.render|safe }}
     </div>
     {% endif %}

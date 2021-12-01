@@ -19,8 +19,8 @@ LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
 class TestLeaderboardViews(BaseGameDataTestCase):
 
     def setUp(self):
-        self.game.publish = True
-        self.game.save()
+        self.leaderboard_obj.publish_date = our_now()
+        self.leaderboard_obj.save()
         self.client = Client()
         self.su_email = "super@user.com"
         self.admin_user = Player.objects.create_superuser(self.su_email, 'foo')
@@ -44,7 +44,7 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         self.assertEqual(pub_resp.status_code, 200)
 
         # non-staff can't see unpublished games, redirect to login
-        new_game = Game.objects.create(publish=False, series=self.series, start=our_now(), end=our_now())
+        new_game = Game.objects.create(series=self.series, start=our_now(), end=our_now())
         resp = self.client.get(url, {'game_id': new_game.game_id, 'series': self.series.slug})
         self.assertEqual(resp.status_code, 302)
 
@@ -87,8 +87,8 @@ class TestLeaderboardViews(BaseGameDataTestCase):
         context = {
             'answer_tally': self.answer_tally,
             'player_answers': player_answers,
-            'game_top_commentary': self.game.top_commentary,
-            'game_bottom_commentary': self.game.bottom_commentary,
+            'game_top_commentary': self.leaderboard_obj.top_commentary,
+            'game_bottom_commentary': self.leaderboard_obj.bottom_commentary,
             'questions': self.questions,
             'host': self.game.hosts.first(),
             'q': self.questions[0],
