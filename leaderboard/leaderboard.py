@@ -7,12 +7,13 @@ import pandas as pd
 
 from django.db.models import Sum, Subquery, OuterRef
 
-from project.utils import REDIS, quick_cache, quick_cache_key, redis_delete_patterns
+from project.utils import REDIS, quick_cache, quick_cache_key, redis_delete_patterns, our_now
 from users.models import Player, Team
 from game.models import Game, AnswerCode
 from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
 from game.tasks import api_to_db
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
+from leaderboard.models import Leaderboard
 
 
 def tabulate_results(game, update=False):
@@ -31,8 +32,7 @@ def tabulate_results(game, update=False):
 
     # write to database
     api_to_db(
-        game.series.slug,
-        game.sheet_name,
+        game,
         responses.to_json(),
         answer_codes,
         update
@@ -134,7 +134,7 @@ def lb_cache_key(game, answer_tally):
     return '_'.join(('leaderboard', game.series.slug, str(game.game_id), str(hash(json.dumps(answer_tally)))))
 
 
-def clear_game_cache(games):
+def clear_leaderboard_cache(games):
     """Deletes all leaderboards and answer tallies for the given games"""
     lb_prefixes = [f'leaderboard_{g.series.slug}_{g.game_id}' for g in games]
     lbs_deleted = redis_delete_patterns(*lb_prefixes)
@@ -270,4 +270,6 @@ def winners_of_game(game):
 
 def visible_leaderboards(slug='commonology', limit=10):
     """The most recent N published leaderboards for a given slug are viewable by members"""
-    return Game.objects.filter(series__slug=slug, publish=True).order_by('-game_id')[:limit]
+    return Leaderboard.objects.filter(
+        game__series__slug=slug, publish_date__lte=our_now()
+    ).order_by('-game__game_id')[:limit]

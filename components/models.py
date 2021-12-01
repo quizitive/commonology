@@ -1,10 +1,6 @@
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
-from sortedm2m.fields import SortedManyToManyField
-from django.utils import timezone
-from django.conf import settings
 from django.template.loader import render_to_string
-from game.models import Series
 
 
 class Location(models.Model):
@@ -32,6 +28,7 @@ class Component(models.Model):
     context = models.JSONField(default=dict, blank=True)
     locations = models.ManyToManyField(
         Location,
+        blank=True,
         related_name='components',
         help_text=f'Make this component available to these apps/locations. NOTE: This does not automatically '
                   f'make the component appear in these locations, that must be configured explicitly.'
