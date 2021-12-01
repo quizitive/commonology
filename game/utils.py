@@ -72,7 +72,13 @@ def players_vs_previous(game):
         timestamp__lte=this_time_last_week,
         removed=False
     ).count()
-    return players_so_far, players_so_far_last_week, 100 * (players_so_far / players_so_far_last_week - 1)
+
+    if players_so_far_last_week:
+        growth = 100 * (players_so_far / players_so_far_last_week - 1)
+    else:
+        growth = float('inf')
+
+    return players_so_far, players_so_far_last_week, growth
 
 
 def write_winner_certificate(name, date, game_number):
