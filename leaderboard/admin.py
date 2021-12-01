@@ -40,13 +40,13 @@ class LeaderboardAdmin(admin.ModelAdmin):
         self.message_user(request, f"{ats_deleted} cached answer tallies were deleted")
 
     def score_selected_games(self, request, queryset):
-        for game in queryset:
-            self._score_game(request, game)
+        for leaderboard in queryset:
+            self._score_game(request, leaderboard.game)
     score_selected_games.short_description = "Score Selected Games"
 
     def score_selected_games_update_existing(self, request, queryset):
-        for game in queryset:
-            self._score_game(request, game, update=True)
+        for leaderboard in queryset:
+            self._score_game(request, leaderboard.game, update=True)
     score_selected_games_update_existing.short_description = 'Score Selected Games (update existing - slower!)'
 
     def _score_game(self, request, game, update=False):
