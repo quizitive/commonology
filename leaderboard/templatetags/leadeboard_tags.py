@@ -44,9 +44,14 @@ def formatted_answer_cell(context, counter):
         addl_classes = f'question-{qid} hideable'
         addl_style = 'style="display:none;"'
 
-    if context['player_answers'] and context['player_answers'].get(question_id=qid)[3] == res:
-        addl_classes += ' player-answer'
-        addl_div = f'<span class="w3-cell-row {addl_classes}" {addl_style}>my answer</span>'
+    # empty list for unauthenticated players
+    if context['player_answers']:
+        # if a player didn't answer a question this will be empty
+        if this_q_answer := context['player_answers'].filter(question_id=qid).first():
+            # check if the player answer matches the current answer
+            if this_q_answer[3] == res:
+                addl_classes += ' player-answer'
+                addl_div = f'<span class="w3-cell-row {addl_classes}" {addl_style}>my answer</span>'
 
     result = f'<div class="w3-cell-row response-item w3-card-0 ' \
              f'w3-round w3-padding {addl_classes}" {addl_style}>' \
