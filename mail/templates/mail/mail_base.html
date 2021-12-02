@@ -1,33 +1,6 @@
 <html>
   <head>
     <style>
-      #email-body {
-        font-family: "Poppins", Verdana, Arial, sans-serif;
-        font-size: 0.9rem;
-        background: #fafbfc;
-        padding: 8px 0;
-      }
-      #email-container {
-        max-width: 600px;
-        box-sizing: border-box;
-        margin: auto;
-      }
-      #email-header {
-        border: 1px solid lightgrey;
-        border-top: 4px solid #237073;
-        background: #fff;
-        border-radius: 4px;
-      }
-      #email-header-image {
-        display: block;
-        padding: 8px 24px;
-        max-width: 320px;
-        margin: auto;
-      }
-      #email-content {
-        margin: 8px auto;
-        padding: 16px 32px;
-      }
       #email-content > p {
         margin: 24px 0 32px 0;
       }
@@ -59,28 +32,24 @@
         font-size: 0.7rem;
         border-top: 1px solid lightgrey;
       }
-      #email-footer {
-        color: grey;
-        margin: auto;
-        padding: 32px 0;
-        font-size: 0.7rem;
-        max-width: 580px;
-        text-align: center;
-        line-height: 1.1rem;
-      }
     </style>
   </head>
 
 
   <body style="padding: 0;">
-    <div id="email-body">
-      <div id="email-container">
+    <div id="email-body" style="font-family: 'Poppins', Verdana, Arial, sans-serif;font-size: 0.9rem;
+    background: #fafbfc;padding: 8px 0;">
+      <div id="email-container" style="max-width: 600px;box-sizing: border-box;margin: auto;">
 
       {#  HEADER  #}
-        <div id="email-header">
+        <div id="email-header" style="border: 1px solid lightgrey;border-top: 4px solid #237073;background: #fff;
+        border-radius: 4px;">
             <a href="https://commonologygame.com-game_url_args-">
-            <img id="email-header-image" src="https://commonologygame.com/static/img/logo.png">
-            </a>
+                <img id="email-header-image"
+                     src="https://commonologygame.com/static/img/logo.png"
+                     style="display: block;padding: 8px 24px;max-width: 320px;margin: auto"
+                     alt="header logo">
+                </a>
           </div>
 
       {#  TOP COMPONENTS  #}
@@ -91,7 +60,7 @@
       {% endfor %}
 
       {# EMAIL MESSAGE #}
-        <div id="email-content" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;border: 1px solid lightgrey;border-top:4px solid #0095da;border-radius:4px">
+        <div id="email-content" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px 32px;border: 1px solid lightgrey;border-top:4px solid #0095da;border-radius:4px">
           {% block email-content %}
             {{ message }}
           {% endblock %}
@@ -106,7 +75,8 @@
       {% endfor %}
 
       {# FOOTER #}
-      <div id="email-footer">
+      <div id="email-footer"
+           style="color: grey;margin: auto;padding: 32px 0;font-size: 0.7rem;max-width: 580px;text-align: center;line-height: 1.1rem;">
         {% block email-footer-content %}
             <p style="padding: 8px 0">
             <a href="https://twitter.com/commonologygame">Twitter</a>&nbsp;
