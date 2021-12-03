@@ -2,6 +2,7 @@
 from django.template.loader import render_to_string
 from project import settings
 from mail.utils import send_one
+from mail.tasks import send_refer_thankyou
 from project.utils import slackit
 
 
@@ -33,5 +34,6 @@ def check_for_reward(player):
     referrer = player.referrer
 
     if referrer:
+        send_refer_thankyou(player)
         if settings.REWARD_THRESHOLD == referrer.players_referred.count():
             send_reward_notice(referrer)
