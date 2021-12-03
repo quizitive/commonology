@@ -44,7 +44,8 @@ class RewardTests(TestCase):
 
         mail.outbox = []
         check_for_reward(p)
-        self.assertEqual(mail.outbox[0].subject, 'You earned a coffee mug!')
+        self.assertEqual(mail.outbox[1].subject, 'You earned a coffee mug!')
+        self.assertEqual(mail.outbox[0].subject, "Thank you for the referral.")
 
         response = client.get(path)
         self.assertEqual(response.reason_phrase, 'OK')
