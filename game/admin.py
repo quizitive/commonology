@@ -115,7 +115,7 @@ class GameAdmin(admin.ModelAdmin):
 
     def find_raffle_winner(self, request, queryset):
         for game in queryset:
-            if game.publish:
+            if game.leaderboard.publish:
                 raffle_winner = random.choice(game.players.filter(is_active=True))
                 msg = f"Raffle Winner for {game} is {raffle_winner} referred by {raffle_winner.referrer}"
                 player_log_entry(raffle_winner, msg)
