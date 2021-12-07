@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 from pychartjs import ChartType, Color, Options, BaseSmartChart, BaseChartData
+from project.utils import our_now
 from game.models import Game
 from game.utils import new_players_for_game
 
@@ -57,7 +58,7 @@ class GamePlayerCount(BaseChartData):
 
     @lru_cache(maxsize=1)
     def queryset(self):
-        return Game.objects.filter(series__slug=self.slug, game_id__gte=self.since_game, publish=True)
+        return Game.objects.filter(series__slug=self.slug, game_id__gte=self.since_game, end__lte=our_now())
 
     @lru_cache(maxsize=1)
     def periods(self):
