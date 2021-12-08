@@ -99,7 +99,7 @@ class PlayerHomeView(LoginRequiredMixin, View):
         user = request.user
         player, _ = Player.objects.get_or_create(id=user.id)
         # todo: hardcoding commonology as series for now for now
-        games = Game.objects.filter(publish=True, series__slug='commonology').order_by('-game_id')
+        games = Game.objects.filter(leaderboard__publish_date__lte=our_now(), series__slug='commonology').order_by('-game_id')
         latest_game_id = games.aggregate(Max('game_id'))['game_id__max']
 
         context = {
