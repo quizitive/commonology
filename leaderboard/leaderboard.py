@@ -197,7 +197,7 @@ def player_score_rank_percentile(player, game):
 
 @quick_cache()
 def player_rank_in_all_games(player, series):
-    games = Game.objects.filter(series=series, publish=True)
+    games = Game.objects.filter(series=series, leaderboard__publish_date__lte=our_now())
     ranks = OrderedDict()
     for game in games:
         try:
