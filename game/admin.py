@@ -8,7 +8,9 @@ from django.contrib.postgres.forms import SimpleArrayField
 from django.forms import Textarea, ModelForm
 from django.db import models
 from django.utils.html import format_html
+from django.shortcuts import redirect
 
+from django_object_actions import DjangoObjectActions
 from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
 
 from components.models import Component
@@ -59,7 +61,8 @@ class QuestionAdmin(admin.StackedInline):
 
 
 @admin.register(Game)
-class GameAdmin(admin.ModelAdmin):
+class GameAdmin(DjangoObjectActions, admin.ModelAdmin):
+
     save_on_top = True
     readonly_fields = ["uuid"]
     list_display = ('name', 'game_id', 'series', 'start', 'end', 'play')
@@ -70,6 +73,7 @@ class GameAdmin(admin.ModelAdmin):
     inlines = (QuestionAdmin,)
     actions = ('clear_cache', 'score_selected_games',
                'score_selected_games_update_existing', 'email_winner_certificates', 'find_raffle_winner')
+    change_actions = ('go_to_leaderboard',)
     view_on_site = True
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
@@ -139,6 +143,9 @@ class GameAdmin(admin.ModelAdmin):
         else:
             return f"{obj.uuid}"
     play.allow_tags = True
+
+    def go_to_leaderboard(self, request, obj):
+        return redirect('admin:leaderboard_leaderboard_change', obj.leaderboard.id)
 
 
 @admin.register(Answer)
