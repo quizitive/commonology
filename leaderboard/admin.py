@@ -2,7 +2,9 @@ import logging
 
 from django.contrib import admin
 from django.contrib.messages import constants as messages
+from django.shortcuts import redirect
 
+from django_object_actions import DjangoObjectActions
 from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
 
 from components.models import Component
@@ -11,7 +13,7 @@ from leaderboard.leaderboard import tabulate_results, winners_of_game, clear_lea
 
 
 @admin.register(Leaderboard)
-class LeaderboardAdmin(admin.ModelAdmin):
+class LeaderboardAdmin(DjangoObjectActions, admin.ModelAdmin):
     save_on_top = True
     list_display = ('game_name', 'game_id', 'series', 'publish_date')
     ordering = ('-game__game_id', )
@@ -20,6 +22,7 @@ class LeaderboardAdmin(admin.ModelAdmin):
     filter_horizontal = ('top_components',)
     actions = ('clear_cache', 'score_selected_games',
                'score_selected_games_update_existing', 'email_winner_certificates', 'find_raffle_winner')
+    change_actions = ('go_to_game'),
     view_on_site = True
 
     @admin.display(ordering='-game__game_id')
@@ -63,3 +66,6 @@ class LeaderboardAdmin(admin.ModelAdmin):
             kwargs['queryset'] = Component.objects.filter(locations__app_name='leaderboard')
             kwargs['widget'] = SortedFilteredSelectMultiple()
         return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+    def go_to_game(self, request, obj):
+        return redirect('admin:game_game_change', obj.game.id)
