@@ -24,7 +24,7 @@
     {% include 'leaderboard/components/leaderboard_header.html' with view='results' %}
 
     {% if game_top_commentary %}
-    <div class="cg-card cg-top-blue w3-padding" >
+    <div class="cg-card cg-border-grey cg-top-blue w3-padding" >
       {{ game_top_commentary|safe }}
     </div>
     {% endif %}
@@ -41,7 +41,7 @@
       height: auto!important;
     }
     </style>
-    <div id="bottom-commentary" class="cg-card cg-top-blue w3-padding">
+    <div id="bottom-commentary" class="cg-card cg-border-grey cg-top-blue w3-padding">
       {{ game_bottom_commentary|safe }}
     </div>
     {% endif %}
