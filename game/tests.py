@@ -85,7 +85,7 @@ class BaseGameDataTestCase(TestCase):
         cls.series = Series.objects.create(name="Commonology", owner=cls.series_owner, public=True)
 
         t = our_now()
-        cls.game = Game.objects.create(series=cls.series, start=t, end=t)
+        cls.game = Game.objects.create(series=cls.series, name="Test Commonology Game", start=t, end=t)
         cls.questions = questions_to_db(cls.game, cls.resp_df)
 
         players_to_db(cls.series, cls.resp_df)
@@ -96,8 +96,7 @@ class BaseGameDataTestCase(TestCase):
         # calculation methods
         cls.answer_tally = build_answer_tally(cls.game)
         cls.leaderboard = build_filtered_leaderboard(cls.game, cls.answer_tally)
-        cls.leaderboard_obj = Leaderboard.objects.create(
-            game=cls.game, sheet_name="Test Commonology Game", publish_date=t)
+        cls.leaderboard_obj = cls.game.leaderboard
 
     @classmethod
     def tearDownClass(cls):
@@ -354,7 +353,7 @@ def make_test_series(series_name='Commonology', hour_window=False):
     t = et = our_now()
     if hour_window:
         et = t + relativedelta(hours=1)
-    game = Game.objects.create(series=series, start=t, end=et)
+    game = Game.objects.create(series=series, name="Test Commonology Game", start=t, end=et)
     game.save()
     question = Question.objects.create(text="Are you my mother?", number=1)
     game.questions.add(question)
@@ -365,8 +364,7 @@ class TestPlayRequest(TestCase):
     def setUp(self):
         self.series, self.game = make_test_series(series_name='Commonology', hour_window=True)
         pub_date = self.game.end + relativedelta(days=1)
-        self.leaderboard = Leaderboard.objects.create(
-            game=self.game, sheet_name="Test Commonology Game", publish_date=pub_date)
+        self.leaderboard = self.game.leaderboard
         self.player = get_local_user()
 
     def test_find_latest_public_game(self):
