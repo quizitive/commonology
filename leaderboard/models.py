@@ -1,4 +1,8 @@
+from datetime import timedelta
+
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from ckeditor_uploader.fields import RichTextUploadingField
 from sortedm2m.fields import SortedManyToManyField
@@ -32,3 +36,10 @@ class Leaderboard(models.Model):
     @property
     def publish(self):
         return our_now() > self.publish_date
+
+
+@receiver(post_save, sender=Game)
+def make_leaderboard_for_new_game(sender, instance, created, **kwargs):
+    if created:
+        Leaderboard.objects.create(
+            game_id=instance.id, sheet_name=instance.name, publish_date=instance.end + timedelta(hours=60))
