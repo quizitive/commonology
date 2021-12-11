@@ -44,8 +44,8 @@ header.w3-container {
 .cg-card {
   margin: auto auto 16px auto;
   background: white;
-  border: 1px solid lightgrey;
   border-radius: 4px;
+  overflow: hidden;
 }
 
 .cg-padding {
