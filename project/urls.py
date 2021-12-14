@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib import admin
 from .views import index, about_view, product_view, our_story_view, testimonials_view, \
-    tos_view, privacy_view, ContactView, raffle_rules_view
+    tos_view, privacy_view, ContactView, raffle_rules_view, sponsor_view
 
 admin.site.site_header = "Commonology Administration"
 admin.site.site_title = "Commonology Administration"
@@ -19,6 +19,7 @@ urlpatterns = [
     path('tos/', tos_view, name='tos'),
     path('privacy/', privacy_view, name='privacy'),
     path('contact/', ContactView.as_view(), name='contact'),
+    path('sponsor/', sponsor_view, name='sponsor-view'),
     path('', include('users.urls')),
     path('', include('game.urls')),
     path('', include('mail.urls')),
