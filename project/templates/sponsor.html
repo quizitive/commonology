@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+
+{% block title %}Commonology | Sponsor a Game{% endblock %}
+
+{% block page_style %}
+  <style>
+  .about-sm {
+    display: none;
+    margin-top: 0;
+  }
+
+  /* Tiny screens */
+  @media only screen and (max-width: 400px) {
+    .about-lg {
+      display: none;
+    }
+    .about-sm {
+      display: block;
+      padding-bottom: 24px;
+    }
+  }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div class="content">
+
+  <h2 class="w3-margin-bottom w3-container" style="vertical-align:bottom;">
+  <img src="{% v_static 'img/logo.svg' %}" class="w3-padding-24"> has a <span style="font-weight:bold;font-style:italic;font-size:1.2em;">passionate</span>
+      community and wants <span style="font-weight:bold;font-style:italic;font-size:1.2em;">you</span> to sponsor a game!
+</h2>
+
+  <div class="w3-row" style="padding: 16pt"></div>
+    <div class="w3-cell-row w3-border-teal w3-round w3-padding">
+      <div class="w3-cell w3-padding-16 w3-container w3-center">
+        <i class="fas fa-bullseye fa-5x" style="color:#237073"></i>
+      </div>
+      <div class="w3-cell w3-cell-middle">
+        <h3 class="w3-container">
+          Focused reach.
+        </h3>
+        <h6 class="about-lg w3-container">As you can tell, we don't clutter our site with banner ads. We
+        give your brand a clean canvas so your message is seen on the leaderboard, results, and game form itself!</h6>
+      </div>
+    </div>
+    {#  Small screens shift text below icon and header #}
+    <h6 class="about-sm w3-container">As you can tell, we don't clutter our site with banner ads. We
+        give your brand a clean canvas so your message is seen on the leaderboard, results, and game form itself!</h6>
+    <div class="w3-row" style="padding: 8pt"></div>
+    <div class="w3-cell-row w3-border-teal w3-round w3-padding" style="background: #f7f8f9">
+      <div class="w3-cell w3-cell-middle">
+        <h3 class="w3-container">
+          On our site, and in inboxes.
+        </h3>
+        <h6 class="about-lg w3-container">
+          Email is the best digital marketing vehicle. We send 3 emails every week
+            to nearly 5k subscribers, and have an open rate of over 100% (yes, you read that right).
+        </h6>
+      </div>
+      <div class="w3-cell w3-padding-16 w3-container w3-center">
+        <i class="fas fa-mail-bulk fa-5x" style="color:#237073"></i>
+      </div>
+    </div>
+    {#  Small screens shift text below icon and header #}
+    <h6 class="about-sm w3-container" style="background: #f7f8f9;">Email is the best digital marketing vehicle. We send 3 emails every week
+            to nearly 5k subscribers, and have an over 100% open rate (yes, you read that right).</h6>
+    <div class="w3-row" style="padding: 8pt"></div>
+    <div class="w3-cell-row w3-border-teal w3-round w3-padding">
+      <div class="w3-cell w3-padding-16 w3-container w3-center">
+        <i class="fas fa-hand-holding-heart fa-5x" style="color:#237073"></i>
+      </div>
+      <div class="w3-cell w3-cell-middle">
+        <h3 class="w3-container">
+          Not just an ad, a sponsorship.
+        </h3>
+        <h6 class="about-lg w3-container w3-mobile">
+          When we publish the game and results, our players flock to the site, chat, and text their friends.
+            Your brand, the exclusive sponsor, building goodwill.
+        </h6>
+      </div>
+    </div>
+    {#  Small screens shift text below icon and header #}
+    <h6 class="about-sm w3-container">
+         When we publish the game and results, our players flock to the site, chat, and text their friends.
+            Your brand, the exclusive sponsor, building goodwill.</h6>
+    <div class="w3-row" style="padding: 8pt"></div>
+    <div class="w3-cell-row w3-border-teal w3-round w3-padding" style="background: #f7f8f9">
+      <div class="w3-cell w3-cell-middle">
+        <h3 class="w3-container">
+          Your message, our voice.
+        </h3>
+        <h6 class="about-lg w3-container">
+          We'll work with you to make sure the messaging is authentic, and genuinely "Alex". We're looking for
+        partners, and want it to be a good fit.
+        </h6>
+      </div>
+      <div class="w3-cell w3-padding-16 w3-container w3-center">
+        <i class="far fa-grin-alt fa-5x" style="color:#237073;"></i>
+      </div>
+    </div>
+    {#  Small screens shift text below icon and header #}
+    <h6 class="about-sm w3-container" style="background: #f7f8f9">
+        We'll work with you to make sure the messaging is authentic, and genuinely "Alex". We're looking for
+        partners, and want it to be a good fit.
+    </h6>
+    <div class="w3-row" style="padding: 8pt"></div>
+    <div class="w3-cell-row w3-border-teal w3-round w3-padding">
+      <div class="w3-cell w3-padding-16 w3-container w3-center">
+        <i class="fas fa-mobile-alt fa-5x" style="color:#237073"></i>
+      </div>
+      <div class="w3-cell w3-cell-middle">
+        <h3 class="w3-container">
+          Sound interesting?
+        </h3>
+        <h6 class="about-lg w3-container w3-mobile">
+          We think so too. Shoot an email to Alex at <a href="mailto:alex@commonologygame.com">alex@commonologygame.com</a>
+            and let's work something out!
+        </h6>
+      </div>
+    </div>
+    {#  Small screens shift text below icon and header #}
+    <h6 class="about-sm w3-container">
+          We think so too. Shoot an email to Alex at <a href="mailto:alex@commonologygame.com">alex@commonologygame.com</a>
+            and let's work something out!</h6>
+    </div>
+   <div class="w3-row" style="padding: 32px"></div>
+
+
+{% endblock %}

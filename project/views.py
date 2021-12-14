@@ -33,7 +33,7 @@ def testimonials_view(request, *args, **kwargs):
 
 
 def raffle_rules_view(request, *args, **kwargs):
-    return document_render(request, 'raffle_rules.html', 'raffle_rules')
+    return document_render(request, 'raffle_rules.html', 'Raffle Rules')
 
 
 def tos_view(request, *args, **kwargs):
@@ -42,6 +42,10 @@ def tos_view(request, *args, **kwargs):
 
 def privacy_view(request, *args, **kwargs):
     return document_render(request, 'privacy.html', 'Privacy Policy')
+
+
+def sponsor_view(request, *args, **kwargs):
+    return render(request, 'sponsor.html')
 
 
 def index(request):
