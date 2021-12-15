@@ -38,6 +38,18 @@ class QuestionAdminForm(ModelForm):
         fields = '__all__'
 
 
+@admin.register(Question)
+class QuestionSearchAdmin(admin.ModelAdmin):
+    model = Question
+    search_fields = ('text',)
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class QuestionAdmin(admin.StackedInline):
     model = Question
     list_display = ('text', 'game')
