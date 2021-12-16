@@ -19,7 +19,7 @@ urlpatterns = [
     path('tos/', tos_view, name='tos'),
     path('privacy/', privacy_view, name='privacy'),
     path('contact/', ContactView.as_view(), name='contact'),
-    path('sponsor/', sponsor_view, name='sponsor-view'),
+    path('sponsor/', sponsor_view, name='sponsor'),
     path('', include('users.urls')),
     path('', include('game.urls')),
     path('', include('mail.urls')),
