@@ -59,6 +59,8 @@ def sendgrid_send(subject, msg, email_list,
                                'unsub_link': unsub_link}
                            )
 
+    msg = make_absolute_urls(msg)
+
     # don't use sendgrid backend for tests
     if (not force_sendgrid) and ('console' in settings.EMAIL_BACKEND or 'locmem' in settings.EMAIL_BACKEND):
         to_emails = [e for e, _ in email_list]
