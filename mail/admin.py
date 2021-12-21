@@ -5,7 +5,6 @@ from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultipl
 
 from project.utils import our_now
 from .models import MailMessage
-from .utils import make_absolute_urls
 from .utils import mass_mail, sendgrid_send
 from users.models import Player
 from components.models import Component
@@ -20,9 +19,9 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             user_code = test_user.code
         except Player.DoesNotExist:
             user_code = -1
-        msg = make_absolute_urls(obj.message)
+
         from_email = (obj.from_email, obj.from_name)
-        sendgrid_send(obj.subject, msg=msg, email_list=[(email, user_code)],
+        sendgrid_send(obj.subject, msg=obj.message, email_list=[(email, user_code)],
                       from_email=from_email, unsub_link=True,
                       top_components=obj.top_components.all(), bottom_components=obj.bottom_components.all())
         obj.tested = True
