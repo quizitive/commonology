@@ -22,9 +22,11 @@ logger = logging.getLogger(__name__)
 def make_absolute_urls(txt):
     domain = settings.DOMAIN
     urlroot = f"https://{domain}"
-    items = ['/media/ckeditor_uploads/']
+    items = ['/media/']
     for i in items:
-        txt = txt.replace(i, f"{urlroot}{i}")
+        target = f"{urlroot}{i}"
+        txt = txt.replace(target, i)
+        txt = txt.replace(i, target)
     return txt
 
 
