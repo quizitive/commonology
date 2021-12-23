@@ -9,6 +9,7 @@ from django.contrib.admin.models import LogEntry, CHANGE
 from project.settings import WINNER_ROOT, WINNER_TEMPLATE_PDF
 from project.utils import our_now, quick_cache, to_ascii
 from game.models import Game, Answer
+from chat.models import Comment
 
 
 @quick_cache(60 * 60)
@@ -24,6 +25,12 @@ def new_players_for_game(slug, game_id):
 def find_latest_active_game(slug):
     t = our_now()
     g = Game.objects.filter(series__slug=slug, end__gte=t, start__lte=t).order_by('start').reverse().first()
+    return g
+
+
+def find_last_closed_game(slug):
+    t = our_now()
+    g = Game.objects.filter(series__slug=slug, end__lte=t).latest('end')
     return g
 
 
@@ -126,3 +133,31 @@ def game_log_entry(game, message):
                                        object_repr=str(game.name),
                                        action_flag=CHANGE,
                                        change_message=message)
+
+
+def is_new_comment(player, slug, t):
+    '''
+    Are there comments later than t that are not authored by player.
+    '''
+
+    g = find_last_closed_game(slug)
+    flag = Comment.objects.filter(thread__object__game=g, created__gte=t).exclude(player=player).exists()
+    return flag
+
+
+def junk():
+    slug = 'commonology'
+    def get_time():
+        g = find_last_closed_game(slug)
+        for q in g.game_questions:
+            for c in Comment.objects.filter(thread=q.thread).all():
+                return c.created
+
+    from users.models import Player
+
+    p = Player.objects.get(email='ms@koplon.com')
+    f = is_new_comment(p, slug, our_now())
+    print(f)
+    t = get_time()
+    f = is_new_comment(p, slug, t)
+    print(f)
