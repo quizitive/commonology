@@ -143,21 +143,3 @@ def is_new_comment(player, slug, t):
     g = find_last_closed_game(slug)
     flag = Comment.objects.filter(thread__object__game=g, created__gte=t).exclude(player=player).exists()
     return flag
-
-
-def junk():
-    slug = 'commonology'
-    def get_time():
-        g = find_last_closed_game(slug)
-        for q in g.game_questions:
-            for c in Comment.objects.filter(thread=q.thread).all():
-                return c.created
-
-    from users.models import Player
-
-    p = Player.objects.get(email='ms@koplon.com')
-    f = is_new_comment(p, slug, our_now())
-    print(f)
-    t = get_time()
-    f = is_new_comment(p, slug, t)
-    print(f)
