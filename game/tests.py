@@ -756,7 +756,6 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         # cls.game.end = our_now() + relativedelta(hours=1)
         # cls.game.save()
 
-
     def test_indicator(self):
         slug = self.game.series.slug
         t = our_now() + datetime.timedelta(minutes=5)
