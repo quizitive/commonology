@@ -18,11 +18,10 @@ from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
 from project.utils import our_now, redis_delete_patterns
-from leaderboard.models import Leaderboard
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
-from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate
+from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate, is_new_comment
 from game.models import Series, Question, Answer
 from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
@@ -746,3 +745,43 @@ class SessionReferralTests(BaseGameDataTestCase):
 
         pe = PendingEmail.objects.filter(email=email).first()
         self.assertEqual(pe.referrer, self.user1)
+
+
+class NewMessageIndicatorTests(BaseGameDataTestCase):
+    # In these tests the referral code was introduced to the session as an argument on the home page.
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        # cls.game.end = our_now() + relativedelta(hours=1)
+        # cls.game.save()
+
+
+    def test_indicator(self):
+        slug = self.game.series.slug
+        t = our_now() + datetime.timedelta(minutes=5)
+        f = is_new_comment(self.game_player, slug, t)
+        self.assertEqual(f, False)
+
+        client = Client()
+        path = reverse('leaderboard:current-leaderboard')
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200)
+
+        # def junk():
+        #     slug = 'commonology'
+        #
+        #     def get_time():
+        #         g = find_last_closed_game(slug)
+        #         for q in g.game_questions:
+        #             for c in Comment.objects.filter(thread=q.thread).all():
+        #                 return c.created
+        #
+        #     from users.models import Player
+        #
+        #     p = Player.objects.get(email='ms@koplon.com')
+        #     f = is_new_comment(p, slug, our_now())
+        #     print(f)
+        #     t = get_time()
+        #     f = is_new_comment(p, slug, t)
+        #     print(f)
