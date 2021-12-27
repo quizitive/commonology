@@ -1,38 +1,9 @@
 
   <div class="w3-row">
     <div class="w3-padding-bottom w3-col">
-      <table class="leaderboard w3-table w3-striped w3-bordered">
-        <thead>
-          <th class="w3-center rank" style="vertical-align: bottom;">Rank</th>
-          <th class="name" style="vertical-align: bottom;">Name</th>
-          <th style="vertical-align: bottom;">Score </th>
-          <th class="w3-center">
-            <div class="w3-dropdown-hover">
-              <button id="following-drp" class="w3-button cg-blue">
-                <i class="fas fa-check-circle" style="color:white; margin:auto;"></i>
-                <i class="fas fa-caret-down"></i></button>
-              <div class="w3-dropdown-content w3-bar-block w3-card-4" style="right:0;">
-                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=following"
-                   hx-target="#component-leaderboard"
-                   class="w3-bar-item w3-button">Following</a>
-                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=followers"
-                   hx-target="#component-leaderboard"
-                   class="w3-bar-item w3-button">My Followers</a>
-                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=new_players"
-                   hx-target="#component-leaderboard"
-                   class="w3-bar-item w3-button">New Players</a>
-                <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
-                   hx-target="#component-leaderboard"
-                   class="w3-bar-item w3-button">All Players</a>
-              </div>
-            </div>
-          </th>
-        </thead>
-        <tbody>
           {% for player in leaderboard %}
-              <tr>
-                <div class="leaderboard-row" >
-                    <div class="w3-cell-row" style="height:80px;">
+                <div class="leaderboard-row" style="padding: 0 4px;">
+                    <div class="w3-cell-row" style="min-height:80px;border-top:1px solid lightgrey;padding:8px 0;">
                         <div class="w3-cell w3-cell-middle" style="width:13%;min-width:50px;font-size:12px;font-weight: bold;color:#555">
                             {{ player.Rank }}
                         </div>
@@ -89,47 +60,8 @@
                     </div>
 
                 </div>
-              </tr>
-{#            <tr {% if player.id == request.user.id %}#}
-{#              style="font-weight:bold;"#}
-{#            {% endif %}>#}
-{#              <td class="w3-center">{{ player.Rank }}</td>#}
-{#              <td class="name" style="color:black;">{{ player.Name }}#}
-{#                {% if player.id == request.user.id %}#}
-{#                  <span style="font-size:12px;">(me)</span>#}
-{#                {% endif %}#}
-{#              </td>#}
-{#              <td {% if player.id == request.user.id %}style="color:#f26649;"{% endif %}>#}
-{#                {{ player.Score }}#}
-{#              </td>#}
-{##}
-              {#      Follow Buttons      #}
-{#              <td class="w3-center">#}
-{#                {% if player.id in user_following %}#}
-{#                  <label class="container">#}
-{#                    <input type="checkbox"#}
-{#                           checked="checked"#}
-{#                           hx-post="{% url 'users-htmx' %}"#}
-{#                           hx-vals='{"to_follow": "{{ player.id }}"}'#}
-{#                           hx-swap="none">#}
-{#                    <span class="checkmark"></span>#}
-{#                  </label>#}
-{#                  {% else %}#}
-{#                  <label class="container">#}
-{#                    <input type="checkbox"#}
-{#                           hx-post="{% url 'users-htmx' %}"#}
-{#                           hx-vals='{"to_follow": "{{ player.id }}"}'#}
-{#                           hx-swap="none">#}
-{#                    <span class="checkmark"></span>#}
-{#                  </label>#}
-{#                {% endif %}#}
-{#              </td>#}
-{##}
-{#            </tr>#}
           {% endfor %}
-        </tbody>
-      </table>
-      <div class="w3-container w3-cell-row w3-center w3-padding-16">
+      <div class="w3-container w3-cell-row w3-center w3-padding-16" style="border-top:1px solid lightgrey;">
 
         {% if prev %}
         <a class="w3-cell"
