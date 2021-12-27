@@ -29,13 +29,13 @@
 
       {% if not hide_navigation %}
       <!-- header buttons -->
-      <div class="game-buttons w3-row w3-center">
+      <div class="leaderboard-buttons w3-row w3-center">
         <div class="leaderboard-results-button-container w3-col m6">
-          <a class="game-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard"
+          <a class="leaderboard-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard"
              href="{% series_or_default_url 'leaderboard' 'current-leaderboard' %}{{ requested_game_id|default:'' }}">
           Leaderboard
           </a>
-          <a class="game-header-button w3-button {% button_highlight 'results' %} w3-round-xxlarge leaderboard"
+          <a class="leaderboard-header-button w3-button {% button_highlight 'results' %} w3-round-xxlarge leaderboard"
              href="{% series_or_default_url 'leaderboard' 'current-results' %}{{ requested_game_id|default:'' }}">
           Results
           </a>
@@ -43,7 +43,7 @@
         <div class="play-button-container w3-col m6">
           {% active_game as active_game %}
           {% if active_game %}
-            <a class="game-header-button play-button w3-button w3-round-xxlarge leaderboard w3-rest" style="background:#f1f3f3;color:#f26649;font-weight:bold;font-style:italic;"
+            <a class="leaderboard-header-button play-button w3-button w3-round-xxlarge leaderboard w3-rest" style="background:#f1f3f3;color:#f26649;font-weight:bold;font-style:italic;"
                  href="{% series_or_default_url 'game' 'play' %}{{ active_game.uuid|default:'' }}">
               Play Latest Game!
             </a>
