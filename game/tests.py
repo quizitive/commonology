@@ -111,7 +111,8 @@ class BaseGameDataTestCase(TestCase):
         self.game.end = t + relativedelta(hours=1)
         self.game.save()
 
-    def deactivate_game(self):
+    @classmethod
+    def deactivate_game(cls):
         cls.game.end = cls.game.start
 
 
