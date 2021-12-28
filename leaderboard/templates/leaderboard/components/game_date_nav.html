@@ -38,7 +38,7 @@
           <a class="game-header-button w3-button {% button_highlight 'results' %} w3-round-xxlarge leaderboard"
              href="{% series_or_default_url 'leaderboard' 'current-results' %}{{ requested_game_id|default:'' }}">
               {% if new_comment_flag %}
-                Results <img style="width:15px;" src="{% v_static 'img/icon.svg' %}">
+                Results <img style="width:15px;" src="{% v_static 'img/new_comment.svg' %}">
               {% else %}
                 Results
               {% endif %}
