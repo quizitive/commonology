@@ -135,14 +135,14 @@ def game_log_entry(game, message):
                                        change_message=message)
 
 
-def is_new_comment(player, slug, t):
+def n_new_comments(player, slug, t):
     '''
     Are there comments later than t that are not authored by player.
     '''
 
     g = find_last_closed_game(slug)
-    if t:
-        flag = Comment.objects.filter(thread__object__game=g, created__gte=t).exclude(player=player).exists()
+    if t and player.is_authenticated:
+        n = Comment.objects.filter(thread__object__game=g, created__gte=t).exclude(player=player).count()
     else:
-        flag = Comment.objects.filter(thread__object__game=g).exists()
-    return flag
+        n = Comment.objects.filter(thread__object__game=g).count()
+    return n
