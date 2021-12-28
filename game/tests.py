@@ -765,31 +765,48 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         c = Comment(player=player, created=t, comment=s, thread=thread)
         c.save()
 
-    def test_indicator(self):
-        client = self.authenticated_client
-        player1, player2 = self.game.players[:2]
-        player1 = self.game_player
-        slug = self.game.series.slug
-        path = reverse('leaderboard:current-leaderboard')
-
+    def get_session_time(self, client):
         # Set session time
         response = client.get(reverse('leaderboard:current-results'))
         self.assertEqual(response.status_code, 200)
-        last_vist_t = client.session['results_last_visit_t']
-        last_vist_t = dateutil.parser.isoparse(last_vist_t)
-        last_vist_plus_5 = last_vist_t + datetime.timedelta(minutes=5)
+        last_visit_t = client.session['results_last_visit_t']
+        last_visit_t = dateutil.parser.isoparse(last_visit_t)
+        return last_visit_t
+
+    def test_indicator(self):
+        client1 = self.authenticated_client
+        player1 = self.game_player
+        player2 = get_local_user(e='two@foo.com')
+        client2 = get_local_client(e='two@foo.com')
+        player3 = get_local_user(e='three@foo.com')
+        client3 = get_local_client(e='three@foo.com')
+        slug = self.game.series.slug
+
+        # Set session time for client 1 and client2
+        self.get_session_time(client2)
+        last_visit_t = self.get_session_time(client1)
+        last_visit_plus_5 = last_visit_t + datetime.timedelta(minutes=5)
 
         # There are no comments yet
-        f = is_new_comment(player1, slug, last_vist_t)
+        f = is_new_comment(player1, slug, last_visit_t)
         self.assertFalse(f)
 
-        # Add a comment 6 minutes after my last results page get.
-        self.add_comment(player2, 'hi', last_vist_t + datetime.timedelta(minutes=6))
-        flag = is_new_comment(player1, slug, last_vist_plus_5)
+        # Player 2 adds a comment 6 minutes after player 1 last visited the results page.
+        self.add_comment(player2, 'hi', last_visit_t + datetime.timedelta(minutes=6))
+        flag = is_new_comment(player1, slug, last_visit_plus_5)
         self.assertTrue(flag)
 
-        response = client.get(path)
+        # Player 1 visits the leaderboard which indicates a new message.
+        response = client1.get(reverse('leaderboard:current-leaderboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "new_comment.svg")
 
-        # check that if player1 visits page then new_comment.svg is not there.
+        # Player 2 visits the leaderboard but should not see an indication because he posted new comment
+        response = client2.get(reverse('leaderboard:current-leaderboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "new_comment.svg")
+
+        # Player 3 visits leaderboard but never visited results
+        response = client3.get(reverse('leaderboard:current-leaderboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "new_comment.svg")
