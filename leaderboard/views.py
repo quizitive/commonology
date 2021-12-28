@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from project.utils import our_now
 from game.models import Game, Question
 from game.views import BaseGameView
-from game.utils import is_new_comment
+from game.utils import n_new_comments
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
     player_score_rank_percentile, rank_string, score_string, visible_leaderboards
@@ -53,7 +53,7 @@ class LeaderboardView(BaseGameView):
         if t:
             t = dateutil.parser.isoparse(t)
             t = t + datetime.timedelta(minutes=5)
-        new_comment_flag = is_new_comment(player, self.slug, t)
+        n_comments = n_new_comments(player, self.slug, t)
 
         if player.is_authenticated:
             # get the logged in player's stats for the game
@@ -63,7 +63,7 @@ class LeaderboardView(BaseGameView):
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
                 'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
-                'new_comment_flag': new_comment_flag,
+                'n_comments': n_comments,
             })
         return context
 

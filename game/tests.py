@@ -22,7 +22,7 @@ from project.utils import our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
-from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate, is_new_comment
+from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate, n_new_comments
 from game.models import Series, Question, Answer
 from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
@@ -788,12 +788,12 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         last_visit_plus_5 = last_visit_t + datetime.timedelta(minutes=5)
 
         # There are no comments yet
-        f = is_new_comment(player1, slug, last_visit_t)
+        f = n_new_comments(player1, slug, last_visit_t)
         self.assertFalse(f)
 
         # Player 2 adds a comment 6 minutes after player 1 last visited the results page.
         self.add_comment(player2, 'hi', last_visit_t + datetime.timedelta(minutes=6))
-        flag = is_new_comment(player1, slug, last_visit_plus_5)
+        flag = n_new_comments(player1, slug, last_visit_plus_5)
         self.assertTrue(flag)
 
         # Player 1 visits the leaderboard which indicates a new message.
