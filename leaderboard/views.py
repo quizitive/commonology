@@ -50,11 +50,10 @@ class LeaderboardView(BaseGameView):
         player = request.user
         t = request.session.get('results_last_visit_t')
 
-        new_comment_flag = False
         if t:
             t = dateutil.parser.isoparse(t)
             t = t + datetime.timedelta(minutes=5)
-            new_comment_flag = is_new_comment(player, self.slug, t)
+        new_comment_flag = is_new_comment(player, self.slug, t)
 
         if player.is_authenticated:
             # get the logged in player's stats for the game

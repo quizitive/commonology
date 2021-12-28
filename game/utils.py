@@ -141,5 +141,8 @@ def is_new_comment(player, slug, t):
     '''
 
     g = find_last_closed_game(slug)
-    flag = Comment.objects.filter(thread__object__game=g, created__gte=t).exclude(player=player).exists()
+    if t:
+        flag = Comment.objects.filter(thread__object__game=g, created__gte=t).exclude(player=player).exists()
+    else:
+        flag = Comment.objects.filter(thread__object__game=g).exists()
     return flag
