@@ -1,6 +1,7 @@
 from os import environ as env
 import re
 import datetime
+import dateutil
 import string
 import random
 import json
@@ -29,6 +30,8 @@ from game.gsheets_api import *
 from game.tasks import questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
 from game.forms import QuestionAnswerForm
+from users.tests import test_pw
+from chat.models import Comment
 
 from django.contrib.auth import get_user_model
 
@@ -749,38 +752,43 @@ class SessionReferralTests(BaseGameDataTestCase):
 
 class NewMessageIndicatorTests(BaseGameDataTestCase):
     # In these tests the referral code was introduced to the session as an argument on the home page.
+    def setUp(self):
+        self.leaderboard_obj.publish_date = our_now() - datetime.timedelta(days=1)
+        self.leaderboard_obj.save()
+        self.authenticated_client = Client(raise_request_exception=False)
+        self.authenticated_client.login(email=self.game_player.email, password=test_pw)
+        self.question = self.game.game_questions.first()
 
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        # cls.game.end = our_now() + relativedelta(hours=1)
-        # cls.game.save()
+    def add_comment(self, player, s, t):
+        thread = self.question.thread
+        c = Comment(player=player, created=t, comment=s, thread=thread)
+        c.save()
 
     def test_indicator(self):
+        client = self.authenticated_client
+        player1, player2 = self.game.players[:2]
+        player1 = self.game_player
         slug = self.game.series.slug
-        t = our_now() + datetime.timedelta(minutes=5)
-        f = is_new_comment(self.game_player, slug, t)
-        self.assertEqual(f, False)
-
-        client = Client()
         path = reverse('leaderboard:current-leaderboard')
+
+        # Set session time
+        response = client.get(reverse('leaderboard:current-results'))
+        self.assertEqual(response.status_code, 200)
+        last_vist_t = client.session['results_last_visit_t']
+        last_vist_t = dateutil.parser.isoparse(last_vist_t)
+        last_vist_plus_5 = last_vist_t + datetime.timedelta(minutes=5)
+
+        # There are no comments yet
+        f = is_new_comment(player1, slug, last_vist_t)
+        self.assertFalse(f)
+
+        # Add a comment 6 minutes after my last results page get.
+        self.add_comment(player2, 'hi', last_vist_t + datetime.timedelta(minutes=6))
+        flag = is_new_comment(player1, slug, last_vist_plus_5)
+        self.assertTrue(flag)
+
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "new_comment.svg")
 
-        # def junk():
-        #     slug = 'commonology'
-        #
-        #     def get_time():
-        #         g = find_last_closed_game(slug)
-        #         for q in g.game_questions:
-        #             for c in Comment.objects.filter(thread=q.thread).all():
-        #                 return c.created
-        #
-        #     from users.models import Player
-        #
-        #     p = Player.objects.get(email='ms@koplon.com')
-        #     f = is_new_comment(p, slug, our_now())
-        #     print(f)
-        #     t = get_time()
-        #     f = is_new_comment(p, slug, t)
-        #     print(f)
+        # check that if player1 visits page then new_comment.svg is not there.
