@@ -23,6 +23,20 @@ h1.leaderboard {
   /*min-width: 285px;*/
   /*margin-top: 5px;*/
 }
+#comment-indicator-badge-container {
+  position:absolute;
+  right:0;
+  top:0;
+  line-height:20px;
+  min-width:20px
+}
+#comment-indicator-badge {
+  line-height: 20px;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 20px;
+  font-size: 14px;
+}
 
 /* These settings force the leaderboard to render well on mobile */
 table.leaderboard {
