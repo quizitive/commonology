@@ -25,6 +25,11 @@ h1.leaderboard {
   width: 99%;
   margin: auto;
 }
+#player-rank {
+  background: #f4f5f6;
+  border: 1px solid #0095da;
+  border-radius: 4px;
+}
 
 /* These settings force the leaderboard to render well on mobile */
 table.leaderboard {
