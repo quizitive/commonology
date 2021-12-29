@@ -781,6 +781,7 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         player3 = get_local_user(e='three@foo.com')
         client3 = get_local_client(e='three@foo.com')
         slug = self.game.series.slug
+        comment_badge = "<div id=\"comment-indicator-badge-container\">"
 
         # Set session time for client 1 and client2
         self.get_session_time(client2)
@@ -799,14 +800,14 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         # Player 1 visits the leaderboard which indicates a new message.
         response = client1.get(reverse('leaderboard:current-leaderboard'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "new_comment.svg")
+        self.assertContains(response, comment_badge)
 
         # Player 2 visits the leaderboard but should not see an indication because he posted new comment
         response = client2.get(reverse('leaderboard:current-leaderboard'))
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "new_comment.svg")
+        self.assertNotContains(response, comment_badge)
 
         # Player 3 visits leaderboard but never visited results
         response = client3.get(reverse('leaderboard:current-leaderboard'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "new_comment.svg")
+        self.assertContains(response, comment_badge)
