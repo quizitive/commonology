@@ -72,7 +72,6 @@ def profile_char(display_name):
     return mark_safe(final_html)
 
 
-
 @register.simple_tag(takes_context=True)
 def active_game(context):
     return find_latest_active_game(context.get('series_slug') or 'commonology')
