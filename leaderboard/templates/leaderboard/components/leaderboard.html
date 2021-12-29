@@ -2,68 +2,67 @@
 
   <div class="w3-row">
     <div class="w3-padding-bottom w3-col">
-          {% for player in leaderboard %}
-                <div class="leaderboard-row" style="padding: 0 4px;">
-                    <div class="w3-cell-row" style="min-height:80px;border-top:1px solid lightgrey;padding:8px 0;">
-                        <div class="w3-cell w3-cell-middle" style="width:13%;min-width:50px;font-size:12px;font-weight: bold;color:#555">
-                            {{ player.Rank }}
-                        </div>
-                        <div class="w3-cell w3-cell-middle" style="width:10%;min-width:50px">
-                            <div style="background: #0095da;color: #fff;text-align:center;width:40px;line-height:40px;border-radius: 50%;font-size: 20px;">
-                              <span style="padding-left:0;">
-                                {% profile_char player.Name %}
-                              </span>
-                            </div>
-                            <div style="height:0;position:absolute;">
-                            {% if player.Rank == 1 %}
-                                <img src="{% v_static 'img/badges/RED face 2 stroke.svg' %}"
-                                     height="25px" style="position:absolute;top:-47px;left:23px;">
-                            {% endif %}
+      {% for player in leaderboard %}
+      <div {% if player.id == request.user.id %}id="player-rank"{% endif %}
+          class="leaderboard-row"
+         style="padding: 0 4px;">
+        <div class="w3-cell-row" style="min-height:80px;border-top:1px solid lightgrey;padding:8px 0;">
+          <div class="w3-cell w3-cell-middle" style="width:13%;min-width:50px;font-size:12px;font-weight: bold;color:#555">
+              {{ player.Rank }}
+          </div>
 
-                            {% if not player.Rank|divisibleby:2 %}
-                            <img src="{% v_static 'img/badges/RIBBON B.svg' %}"
-                                 height="25px" style="position:absolute;top:-14px;left:23px;">
-                            {% endif %}
-                            </div>
+          <div class="w3-cell w3-cell-middle" style="width:10%;min-width:50px">
+            <div style="background: #0095da;color: #fff;text-align:center;width:40px;line-height:40px;border-radius: 50%;font-size: 20px;">
+              {% profile_char player.Name %}
+            </div>
+            <div style="height:0;position:absolute;">
+            {% if player.Rank == 1 %}
+              <img src="{% v_static 'img/badges/RED face 2 stroke.svg' %}"
+                   height="25px" style="position:absolute;top:-47px;left:23px;">
+            {% endif %}
 
-                        </div>
-                        <div class="w3-cell w3-container w3-cell-middle w3-rest" >
-                            <div class="w3-row w3-left-align" style="font-weight: bold;">
-                                {{ player.Name }}
-                            </div>
-                            <div class="w3-row w3-left-align" style="font-weight: bold;color:#f26649">
-                                {{ player.Score }}
-                            </div>
-                        </div>
-                        <div class="w3-cell w3-cell-middle" style="width:25%;">
-                            <div class="w3-container"
-                                 style="font-weight: bold;font-size:10px;font-style:italic;color:#0095da;">
-                                Follow
-                            </div>
-                            {% if player.id in user_following %}
-                              <label class="container">
-                                <input type="checkbox"
-                                       checked="checked"
-                                       hx-post="{% url 'users-htmx' %}"
-                                       hx-vals='{"to_follow": "{{ player.id }}"}'
-                                       hx-swap="none">
-                                <span class="checkmark"></span>
-                              </label>
-                              {% else %}
-                              <label class="container">
-                                <input type="checkbox"
-                                       hx-post="{% url 'users-htmx' %}"
-                                       hx-vals='{"to_follow": "{{ player.id }}"}'
-                                       hx-swap="none">
-                                <span class="checkmark"></span>
-                              </label>
-                            {% endif %}
-                        </div>
+            {% if not player.Rank|divisibleby:2 %}
+            <img src="{% v_static 'img/badges/RIBBON B.svg' %}"
+                 height="25px" style="position:absolute;top:-14px;left:23px;">
+            {% endif %}
+            </div>
+          </div>
 
-                    </div>
-
-                </div>
-          {% endfor %}
+          <div class="w3-cell w3-container w3-cell-middle w3-rest" >
+            <div class="w3-row w3-left-align" style="font-weight: bold;">
+                {{ player.Name }}
+            </div>
+            <div class="w3-row w3-left-align" style="font-weight: bold;color:#f26649">
+                {{ player.Score }}
+            </div>
+          </div>
+            <div class="w3-cell w3-cell-middle" style="width:25%;">
+              <div class="w3-container"
+                   style="font-weight: bold;font-size:10px;font-style:italic;color:#0095da;">
+                  Follow
+              </div>
+              {% if player.id in user_following %}
+                <label class="container">
+                  <input type="checkbox"
+                         checked="checked"
+                         hx-post="{% url 'users-htmx' %}"
+                         hx-vals='{"to_follow": "{{ player.id }}"}'
+                         hx-swap="none">
+                  <span class="checkmark"></span>
+                </label>
+              {% else %}
+                <label class="container">
+                  <input type="checkbox"
+                         hx-post="{% url 'users-htmx' %}"
+                         hx-vals='{"to_follow": "{{ player.id }}"}'
+                         hx-swap="none">
+                  <span class="checkmark"></span>
+                </label>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
       <div class="w3-container w3-cell-row w3-center w3-padding-16" style="border-top:1px solid lightgrey;">
 
         {% if prev %}
