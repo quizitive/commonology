@@ -30,19 +30,22 @@
       {% if not hide_navigation %}
       <!-- header buttons -->
       <div class="game-buttons w3-row w3-center">
-        <div class="leaderboard-results-button-container w3-col m6">
+        <div class="leaderboard-results-button-container w3-col m6" style="position: relative">
           <a class="game-header-button w3-button {% button_highlight 'leaderboard' %} w3-round-xxlarge leaderboard"
              href="{% series_or_default_url 'leaderboard' 'current-leaderboard' %}{{ requested_game_id|default:'' }}">
-          Leaderboard
+             Leaderboard
           </a>
           <a class="game-header-button w3-button {% button_highlight 'results' %} w3-round-xxlarge leaderboard"
              href="{% series_or_default_url 'leaderboard' 'current-results' %}{{ requested_game_id|default:'' }}">
-              {% if n_comments %}
-                Results <img style="width:15px;" src="{% v_static 'img/new_comment.svg' %}">
-              {% else %}
-                Results
-              {% endif %}
+             Results
           </a>
+          {% if n_comments %}
+            <div id="comment-indicator-badge-container">
+              <span id="comment-indicator-badge" class="cg-red">
+                {{ n_comments }}
+              </span>
+            </div>
+          {% endif %}
 
         </div>
         <div class="play-button-container w3-col m6">
