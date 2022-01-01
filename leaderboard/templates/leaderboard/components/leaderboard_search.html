@@ -9,14 +9,14 @@
            hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
            hx-target="#component-leaderboard"
            hx-include="[name='q']"
-           onclick="filter_focus(this)">
+           onclick="filterFocus(this)">
         All Players
       </div>
       <div class="leaderboard-header-button filter-button w3-button w3-round-xxlarge leaderboard w3-light-grey"
            hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=following"
            hx-target="#component-leaderboard"
            hx-include="[name='q']"
-           onclick="filter_focus(this)">
+           onclick="filterFocus(this)">
         Following
       </div>
     </div>
@@ -25,7 +25,7 @@
            hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=followers"
            hx-target="#component-leaderboard"
            hx-include="[name='q']"
-           onclick="filter_focus(this)">
+           onclick="filterFocus(this)">
         My Followers
       </div>
       <div id="new-players-button"
@@ -33,7 +33,7 @@
            hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=new_players"
            hx-target="#component-leaderboard"
            hx-include="[name='q']"
-           onclick="filter_focus(this)">
+           onclick="filterFocus(this)">
         New Players
       </div>
     </div>
