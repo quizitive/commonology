@@ -5,10 +5,11 @@ from django.views.generic.base import View
 from django.http import Http404
 from django.utils.safestring import mark_safe
 
-from game.models import Game, Answer
+from game.models import Game
 from game.views import SeriesPermissionMixin
 from game.utils import new_players_for_game
 from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard, visible_leaderboards
+from users.models import Player
 
 
 class LeaderboardHTMXView(SeriesPermissionMixin, View):
@@ -56,8 +57,8 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             raise Http404("Game does not exist")
 
         answer_tally = build_answer_tally(current_game)
-
-        user, user_following = self._user_and_following
+        winners_of_series = Player.objects.filter(
+                games_won__game__series__slug=self.slug).values_list("id", flat=True)
 
         # leaderboard filters
         search_term = request.GET.get('q')
@@ -87,8 +88,8 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             'game_id': self.game_id,
             'leaderboard': leaderboard,
             'search_term': search_term,
-            'user_following': user_following,
             'id_filter': id_filter,
+            'winners_of_series': winners_of_series,
             'lb_message': lb_message,
             'total_players': total_players,
             'page': page,
