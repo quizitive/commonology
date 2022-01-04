@@ -46,10 +46,6 @@
 
 
   <div id="leaderboard-search" class="w3-margin-top">
-    <form method="get"
-        hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
-        hx-target="#component-leaderboard"
-        hx-include="[name='id_filter']">
       <div class="w3-col" style="width:48px">
         <button class="w3-button w3-round cg-blue w3-border cg-border-blue"
                 type="submit">
@@ -57,9 +53,17 @@
         </button>
       </div>
       <div class="w3-rest">
-        <input type="text" name="q" class="w3-input w3-round w3-border" placeholder="Search..." {% if search_term %} value="{{ search_term }}"{% endif %}>
+        <input
+            type="search"
+            name="q"
+            class="w3-input w3-round w3-border"
+            incremental="incremental"
+            placeholder="Search..." {% if search_term %} value="{{ search_term }}"{% endif %}
+            hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
+            hx-target="#component-leaderboard"
+            hx-include="[name='id_filter']"
+            hx-trigger="search delay:0.5s">
       </div>
-    </form>
     <div style="padding-left: 56px; color: grey;"><i>eg. John L, Paul M, George H, Ringo</i></div>
   </div>
 
