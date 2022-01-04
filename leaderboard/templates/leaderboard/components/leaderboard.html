@@ -16,7 +16,7 @@
               {% profile_char player.Name %}
             </div>
             <div style="height:0;position:absolute;">
-            {% if player.Rank == 1 %}
+            {% if player.id in winners_of_series %}
               <img src="{% v_static 'img/badges/RED face 2 stroke.svg' %}"
                    height="25px" style="position:absolute;top:-47px;left:23px;">
             {% endif %}
@@ -41,7 +41,7 @@
                    style="font-weight: bold;font-size:10px;font-style:italic;color:#0095da;">
                   Follow
               </div>
-              {% if player.id in user_following %}
+              {% if player.id in user.following_ids %}
                 <label class="container">
                   <input type="checkbox"
                          checked="checked"
