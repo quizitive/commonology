@@ -769,7 +769,7 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         # Set session time
         response = client.get(reverse('leaderboard:current-results'))
         self.assertEqual(response.status_code, 200)
-        last_visit_t = client.session['results_last_visit_t']
+        last_visit_t = client.session[f'results_last_visit_t:{self.series.slug}:{self.game.game_id}']
         last_visit_t = dateutil.parser.isoparse(last_visit_t)
         return last_visit_t
 
