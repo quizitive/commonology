@@ -21,7 +21,7 @@
                    height="25px" style="position:absolute;top:-47px;left:23px;">
             {% endif %}
 
-            {% if not player.Rank|divisibleby:2 %}
+            {% if player.id in players_with_referral_badge %}
             <img src="{% v_static 'img/badges/RIBBON B.svg' %}"
                  height="25px" style="position:absolute;top:-14px;left:23px;">
             {% endif %}
