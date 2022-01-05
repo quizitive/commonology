@@ -86,7 +86,7 @@ class Player(CustomUser):
                              help_text="Unique identifier useful for url parameters like referrer.")
     reminder = models.BooleanField(default=True,
                                    help_text="Send game reminder email even if the player played this weeks game already.")
-    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='referrers')
+    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='referrals')
     goofy = models.OneToOneField
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
