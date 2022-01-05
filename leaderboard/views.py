@@ -48,12 +48,13 @@ class LeaderboardView(BaseGameView):
         context['historical_leaderboards'] = visible_leaderboards(self.slug)
         request = self.request
         player = request.user
-        t = request.session.get('results_last_visit_t')
+        t = request.session.get(self._last_results_visit_key())
 
         if t:
             t = dateutil.parser.isoparse(t)
             t = t + datetime.timedelta(minutes=5)
-        n_comments = n_new_comments(player, self.slug, t)
+        n_comments = n_new_comments(self.game, player, t)
+        context['n_comments'] = n_comments
 
         if player.is_authenticated:
             # get the logged in player's stats for the game
@@ -63,13 +64,15 @@ class LeaderboardView(BaseGameView):
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
                 'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
-                'n_comments': n_comments,
             })
         return context
 
     def get(self, request, *args, **kwargs):
         messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, 'leaderboard/leaderboard_view.html', self.get_context(*args, **kwargs))
+
+    def _last_results_visit_key(self):
+        return f'results_last_visit_t:{self.slug}:{self.game.game_id}'
 
 
 class ResultsView(LeaderboardView):
@@ -95,7 +98,7 @@ class ResultsView(LeaderboardView):
         })
         messages.info(request, "Login to follow your friends and join the conversation!")
 
-        request.session['results_last_visit_t'] = our_now().isoformat()
+        request.session[self._last_results_visit_key()] = our_now().isoformat()
 
         return render(request, 'leaderboard/results.html', context)
 
