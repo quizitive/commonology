@@ -8,7 +8,8 @@ from django.utils.safestring import mark_safe
 from game.models import Game
 from game.views import SeriesPermissionMixin
 from game.utils import new_players_for_game
-from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard, visible_leaderboards
+from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard, \
+    visible_leaderboards, winners_of_series
 from users.models import Player
 
 
@@ -57,8 +58,8 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             raise Http404("Game does not exist")
 
         answer_tally = build_answer_tally(current_game)
-        winners_of_series = Player.objects.filter(
-                games_won__game__series__slug=self.slug).values_list("id", flat=True)
+
+        # todo: get referral badges
 
         # leaderboard filters
         search_term = request.GET.get('q')
@@ -89,7 +90,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             'leaderboard': leaderboard,
             'search_term': search_term,
             'id_filter': id_filter,
-            'winners_of_series': winners_of_series,
+            'winners_of_series': winners_of_series(self.slug),
             'lb_message': lb_message,
             'total_players': total_players,
             'page': page,
