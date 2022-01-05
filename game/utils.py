@@ -28,12 +28,6 @@ def find_latest_active_game(slug):
     return g
 
 
-def find_last_closed_game(slug):
-    t = our_now()
-    g = Game.objects.filter(series__slug=slug, end__lte=t).latest('end')
-    return g
-
-
 def find_latest_public_game(slug):
     t = our_now()
     g = Game.objects.filter(series__slug=slug, series__public=True,
@@ -135,16 +129,15 @@ def game_log_entry(game, message):
                                        change_message=message)
 
 
-def n_new_comments(player, slug, t):
+def n_new_comments(game, player, t):
     """
     Are there comments later than t that are not authored by player.
     """
 
-    g = find_last_closed_game(slug)
     if t and player.is_authenticated:
-        n = Comment.objects.filter(thread__object__game=g, created__gte=t).exclude(player=player).count()
+        n = Comment.objects.filter(thread__object__game=game, created__gte=t).exclude(player=player).count()
     elif t:
-        n = Comment.objects.filter(thread__object__game=g, created__gte=t).count()
+        n = Comment.objects.filter(thread__object__game=game, created__gte=t).count()
     else:
-        n = Comment.objects.filter(thread__object__game=g).count()
+        n = Comment.objects.filter(thread__object__game=game).count()
     return n
