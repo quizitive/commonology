@@ -120,6 +120,9 @@ def build_leaderboard_fromdb(game, answer_tally):
     leaderboard = _score_and_rank(leaderboard, lb_cols)
     leaderboard = leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + lb_cols]
     REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 60 * 60)
+    player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
+    game.leaderboard.winners.set(Player.objects.filter(id__in=player_ids))
+    winners_of_game(game, force_refresh=True)
     return leaderboard
 
 
@@ -261,16 +264,21 @@ def player_latest_game_message(game, rank, percentile):
     return f"This game you ranked {rank} out of {player_count} players. {follow_up}"
 
 
-@quick_cache(24 * 60 * 60)
+@quick_cache()
 def winners_of_game(game):
+    # todo: we don't need any of the bottom part once games have winners in db
+    winners_from_db = Player.objects.filter(games_won__game=game)
+    if winners_from_db:
+        return winners_from_db
     answer_tally = build_answer_tally(game)
     leaderboard = build_filtered_leaderboard(game, answer_tally)
     player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
     return Player.objects.filter(id__in=player_ids)
 
 
-@quick_cache(24 * 60 * 60)
+@quick_cache()
 def winners_of_series(slug):
+    # todo: this can be a list of a queryset once we have database populated
     winners = []
     series = Series.objects.get(slug=slug)
     for game in series.games.all():
