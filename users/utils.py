@@ -84,4 +84,4 @@ def get_player(code):
 @quick_cache()
 def players_with_referral_badge(threshold=3):
     return Player.objects.annotate(
-        ref_count=Count("referrals")).filter(ref_count__gt=threshold).values_list("id", flat=True)
+        ref_count=Count("referrals")).filter(ref_count__gte=threshold).values_list("id", flat=True)
