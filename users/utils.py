@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
+from project.utils import quick_cache
 from .models import PendingEmail, Player
 from django.contrib.auth import get_user_model
 from django.core.signing import Signer
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.models import LogEntry, CHANGE
+from django.db.models import Count
 from django.utils.timezone import make_aware
 from game.models import Series
 import logging
@@ -77,3 +79,9 @@ def player_log_entry(player, message):
 
 def get_player(code):
     return Player.objects.filter(_code=code).first()
+
+
+@quick_cache()
+def players_with_referral_badge(threshold=3):
+    return Player.objects.annotate(
+        ref_count=Count("referrals")).filter(ref_count__gt=threshold).values_list("id", flat=True)
