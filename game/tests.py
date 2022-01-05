@@ -780,7 +780,6 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         client2 = get_local_client(e='two@foo.com')
         player3 = get_local_user(e='three@foo.com')
         client3 = get_local_client(e='three@foo.com')
-        slug = self.game.series.slug
         comment_badge = "<div id=\"comment-indicator-badge-container\">"
 
         # Set session time for client 1 and client2
@@ -789,12 +788,12 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         last_visit_plus_5 = last_visit_t + datetime.timedelta(minutes=5)
 
         # There are no comments yet
-        f = n_new_comments(player1, slug, last_visit_t)
+        f = n_new_comments(self.game, player1, last_visit_t)
         self.assertFalse(f)
 
         # Player 2 adds a comment 6 minutes after player 1 last visited the results page.
         self.add_comment(player2, 'hi', last_visit_t + datetime.timedelta(minutes=6))
-        flag = n_new_comments(player1, slug, last_visit_plus_5)
+        flag = n_new_comments(self.game, player1, last_visit_plus_5)
         self.assertTrue(flag)
 
         # Player 1 visits the leaderboard which indicates a new message.
