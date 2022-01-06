@@ -9,6 +9,7 @@ from django.contrib.admin.models import LogEntry, CHANGE
 from project.settings import WINNER_ROOT, WINNER_TEMPLATE_PDF
 from project.utils import our_now, quick_cache, to_ascii
 from game.models import Game, Answer
+from chat.models import Comment
 
 
 @quick_cache(60 * 60)
@@ -126,3 +127,17 @@ def game_log_entry(game, message):
                                        object_repr=str(game.name),
                                        action_flag=CHANGE,
                                        change_message=message)
+
+
+def n_new_comments(game, player, t):
+    """
+    Are there comments later than t that are not authored by player.
+    """
+
+    if t and player.is_authenticated:
+        n = Comment.objects.filter(thread__object__game=game, created__gte=t).exclude(player=player).count()
+    elif t:
+        n = Comment.objects.filter(thread__object__game=game, created__gte=t).count()
+    else:
+        n = Comment.objects.filter(thread__object__game=game).count()
+    return n

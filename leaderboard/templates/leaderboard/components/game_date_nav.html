@@ -39,6 +39,14 @@
              href="{% series_or_default_url 'leaderboard' 'current-results' %}{{ requested_game_id|default:'' }}">
           Results
           </a>
+          {% if n_comments %}
+            <div id="comment-indicator-badge-container">
+              <span id="comment-indicator-badge" class="cg-red">
+                {{ n_comments }}
+              </span>
+            </div>
+          {% endif %}
+
         </div>
         <div class="play-button-container w3-col m6">
           {% active_game as active_game %}
