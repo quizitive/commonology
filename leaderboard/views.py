@@ -1,3 +1,6 @@
+import datetime
+import dateutil
+
 from django.shortcuts import render
 from django.views.generic.base import View
 from django.http import Http404
@@ -8,6 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from project.utils import our_now
 from game.models import Game, Question
 from game.views import BaseGameView
+from game.utils import n_new_comments
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
     player_score_rank_percentile, rank_string, score_string, visible_leaderboards
@@ -42,10 +46,20 @@ class LeaderboardView(BaseGameView):
     def get_context(self, *args, **kwargs):
         context = super().get_context(*args, **kwargs)
         context['historical_leaderboards'] = visible_leaderboards(self.slug)
-        if self.request.user.is_authenticated:
+        request = self.request
+        player = request.user
+        t = request.session.get(self._last_results_visit_key())
+
+        if t:
+            t = dateutil.parser.isoparse(t)
+            t = t + datetime.timedelta(minutes=5)
+        n_comments = n_new_comments(self.game, player, t)
+        context['n_comments'] = n_comments
+
+        if player.is_authenticated:
             # get the logged in player's stats for the game
             player_score, player_rank, player_percentile = \
-                player_score_rank_percentile(self.request.user, self.game)
+                player_score_rank_percentile(player, self.game)
             context.update({
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
@@ -57,6 +71,9 @@ class LeaderboardView(BaseGameView):
         messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, 'leaderboard/leaderboard_view.html', self.get_context(*args, **kwargs))
 
+    def _last_results_visit_key(self):
+        return f'results_last_visit_t:{self.slug}:{self.game.game_id}'
+
 
 class ResultsView(LeaderboardView):
 
@@ -66,6 +83,7 @@ class ResultsView(LeaderboardView):
         context = self.get_context()
         questions = game.questions.exclude(type=Question.op).order_by('number')
         player_answers = []
+
         if request.user.is_authenticated:
             player_answers = game.coded_player_answers.filter(player=request.user)
 
@@ -79,6 +97,9 @@ class ResultsView(LeaderboardView):
             'visible_comments': 5
         })
         messages.info(request, "Login to follow your friends and join the conversation!")
+
+        request.session[self._last_results_visit_key()] = our_now().isoformat()
+
         return render(request, 'leaderboard/results.html', context)
 
 
