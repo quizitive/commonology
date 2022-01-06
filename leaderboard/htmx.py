@@ -5,10 +5,12 @@ from django.views.generic.base import View
 from django.http import Http404
 from django.utils.safestring import mark_safe
 
-from game.models import Game, Answer
+from game.models import Game
 from game.views import SeriesPermissionMixin
 from game.utils import new_players_for_game
-from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard, visible_leaderboards
+from leaderboard.leaderboard import build_answer_tally, build_filtered_leaderboard, \
+    visible_leaderboards, winners_of_series
+from users.utils import players_with_referral_badge
 
 
 class LeaderboardHTMXView(SeriesPermissionMixin, View):
@@ -57,8 +59,6 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
 
         answer_tally = build_answer_tally(current_game)
 
-        user, user_following = self._user_and_following
-
         # leaderboard filters
         search_term = request.GET.get('q')
         team_id = request.GET.get('team')
@@ -87,8 +87,9 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
             'game_id': self.game_id,
             'leaderboard': leaderboard,
             'search_term': search_term,
-            'user_following': user_following,
             'id_filter': id_filter,
+            'winners_of_series': set(winners_of_series(self.slug)),
+            'players_with_referral_badge': set(players_with_referral_badge().values_list("id", flat=True)),
             'lb_message': lb_message,
             'total_players': total_players,
             'page': page,
