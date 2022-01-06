@@ -9,7 +9,7 @@ from django.db.models import Sum, Subquery, OuterRef
 
 from project.utils import REDIS, quick_cache, quick_cache_key, redis_delete_patterns, our_now
 from users.models import Player, Team
-from game.models import Game, AnswerCode
+from game.models import Game, AnswerCode, Series
 from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
 from game.tasks import api_to_db
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
@@ -119,7 +119,10 @@ def build_leaderboard_fromdb(game, answer_tally):
     )
     leaderboard = _score_and_rank(leaderboard, lb_cols)
     leaderboard = leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + lb_cols]
-    REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 60 * 60)
+    REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 60 * 60)
+    player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
+    game.leaderboard.winners.set(Player.objects.filter(id__in=player_ids))
+    winners_of_game(game, force_refresh=True)
     return leaderboard
 
 
@@ -150,7 +153,7 @@ def _score_and_rank(leaderboard, lb_cols):
     return leaderboard
 
 
-@quick_cache(60 * 60)
+@quick_cache(24 * 60 * 60)
 def build_answer_tally(game):
     raw_string_counts = game.valid_raw_string_counts
     answer_subquery = raw_string_counts.filter(raw_string=OuterRef('raw_string')).filter(question=OuterRef('question'))
@@ -261,11 +264,26 @@ def player_latest_game_message(game, rank, percentile):
     return f"This game you ranked {rank} out of {player_count} players. {follow_up}"
 
 
+@quick_cache()
 def winners_of_game(game):
+    # todo: we don't need any of the bottom part once games have winners in db
+    winners_from_db = Player.objects.filter(games_won__game=game)
+    if winners_from_db:
+        return winners_from_db
     answer_tally = build_answer_tally(game)
     leaderboard = build_filtered_leaderboard(game, answer_tally)
     player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
     return Player.objects.filter(id__in=player_ids)
+
+
+@quick_cache()
+def winners_of_series(slug):
+    # todo: this can be a list of a queryset once we have database populated
+    winners = []
+    series = Series.objects.get(slug=slug)
+    for game in series.games.all():
+        winners.extend(list(winners_of_game(game).values_list("id", flat=True)))
+    return winners
 
 
 def visible_leaderboards(slug='commonology', limit=10):
