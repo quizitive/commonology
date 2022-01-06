@@ -1,3 +1,5 @@
+from emoji import is_emoji
+
 from django import template
 from django.shortcuts import reverse
 from django.utils.safestring import mark_safe
@@ -60,6 +62,14 @@ def formatted_answer_cell(context, counter):
              f'</div>{addl_div}'
 
     return mark_safe(result)
+
+
+@register.simple_tag
+def profile_char(display_name):
+    first_char = display_name[:1]
+    style = " style=\"padding-left:2px;\"" if is_emoji(first_char) else ""
+    final_html = f"<span{style}>{first_char}</span>"
+    return mark_safe(final_html)
 
 
 @register.simple_tag(takes_context=True)
