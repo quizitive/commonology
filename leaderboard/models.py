@@ -10,6 +10,7 @@ from sortedm2m.fields import SortedManyToManyField
 from project.utils import our_now
 from game.models import Game
 from components.models import Component
+from users.models import Player
 
 
 class Leaderboard(models.Model):
@@ -29,6 +30,7 @@ class Leaderboard(models.Model):
     )
     top_commentary = RichTextUploadingField(null=True, blank=True)
     bottom_commentary = RichTextUploadingField(null=True, blank=True)
+    winners = models.ManyToManyField(Player, blank=True, related_name='games_won', db_index=True)
 
     def __str__(self):
         return f"Game {self.game.game_id} Leaderboard"
