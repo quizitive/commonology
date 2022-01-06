@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import CIEmailField
 from django.utils.translation import ugettext_lazy as _
+from django.utils.functional import cached_property
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.safestring import mark_safe
@@ -85,7 +86,7 @@ class Player(CustomUser):
                              help_text="Unique identifier useful for url parameters like referrer.")
     reminder = models.BooleanField(default=True,
                                    help_text="Send game reminder email even if the player played this weeks game already.")
-    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='referrers')
+    referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='referrals')
     goofy = models.OneToOneField
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
@@ -148,6 +149,10 @@ class Player(CustomUser):
         else:
             r = 'None'
         return mark_safe(r)
+
+    @cached_property
+    def following_ids(self):
+        return {p for p in self.following.values_list("id", flat=True)}
 
 
 class PendingEmail(models.Model):
