@@ -1,6 +1,7 @@
 from os import environ as env
 import re
 import datetime
+import dateutil
 import string
 import random
 import json
@@ -18,11 +19,10 @@ from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
 from project.utils import our_now, redis_delete_patterns
-from leaderboard.models import Leaderboard
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
-from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate
+from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate, n_new_comments
 from game.models import Series, Question, Answer
 from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
@@ -30,6 +30,8 @@ from game.gsheets_api import *
 from game.tasks import questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
 from game.forms import QuestionAnswerForm
+from users.tests import test_pw
+from chat.models import Comment
 
 from django.contrib.auth import get_user_model
 
@@ -109,7 +111,8 @@ class BaseGameDataTestCase(TestCase):
         self.game.end = t + relativedelta(hours=1)
         self.game.save()
 
-    def deactivate_game(self):
+    @classmethod
+    def deactivate_game(cls):
         cls.game.end = cls.game.start
 
 
@@ -746,3 +749,64 @@ class SessionReferralTests(BaseGameDataTestCase):
 
         pe = PendingEmail.objects.filter(email=email).first()
         self.assertEqual(pe.referrer, self.user1)
+
+
+class NewMessageIndicatorTests(BaseGameDataTestCase):
+    # In these tests the referral code was introduced to the session as an argument on the home page.
+    def setUp(self):
+        self.leaderboard_obj.publish_date = our_now() - datetime.timedelta(days=1)
+        self.leaderboard_obj.save()
+        self.authenticated_client = Client(raise_request_exception=False)
+        self.authenticated_client.login(email=self.game_player.email, password=test_pw)
+        self.question = self.game.game_questions.first()
+
+    def add_comment(self, player, s, t):
+        thread = self.question.thread
+        c = Comment(player=player, created=t, comment=s, thread=thread)
+        c.save()
+
+    def get_session_time(self, client):
+        # Set session time
+        response = client.get(reverse('leaderboard:current-results'))
+        self.assertEqual(response.status_code, 200)
+        last_visit_t = client.session[f'results_last_visit_t:{self.series.slug}:{self.game.game_id}']
+        last_visit_t = dateutil.parser.isoparse(last_visit_t)
+        return last_visit_t
+
+    def test_indicator(self):
+        client1 = self.authenticated_client
+        player1 = self.game_player
+        player2 = get_local_user(e='two@foo.com')
+        client2 = get_local_client(e='two@foo.com')
+        player3 = get_local_user(e='three@foo.com')
+        client3 = get_local_client(e='three@foo.com')
+        comment_badge = "<div id=\"comment-indicator-badge-container\">"
+
+        # Set session time for client 1 and client2
+        self.get_session_time(client2)
+        last_visit_t = self.get_session_time(client1)
+        last_visit_plus_5 = last_visit_t + datetime.timedelta(minutes=5)
+
+        # There are no comments yet
+        f = n_new_comments(self.game, player1, last_visit_t)
+        self.assertFalse(f)
+
+        # Player 2 adds a comment 6 minutes after player 1 last visited the results page.
+        self.add_comment(player2, 'hi', last_visit_t + datetime.timedelta(minutes=6))
+        flag = n_new_comments(self.game, player1, last_visit_plus_5)
+        self.assertTrue(flag)
+
+        # Player 1 visits the leaderboard which indicates a new message.
+        response = client1.get(reverse('leaderboard:current-leaderboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, comment_badge)
+
+        # Player 2 visits the leaderboard but should not see an indication because he posted new comment
+        response = client2.get(reverse('leaderboard:current-leaderboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, comment_badge)
+
+        # Player 3 visits leaderboard but never visited results
+        response = client3.get(reverse('leaderboard:current-leaderboard'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, comment_badge)
