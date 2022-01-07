@@ -92,7 +92,7 @@ class ResultsView(LeaderboardView):
         if request.user.is_authenticated:
             player = request.user
             player_answers = game.coded_player_answers.filter(player=player)
-            save_last_visit_t.delay(player.id, self._last_results_visit_key(), our_now().isoformat())
+            save_last_visit_t(player.id, self._last_results_visit_key(), our_now().isoformat())
         else:
             messages.info(request, "Login to follow your friends and join the conversation!")
 
