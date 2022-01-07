@@ -49,13 +49,15 @@ class LeaderboardView(BaseGameView):
         context['historical_leaderboards'] = visible_leaderboards(self.slug)
         request = self.request
         player = request.user
-        t = player.data.get(self._last_results_visit_key())
 
-        if t:
-            t = dateutil.parser.isoparse(t)
-            t = t + datetime.timedelta(minutes=5)
-        n_comments = n_new_comments(self.game, player, t)
-        context['n_comments'] = n_comments
+        if not player.is_anonymous:
+            t = player.data.get(self._last_results_visit_key())
+
+            if t:
+                t = dateutil.parser.isoparse(t)
+                t = t + datetime.timedelta(minutes=5)
+            n_comments = n_new_comments(self.game, player, t)
+            context['n_comments'] = n_comments
 
         if player.is_authenticated:
             # get the logged in player's stats for the game
