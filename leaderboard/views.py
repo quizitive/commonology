@@ -15,6 +15,7 @@ from game.utils import n_new_comments
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
     player_score_rank_percentile, rank_string, score_string, visible_leaderboards
+from leaderboard.tasks import save_last_visit_t
 
 
 class LeaderboardView(BaseGameView):
@@ -48,7 +49,7 @@ class LeaderboardView(BaseGameView):
         context['historical_leaderboards'] = visible_leaderboards(self.slug)
         request = self.request
         player = request.user
-        t = request.session.get(self._last_results_visit_key())
+        t = player.data.get(self._last_results_visit_key())
 
         if t:
             t = dateutil.parser.isoparse(t)
@@ -85,7 +86,11 @@ class ResultsView(LeaderboardView):
         player_answers = []
 
         if request.user.is_authenticated:
-            player_answers = game.coded_player_answers.filter(player=request.user)
+            player = request.user
+            player_answers = game.coded_player_answers.filter(player=player)
+            save_last_visit_t(player, self._last_results_visit_key(), our_now().isoformat())
+        else:
+            messages.info(request, "Login to follow your friends and join the conversation!")
 
         context.update({
             'answer_tally': answer_tally,
@@ -96,9 +101,6 @@ class ResultsView(LeaderboardView):
             'host': game.hosts.filter(email="alex@commonologygame.com").first() or game.hosts.first(),
             'visible_comments': 5
         })
-        messages.info(request, "Login to follow your friends and join the conversation!")
-
-        request.session[self._last_results_visit_key()] = our_now().isoformat()
 
         return render(request, 'leaderboard/results.html', context)
 
