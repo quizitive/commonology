@@ -765,11 +765,12 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         c = Comment(player=player, created=t, comment=s, thread=thread)
         c.save()
 
-    def get_session_time(self, client):
+    def get_time(self, client, player):
         # Set session time
         response = client.get(reverse('leaderboard:current-results'))
         self.assertEqual(response.status_code, 200)
-        last_visit_t = client.session[f'results_last_visit_t:{self.series.slug}:{self.game.game_id}']
+        player = Player.objects.get(id=player.id)
+        last_visit_t = player.data.get(f'results_last_visit_t:{self.series.slug}:{self.game.game_id}')
         last_visit_t = dateutil.parser.isoparse(last_visit_t)
         return last_visit_t
 
@@ -783,8 +784,8 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         comment_badge = "<div id=\"comment-indicator-badge-container\">"
 
         # Set session time for client 1 and client2
-        self.get_session_time(client2)
-        last_visit_t = self.get_session_time(client1)
+        self.get_time(client2, player2)
+        last_visit_t = self.get_time(client1, player1)
         last_visit_plus_5 = last_visit_t + datetime.timedelta(minutes=5)
 
         # There are no comments yet

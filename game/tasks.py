@@ -8,8 +8,7 @@ from celery import shared_task
 
 from django.utils.timezone import make_aware
 from django.db import transaction
-from project.utils import our_now, REDIS
-from game.models import Series, Game, Question, Answer, AnswerCode
+from game.models import Question, Answer, AnswerCode
 from django.contrib.auth import get_user_model
 
 
