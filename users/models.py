@@ -81,6 +81,10 @@ def code_player():
             return code
 
 
+def default_data_dict():
+    return {}
+
+
 class Player(CustomUser):
     _code = models.CharField(max_length=5, db_index=True, null=True,
                              help_text="Unique identifier useful for url parameters like referrer.")
@@ -94,6 +98,7 @@ class Player(CustomUser):
         default=False,
         help_text="Designates whether this player has joined the online community."
     )
+    data = models.JSONField(default=default_data_dict)
 
     @property
     def code(self):
