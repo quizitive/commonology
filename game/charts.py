@@ -77,6 +77,7 @@ class GamePlayerCount(BaseChartData):
     def get_data(self):
         data = []
         games = self.queryset()
+        # todo: fetch numerator data into dictionary before iterating through periods
         for p in self.periods():
             this_period = games.filter(game_id__gte=p[0], game_id__lte=p[1])
             try:
