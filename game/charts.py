@@ -41,6 +41,7 @@ class PlayersAndMembersDataset:
             backgroundColor=Color.Hex(0x237073FF),
             **kwargs
         )
+        print("Foo")
 
     def get_labels(self):
         return self.Members.get_labels()
@@ -101,8 +102,6 @@ class GamePlayerCount(BaseChartData):
         return data
 
     def get_labels(self):
-        periods = self.periods
-        periods.reverse()
         if self.agg_period == 1:
-            return [f"Game {s}" for s, _ in periods]
-        return [f"Games {s} - {e}" for s, e in periods]
+            return [f"Game {s}" for s, _ in reversed(self.periods)]
+        return [f"Games {s} - {e}" for s, e in reversed(self.periods)]
