@@ -1,4 +1,3 @@
-from functools import lru_cache
 from collections import Counter
 
 from pychartjs import ChartType, Color, Options, BaseSmartChart, BaseChartData
@@ -6,9 +5,7 @@ from pychartjs import ChartType, Color, Options, BaseSmartChart, BaseChartData
 from django.db.models import Count, F, Min
 from django.utils.functional import cached_property
 
-from project.utils import our_now
 from game.models import Game
-from game.utils import new_players_for_game
 from users.models import Player
 
 
