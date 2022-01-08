@@ -3,7 +3,8 @@ from collections import Counter
 
 from pychartjs import ChartType, Color, Options, BaseSmartChart, BaseChartData
 
-from django.db.models import Min, Q
+from django.db.models import Count, F, Min
+from django.utils.functional import cached_property
 
 from project.utils import our_now
 from game.models import Game
@@ -32,7 +33,7 @@ class PlayersAndMembersDataset:
             **kwargs
         )
         self.Members = GamePlayerCount(
-            player_filters={'player__is_member': True},
+            player_filters={'is_member': True},
             borderColor=Color.Hex(0xf26649FF),
             backgroundColor=Color.Hex(0xf26649FF),
             **kwargs
@@ -50,8 +51,8 @@ class PlayersAndMembersDataset:
 
 class GamePlayerCount(BaseChartData):
     # self.numerator_fcn is the name of the desired numerator function that
-    # takes the argument this_period, which is a list of games in a period,
-    # and returns a list of numerators that ultimately get returned to the chart
+    # defines the count of players for each game based on custom filters. It returns
+    # a dict of such as {game_id: player_count}
 
     def __init__(self, slug, since_game=0, player_filters=None, agg_period=1, **kwargs):
         self.slug = slug
@@ -61,13 +62,26 @@ class GamePlayerCount(BaseChartData):
         self.agg_period = agg_period
         super().__init__(**kwargs)
 
-    @lru_cache(maxsize=1)
-    def queryset(self):
-        return Game.objects.filter(series__slug=self.slug, game_id__gte=self.since_game, end__lte=our_now())
+    def players_with_filters(self):
+        players_with_filter_count = Player.objects.filter(
+            answers__question__game__game_id__gte=self.since_game,
+            answers__question__game__series__slug='commonology',
+            **self.player_filters
+        ).values(
+            game_id=F('answers__question__game__game_id')
+        ).annotate(num_players=Count('id', distinct=True))
+        return {game['game_id']: game['num_players'] for game in players_with_filter_count}
 
-    @lru_cache(maxsize=1)
+    def new_players(self):
+        first_games = Player.objects.filter(
+            answers__question__game__series__slug='commonology').annotate(
+            first_game=Min('answers__question__game__game_id')
+        ).values_list('id', 'first_game')
+        return Counter([fg[1] for fg in first_games])
+
+    @cached_property
     def periods(self):
-        gids = self.queryset().values_list('game_id', flat=True)
+        gids = Game.objects.filter(game_id__gte=self.since_game).values_list('game_id', flat=True)
         periods = []
         for idx in range(0, len(gids), self.agg_period):
             g = gids[idx]
@@ -75,28 +89,21 @@ class GamePlayerCount(BaseChartData):
         return periods
 
     def get_data(self):
+        numerator_fcn = self.__getattribute__(self.numerator_fcn)
+        numerator_dict = numerator_fcn()
         data = []
-        games = self.queryset()
-        # todo: fetch numerator data into dictionary before iterating through periods
-        for p in self.periods():
-            this_period = games.filter(game_id__gte=p[0], game_id__lte=p[1])
+        for p in self.periods:
+            game_ids = [gid for gid in range(p[0], p[1] + 1)]
             try:
-                numerator_fcn = self.__getattribute__(self.numerator_fcn)
-                this_pd_avg = sum(numerator_fcn(this_period)) / this_period.count()
+                this_pd_avg = sum([numerator_dict[gid] for gid in game_ids]) / len(game_ids)
             except ZeroDivisionError:
                 break
             data.append(this_pd_avg)
         data.reverse()
         return data
 
-    def players_with_filters(self, this_period):
-        return [g.players_dict.filter(**self.player_filters).count() for g in this_period]
-
-    def new_players(self, this_period):
-        return [new_players_for_game(g.series.slug, g.game_id).count() for g in this_period]
-
     def get_labels(self):
-        periods = self.periods()
+        periods = self.periods
         periods.reverse()
         if self.agg_period == 1:
             return [f"Game {s}" for s, _ in periods]
