@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.urls import path
 from django.shortcuts import render
 
+from project.utils import quick_cache
+
 from game.charts import PlayerTrendChart, PlayersAndMembersDataset
 
 
@@ -14,6 +16,7 @@ class CommonologyAdmin(admin.AdminSite):
         other_urls = [path('stats/', self.admin_view(self.stats_view), name='game-stats'), ]
         return other_urls + urls
 
+    @quick_cache()
     def stats_view(self, request):
         chart_1 = PlayerTrendChart(
             PlayersAndMembersDataset, slug='commonology', name="chart_3", since_game=38)
