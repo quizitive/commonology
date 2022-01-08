@@ -41,7 +41,6 @@ class PlayersAndMembersDataset:
             backgroundColor=Color.Hex(0x237073FF),
             **kwargs
         )
-        print("Foo")
 
     def get_labels(self):
         return self.Members.get_labels()
