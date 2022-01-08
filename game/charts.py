@@ -72,7 +72,8 @@ class GamePlayerCount(BaseChartData):
         ).annotate(num_players=Count('id', distinct=True))
         return {game['game_id']: game['num_players'] for game in players_with_filter_count}
 
-    def new_players(self):
+    @staticmethod
+    def new_players():
         first_games = Player.objects.filter(
             answers__question__game__series__slug='commonology').annotate(
             first_game=Min('answers__question__game__game_id')
