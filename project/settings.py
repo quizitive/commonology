@@ -9,6 +9,7 @@ import platform
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from project import settings_utils
+# from .celery import app as celery_app
 
 
 BASE_DIR = settings_utils.BASE_DIR
