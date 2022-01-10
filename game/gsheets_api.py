@@ -191,11 +191,14 @@ def make_rollups_sheet(rollups_and_tallies):
 
 @shared_task
 def write_new_responses_to_gdrive(gid):
-    game = Game.objects.get(id=gid)
-    redis_key = f'responses_{game.series.slug}_{game.game_id}'
-    if REDIS.get(redis_key):
-        return
-    REDIS.set(redis_key, 'true', timeout=60)
-    sheet_doc = get_sheet_doc(game)
-    responses = raw_answers_db_to_df(game)
-    write_responses_sheet(sheet_doc, responses)
+    try:
+        game = Game.objects.get(id=gid)
+        redis_key = f'responses_{game.series.slug}_{game.game_id}'
+        if REDIS.get(redis_key):
+            return
+        REDIS.set(redis_key, 'true', timeout=60)
+        sheet_doc = get_sheet_doc(game)
+        responses = raw_answers_db_to_df(game)
+        write_responses_sheet(sheet_doc, responses)
+    except FileNotFoundError:
+        print('Missing .config.gspread.commonology_service_account.json file.')
