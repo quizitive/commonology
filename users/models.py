@@ -150,6 +150,9 @@ class Player(CustomUser):
         r = [f'<a href="/admin/users/player/{r.id}/change">{r.email} {r.display_name}</a>' for r in
              self.players_referred]
         if r:
+            n = len(r)
+            r.append('')
+            r.append(f'Count = {n}')
             r = '<br>'.join(r)
         else:
             r = 'None'
