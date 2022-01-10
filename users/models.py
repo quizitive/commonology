@@ -146,7 +146,7 @@ class Player(CustomUser):
         return len(self.players_referred.all())
 
     @property
-    def referrals(self):
+    def referrals_roster(self):
         r = [f'<a href="/admin/users/player/{r.id}/change">{r.email} {r.display_name}</a>' for r in
              self.players_referred]
         if r:
