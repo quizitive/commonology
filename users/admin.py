@@ -26,7 +26,7 @@ class PlayerUserAdmin(UserAdmin):
         (None, {'fields': ('email', 'password', 'code')}),
         ('Personal', {'fields': ('first_name', 'last_name', 'display_name', 'birth_date', 'is_member', 'subscribed', 'reminder')}),
         ('Other', {'fields': ('date_joined', 'location')}),
-        ('Referrals', {'fields': ('referrer', 'referrals',)}),
+        ('Referrals', {'fields': ('referrer', 'referrals_roster',)}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser',
                                     'groups', 'user_permissions')}),
     )
@@ -37,7 +37,7 @@ class PlayerUserAdmin(UserAdmin):
                        'is_staff', 'is_active', 'is_superuser', 'groups')}
         ),
     )
-    readonly_fields = ('code', 'referrals')
+    readonly_fields = ('code', 'referrals_roster')
     search_fields = ('email', 'first_name', 'last_name', 'display_name')
     ordering = ('email',)
     actions = [subscribe_action, unsubscribe_action]
