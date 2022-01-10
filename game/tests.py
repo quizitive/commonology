@@ -1,3 +1,4 @@
+import os
 from os import environ as env
 from time import sleep
 import re
@@ -19,18 +20,17 @@ from django.core import mail
 from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
-from project.utils import our_now, redis_delete_patterns
+from project.utils import our_now, redis_delete_patterns, REDIS
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
 from leaderboard.tasks import save_last_visit_t
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
 from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate, n_new_comments
-from game.models import Series, Question, Answer
+from game.models import Game, Series, Question, Answer
 from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
-from game.gsheets_api import *
-from game.tasks import questions_to_db, players_to_db, \
-    answers_codes_to_db, answers_to_db
+from game.gsheets_api import api_and_db_data_as_df
+from game.tasks import questions_to_db, players_to_db, answers_codes_to_db, answers_to_db
 import game.gsheets_api
 from project.celery import stubbed_task
 from game.forms import QuestionAnswerForm
