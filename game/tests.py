@@ -822,6 +822,5 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         t = our_now().isoformat()
         key = 'leaderboard_last_t'
         save_last_visit_t.delay(player_id, key, t)
-        sleep(10)
         p = Player.objects.get(id=player_id)
         self.assertEqual(p.data[key], t)
