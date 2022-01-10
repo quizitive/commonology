@@ -23,12 +23,6 @@ from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
 from game.gsheets_api import api_data_to_df, build_rollups_and_tallies, make_answers_sheet, make_rollups_sheet
-# import game.gsheets_api
-# from project.celery import stubbed_task
-# Rather than provide gdrive credentials to ci tests we'll just stub with no-op.
-# Do this before gsheets_api is imported elsewhere
-# game.gsheets_api.write_new_responses_to_gdrive = stubbed_task
-
 from project import settings
 from project.utils import our_now, redis_delete_patterns, REDIS
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
