@@ -13,6 +13,8 @@ from copy import deepcopy
 from csv import reader
 from dateutil.relativedelta import relativedelta
 
+import pandas as pd
+
 from django.utils.timezone import make_aware
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -20,7 +22,7 @@ from django.core import mail
 from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
-from game.gsheets_api import api_data_to_df, build_rollups_and_tallies
+from game.gsheets_api import api_data_to_df, build_rollups_and_tallies, make_answers_sheet, make_rollups_sheet
 import game.gsheets_api
 from project.celery import stubbed_task
 # Rather than provide gdrive credentials to ci tests we'll just stub with no-op.
