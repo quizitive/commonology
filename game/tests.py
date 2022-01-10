@@ -1,4 +1,6 @@
+import os
 from os import environ as env
+from time import sleep
 import re
 import datetime
 import dateutil
@@ -11,6 +13,8 @@ from copy import deepcopy
 from csv import reader
 from dateutil.relativedelta import relativedelta
 
+import pandas as pd
+
 from django.utils.timezone import make_aware
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -18,17 +22,18 @@ from django.core import mail
 from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
-from project.utils import our_now, redis_delete_patterns
+from game.gsheets_api import api_data_to_df, build_rollups_and_tallies, make_answers_sheet, make_rollups_sheet
+from project import settings
+from project.utils import our_now, redis_delete_patterns, REDIS
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
+from leaderboard.tasks import save_last_visit_t
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
 from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate, n_new_comments
-from game.models import Series, Question, Answer
+from game.models import Game, Series, Question, Answer
 from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
-from game.gsheets_api import *
-from game.tasks import questions_to_db, players_to_db, \
-    answers_codes_to_db, answers_to_db
+from game.tasks import questions_to_db, players_to_db, answers_codes_to_db, answers_to_db
 from game.forms import QuestionAnswerForm
 from users.tests import test_pw
 from chat.models import Comment
@@ -811,3 +816,12 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         response = client3.get(reverse('leaderboard:current-leaderboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, comment_badge)
+
+    def test_save_last_visit_t(self):
+        player_id = self.game_player.id
+        t = our_now().isoformat()
+        key = 'leaderboard_last_t'
+        save_last_visit_t.delay(player_id, key, t)
+        sleep(10)
+        p = Player.objects.get(id=player_id)
+        self.assertEqual(p.data[key], t)
