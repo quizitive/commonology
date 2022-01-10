@@ -20,12 +20,14 @@ from django.core import mail
 from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
+from game.gsheets_api import api_data_to_df
 import game.gsheets_api
 from project.celery import stubbed_task
 # Rather than provide gdrive credentials to ci tests we'll just stub with no-op.
 # Do this before gsheets_api is imported elsewhere
 game.gsheets_api.write_new_responses_to_gdrive = stubbed_task
 
+from project import settings
 from project.utils import our_now, redis_delete_patterns, REDIS
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
 from leaderboard.tasks import save_last_visit_t
@@ -36,7 +38,6 @@ from game.models import Game, Series, Question, Answer
 from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
 from game.tasks import questions_to_db, players_to_db, answers_codes_to_db, answers_to_db
-
 from game.forms import QuestionAnswerForm
 from users.tests import test_pw
 from chat.models import Comment
