@@ -56,12 +56,14 @@ python manage.py migrate
 python manage.py collectstatic --noinput
 
 echo "About to run Django tests."
+export EAGER_CELERY=true
 python manage.py test
 if [ $? -eq 0 ]; then
     echo OK
 else
     echo "failed to django tests."
 fi
+unset EAGER_CELERY
 
 echo "About to restart gunicorn."
 sudo systemctl restart gunicorn
