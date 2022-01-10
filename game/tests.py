@@ -1,4 +1,5 @@
 from os import environ as env
+from time import sleep
 import re
 import datetime
 import dateutil
@@ -20,6 +21,7 @@ from django.core.files.storage import FileSystemStorage
 
 from project.utils import our_now, redis_delete_patterns
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
+from leaderboard.tasks import save_last_visit_t
 from users.tests import get_local_user, get_local_client, ABINORMAL
 from users.models import Player, PendingEmail
 from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate, n_new_comments
@@ -811,3 +813,12 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         response = client3.get(reverse('leaderboard:current-leaderboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, comment_badge)
+
+    def test_save_last_visit_t(self):
+        player_id = self.game_player.id
+        t = our_now().isoformat()
+        key = 'leaderboard_last_t'
+        save_last_visit_t.delay(player_id, key, t)
+        sleep(10)
+        p = Player.objects.get(id=player_id)
+        self.assertEqual(p.data[key], t)
