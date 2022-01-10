@@ -20,6 +20,12 @@ from django.core import mail
 from django.db import IntegrityError
 from django.core.files.storage import FileSystemStorage
 
+import game.gsheets_api
+from project.celery import stubbed_task
+# Rather than provide gdrive credentials to ci tests we'll just stub with no-op.
+# Do this before gsheets_api is imported elsewhere
+game.gsheets_api.write_new_responses_to_gdrive = stubbed_task
+
 from project.utils import our_now, redis_delete_patterns, REDIS
 from leaderboard.leaderboard import build_filtered_leaderboard, build_answer_tally, lb_cache_key, winners_of_game
 from leaderboard.tasks import save_last_visit_t
@@ -29,10 +35,8 @@ from game.utils import next_wed_noon, next_friday_1159, write_winner_certificate
 from game.models import Game, Series, Question, Answer
 from game.views import PSIDMixin, find_latest_public_game
 from game.rollups import *
-from game.gsheets_api import api_and_db_data_as_df
 from game.tasks import questions_to_db, players_to_db, answers_codes_to_db, answers_to_db
-import game.gsheets_api
-from project.celery import stubbed_task
+
 from game.forms import QuestionAnswerForm
 from users.tests import test_pw
 from chat.models import Comment
@@ -41,9 +45,6 @@ from django.contrib.auth import get_user_model
 
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
-
-# Rather than provide gdrive credentials to ci tests we'll just stub with no-op.
-game.gsheets_api.write_new_responses_to_gdrive = stubbed_task
 
 
 def suppress_hidden_error_logs(func):
