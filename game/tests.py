@@ -31,6 +31,8 @@ from game.rollups import *
 from game.gsheets_api import *
 from game.tasks import questions_to_db, players_to_db, \
     answers_codes_to_db, answers_to_db
+import game.gsheets_api
+from project.celery import stubbed_task
 from game.forms import QuestionAnswerForm
 from users.tests import test_pw
 from chat.models import Comment
@@ -39,6 +41,9 @@ from django.contrib.auth import get_user_model
 
 
 LOCAL_DIR = os.path.dirname(os.path.realpath(__file__))
+
+# Rather than provide gdrive credentials to ci tests we'll just stub with no-op.
+game.gsheets_api.write_new_responses_to_gdrive = stubbed_task
 
 
 def suppress_hidden_error_logs(func):
