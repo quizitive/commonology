@@ -786,7 +786,7 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         client2 = get_local_client(e='two@foo.com')
         player3 = get_local_user(e='three@foo.com')
         client3 = get_local_client(e='three@foo.com')
-        comment_badge = "<div id=\"comment-indicator-badge-container\">"
+        comment_badge = "<div id=\"comment-indicator-badge-container\" class=\"w3-tooltip\">"
 
         # Set session time for client 1 and client2
         self.get_time(client2, player2)
