@@ -5,6 +5,7 @@ from pychartjs import ChartType, Color, Options, BaseSmartChart, BaseChartData
 from django.db.models import Count, F, Min
 from django.utils.functional import cached_property
 
+from project.utils import our_now
 from game.models import Game
 from users.models import Player
 
@@ -62,24 +63,23 @@ class GamePlayerCount(BaseChartData):
     def players_with_filters(self):
         players_with_filter_count = Player.objects.filter(
             answers__question__game__game_id__gte=self.since_game,
-            answers__question__game__series__slug='commonology',
+            answers__question__game__series__slug=self.slug,
             **self.player_filters
         ).values(
             game_id=F('answers__question__game__game_id')
         ).annotate(num_players=Count('id', distinct=True))
         return {game['game_id']: game['num_players'] for game in players_with_filter_count}
 
-    @staticmethod
-    def new_players():
+    def new_players(self):
         first_games = Player.objects.filter(
-            answers__question__game__series__slug='commonology').annotate(
+            answers__question__game__series__slug=self.slug).annotate(
             first_game=Min('answers__question__game__game_id')
         ).values_list('id', 'first_game')
         return Counter([fg[1] for fg in first_games])
 
     @cached_property
     def periods(self):
-        gids = Game.objects.filter(game_id__gte=self.since_game).values_list('game_id', flat=True)
+        gids = Game.objects.filter(series__slug=self.slug, game_id__gte=self.since_game, end__lte=our_now()).values_list('game_id', flat=True)
         periods = []
         for idx in range(0, len(gids), self.agg_period):
             g = gids[idx]
