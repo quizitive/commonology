@@ -104,8 +104,12 @@ def do_it():
     merge_related_fields(from_p, to_p)
     merge_unrelated_fields(from_p, to_p)
     from_p.is_active = False
+    from_p.subscribed = False
+    from_p.is_member = False
+    from_p.reminder = False
     from_p.save()
     player_log_entry(from_p, f'Deactivated and moved to {to_p}')
+    player_log_entry(to_p, f'{from_p} merged into {to_p}')
 
 
 do_it()
