@@ -48,8 +48,7 @@ def make_leaderboard_for_new_game(sender, instance, created, **kwargs):
 
 
 class PlayerRankScore(models.Model):
-    # todo: consider adding db indexes
-    player = models.ForeignKey(Player, related_name='rank_scores', on_delete=models.CASCADE)
-    leaderboard = models.ForeignKey(Leaderboard, related_name='rank_scores', on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, related_name='rank_scores', on_delete=models.CASCADE, db_index=True)
+    leaderboard = models.ForeignKey(Leaderboard, related_name='rank_scores', on_delete=models.CASCADE, db_index=True)
     rank = models.IntegerField()
     score = models.IntegerField()
