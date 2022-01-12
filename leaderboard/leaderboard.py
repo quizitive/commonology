@@ -121,11 +121,11 @@ def build_leaderboard_fromdb(game, answer_tally):
     )
     leaderboard = _score_and_rank(leaderboard, lb_cols)
     leaderboard = leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + lb_cols]
-    # REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 60 * 60)
+    REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 60 * 60)
     player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
     game.leaderboard.winners.set(Player.objects.filter(id__in=player_ids))
-    # winners_of_game(game, force_refresh=True)
-    _save_player_rank_scores.delay(leaderboard.to_json(), game.leaderboard.id)
+    winners_of_game(game, force_refresh=True)
+    save_player_rank_scores.delay(leaderboard.to_json(), game.leaderboard.id)
     return leaderboard
 
 
@@ -138,16 +138,31 @@ def _leaderboard_from_cache(game, answer_tally):
 
 @shared_task()
 @transaction.atomic()
-def _save_player_rank_scores(lb_json, lb_id):
-    # todo: make this more efficient
+def save_player_rank_scores(lb_json, lb_id):
+    existing_prs = PlayerRankScore.objects.filter(leaderboard_id=lb_id)
+    pids = [prs.player_id for prs in existing_prs]
     leaderboard = pd.read_json(lb_json)
-    print("foo")
-    for _, result in leaderboard.iterrows():
-        PlayerRankScore.objects.update_or_create(
-            player_id=result['id'],
-            leaderboard_id=lb_id,
-            rank=result['Rank'],
-            score=result['Score'])
+
+    # find any new players and add to PlayerRankScore table
+    new_records = leaderboard[~leaderboard['id'].isin(pids)]
+    new_prs_objs = []
+    for pid, rank, score in zip(new_records['id'], new_records['Rank'], new_records['Score']):
+        new_prs_objs.append(
+            PlayerRankScore(leaderboard_id=lb_id, player_id=pid, rank=rank, score=score)
+        )
+    PlayerRankScore.objects.bulk_create(new_prs_objs)
+
+    # find all players with changed rank or score and update
+    composites = [f"{prs.player_id}_{prs.rank}_{prs.score}" for prs in existing_prs]
+    leaderboard['composite'] = leaderboard[['id', 'Rank', 'Score']].astype(str).agg('_'.join, axis=1)
+    changed_records = leaderboard.loc[~leaderboard['composite'].isin(composites) & leaderboard['id'].isin(pids)]
+    changed_prs_objs = existing_prs.filter(player_id__in=changed_records['id'])
+    for obj in changed_prs_objs:
+        this_record = changed_records.loc[changed_records['id'] == obj.player_id]
+        obj.rank = this_record['Rank']
+        obj.score = this_record['Score']
+    print(f"Found {len(changed_prs_objs)} changed PRS")
+    PlayerRankScore.objects.bulk_update(changed_prs_objs, fields=['rank', 'score'])
 
 
 def lb_cache_key(game, answer_tally):
