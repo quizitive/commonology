@@ -5,7 +5,9 @@ from django.urls import reverse
 from django.test import Client
 
 from project.utils import REDIS, our_now, redis_delete_patterns
-from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key, winners_of_game
+from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key, winners_of_game, \
+    save_player_rank_scores, build_leaderboard_fromdb
+from leaderboard.models import PlayerRankScore
 from game.models import Game, Answer
 from game.tests import BaseGameDataTestCase, suppress_hidden_error_logs
 
@@ -207,3 +209,18 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         redis_delete_patterns('*')
         leaderboard = build_filtered_leaderboard(self.game, self.answer_tally)
         self.assertEqual(len(leaderboard), len(self.leaderboard) - 1)
+
+    def test_save_player_rank_scores(self):
+        player = Player.objects.get(email='user1@fakeemail.com')
+        player_prs_qs = PlayerRankScore.objects.filter(player=player)
+        self.assertTrue(player_prs_qs.exists())
+
+        player_prs = player_prs_qs.first()
+        original_value = player_prs.score
+        player_prs.score = 0
+        player_prs.save()
+        self.assertNotEqual(player_prs.score, original_value)
+
+        build_leaderboard_fromdb(self.game, self.answer_tally)
+        new_value = PlayerRankScore.objects.filter(player=player).first().score
+        self.assertEqual(original_value, new_value)
