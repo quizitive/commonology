@@ -3,9 +3,11 @@ import json
 import math
 from collections import OrderedDict, deque
 
+from celery import shared_task
 import pandas as pd
 
 from django.db.models import Sum, Subquery, OuterRef
+from django.db import transaction
 
 from project.utils import REDIS, quick_cache, quick_cache_key, redis_delete_patterns, our_now
 from users.models import Player, Team
@@ -13,7 +15,7 @@ from game.models import Game, AnswerCode, Series
 from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
 from game.tasks import api_to_db
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
-from leaderboard.models import Leaderboard
+from leaderboard.models import Leaderboard, PlayerRankScore
 
 
 def tabulate_results(game, update=False):
@@ -119,10 +121,11 @@ def build_leaderboard_fromdb(game, answer_tally):
     )
     leaderboard = _score_and_rank(leaderboard, lb_cols)
     leaderboard = leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + lb_cols]
-    REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 60 * 60)
+    # REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 60 * 60)
     player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
     game.leaderboard.winners.set(Player.objects.filter(id__in=player_ids))
-    winners_of_game(game, force_refresh=True)
+    # winners_of_game(game, force_refresh=True)
+    _save_player_rank_scores.delay(leaderboard.to_json(), game.leaderboard.id)
     return leaderboard
 
 
@@ -131,6 +134,20 @@ def _leaderboard_from_cache(game, answer_tally):
     if not lb_json:
         return None
     return pd.read_json(lb_json)
+
+
+@shared_task()
+@transaction.atomic()
+def _save_player_rank_scores(lb_json, lb_id):
+    # todo: make this more efficient
+    leaderboard = pd.read_json(lb_json)
+    print("foo")
+    for _, result in leaderboard.iterrows():
+        PlayerRankScore.objects.update_or_create(
+            player_id=result['id'],
+            leaderboard_id=lb_id,
+            rank=result['Rank'],
+            score=result['Score'])
 
 
 def lb_cache_key(game, answer_tally):
