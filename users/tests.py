@@ -377,3 +377,21 @@ class PendingUsersTests(TestCase):
         q = Question.objects.create(text='question text')
         Answer.objects.create(player=user2, raw_string='answer', question=q)
         self.assertEqual(user1.players_referred.count(), 1)
+
+
+class MergePlayers(TestCase):
+    def test_fields(self):
+        # This test is designed to make sure we maintain merge_players.py
+        # when new Player related fields are added.
+
+        expected = ['referrals', 'followers', 'pendingemail', 'captain_teams', 'teams',
+                    'logentry', 'social_auth', 'comments', 'owned_series', 'hosted_series',
+                    'series', 'hosted_games', 'answers', 'games_won', 'claim', 'mailingaddress',
+                    'id', 'password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined',
+                    'email', 'first_name', 'last_name', 'location', 'birth_date', 'subscribed', '_code',
+                    'reminder', 'referrer', 'display_name', 'is_member', 'data', 'groups', 'user_permissions',
+                    'following', 'marc']
+
+        names = [field.name for field in Player._meta.get_fields()]
+        self.assertTrue(set(names) == set(expected),
+                        msg='Was a model changed that relates to Player? Check impact to scripts/hacks/merge_players.py')
