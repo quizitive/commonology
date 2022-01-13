@@ -142,30 +142,15 @@ def _leaderboard_from_cache(game, answer_tally):
 @shared_task()
 @transaction.atomic()
 def save_player_rank_scores(lb_json, lb_id):
-    existing_prs = PlayerRankScore.objects.filter(leaderboard_id=lb_id)
-    pids = [prs.player_id for prs in existing_prs]
     leaderboard = pd.read_json(lb_json)
-
-    # find any new players and add to PlayerRankScore table
-    new_records = leaderboard[~leaderboard['id'].isin(pids)]
-    new_prs_objs = []
-    for pid, rank, score in zip(new_records['id'], new_records['Rank'], new_records['Score']):
-        new_prs_objs.append(
+    prs_objs = []
+    for pid, rank, score in zip(leaderboard['id'], leaderboard['Rank'], leaderboard['Score']):
+        prs_objs.append(
             PlayerRankScore(leaderboard_id=lb_id, player_id=pid, rank=rank, score=score)
         )
-    PlayerRankScore.objects.bulk_create(new_prs_objs)
-
-    # find all players with changed rank or score and update
-    composites = [f"{prs.player_id}_{prs.rank}_{prs.score}" for prs in existing_prs]
-    leaderboard['composite'] = leaderboard[['id', 'Rank', 'Score']].astype(str).agg('_'.join, axis=1)
-    changed_records = leaderboard.loc[~leaderboard['composite'].isin(composites) & leaderboard['id'].isin(pids)]
-    changed_prs_objs = existing_prs.filter(player_id__in=changed_records['id'])
-    for obj in changed_prs_objs:
-        this_record = changed_records.loc[changed_records['id'] == obj.player_id]
-        obj.rank = this_record['Rank']
-        obj.score = this_record['Score']
-    print(f"Found {len(changed_prs_objs)} changed PRS")
-    PlayerRankScore.objects.bulk_update(changed_prs_objs, fields=['rank', 'score'])
+    if prs_objs:
+        PlayerRankScore.objects.bulk_update_or_create(
+            prs_objs, ['rank', 'score'], match_field=('leaderboard_id', 'player_id'))
 
 
 def lb_cache_key(game, answer_tally):
