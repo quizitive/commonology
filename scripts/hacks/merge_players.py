@@ -14,7 +14,6 @@ django.setup()
 from users.models import Player, PendingEmail
 from rewards.models import MailingAddress
 from users.utils import player_log_entry
-from chat.models import Comment
 
 
 # # Use this to discover related fields
