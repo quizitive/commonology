@@ -390,7 +390,7 @@ class MergePlayers(TestCase):
                     'id', 'password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined',
                     'email', 'first_name', 'last_name', 'location', 'birth_date', 'subscribed', '_code',
                     'reminder', 'referrer', 'display_name', 'is_member', 'data', 'groups', 'user_permissions',
-                    'following', 'marc']
+                    'following']
 
         names = [field.name for field in Player._meta.get_fields()]
         self.assertTrue(set(names) == set(expected),
