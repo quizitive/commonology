@@ -52,3 +52,6 @@ class PlayerRankScore(models.Model):
     leaderboard = models.ForeignKey(Leaderboard, related_name='rank_scores', on_delete=models.CASCADE, db_index=True)
     rank = models.IntegerField()
     score = models.IntegerField()
+
+    class Meta:
+        unique_together = ('player', 'leaderboard')
