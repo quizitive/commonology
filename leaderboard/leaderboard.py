@@ -314,7 +314,7 @@ def winners_of_series(slug):
     # todo: this can be a list of a queryset once we have database populated
     winners = []
     series = Series.objects.get(slug=slug)
-    for game in series.games.all():
+    for game in series.games.filter(leaderboard__publish_date__lte=our_now()):
         winners.extend(list(winners_of_game(game).values_list("id", flat=True)))
     return winners
 
