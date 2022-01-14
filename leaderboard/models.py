@@ -1,11 +1,12 @@
 from datetime import timedelta
 
+from bulk_update_or_create import BulkUpdateOrCreateQuerySet
+from ckeditor_uploader.fields import RichTextUploadingField
+from sortedm2m.fields import SortedManyToManyField
+
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
-from ckeditor_uploader.fields import RichTextUploadingField
-from sortedm2m.fields import SortedManyToManyField
 
 from project.utils import our_now
 from game.models import Game
@@ -45,3 +46,14 @@ def make_leaderboard_for_new_game(sender, instance, created, **kwargs):
     if created:
         Leaderboard.objects.create(
             game_id=instance.id, sheet_name=instance.name, publish_date=instance.end + timedelta(hours=60))
+
+
+class PlayerRankScore(models.Model):
+    objects = BulkUpdateOrCreateQuerySet.as_manager()
+    player = models.ForeignKey(Player, related_name='rank_scores', on_delete=models.CASCADE, db_index=True)
+    leaderboard = models.ForeignKey(Leaderboard, related_name='rank_scores', on_delete=models.CASCADE, db_index=True)
+    rank = models.IntegerField()
+    score = models.IntegerField()
+
+    class Meta:
+        unique_together = ('player', 'leaderboard')
