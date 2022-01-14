@@ -3,9 +3,11 @@ import json
 import math
 from collections import OrderedDict, deque
 
+from celery import shared_task
 import pandas as pd
 
 from django.db.models import Sum, Subquery, OuterRef
+from django.db import transaction
 
 from project.utils import REDIS, quick_cache, quick_cache_key, redis_delete_patterns, our_now
 from users.models import Player, Team
@@ -13,7 +15,7 @@ from game.models import Game, AnswerCode, Series
 from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
 from game.tasks import api_to_db
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
-from leaderboard.models import Leaderboard
+from leaderboard.models import Leaderboard, PlayerRankScore
 
 
 def tabulate_results(game, update=False):
@@ -120,9 +122,13 @@ def build_leaderboard_fromdb(game, answer_tally):
     leaderboard = _score_and_rank(leaderboard, lb_cols)
     leaderboard = leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + lb_cols]
     REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 60 * 60)
+    # ------------- ------------- ------------- ------------- #
+    # todo: remove these lines when winners is no longer used
     player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
     game.leaderboard.winners.set(Player.objects.filter(id__in=player_ids))
     winners_of_game(game, force_refresh=True)
+    # ------------- ------------- ------------- ------------- #
+    save_player_rank_scores.delay(leaderboard.to_json(), game.leaderboard.id)
     return leaderboard
 
 
@@ -131,6 +137,20 @@ def _leaderboard_from_cache(game, answer_tally):
     if not lb_json:
         return None
     return pd.read_json(lb_json)
+
+
+@shared_task()
+@transaction.atomic()
+def save_player_rank_scores(lb_json, lb_id):
+    leaderboard = pd.read_json(lb_json)
+    prs_objs = []
+    for pid, rank, score in zip(leaderboard['id'], leaderboard['Rank'], leaderboard['Score']):
+        prs_objs.append(
+            PlayerRankScore(leaderboard_id=lb_id, player_id=pid, rank=rank, score=score)
+        )
+    if prs_objs:
+        PlayerRankScore.objects.bulk_update_or_create(
+            prs_objs, ['rank', 'score'], match_field=('leaderboard_id', 'player_id'))
 
 
 def lb_cache_key(game, answer_tally):
@@ -186,7 +206,6 @@ def _answer_tally_from_cache(game):
 
 @quick_cache()
 def player_score_rank_percentile(player, game):
-
     if game.game_id not in player.game_ids.values_list('game_id', flat=True):
         return None, None, None
 
@@ -246,7 +265,6 @@ def score_string(score):
 
 
 def player_latest_game_message(game, rank, percentile):
-
     if not rank:
         return "Looks like you missed this game... you'll get 'em next time!"
 
