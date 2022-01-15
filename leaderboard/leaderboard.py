@@ -206,14 +206,14 @@ def _answer_tally_from_cache(game):
 
 @quick_cache()
 def player_score_rank_percentile(player, game):
-    if game.game_id not in player.game_ids.values_list('game_id', flat=True):
-        return None, None, None
-
     answer_tally = build_answer_tally(game)
     filtered_leaderboard = build_filtered_leaderboard(game, answer_tally, player_ids=[player.id])
-    score = filtered_leaderboard['Score'].values[0]
-    rank = filtered_leaderboard['Rank'].values[0]
-    percentile = rank / game.players_dict.count()
+    try:
+        score = filtered_leaderboard['Score'].values[0]
+        rank = filtered_leaderboard['Rank'].values[0]
+    except IndexError:
+        return None, None, None
+    percentile = rank / len(filtered_leaderboard)
     return score, rank, percentile
 
 
