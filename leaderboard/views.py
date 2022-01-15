@@ -87,7 +87,7 @@ class ResultsView(LeaderboardView):
         answer_tally = build_answer_tally(game)
         context = self.get_context()
         questions = game.questions.exclude(type=Question.op).order_by(
-            'number').select_related('thread').prefetch_related('thread__comments')
+            'number').select_related('thread').prefetch_related('thread__comments', 'thread__comments__player')
         player_answers = []
 
         if request.user.is_authenticated:
