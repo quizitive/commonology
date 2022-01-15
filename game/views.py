@@ -132,7 +132,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
         self.requested_slug = self.slug = game.series.slug
         self.game = game
-        return render(request, 'game/game_form.html', self.get_context(game, psid, dn_form, editable=editable))
+        return render(request, 'game/game_form.html',
+                      self.get_context(game, player.id, psid, dn_form, editable=editable))
 
     def get(self, request, *args, **kwargs):
         # any request without a player_signed_id gets redirected to GameEntryView
@@ -150,7 +151,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             ).values_list('question', 'raw_string')
         }
         forms = self._build_game_forms(game, form_data, editable=False)
-        context = self.get_context(game, None, dn_form, forms, False)
+        context = self.get_context(game, player.id, None, dn_form, forms, False)
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -168,7 +169,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         game_forms = self._build_game_forms_post(player)
 
         if any([not f.is_valid() for f in game_forms.values()]):
-            context = self.get_context(self.game, psid, dn_form, game_forms)
+            context = self.get_context(self.game, player.id, psid, dn_form, game_forms)
             return render(request, 'game/game_form.html', context)
 
         player.display_name = self.request.POST.get('display_name')
@@ -220,6 +221,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             form_method='get',
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
             player_code=f'?r={player.code}',
+            player_id=player.id,
             **msgs[msg]
         )
 
@@ -256,7 +258,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             game_rules = None
         return game_rules
 
-    def get_context(self, game, psid=None, dn_form=None, forms=None, editable=True, replay=False):
+    def get_context(self, game, player_id=None, psid=None, dn_form=None, forms=None, editable=True, replay=False):
         context = super().get_context()
         if settings.RECAPTCHA3_INHIBIT:
             recaptcha_key = False
@@ -270,6 +272,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             'dn_form': dn_form,
             'questions': self.questions_with_forms(game, forms),
             'psid': psid,
+            'player_id': player_id,
             'editable': editable,  # flag to disable forms and js and hide submit button
             'replay': replay,
             'recaptcha_key': recaptcha_key,
