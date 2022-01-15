@@ -45,3 +45,11 @@ def current_game_overview():
         return "There was an issues calculating this statistic."
     return f'{cur} players {action_terms[0]} this week, compared to {prev} {action_terms[1]} last week. ' \
            f'That represents a change of {pct_chg:.2f}%.'
+
+
+@register.simple_tag(takes_context=True)
+def current_player_id(context):
+    player_id = context['request'].user.id
+    if not player_id:
+        player_id = context.get('player_id')
+    return player_id
