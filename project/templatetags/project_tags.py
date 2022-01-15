@@ -49,7 +49,10 @@ def current_game_overview():
 
 @register.simple_tag(takes_context=True)
 def current_player_id(context):
-    player_id = context['request'].user.id
+    request = context.get('request')
+    if not request:
+        return None
+    player_id = request.user.id
     if not player_id:
         player_id = context.get('player_id')
     return player_id
