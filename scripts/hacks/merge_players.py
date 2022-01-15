@@ -72,6 +72,8 @@ def merge_unrelated_fields(f, t):
 def merge_related_fields(from_p, to_p):
     to_p.answers.set(from_p.answers.all())
 
+    to_p.rank_scores.set(from_p.rank_scores.all())
+
     to_p.referrals.set(from_p.referrals.all())
 
     PendingEmail.objects.filter(email=from_email).delete()
