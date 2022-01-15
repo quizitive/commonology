@@ -9,7 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from project.utils import our_now
-from game.models import Game
+from game.models import Game, AnswerCode
 from components.models import Component
 from users.models import Player
 
@@ -40,9 +40,18 @@ class Leaderboard(models.Model):
     def publish(self):
         return our_now() > self.publish_date
 
-    def qid_answer_dict(self, **player_filters):
-        return {str(a.question_id): a.coded_answer.coded_answer
-                for a in self.game.raw_player_answers.filter(**player_filters)}
+    def qid_answer_dict(self, player_id):
+        qid_ac_tuples = AnswerCode.objects.raw(
+            f"""select ac.id, ac.question_id, ac.coded_answer
+            from game_answercode ac, game_answer a, game_question q, game_game g
+            where a.raw_string = ac.raw_string
+            and a.question_id = ac.question_id
+            and a.question_id = q.id
+            and q.game_id = g.id
+            and g.game_id = {self.game.game_id}
+            and a.player_id = {player_id}"""
+        )
+        return {str(qid_ac.question_id): qid_ac.coded_answer for qid_ac in qid_ac_tuples}
 
 
 @receiver(post_save, sender=Game)
