@@ -82,7 +82,8 @@ class TestLeaderboardViews(BaseGameDataTestCase):
 
     # ---- Template Tag Tests ---- #
     def test_formatted_answer_cell(self):
-        player_answers = self.game.leaderboard.qid_answer_dict(player__email='user1@fakeemail.com')
+        player = Player.objects.get(email='user1@fakeemail.com')
+        player_answers = self.game.leaderboard.qid_answer_dict(player.id)
 
         # this is just to mock the for loop in the template
         resvals = [{'res': res, 'val': val} for res, val in self.answer_tally[self.questions[0].text].items()]
