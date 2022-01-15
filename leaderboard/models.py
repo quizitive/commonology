@@ -40,6 +40,10 @@ class Leaderboard(models.Model):
     def publish(self):
         return our_now() > self.publish_date
 
+    def qid_answer_dict(self, **player_filters):
+        return {str(a.question_id): a.coded_answer.coded_answer
+                for a in self.game.raw_player_answers.filter(**player_filters)}
+
 
 @receiver(post_save, sender=Game)
 def make_leaderboard_for_new_game(sender, instance, created, **kwargs):
