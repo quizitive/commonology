@@ -86,12 +86,13 @@ class ResultsView(LeaderboardView):
         game = self.get_game()
         answer_tally = build_answer_tally(game)
         context = self.get_context()
-        questions = game.questions.exclude(type=Question.op).order_by('number')
+        questions = game.questions.exclude(type=Question.op).order_by(
+            'number').select_related('thread').prefetch_related('thread__comments', 'thread__comments__player')
         player_answers = []
 
         if request.user.is_authenticated:
             player = request.user
-            player_answers = game.coded_player_answers.filter(player=player)
+            player_answers = self.game.leaderboard.qid_answer_dict(player.id)
             save_last_visit_t(player.id, self._last_results_visit_key(), our_now().isoformat())
         else:
             messages.info(request, "Login to follow your friends and join the conversation!")

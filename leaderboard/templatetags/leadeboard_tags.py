@@ -49,9 +49,9 @@ def formatted_answer_cell(context, counter):
     # empty list for unauthenticated players
     if context['player_answers']:
         # if a player didn't answer a question this will be empty
-        if this_q_answer := context['player_answers'].filter(question_id=qid).first():
+        if this_q_answer := context['player_answers'].get(qid, None):
             # check if the player answer matches the current answer
-            if this_q_answer[3] == res:
+            if this_q_answer == res:
                 addl_classes += ' player-answer'
                 addl_div = f'<span class="w3-cell-row {addl_classes}" {addl_style}>my answer</span>'
 
