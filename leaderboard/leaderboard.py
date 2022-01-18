@@ -308,4 +308,4 @@ def visible_leaderboards(slug='commonology', limit=10):
     """The most recent N published leaderboards for a given slug are viewable by members"""
     return Leaderboard.objects.filter(
         game__series__slug=slug, publish_date__lte=our_now()
-    ).order_by('-game__game_id')[:limit]
+    ).select_related('game').order_by('-game__game_id')[:limit]
