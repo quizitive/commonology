@@ -100,14 +100,23 @@ class ResultsView(LeaderboardView):
         context.update({
             'answer_tally': answer_tally,
             'player_answers': player_answers,
-            'game_top_commentary': game.leaderboard.top_commentary,
-            'game_bottom_commentary': game.leaderboard.bottom_commentary,
             'questions': questions,
             'host': game.hosts.filter(email="alex@commonologygame.com").first() or game.hosts.first(),
             'visible_comments': 5
         })
 
         return render(request, 'leaderboard/results.html', context)
+
+
+class HostNoteView(LeaderboardView):
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context(*args, **kwargs)
+        context.update({
+            'game_top_commentary': self.game.leaderboard.top_commentary,
+            'game_bottom_commentary': self.game.leaderboard.bottom_commentary,
+        })
+        return render(request, 'leaderboard/host_note.html', context)
 
 
 class PlayerHomeView(LoginRequiredMixin, View):
