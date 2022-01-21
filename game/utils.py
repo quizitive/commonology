@@ -13,11 +13,13 @@ from chat.models import Comment
 
 
 @quick_cache(60 * 60)
-def new_players_for_game(slug, game_id):
+def new_players_for_game(slug, game_id, timestamp=our_now()):
     new_players = Answer.objects.values('player_id').annotate(
         Min('question__game__game_id')
     ).order_by('player_id').filter(
-        question__game__game_id__min=game_id, question__game__series__slug=slug
+        question__game__game_id__min=game_id,
+        question__game__series__slug=slug,
+        timestamp__lte=timestamp
     ).values_list('player_id', flat=True)
     return new_players
 
@@ -80,6 +82,21 @@ def players_vs_previous(game):
         growth = float('inf')
 
     return players_so_far, players_so_far_last_week, growth
+
+
+def new_players_v_previous(game):
+    now = our_now()
+    new_players_so_far = new_players_for_game('commonology', game.game_id, force_refresh=True).count()
+    this_time_last_week = now - datetime.timedelta(7)
+    new_players_so_far_last_week = new_players_for_game(
+        slug='commonology', game_id=game.game_id - 1, timestamp=this_time_last_week).count()
+
+    if new_players_so_far_last_week:
+        growth = 100 * (new_players_so_far / new_players_so_far_last_week - 1)
+    else:
+        growth = float('inf')
+
+    return new_players_so_far, new_players_so_far_last_week, growth
 
 
 def write_winner_certificate(name, date, game_number):
