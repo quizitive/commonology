@@ -15,3 +15,7 @@ div.w3-modal-content {
 header.w3-container {
     border-radius: 4px 4px 0 0
 }
+
+.question-card {
+  padding: 0 24px;
+}
