@@ -21,12 +21,25 @@
 
   <div class="card-content">
 
-    {% include 'leaderboard/components/leaderboard_header.html' with view='results' %}
+    {% include 'leaderboard/components/leaderboard_header.html' with view='host-note' %}
 
-    {# Results objs go here #}
-    {% for q in questions %}
-      {% include 'leaderboard/components/results_card.html' with text=q.text q=q responses=responses %}
-    {% endfor %}
+    {% if game_top_commentary %}
+    <div class="cg-card cg-border-grey cg-top-blue w3-padding" >
+      {{ game_top_commentary|safe }}
+    </div>
+    {% endif %}
+
+    {% if game_bottom_commentary %}
+    <style>
+    #bottom-commentary img {
+      max-width: 100%!important;
+      height: auto!important;
+    }
+    </style>
+    <div id="bottom-commentary" class="cg-card cg-border-grey cg-top-blue w3-padding">
+      {{ game_bottom_commentary|safe }}
+    </div>
+    {% endif %}
 
     <div class="w3-row w3-padding-large"></div>
 
