@@ -11,6 +11,9 @@ div.content {
 h1.leaderboard {
   margin: 0;
 }
+#game-name {
+  font-size: 28px;
+}
 .leaderboard-buttons {
   padding: 12px 0 0 0;
 }
@@ -86,6 +89,9 @@ table.leaderboard td:first-child {
   .leaderboard-buttons {
     max-width: 200px;
     margin: auto;
+  }
+  #game-name {
+    font-size: 26px;
   }
 }
 
