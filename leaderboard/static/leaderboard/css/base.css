@@ -15,11 +15,16 @@ h1.leaderboard {
   padding: 12px 0 0 0;
 }
 .leaderboard-header-button {
-  margin: 4px 0;
-  width: 49%;
+  margin: 4px 1px;
+  width: 25%;
+  overflow: visible;
 }
 .leaderboard-header-button.play-button {
-  width: 99%;
+  width:465px;
+}
+.filter-button {
+  margin: 4px 0;
+  width: 49%;
 }
 #leaderboard-search {
   width: 99%;
@@ -32,8 +37,8 @@ h1.leaderboard {
 }
 #comment-indicator-badge-container {
   position:absolute;
-  right:0;
-  top:0;
+  right:-2px;
+  top:-2px;
   line-height:20px;
   min-width:20px
 }
@@ -66,6 +71,9 @@ table.leaderboard td:first-child {
   width: 65%;
   word-wrap: break-word;
 }
+a {
+  text-decoration: none;
+}
 
 /* Medium screens */
 @media only screen and (max-width: 767px) {
@@ -77,6 +85,10 @@ table.leaderboard td:first-child {
   }
   h3.leaderboard {
     font-size: 1.4rem;
+  }
+  .leaderboard-buttons {
+    max-width: 300px;
+    margin: auto;
   }
 }
 
