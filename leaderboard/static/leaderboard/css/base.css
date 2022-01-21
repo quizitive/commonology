@@ -71,9 +71,6 @@ table.leaderboard td:first-child {
   width: 65%;
   word-wrap: break-word;
 }
-a {
-  text-decoration: none;
-}
 
 /* Medium screens */
 @media only screen and (max-width: 767px) {
