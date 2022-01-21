@@ -2,7 +2,7 @@
 
 <div class="game-header cg-padding w3-round w3-center">
 
-  <div id="game-name" class="leaderboard"><span style="font-size: 26px">{{ game_name }}</span></div>
+  <div id="game-name" class="leaderboard">{{ game_name }}</div>
 
   <div id="change-game" class="w3-dropdown-click" style="font-size:20px;padding-top:4px;">
     {{ date_range }}<i class="fas fa-caret-down" style="margin-left:8px;"></i>
@@ -20,21 +20,21 @@
   </div>
 
   <div class="leaderboard-buttons">
-    <div class="w3-row">
+    <div class="w3-row" style="max-width:465px;margin:auto;">
 {#      <div class="w3-col spacer" style="width:62px;">&nbsp</div>#}
-      <div>
+      <div class="w3-col m4">
         <a class="leaderboard-header-button w3-button w3-mobile w3-round-xxlarge {% button_highlight 'host-note' %}"
            href="{% series_or_default_url 'leaderboard' 'current-host-note' %}{{ requested_game_id|default:'' }}">
           Host's Note
         </a>
       </div>
-        <div>
+        <div class="w3-col m4">
         <a class="leaderboard-header-button w3-button w3-mobile w3-round-xxlarge {% button_highlight 'leaderboard' %}"
            href="{% series_or_default_url 'leaderboard' 'current-leaderboard' %}{{ requested_game_id|default:'' }}">
           Leaderboard
         </a>
       </div>
-        <div style="position:relative;">
+        <div class="w3-col m4" style="position:relative;">
           <a class="leaderboard-header-button w3-button w3-mobile w3-round-xxlarge {% button_highlight 'results' %}"
              href="{% series_or_default_url 'leaderboard' 'current-results' %}{{ requested_game_id|default:'' }}">
             Results

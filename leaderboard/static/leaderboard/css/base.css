@@ -16,7 +16,7 @@ h1.leaderboard {
 }
 .leaderboard-header-button {
   margin: 4px 1px;
-  width: 25%;
+  width: 99%;
   overflow: visible;
 }
 .leaderboard-header-button.play-button {
@@ -84,7 +84,7 @@ table.leaderboard td:first-child {
     font-size: 1.4rem;
   }
   .leaderboard-buttons {
-    max-width: 300px;
+    max-width: 200px;
     margin: auto;
   }
 }
