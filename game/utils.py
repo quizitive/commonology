@@ -13,7 +13,8 @@ from chat.models import Comment
 
 
 @quick_cache(60 * 60)
-def new_players_for_game(slug, game_id, timestamp=our_now()):
+def new_players_for_game(slug, game_id, timestamp=None):
+    timestamp = timestamp or our_now()
     new_players = Answer.objects.values('player_id').annotate(
         Min('question__game__game_id')
     ).order_by('player_id').filter(
