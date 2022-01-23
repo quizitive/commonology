@@ -5,8 +5,7 @@ from django.urls import reverse
 from django.test import Client
 
 from project.utils import REDIS, our_now, redis_delete_patterns
-from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key, winners_of_game, \
-    save_player_rank_scores, build_leaderboard_fromdb
+from leaderboard.leaderboard import build_filtered_leaderboard, lb_cache_key, winners_of_game, build_leaderboard_fromdb
 from leaderboard.models import PlayerRankScore
 from game.models import Game, Answer
 from game.tests import BaseGameDataTestCase, suppress_hidden_error_logs
