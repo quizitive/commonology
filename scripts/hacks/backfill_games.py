@@ -26,13 +26,26 @@ commonology = Series.objects.get(slug="commonology")
 game_44 = Game.objects.get(game_id=44)
 
 
-def set_game_dates(g):
+def calc_dates(game_id):
     start_date = game_44.start
     end_date = game_44.end
-    n = (44 - g.game_id) * 7
+    n = (44 - game_id) * 7
     delta = relativedelta(days=n)
     start_date -= delta
     end_date -= delta
+    return start_date, end_date
+
+
+def list_game_dates():
+    for i in range(1, 44):
+        b, e = calc_dates(i)
+        delta = relativedelta(days=2)
+        e += delta
+        print(f"{i} {e.strftime('%A')} {e.date()}")
+
+
+def set_game_dates(g):
+    start_date, end_date = calc_dates(g.game_id)
     g.start = start_date
     g.end = end_date
     return start_date, end_date
@@ -51,7 +64,7 @@ def get_player(email, display_name):
 
 
 @transaction.atomic
-def do_it(game_id, data):
+def process_game(game_id, data):
     g = Game()
     g.game_id = game_id
     g.name = f'Commonology Game {game_id}'
@@ -117,13 +130,22 @@ def process(game_id):
     ws.active = ws.sheetnames.index(sheet_name)
     data = read_sheet(ws)
 
-    do_it(game_id, data)
+    process_game(game_id, data)
 
 
-for game_id in range(1, 2):
-    print(f'Processing game {game_id}')
-    process(game_id)
+def do_it():
+    for game_id in range(1, 2):
+        print(f'Processing game {game_id}')
+        process(game_id)
 
-print_player_scores(1)
+        print()
+        print()
+        print_player_scores(game_id)
+
+
+# do_it()
+list_game_dates()
 
 #  pg_restore -d postgresql://postgres:postgres@localhost/commonology --verbose --clean --no-acl --no-owner ./pg_dumps/commonology_Sun.tar
+# missing email for week 6, 14,
+# Missing data for 21 - 27 - we have raw data for them.
