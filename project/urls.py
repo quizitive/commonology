@@ -29,6 +29,7 @@ urlpatterns = [
     path('c/<slug:series_slug>/', include('leaderboard.urls', namespace='series-leaderboard')),
     path('c/<slug:series_slug>/', include('game.urls', namespace='series-game')),
     path('chat/', include('chat.urls')),
+    path('charts/', include('charts.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('admin/', admin.site.urls),
     path('', include('social_django.urls', namespace='social')),
