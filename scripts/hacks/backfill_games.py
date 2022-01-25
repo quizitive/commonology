@@ -59,6 +59,7 @@ def get_player(email, display_name):
         p.display_name = display_name
         p.subscribed = False
         p.save()
+        p.series.add(commonology)
         print(f"Adding player {display_name} {email}")
 
     return p
