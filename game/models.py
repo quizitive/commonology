@@ -76,7 +76,7 @@ class Game(models.Model):
     def save(self, *args, **kwargs):
         game_id = kwargs.get('game_id') or self.game_id
         series = kwargs.get('series') or self.series
-        if not game_id:
+        if game_id is None:
             max_game_id = Game.objects.filter(series=series).aggregate(models.Max('game_id'))['game_id__max'] or 0
             game_id = max_game_id + 1
         self.game_id = game_id
