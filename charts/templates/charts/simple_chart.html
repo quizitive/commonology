@@ -1,0 +1,6 @@
+{#<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>#}
+<div id="{{ chart.name }}"></div>
+<script>
+var {{ chart.name }} = new ApexCharts(document.querySelector("#{{ chart.name }}"), {{ chart.options | safe }});
+{{ chart.name }}.render();
+</script>
