@@ -45,8 +45,9 @@
   {% if chart %}
   {% block chart %}
     <div class="w3-padding"></div>
-    <canvas class="chart" id="{{ chart.name }}"></canvas>
-    {{ chart.get|json_script:chart.data_name }}
+    <div hx-get="/charts/htmx/{{ chart.name }}" hx-trigger="load" style="height:450px;width:100%">
+    <img width="50" style="margin: 100px auto;display:flex;" src="{% v_static 'img/spinners/puff.svg' %}"/>
+    </div>
   {% endblock %}
   {% endif %}
 

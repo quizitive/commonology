@@ -1,50 +1,66 @@
 from collections import Counter
 
-from pychartjs import ChartType, Color, Options, BaseSmartChart, BaseChartData
-
 from django.db.models import Count, F, Min
 from django.utils.functional import cached_property
 
+from charts.utils import BaseSmartChart, BaseChartData
 from project.utils import our_now
 from game.models import Game
 from users.models import Player
 
 
 class PlayerTrendChart(BaseSmartChart):
-    type = ChartType.Line
 
-    class options:
-        scales = Options.General(
-            y=Options.General(
-                title=Options.Title("Number of Players")
-            )
-        )
+    def _options_dict(self):
+        od = {
+            "grid": {
+                "row": {
+                    "colors": ['#f3f3f3', 'transparent'],
+                    "opacity": 0.5
+                }
+            },
+            "chart": {
+                "height": 450,
+                "type": 'line'
+            },
+            "stroke": {
+                "width": 4
+            },
+            "markers": {
+                "size": 3,
+                "strokeWidth": 0
+            },
+            "colors": ["#0095da", "#f26649", "#237073"],
+            "xaxis": {
+                "tickAmount": 12,
+                "tickPlacement": "on"
+            },
+            "yaxis": {
+                "labels": {
+                    "align": "right"
+                },
+                "decimalsInFloat": 0
+            }
+        }
+        return od
 
 
 class PlayersAndMembersDataset:
 
     def __init__(self, **kwargs):
-        self.Players = GamePlayerCount(
-            player_filters={},
-            borderColor=Color.Hex(0x0095daFF),
-            backgroundColor=Color.Hex(0x0095daFF),
-            **kwargs
-        )
-        self.Members = GamePlayerCount(
-            player_filters={'is_member': True},
-            borderColor=Color.Hex(0xf26649FF),
-            backgroundColor=Color.Hex(0xf26649FF),
-            **kwargs
-        )
-        self.NewPlayers = GamePlayerCount(
-            numerator_fcn='new_players',
-            borderColor=Color.Hex(0x237073FF),
-            backgroundColor=Color.Hex(0x237073FF),
-            **kwargs
-        )
+        self.Players = GamePlayerCount(**kwargs)
+        self.Members = GamePlayerCount(player_filters={'is_member': True}, **kwargs)
+        self.NewPlayers = GamePlayerCount(numerator_fcn='new_players', **kwargs)
 
     def get_labels(self):
         return self.Members.get_labels()
+
+    def get_all_series(self):
+        return [
+            {"name": "Players", "data": self.Players.get_data()},
+            {"name": "Members", "data": self.Members.get_data()},
+            {"name": "New Players", "data": self.NewPlayers.get_data()},
+        ]
 
 
 class GamePlayerCount(BaseChartData):
@@ -79,7 +95,8 @@ class GamePlayerCount(BaseChartData):
 
     @cached_property
     def periods(self):
-        gids = Game.objects.filter(series__slug=self.slug, game_id__gte=self.since_game, end__lte=our_now()).values_list('game_id', flat=True)
+        gids = Game.objects.filter(series__slug=self.slug, game_id__gte=self.since_game,
+                                   end__lte=our_now()).values_list('game_id', flat=True)
         periods = []
         for idx in range(0, len(gids), self.agg_period):
             g = gids[idx]
@@ -104,3 +121,5 @@ class GamePlayerCount(BaseChartData):
         if self.agg_period == 1:
             return [f"Game {s}" for s, _ in reversed(self.periods)]
         return [f"Games {s} - {e}" for s, e in reversed(self.periods)]
+
+
