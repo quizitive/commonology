@@ -41,7 +41,7 @@ def list_game_dates():
         b, e = calc_dates(i)
         delta = relativedelta(days=2)
         e += delta
-        print(f"{i} {e.strftime('%A')} {e.date()}")
+        print(f"{i} {b.date()} -> {e.strftime('%A')} {e.date()}")
 
 
 def set_game_dates(g):
@@ -59,14 +59,14 @@ def get_player(email, display_name):
         p.display_name = display_name
         p.subscribed = False
         p.save()
+        print(f"Adding player {display_name} {email}")
 
     return p
 
 
 @transaction.atomic
 def process_game(game_id, data):
-    g = Game()
-    g.game_id = game_id
+    g = Game(game_id=game_id)
     g.name = f'Commonology Game {game_id}'
     g.series = commonology
     set_game_dates(g)
@@ -80,7 +80,7 @@ def process_game(game_id, data):
         p = get_player(email=email, display_name=name)
         prs = PlayerRankScore()
         prs.player = p
-        prs.leaderboard = l
+        prs.leaderboard = lb
         prs.rank = rank
         prs.score = score
         prs.save()
@@ -111,6 +111,11 @@ def read_sheet(w):
 
     rank = 0
     last_score = '0'
+
+    missing_scores = [x for x in data if not x[2]]
+    if missing_scores:
+        print(f'Missing scores for: {missing_scores}')
+
     data.sort(key=lambda x: -x[2])
     for rec in data:
         email, name, score, x = rec
@@ -126,7 +131,13 @@ def read_sheet(w):
 
 
 def process(game_id):
-    sheet_name = f'Week {game_id}'
+
+    if 0 == game_id:
+        sheet_name = 'Week A1'
+    else:
+        sheet_name = f'Week {game_id}'
+
+    print(f"Processing {sheet_name}")
     ws.active = ws.sheetnames.index(sheet_name)
     data = read_sheet(ws)
 
@@ -134,18 +145,18 @@ def process(game_id):
 
 
 def do_it():
-    for game_id in range(1, 2):
-        print(f'Processing game {game_id}')
-        process(game_id)
-
+    for game_id in range(0, 28):
+        if Game.objects.filter(series=commonology, game_id=game_id).exists():
+            print(f'Skipping game_id {game_id} because it exists.')
+        else:
+            print(f'Processing game_id {game_id}')
+            process(game_id)
+            # print_player_scores(game_id)
         print()
         print()
-        print_player_scores(game_id)
 
 
-# do_it()
+do_it()
 list_game_dates()
 
-#  pg_restore -d postgresql://postgres:postgres@localhost/commonology --verbose --clean --no-acl --no-owner ./pg_dumps/commonology_Sun.tar
-# missing email for week 6, 14,
-# Missing data for 21 - 27 - we have raw data for them.
+#  pg_restore -d postgresql://postgres:postgres@localhost/commonology --verbose --clean --no-acl --no-owner ./pg_dumps/commonology_Tue.tar
