@@ -21,9 +21,9 @@
 {% block content %}
   <div id="content-main">
 
-    {% for chart in charts %}
+    {% for card in cards %}
       <div class="w3-padding-16"></div>
-      {% include 'cards/base_card.html' with header=chart.header chart=chart custom_message=chart.custom_message%}
+      {% include 'cards/base_card.html' with header=card.header chart=card.chart custom_message=card.custom_message%}
     {% endfor %}
 
     <div class="w3-padding-16"></div>
