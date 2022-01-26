@@ -14,6 +14,7 @@ django.setup()
 
 
 from users.models import Player
+from users.utils import player_log_entry
 from game.models import Game, Series
 from leaderboard.models import PlayerRankScore
 
@@ -51,15 +52,17 @@ def set_game_dates(g):
     return start_date, end_date
 
 
-def get_player(email, display_name):
+def get_player(email, display_name, join_date):
     try:
         p = Player.objects.get(email=email)
     except Player.DoesNotExist:
         p = Player(email=email)
         p.display_name = display_name
         p.subscribed = False
+        p.date_joined = join_date
         p.save()
         p.series.add(commonology)
+        player_log_entry(p, "Added by backfill_games.py script.")
         print(f"Adding player {display_name} {email}")
 
     return p
@@ -78,7 +81,7 @@ def process_game(game_id, data):
     lb.save()
 
     for email, name, score, rank in data:
-        p = get_player(email=email, display_name=name)
+        p = get_player(email=email, display_name=name, join_date=g.start)
         prs = PlayerRankScore()
         prs.player = p
         prs.leaderboard = lb
