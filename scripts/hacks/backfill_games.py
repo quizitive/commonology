@@ -17,8 +17,8 @@ from users.models import Player
 from game.models import Game, Series
 from leaderboard.models import PlayerRankScore
 
-
-fn = os.path.join(os.path.join('/Users/ms/Downloads/', 'Commonology Backfill Weeks.xlsx'))
+fn = os.path.expanduser('~/Downloads')
+fn = os.path.join(os.path.join(fn, 'Commonology Backfill Weeks.xlsx'))
 ws = openpyxl.load_workbook(fn)
 
 commonology = Series.objects.get(slug="commonology")
