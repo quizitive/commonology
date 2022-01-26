@@ -3,49 +3,13 @@ from collections import Counter
 from django.db.models import Count, F, Min
 from django.utils.functional import cached_property
 
-from charts.utils import BaseSmartChart, BaseChartData
+from charts.utils import BaseSmartChart, BaseChartDataset, BaseChartSeries
 from project.utils import our_now
 from game.models import Game
 from users.models import Player
 
 
-class PlayerTrendChart(BaseSmartChart):
-
-    def _options_dict(self):
-        od = {
-            "grid": {
-                "row": {
-                    "colors": ['#f3f3f3', 'transparent'],
-                    "opacity": 0.5
-                }
-            },
-            "chart": {
-                "height": 450,
-                "type": 'line'
-            },
-            "stroke": {
-                "width": 4
-            },
-            "markers": {
-                "size": 3,
-                "strokeWidth": 0
-            },
-            "colors": ["#0095da", "#f26649", "#237073"],
-            "xaxis": {
-                "tickAmount": 12,
-                "tickPlacement": "on"
-            },
-            "yaxis": {
-                "labels": {
-                    "align": "right"
-                },
-                "decimalsInFloat": 0
-            }
-        }
-        return od
-
-
-class PlayersAndMembersDataset:
+class PlayersAndMembersDataset(BaseChartDataset):
 
     def __init__(self, **kwargs):
         self.Players = GamePlayerCount(**kwargs)
@@ -53,7 +17,7 @@ class PlayersAndMembersDataset:
         self.NewPlayers = GamePlayerCount(numerator_fcn='new_players', **kwargs)
 
     def get_labels(self):
-        return self.Members.get_labels()
+        return self.Players.get_labels()
 
     def get_all_series(self):
         return [
@@ -63,17 +27,17 @@ class PlayersAndMembersDataset:
         ]
 
 
-class GamePlayerCount(BaseChartData):
+class GamePlayerCount(BaseChartSeries):
     # self.numerator_fcn is the name of the desired numerator function that
     # defines the count of players for each game based on custom filters. It returns
     # a dict of such as {game_id: player_count}
 
-    def __init__(self, slug, since_game=0, player_filters=None, agg_period=1, **kwargs):
+    def __init__(self, slug='commonology', since_game=0, player_filters=None, agg_period=1, **kwargs):
         self.slug = slug
-        self.since_game = since_game
+        self.since_game = int(since_game)
         self.numerator_fcn = 'players_with_filters'
         self.player_filters = player_filters or {}
-        self.agg_period = agg_period
+        self.agg_period = int(agg_period)
         super().__init__(**kwargs)
 
     def players_with_filters(self):
@@ -123,3 +87,39 @@ class GamePlayerCount(BaseChartData):
         return [f"Games {s} - {e}" for s, e in reversed(self.periods)]
 
 
+class PlayerTrendChart(BaseSmartChart):
+
+    def __init__(self, **kwargs):
+        self.name = "weekly_players"
+        self.data_class = PlayersAndMembersDataset
+        self.options_dict = {
+            "grid": {
+                "row": {
+                    "colors": ['#f3f3f3', 'transparent'],
+                    "opacity": 0.5
+                }
+            },
+            "chart": {
+                "height": 450,
+                "type": 'line'
+            },
+            "stroke": {
+                "width": 4
+            },
+            "markers": {
+                "size": 3,
+                "strokeWidth": 0
+            },
+            "colors": ["#0095da", "#f26649", "#237073"],
+            "xaxis": {
+                "tickAmount": 12,
+                "tickPlacement": "on"
+            },
+            "yaxis": {
+                "labels": {
+                    "align": "right"
+                },
+                "decimalsInFloat": 0
+            }
+        }
+        super().__init__(**kwargs)
