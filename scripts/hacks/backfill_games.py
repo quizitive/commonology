@@ -12,7 +12,7 @@ sys.path.append(path)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
 django.setup()
 
-
+from collections import defaultdict
 from users.models import Player
 from users.utils import player_log_entry
 from game.models import Game, Series
@@ -160,7 +160,46 @@ def do_it():
         print()
 
 
+def set_join_dates():
+    # Set the join date to the first game played start date for anyone who doesn't have a join date set.
+    players = Player.objects.filter(series=commonology).all()
+    old_dates = defaultdict(int)
+    for p in players:
+        game_ids = [i['game_id'] for i in p.game_ids.filter(series=commonology)]
+        if game_ids:
+            first_game = min(game_ids)
+            g = Game.objects.get(series=commonology, game_id=first_game)
+            if p.date_joined > g.end:
+                old_date = p.date_joined.date()
+                old_dates[old_date] += 1
+                p.date_joined = g.start
+                p.save()
+                msg = "Set date joined to start date of first game played"
+                print(f'{msg} for {p.email} it was {old_date}.')
+                player_log_entry(p, f"{msg}.")
+
+    print()
+    print('Old dates:')
+    for d in old_dates.keys():
+        print('  ', d)
+
+
+def game_winner_sanity_check():
+    x = {i.leaderboard.game.game_id: i.score for i in PlayerRankScore.objects.filter(rank=1).all()}
+    x = [[k, x[k]] for k in x.keys()]
+    x.sort(key=lambda x: -x[1])
+    y = [[one[0], one[1], two[0], two[1]] for one, two in zip(x[1:], x[:-1]) if one[1] == two[1]]
+    if y:
+        for i in y:
+            print(f"These games have the same winner score: {i[0]} and {i[2]}")
+    else:
+        print('None of the games have the same winning score.')
+
+
 do_it()
 list_game_dates()
+set_join_dates()
+game_winner_sanity_check()
+
 
 #  pg_restore -d postgresql://postgres:postgres@localhost/commonology --verbose --clean --no-acl --no-owner ./pg_dumps/commonology_Tue.tar
