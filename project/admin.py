@@ -1,12 +1,8 @@
-import json
-
 from django.contrib import admin
 from django.urls import path
 from django.shortcuts import render
 
-from project.utils import quick_cache
-
-from game.charts import PlayerTrendChart, PlayersAndMembersDataset
+from charts.charts import Charts
 
 
 class CommonologyAdmin(admin.AdminSite):
@@ -19,24 +15,31 @@ class CommonologyAdmin(admin.AdminSite):
         return other_urls + urls
 
     def stats_view(self, request):
-        # chart_1 = PlayerTrendChart(
-        #     PlayersAndMembersDataset, slug='commonology', name="chart_3", since_game=38)
-        # chart_2 = PlayerTrendChart(
-        #     PlayersAndMembersDataset, slug='commonology', name="chart_2", since_game=38, agg_period=4)
         context = dict(
             # Include common variables for rendering the admin template.
             self.each_context(request),
             title='Stats'
         )
         context.update({
-            "charts": [
+            "cards": [
                 {
-                    "name": "weekly_players",
+                    "chart": Charts.lazy_chart(
+                        Charts.weekly_players,
+                        slug='commonology',
+                        name="weekly_players",
+                        since_game=38
+                    ),
                     "header": "Player/Member Growth Weekly",
                     "custom_message": "Weekly player counts, of whom are members and new players"
                 },
                 {
-                    "name": "weekly_players_4wma",
+                    "chart": Charts.lazy_chart(
+                        Charts.weekly_players,
+                        slug='commonology',
+                        name="weekly_players_4wk",
+                        since_game=38,
+                        agg_period=4
+                    ),
                     "header": "Player/Member Growth 4-Week-Average",
                     "custom_message": "4-week-average player counts, of whom are members and new players"
                 }
