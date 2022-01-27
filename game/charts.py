@@ -1,4 +1,5 @@
 from collections import Counter
+from functools import lru_cache
 
 from django.db.models import Count, F, Min
 from django.utils.functional import cached_property
@@ -7,6 +8,48 @@ from charts.utils import BaseSmartChart, BaseChartDataset, BaseChartSeries
 from project.utils import our_now
 from game.models import Game
 from users.models import Player
+
+
+class GamePlayerTrendChart(BaseSmartChart):
+
+    def __init__(self, **kwargs):
+        self.name = "game_player_trend" + "_".join(kwargs.values())
+        self.data_class = PlayersAndMembersDataset(**kwargs)
+        self.options_dict = {
+            "grid": {
+                "row": {
+                    "colors": ['#f3f3f3', 'transparent'],
+                    "opacity": 0.5
+                }
+            },
+            "chart": {
+                "height": 450,
+                "type": 'line'
+            },
+            "stroke": {
+                "width": 4
+            },
+            "markers": {
+                "size": 3,
+                "strokeWidth": 0
+            },
+            "colors": ["#0095da", "#f26649", "#237073"],
+            "xaxis": {
+                "tickPlacement": "on"
+            },
+            "yaxis": {
+                "labels": {
+                    "align": "right"
+                },
+                "decimalsInFloat": 0
+            }
+        }
+        super().__init__(**kwargs)
+
+    def get_xaxis(self):
+        xaxis = super().get_xaxis()
+        xaxis['tickAmount'] = max(12.0, len(self.data_class.get_labels()) / 4)
+        return xaxis
 
 
 class PlayersAndMembersDataset(BaseChartDataset):
@@ -39,6 +82,7 @@ class GamePlayerCount(BaseChartSeries):
         self.player_filters = player_filters or {}
         self.agg_period = int(agg_period)
         super().__init__(**kwargs)
+        print("Init again")
 
     def players_with_filters(self):
         players_with_filter_count = Player.objects.filter(
@@ -57,21 +101,20 @@ class GamePlayerCount(BaseChartSeries):
         ).values_list('id', 'first_game')
         return Counter([fg[1] for fg in first_games])
 
-    @cached_property
     def periods(self):
         gids = Game.objects.filter(series__slug=self.slug, game_id__gte=self.since_game,
                                    end__lte=our_now()).values_list('game_id', flat=True)
         periods = []
         for idx in range(0, len(gids), self.agg_period):
             g = gids[idx]
-            periods.append((max(self.since_game, g - (self.agg_period - 1)), g))
+            periods.append((max(self.since_game, g - (self.agg_period - 1), min(gids)), g))
         return periods
 
     def get_data(self):
         numerator_fcn = self.__getattribute__(self.numerator_fcn)
         numerator_dict = numerator_fcn()
         data = []
-        for p in self.periods:
+        for p in self.periods():
             game_ids = [gid for gid in range(p[0], p[1] + 1)]
             try:
                 this_pd_avg = sum([numerator_dict[gid] for gid in game_ids]) / len(game_ids)
@@ -83,43 +126,5 @@ class GamePlayerCount(BaseChartSeries):
 
     def get_labels(self):
         if self.agg_period == 1:
-            return [f"Game {s}" for s, _ in reversed(self.periods)]
-        return [f"Games {s} - {e}" for s, e in reversed(self.periods)]
-
-
-class PlayerTrendChart(BaseSmartChart):
-
-    def __init__(self, **kwargs):
-        self.name = "weekly_players"
-        self.data_class = PlayersAndMembersDataset
-        self.options_dict = {
-            "grid": {
-                "row": {
-                    "colors": ['#f3f3f3', 'transparent'],
-                    "opacity": 0.5
-                }
-            },
-            "chart": {
-                "height": 450,
-                "type": 'line'
-            },
-            "stroke": {
-                "width": 4
-            },
-            "markers": {
-                "size": 3,
-                "strokeWidth": 0
-            },
-            "colors": ["#0095da", "#f26649", "#237073"],
-            "xaxis": {
-                "tickAmount": 12,
-                "tickPlacement": "on"
-            },
-            "yaxis": {
-                "labels": {
-                    "align": "right"
-                },
-                "decimalsInFloat": 0
-            }
-        }
-        super().__init__(**kwargs)
+            return [f"Game {s}" for s, _ in reversed(self.periods())]
+        return [f"Games {s} - {e}" for s, e in reversed(self.periods())]
