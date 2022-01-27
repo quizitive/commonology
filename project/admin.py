@@ -1,8 +1,10 @@
 from django.contrib import admin
+from django.db.models import Min
 from django.urls import path
 from django.shortcuts import render
 
 from charts.charts import Charts
+from game.models import Game
 
 
 class CommonologyAdmin(admin.AdminSite):
@@ -23,23 +25,12 @@ class CommonologyAdmin(admin.AdminSite):
         context.update({
             "cards": [
                 {
-                    "chart": Charts.lazy_chart(
-                        Charts.weekly_players,
-                        slug='commonology',
-                        name="weekly_players",
-                        since_game=38
-                    ),
+                    "chart": Charts.lazy_chart(Charts.game_player_trend, slug='commonology'),
                     "header": "Player/Member Growth Weekly",
                     "custom_message": "Weekly player counts, of whom are members and new players"
                 },
                 {
-                    "chart": Charts.lazy_chart(
-                        Charts.weekly_players,
-                        slug='commonology',
-                        name="weekly_players_4wk",
-                        since_game=38,
-                        agg_period=4
-                    ),
+                    "chart": Charts.lazy_chart(Charts.game_player_trend, slug='commonology', agg_period=4),
                     "header": "Player/Member Growth 4-Week-Average",
                     "custom_message": "4-week-average player counts, of whom are members and new players"
                 }
