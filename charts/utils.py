@@ -28,12 +28,12 @@ class BaseSmartChart(BaseChartSubclass):
         return json.dumps(op_dict)
 
     def get_series(self):
-        return self.data_class(**self.kwargs).get_all_series()
+        return self.data_class.get_all_series()
 
     def get_xaxis(self):
         # x axis labels
         return {
-            "categories": self.data_class(**self.kwargs).get_labels()
+            "categories": self.data_class.get_labels()
         }
 
     def _get_methods(self):
@@ -63,4 +63,3 @@ class BaseChartSeries(BaseChartSubclass):
 
     def get_data(self):
         raise NotImplementedError
-
