@@ -82,7 +82,6 @@ class GamePlayerCount(BaseChartSeries):
         self.player_filters = player_filters or {}
         self.agg_period = int(agg_period)
         super().__init__(**kwargs)
-        print("Init again")
 
     def players_with_filters(self):
         players_with_filter_count = Player.objects.filter(
