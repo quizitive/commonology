@@ -12,14 +12,16 @@ sys.path.append(path)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "project.settings")
 django.setup()
 
+from django.db.models import Min
 from collections import defaultdict
+from project.utils import our_now
 from users.models import Player
 from users.utils import player_log_entry
-from game.models import Game, Series
+from game.models import Game, Series, Answer
 from leaderboard.models import PlayerRankScore
 
 fn = os.path.expanduser('~/Downloads')
-fn = os.path.join(os.path.join(fn, 'Commonology Backfill Weeks.xlsx'))
+fn = os.path.join(os.path.join(fn, 'CommonologyBackfillWeeks.xlsx'))
 ws = openpyxl.load_workbook(fn)
 
 commonology = Series.objects.get(slug="commonology")
@@ -38,11 +40,14 @@ def calc_dates(game_id):
 
 
 def list_game_dates():
-    for i in range(1, 44):
+    print("Listing calculated game begin and end dates.")
+    for i in range(0, 44):
         b, e = calc_dates(i)
         delta = relativedelta(days=2)
         e += delta
         print(f"{i} {b.date()} -> {e.strftime('%A')} {e.date()}")
+    print()
+    print()
 
 
 def set_game_dates(g):
@@ -91,6 +96,7 @@ def process_game(game_id, data):
 
 
 def print_player_scores(game_id):
+    print(f"Listing scores and ranks for all players of game {game_id}")
     g = Game.objects.get(game_id=game_id, series=commonology)
     lb = g.leaderboard
     for i in PlayerRankScore.objects.filter(leaderboard=lb).all():
@@ -149,6 +155,7 @@ def process(game_id):
 
 
 def do_it():
+    print('Starting to backfill game results into PlayerRankScore model.')
     for game_id in range(0, 28):
         if Game.objects.filter(series=commonology, game_id=game_id).exists():
             print(f'Skipping game_id {game_id} because it exists.')
@@ -161,30 +168,34 @@ def do_it():
 
 
 def set_join_dates():
+    print('Setting players join dates to first answer record date if their join date is later than that.')
     # Set the join date to the first game played start date for anyone who doesn't have a join date set.
     players = Player.objects.filter(series=commonology).all()
     old_dates = defaultdict(int)
     for p in players:
-        game_ids = [i['game_id'] for i in p.game_ids.filter(series=commonology)]
-        if game_ids:
-            first_game = min(game_ids)
-            g = Game.objects.get(series=commonology, game_id=first_game)
-            if p.date_joined > g.end:
-                old_date = p.date_joined.date()
-                old_dates[old_date] += 1
-                p.date_joined = g.start
-                p.save()
-                msg = "Set date joined to start date of first game played"
-                print(f'{msg} for {p.email} it was {old_date}.')
-                player_log_entry(p, f"{msg}.")
+        first_play_date = Answer.objects.filter(player_id=p.id).aggregate(joined=Min('timestamp'))['joined']
+        if first_play_date is None:
+            continue
+
+        if p.date_joined > first_play_date:
+            old_date = first_play_date.date()
+            old_dates[old_date] += 1
+            p.date_joined = first_play_date
+            p.save()
+            msg = "Set date joined to start date of first game played"
+            print(f'{msg} for {p.email} it was {old_date}.')
+            player_log_entry(p, f"{msg}.")
 
     print()
     print('Old dates:')
     for d in old_dates.keys():
         print('  ', d)
+    print()
+    print()
 
 
 def game_winner_sanity_check():
+    print("Looking for any two games that have the same winning score.")
     x = {i.leaderboard.game.game_id: i.score for i in PlayerRankScore.objects.filter(rank=1).all()}
     x = [[k, x[k]] for k in x.keys()]
     x.sort(key=lambda x: -x[1])
@@ -194,12 +205,27 @@ def game_winner_sanity_check():
             print(f"These games have the same winner score: {i[0]} and {i[2]}")
     else:
         print('None of the games have the same winning score.')
+    print()
+    print()
+
+
+def list_winners():
+    print("Listing game winners for all games.")
+    winners = [[i.leaderboard.game.game_id, str(i.leaderboard.game.start.date()),
+                i.player.email, i.score, i.rank] for i in
+               PlayerRankScore.objects.filter(rank=1, leaderboard__game__series=commonology).all()]
+    winners.sort()
+    for w in winners:
+        print(w)
+    print()
+    print()
 
 
 do_it()
 list_game_dates()
 set_join_dates()
 game_winner_sanity_check()
-
+list_winners()
+# print_player_scores(0)
 
 #  pg_restore -d postgresql://postgres:postgres@localhost/commonology --verbose --clean --no-acl --no-owner ./pg_dumps/commonology_Tue.tar
