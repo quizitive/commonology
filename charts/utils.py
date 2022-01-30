@@ -1,5 +1,9 @@
 from inspect import getmembers, ismethod
 import json
+from urllib import parse
+from uuid import uuid4
+
+from project.utils import REDIS
 
 
 class BaseChartSubclass:
@@ -16,9 +20,20 @@ class BaseSmartChart(BaseChartSubclass):
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
+        self.uuid = uuid4().hex
         super().__init__(**kwargs)
 
+    def html_id(self):
+        return f"{self.name}_{self.uuid}"
+
+    @classmethod
+    def htmx_path(cls, **kwargs):
+        url_fmt = parse.urlencode(kwargs)
+        REDIS.set(url_fmt, 1, timeout=30)
+        return f"/charts/htmx/{cls.name}?{url_fmt}"
+
     def options(self):
+        # called from template: .../charts/simple_chart.html
         op_dict = self.options_dict
         for name, get_method in self._get_methods():
             if name in op_dict:
