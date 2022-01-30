@@ -1,0 +1,8 @@
+{# Uncomment below to debug with toolbar #}
+{#<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>#}
+{#<body></body>#}
+<div id="{{ chart.html_id }}"></div>
+<script>
+var chart = new ApexCharts(document.querySelector("#{{ chart.html_id }}"), {{ chart.options | safe }});
+chart.render();
+</script>
