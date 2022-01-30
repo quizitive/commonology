@@ -3,6 +3,7 @@ from django.db.models import Min
 from django.urls import path
 from django.shortcuts import render
 
+from project.htmx import htmx_call
 from charts.charts import Charts
 from game.models import Game
 
@@ -25,12 +26,12 @@ class CommonologyAdmin(admin.AdminSite):
         context.update({
             "cards": [
                 {
-                    "chart": Charts.lazy_chart(Charts.game_player_trend, slug='commonology'),
+                    "chart": htmx_call(request, Charts.game_player_trend.htmx_path(slug='commonology')),
                     "header": "Player/Member Growth Weekly",
                     "custom_message": "Weekly player counts, of whom are members and new players"
                 },
                 {
-                    "chart": Charts.lazy_chart(Charts.game_player_trend, slug='commonology', agg_period=4),
+                    "chart": htmx_call(request, Charts.game_player_trend.htmx_path(slug='commonology', agg_period=4)),
                     "header": "Player/Member Growth 4-Week-Average",
                     "custom_message": "4-week-average player counts, of whom are members and new players"
                 }
