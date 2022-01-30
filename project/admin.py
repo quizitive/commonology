@@ -1,10 +1,11 @@
 from django.contrib import admin
+from django.db.models import Min
 from django.urls import path
 from django.shortcuts import render
 
-from project.utils import quick_cache
-
-from game.charts import PlayerTrendChart, PlayersAndMembersDataset
+from project.htmx import htmx_call
+from charts.charts import Charts
+from game.models import Game
 
 
 class CommonologyAdmin(admin.AdminSite):
@@ -16,19 +17,24 @@ class CommonologyAdmin(admin.AdminSite):
         other_urls = [path('stats/', self.admin_view(self.stats_view), name='game-stats'), ]
         return other_urls + urls
 
-    @quick_cache()
     def stats_view(self, request):
-        chart_1 = PlayerTrendChart(
-            PlayersAndMembersDataset, slug='commonology', name="chart_3", since_game=38)
-        chart_2 = PlayerTrendChart(
-            PlayersAndMembersDataset, slug='commonology', name="chart_2", since_game=38, agg_period=4)
         context = dict(
             # Include common variables for rendering the admin template.
             self.each_context(request),
             title='Stats'
         )
         context.update({
-            "chart_1": chart_1,
-            "chart_2": chart_2,
+            "cards": [
+                {
+                    "chart": htmx_call(request, Charts.game_player_trend.htmx_path(slug='commonology')),
+                    "header": "Player/Member Growth Weekly",
+                    "custom_message": "Weekly player counts, of whom are members and new players"
+                },
+                {
+                    "chart": htmx_call(request, Charts.game_player_trend.htmx_path(slug='commonology', agg_period=4)),
+                    "header": "Player/Member Growth 4-Week-Average",
+                    "custom_message": "4-week-average player counts, of whom are members and new players"
+                }
+            ]
         })
         return render(request, 'game/stats.html', context)
