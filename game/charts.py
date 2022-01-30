@@ -7,13 +7,15 @@ from django.utils.functional import cached_property
 from charts.utils import BaseSmartChart, BaseChartDataset, BaseChartSeries
 from project.utils import our_now
 from game.models import Game
+from leaderboard.models import PlayerRankScore
 from users.models import Player
 
 
 class GamePlayerTrendChart(BaseSmartChart):
 
+    name = "game_player_trend"
+
     def __init__(self, **kwargs):
-        self.name = "game_player_trend" + "_".join(kwargs.values())
         self.data_class = PlayersAndMembersDataset(**kwargs)
         self.options_dict = {
             "grid": {
@@ -56,7 +58,7 @@ class PlayersAndMembersDataset(BaseChartDataset):
 
     def __init__(self, **kwargs):
         self.Players = GamePlayerCount(**kwargs)
-        self.Members = GamePlayerCount(player_filters={'is_member': True}, **kwargs)
+        self.Members = GamePlayerCount(player_filters={'player__is_member': True}, **kwargs)
         self.NewPlayers = GamePlayerCount(numerator_fcn='new_players', **kwargs)
 
     def get_labels(self):
@@ -84,19 +86,17 @@ class GamePlayerCount(BaseChartSeries):
         super().__init__(**kwargs)
 
     def players_with_filters(self):
-        players_with_filter_count = Player.objects.filter(
-            answers__question__game__game_id__gte=self.since_game,
-            answers__question__game__series__slug=self.slug,
-            **self.player_filters
-        ).values(
-            game_id=F('answers__question__game__game_id')
-        ).annotate(num_players=Count('id', distinct=True))
+        players_with_filter_count = PlayerRankScore.objects.filter(
+            leaderboard__game__series__slug=self.slug,
+            **self.player_filters).values(
+            game_id=F('leaderboard__game__game_id')).annotate(
+            num_players=Count('game_id')).order_by('game_id')
         return {game['game_id']: game['num_players'] for game in players_with_filter_count}
 
     def new_players(self):
         first_games = Player.objects.filter(
-            answers__question__game__series__slug=self.slug).annotate(
-            first_game=Min('answers__question__game__game_id')
+            rank_scores__leaderboard__game__series__slug='commonology').annotate(
+            first_game=Min('rank_scores__leaderboard__game__game_id')
         ).values_list('id', 'first_game')
         return Counter([fg[1] for fg in first_games])
 
