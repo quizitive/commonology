@@ -1,10 +1,8 @@
 {# Uncomment below to debug with toolbar #}
 {#<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>#}
 {#<body></body>#}
-{% if True %}
-<div id="{{ chart.name }}"></div>
+<div id="{{ chart.html_id }}"></div>
 <script>
-var {{ chart.name }} = new ApexCharts(document.querySelector("#{{ chart.name }}"), {{ chart.options | safe }});
-{{ chart.name }}.render();
+var chart = new ApexCharts(document.querySelector("#{{ chart.html_id }}"), {{ chart.options | safe }});
+chart.render();
 </script>
-{% endif %}
