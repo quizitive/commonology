@@ -292,7 +292,10 @@ def winners_of_game(game):
 def winners_of_series(slug):
     """Returns the list of player ids that have won a game in a given Series"""
     winners = Player.objects.filter(
-        rank_scores__rank=1, rank_scores__leaderboard__game__series__slug=slug).values_list(
+        rank_scores__rank=1,
+        rank_scores__leaderboard__game__series__slug=slug,
+        rank_scores__leaderboard__publish_date__lte=our_now()
+    ).values_list(
         'id', flat=True
     )
     return list(winners)
