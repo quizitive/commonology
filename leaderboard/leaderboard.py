@@ -284,24 +284,21 @@ def player_latest_game_message(game, rank, percentile):
 
 @quick_cache()
 def winners_of_game(game):
-    # todo: we don't need any of the bottom part once games have winners in db
-    winners_from_db = Player.objects.filter(games_won__game=game)
-    if winners_from_db:
-        return winners_from_db
-    answer_tally = build_answer_tally(game)
-    leaderboard = build_filtered_leaderboard(game, answer_tally)
-    player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
-    return Player.objects.filter(id__in=player_ids)
+    """Returns the list of player objects that won the given game"""
+    return Player.objects.filter(rank_scores__rank=1, rank_scores__leaderboard__game=game)
 
 
 @quick_cache()
 def winners_of_series(slug):
-    # todo: this can be a list of a queryset once we have database populated
-    winners = []
-    series = Series.objects.get(slug=slug)
-    for game in series.games.filter(leaderboard__publish_date__lte=our_now()):
-        winners.extend(list(winners_of_game(game).values_list("id", flat=True)))
-    return winners
+    """Returns the list of player ids that have won a game in a given Series"""
+    winners = Player.objects.filter(
+        rank_scores__rank=1,
+        rank_scores__leaderboard__game__series__slug=slug,
+        rank_scores__leaderboard__publish_date__lte=our_now()
+    ).values_list(
+        'id', flat=True
+    )
+    return list(winners)
 
 
 def visible_leaderboards(slug='commonology', limit=10):
