@@ -64,7 +64,7 @@ class BaseSmartChart(BaseChartSubclass):
         # called from template: .../charts/simple_chart.html
         op_dict = self.options_dict
         for name, get_method in self._get_methods():
-            if name in op_dict:
+            if name in op_dict and type(op_dict[name]) == dict:
                 op_dict[name].update(get_method())
             else:
                 op_dict[name] = get_method()
@@ -76,6 +76,7 @@ class BaseSmartChart(BaseChartSubclass):
     def get_xaxis(self):
         # x axis labels
         return {
+            'tickAmount': min(12.0, len(self.data_class.get_labels()) / 4),
             "categories": self.data_class.get_labels()
         }
 
