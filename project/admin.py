@@ -34,6 +34,11 @@ class CommonologyAdmin(admin.AdminSite):
                     "chart": htmx_call(request, Charts.game_player_trend.htmx_path(slug='commonology', agg_period=4)),
                     "header": "Player/Member Growth 4-Week-Average",
                     "custom_message": "4-week-average player counts, of whom are members and new players"
+                },
+                {
+                    "chart": htmx_call(request, Charts.subscribers_trend.htmx_path()),
+                    "header": "Subscribers over time",
+                    "custom_message": "Count of new subscribers by day"
                 }
             ]
         })
