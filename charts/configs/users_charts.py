@@ -15,9 +15,6 @@ class SubscribersChart(BaseSmartChart):
         self.data_class = SubscribersDataset(**kwargs)
         super().__init__(**kwargs)
 
-    def get_xaxis(self):
-        return {"type": "datetime"}
-
 
 class SubscribersDataset(BaseChartDataset):
 
@@ -25,10 +22,10 @@ class SubscribersDataset(BaseChartDataset):
         self.subscribers = SubscribersOverTime(**kwargs)
 
     def get_labels(self):
-        pass
+        return self.subscribers.get_labels()
 
     def get_all_series(self):
-        return {"data": self.subscribers.get_data()}
+        return [{"name": "Subscribers", "data": self.subscribers.get_data()}]
 
 
 class SubscribersOverTime(BaseChartSeries):
@@ -43,7 +40,12 @@ class SubscribersOverTime(BaseChartSeries):
             count=Count('id'))
 
     def get_data(self):
-        return [{'x': d['joined'].strftime('%Y-%m-%d'), 'y': d['count']} for d in self.query]
+        total_players = []
+        cur_total = 0
+        for d in self.query:
+            cur_total += d['count']
+            total_players.append(cur_total)
+        return total_players
 
     def get_labels(self):
-        return [d['date_joined'] for d in self.query]
+        return [d['joined'].strftime('%Y-%m-%d') for d in self.query]
