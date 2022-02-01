@@ -419,8 +419,11 @@ class GameEntryView(PSIDMixin, CardFormView):
             elif game_uuid:
                 return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
             else:
-                return self.join(request,
-                                 'Cannot find an active game.  Join so we can let you know when the next game begins.')
+                if slug is None or slug == 'commonology':
+                    msg = 'Next game begins on Wednesday at noon.  Join so we can send you an invitation when it starts.'
+                else:
+                    msg = 'Cannot find an active game.  Join so we can let you know when the next game begins.'
+                return self.join(request, msg)
 
         slug = g.series.slug
 
