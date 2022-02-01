@@ -58,7 +58,7 @@ class PlayersAndMembersDataset(BaseChartDataset):
 
     def __init__(self, **kwargs):
         self.Players = GamePlayerCount(**kwargs)
-        self.Members = GamePlayerCount(player_filters={'player__is_member': True}, **kwargs)
+        # self.Members = GamePlayerCount(player_filters={'player__is_member': True}, **kwargs)
         self.NewPlayers = GamePlayerCount(numerator_fcn='new_players', **kwargs)
 
     def get_labels(self):
@@ -67,7 +67,7 @@ class PlayersAndMembersDataset(BaseChartDataset):
     def get_all_series(self):
         return [
             {"name": "Players", "data": self.Players.get_data()},
-            {"name": "Members", "data": self.Members.get_data()},
+            # {"name": "Members", "data": self.Members.get_data()},
             {"name": "New Players", "data": self.NewPlayers.get_data()},
         ]
 
