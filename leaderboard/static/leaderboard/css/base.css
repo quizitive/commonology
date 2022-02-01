@@ -103,9 +103,6 @@ table.leaderboard td:first-child {
   #following-drp {
     padding: 8px 12px;
   }
-  .hide-mobile {
-    display: None;
-  }
 }
 
 /* FOLLOWING CHECKBOXES */
