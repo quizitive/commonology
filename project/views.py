@@ -17,7 +17,8 @@ def document_render(request, filename, title):
 
 
 def about_view(request, *args, **kwargs):
-    return render(request, 'about.html')
+    context = next_game_context()
+    return render(request, 'about.html', context)
 
 
 def product_view(request, *args, **kwargs):
