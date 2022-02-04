@@ -16,7 +16,35 @@ class BaseSmartChart(BaseChartSubclass):
 
     data_class = None
     name = None
-    options_dict = {}
+    options_dict = {
+        "grid": {
+            "row": {
+                "colors": ['#f3f3f3', 'transparent'],
+                "opacity": 0.5
+            }
+        },
+        "chart": {
+            "height": 450,
+            "type": 'line'
+        },
+        "stroke": {
+            "width": 4
+        },
+        "markers": {
+            "size": 3,
+            "strokeWidth": 0
+        },
+        "colors": ["#0095da", "#f26649", "#237073"],
+        "xaxis": {
+            "tickPlacement": "on"
+        },
+        "yaxis": {
+            "labels": {
+                "align": "right"
+            },
+            "decimalsInFloat": 0
+        }
+    }
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
@@ -36,7 +64,7 @@ class BaseSmartChart(BaseChartSubclass):
         # called from template: .../charts/simple_chart.html
         op_dict = self.options_dict
         for name, get_method in self._get_methods():
-            if name in op_dict:
+            if name in op_dict and type(op_dict[name]) == dict:
                 op_dict[name].update(get_method())
             else:
                 op_dict[name] = get_method()
@@ -48,6 +76,7 @@ class BaseSmartChart(BaseChartSubclass):
     def get_xaxis(self):
         # x axis labels
         return {
+            'tickAmount': min(12.0, len(self.data_class.get_labels()) / 4),
             "categories": self.data_class.get_labels()
         }
 

@@ -3,6 +3,7 @@
 {#<body></body>#}
 <div id="{{ chart.html_id }}"></div>
 <script>
-var chart = new ApexCharts(document.querySelector("#{{ chart.html_id }}"), {{ chart.options | safe }});
+var options = {{ chart.options | safe }}
+var chart = new ApexCharts(document.querySelector("#{{ chart.html_id }}"), options);
 chart.render();
 </script>
