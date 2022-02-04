@@ -17,35 +17,6 @@ class GamePlayerTrendChart(BaseSmartChart):
 
     def __init__(self, **kwargs):
         self.data_class = PlayersAndMembersDataset(**kwargs)
-        self.options_dict = {
-            "grid": {
-                "row": {
-                    "colors": ['#f3f3f3', 'transparent'],
-                    "opacity": 0.5
-                }
-            },
-            "chart": {
-                "height": 450,
-                "type": 'line'
-            },
-            "stroke": {
-                "width": 4
-            },
-            "markers": {
-                "size": 3,
-                "strokeWidth": 0
-            },
-            "colors": ["#0095da", "#f26649", "#237073"],
-            "xaxis": {
-                "tickPlacement": "on"
-            },
-            "yaxis": {
-                "labels": {
-                    "align": "right"
-                },
-                "decimalsInFloat": 0
-            }
-        }
         super().__init__(**kwargs)
 
     def get_xaxis(self):
@@ -58,7 +29,6 @@ class PlayersAndMembersDataset(BaseChartDataset):
 
     def __init__(self, **kwargs):
         self.Players = GamePlayerCount(**kwargs)
-        # self.Members = GamePlayerCount(player_filters={'player__is_member': True}, **kwargs)
         self.NewPlayers = GamePlayerCount(numerator_fcn='new_players', **kwargs)
 
     def get_labels(self):
@@ -67,7 +37,6 @@ class PlayersAndMembersDataset(BaseChartDataset):
     def get_all_series(self):
         return [
             {"name": "Players", "data": self.Players.get_data()},
-            # {"name": "Members", "data": self.Members.get_data()},
             {"name": "New Players", "data": self.NewPlayers.get_data()},
         ]
 
