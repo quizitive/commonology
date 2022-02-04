@@ -60,5 +60,5 @@ class PlayersOverTime(BaseChartSeries):
         return total_players
 
     def get_labels(self):
-        numdays = (datetime.today().date() - self.min_date.date()).days
+        numdays = (datetime.today().date() - self.min_date.date()).days + 1
         return [(self.min_date.date() + timedelta(days=days)).strftime("%Y-%m-%d") for days in range(numdays)]
