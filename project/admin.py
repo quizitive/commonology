@@ -37,9 +37,10 @@ class CommonologyAdmin(admin.AdminSite):
                 },
                 {
                     "chart": htmx_call(request, Charts.subscribers_trend.htmx_path()),
-                    "header": "Subscribers over time",
-                    "custom_message": "Count of new subscribers by day"
-                }
+                    "header": "Players and subscribers by date joined",
+                    "custom_message": f"Cumulative count of total players and current "
+                                      f"subscribers by the date they joined"
+                },
             ]
         })
         return render(request, 'game/stats.html', context)
