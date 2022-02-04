@@ -28,7 +28,8 @@ class BaseSmartChart(BaseChartSubclass):
             "type": 'line'
         },
         "stroke": {
-            "width": 4
+            "width": 4,
+            "curve": "straight"
         },
         "markers": {
             "size": 3,
