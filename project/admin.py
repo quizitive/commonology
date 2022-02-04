@@ -37,7 +37,7 @@ class CommonologyAdmin(admin.AdminSite):
                 },
                 {
                     "chart": htmx_call(request, Charts.subscribers_trend.htmx_path()),
-                    "header": "Players and subscribers by date joined",
+                    "header": "Players and Subscribers by Date Joined",
                     "custom_message": f"Cumulative count of total players and current "
                                       f"subscribers by the date they joined"
                 },
