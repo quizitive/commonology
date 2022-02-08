@@ -244,7 +244,7 @@ class EmailConfirmedView(View):
                 display_name = user.display_name
             except User.DoesNotExist:
                 display_name = ''
-                user = User(email=email)
+                user = User(email=email, referrer=pe.referrer)
                 user.save()
 
             form = JoinForm(initial={'email': pe.email, 'referrer': pe.referrer, 'display_name': display_name})
