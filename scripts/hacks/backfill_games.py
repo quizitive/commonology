@@ -220,7 +220,7 @@ def list_winners():
 # list_winners()
 # print_player_scores(0)
 
-set_join_dates_from()
+set_join_dates()
 
 
 #  pg_restore -d postgresql://postgres:postgres@localhost/commonology --verbose --clean --no-acl --no-owner ./pg_dumps/commonology_Tue.tar
