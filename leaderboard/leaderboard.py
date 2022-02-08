@@ -122,12 +122,6 @@ def build_leaderboard_fromdb(game, answer_tally):
     leaderboard = _score_and_rank(leaderboard, lb_cols)
     leaderboard = leaderboard[['id', 'is_host', 'Rank', 'Name', 'Score'] + lb_cols]
     REDIS.set(lb_cache_key(game, answer_tally), leaderboard.to_json(), 24 * 60 * 60)
-    # ------------- ------------- ------------- ------------- #
-    # todo: remove these lines when winners is no longer used
-    player_ids = leaderboard[leaderboard['Rank'] == 1]['id'].tolist()
-    game.leaderboard.winners.set(Player.objects.filter(id__in=player_ids))
-    winners_of_game(game, force_refresh=True)
-    # ------------- ------------- ------------- ------------- #
     save_player_rank_scores.delay(leaderboard.to_json(), game.leaderboard.id)
     return leaderboard
 
