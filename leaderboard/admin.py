@@ -9,7 +9,7 @@ from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultipl
 
 from components.models import Component
 from leaderboard.models import Leaderboard
-from leaderboard.leaderboard import tabulate_results, winners_of_game, clear_leaderboard_cache
+from leaderboard.leaderboard import tabulate_results, clear_leaderboard_cache
 
 
 @admin.register(Leaderboard)
