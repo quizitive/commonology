@@ -378,6 +378,18 @@ class PendingUsersTests(TestCase):
         Answer.objects.create(player=user2, raw_string='answer', question=q)
         self.assertEqual(user1.players_referred.count(), 1)
 
+    def test_email_join_referral(self):
+        user1 = get_local_user()
+        referred_email = 'igot@referred.com'
+        pe = PendingEmail.objects.create(referrer=user1, email=referred_email)
+
+        join_view = reverse('join', args=[pe.uuid])
+        Client().get(join_view)
+        user2 = Player.objects.get(email=referred_email)
+
+        self.assertTrue(user1 in user2.following.all())
+        self.assertTrue(user2 in user1.following.all())
+
 
 class MergePlayers(TestCase):
     def test_fields(self):
