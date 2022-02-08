@@ -88,8 +88,6 @@ def merge_related_fields(from_p, to_p):
 
     to_p.hosted_games.set(from_p.hosted_games.all())
 
-    to_p.games_won.set(from_p.games_won.all())
-
     to_p.claim_set.set(from_p.claim_set.all())
 
     try:
