@@ -378,14 +378,6 @@ class PendingUsersTests(TestCase):
         Answer.objects.create(player=user2, raw_string='answer', question=q)
         self.assertEqual(user1.players_referred.count(), 1)
 
-    def test_following_referral(self):
-        user1 = get_local_user()
-        user2 = Player(email='igot@referred.com', referrer=user1)
-        user2.save()
-
-        self.assertTrue(user1 in user2.following.all())
-        self.assertTrue(user2 in user1.following.all())
-
     def test_email_join_referral(self):
         user1 = get_local_user()
         referred_email = 'igot@referred.com'
