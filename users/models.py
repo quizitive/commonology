@@ -188,6 +188,10 @@ def add_names_and_follow(sender, instance, created, **kwargs):
                 instance.first_name = ""
                 instance.last_name = ""
         instance.following.add(instance)
+        referrer = instance.referrer
+        if referrer:
+            instance.following.add(referrer)
+            referrer.following.add(instance)
 
 
 def create_key(k=7):
