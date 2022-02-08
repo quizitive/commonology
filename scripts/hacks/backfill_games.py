@@ -14,7 +14,6 @@ django.setup()
 
 from django.db.models import Min
 from collections import defaultdict
-from project.utils import our_now
 from users.models import Player
 from users.utils import player_log_entry
 from game.models import Game, Series, Answer
@@ -168,30 +167,23 @@ def do_it():
 
 
 def set_join_dates():
-    print('Setting players join dates to first answer record date if their join date is later than that.')
-    # Set the join date to the first game played start date for anyone who doesn't have a join date set.
-    players = Player.objects.filter(series=commonology).all()
-    old_dates = defaultdict(int)
-    for p in players:
-        first_play_date = Answer.objects.filter(player_id=p.id).aggregate(joined=Min('timestamp'))['joined']
-        if first_play_date is None:
+    print('Better than set_join_dates because it we do not have Answer recs for first 27 games.')
+    print('Setting players join dates to min(end time of first game played, player.date_joined).')
+
+    for prs in PlayerRankScore.objects.all():
+        g = prs.leaderboard.game
+        s = g.start
+        e = g.end
+        date_joined = prs.player.date_joined
+        if date_joined < s:
             continue
 
-        if p.date_joined > first_play_date:
-            old_date = first_play_date.date()
-            old_dates[old_date] += 1
-            p.date_joined = first_play_date
-            p.save()
-            msg = "Set date joined to start date of first game played"
-            print(f'{msg} for {p.email} it was {old_date}.')
-            player_log_entry(p, f"{msg}.")
+        if date_joined < e:
+            continue
 
-    print()
-    print('Old dates:')
-    for d in old_dates.keys():
-        print('  ', d)
-    print()
-    print()
+        p = prs.player
+        p.date_joined = s
+        p.save()
 
 
 def game_winner_sanity_check():
@@ -221,11 +213,14 @@ def list_winners():
     print()
 
 
-do_it()
-list_game_dates()
-set_join_dates()
-game_winner_sanity_check()
-list_winners()
+# do_it()
+# list_game_dates()
+# set_join_dates()
+# game_winner_sanity_check()
+# list_winners()
 # print_player_scores(0)
+
+set_join_dates_from()
+
 
 #  pg_restore -d postgresql://postgres:postgres@localhost/commonology --verbose --clean --no-acl --no-owner ./pg_dumps/commonology_Tue.tar
