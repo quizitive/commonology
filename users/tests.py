@@ -386,7 +386,7 @@ class MergePlayers(TestCase):
 
         expected = ['referrals', 'followers', 'pendingemail', 'captain_teams', 'teams',
                     'logentry', 'social_auth', 'comments', 'owned_series', 'hosted_series',
-                    'series', 'hosted_games', 'answers', 'games_won', 'claim', 'mailingaddress',
+                    'series', 'hosted_games', 'answers', 'claim', 'mailingaddress',
                     'id', 'password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined',
                     'email', 'first_name', 'last_name', 'location', 'birth_date', 'subscribed', '_code',
                     'reminder', 'referrer', 'display_name', 'is_member', 'data', 'groups', 'user_permissions',
