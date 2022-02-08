@@ -213,7 +213,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
         return CardFormView(
             page_template='game/game_card_view.html',
-            card_template='game/cards/game_complete_card.html'
+            card_template='game/cards/game_complete_card.html',
         ).render(
             request,
             button_label="View my answers",
@@ -222,6 +222,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
             player_code=f'?r={player.code}',
             player_id=player.id,
+            title=f'Answers Submitted',
             **msgs[msg]
         )
 
@@ -391,15 +392,15 @@ class GameEntryView(PSIDMixin, CardFormView):
     page_template = "game/game_card_view.html"
 
     def message(self, request, msg):
-        return self.render_message(request, msg, form=None, button_label='Ok',
+        return self.render_message(request, msg, form=None, button_label='Ok', title='Play',
                                    form_method="get", form_action='/')
 
     def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
-        return self.render_message(request, msg, form=None, button_label='Leaderboard',
+        return self.render_message(request, msg, form=None, button_label='Leaderboard', title='Play',
                                    form_method="get", form_action=f'/c/{slug}/leaderboard/')
 
     def join(self, request, msg):
-        return self.render_message(request, msg, form=None, button_label='Join',
+        return self.render_message(request, msg, form=None, button_label='Join', title='Play',
                                    form_method="get", form_action='/join/')
 
     def get(self, request, *args, **kwargs):
@@ -462,7 +463,7 @@ class GameEntryView(PSIDMixin, CardFormView):
         if user.is_authenticated:
             return render_game(request, g)
 
-        return super().get(request, *args, **kwargs)
+        return super().get(request, title=f'Play', *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         # The get method already determined that:
