@@ -28,7 +28,7 @@ from project.card_views import recaptcha_check
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
 from game.models import Game, Series, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
-from game.utils import find_latest_public_game, write_winner_certificate
+from game.utils import find_latest_public_game, find_latest_published_game, write_winner_certificate
 from game.mail import send_winner_notice
 from leaderboard.leaderboard import tabulate_results, winners_of_game
 from users.models import PendingEmail, Player
@@ -334,15 +334,15 @@ class GameReplayView(GameFormView):
         if any([not f.is_valid() for f in game_forms.values()]):
             return render(request, 'game/game_form.html', context)
 
-        # todo: render corresponding results page with current player answers
-        return render(request, 'game/game_form.html', context)
+        # todo: add answers to session
+
+        if self.slug == "commonology":
+            return redirect('leaderboard:current-results')
+        else:
+            return redirect('series-leaderboard:current-results', self.slug)
 
     def get_game(self):
-        uuid = self.kwargs['uuid']
-        try:
-            return Game.objects.get(uuid=uuid)
-        except Game.DoesNotExist:
-            raise Http404
+        return find_latest_published_game(self.slug)
 
     def get_game_rules(self):
         try:
