@@ -88,13 +88,13 @@ class ResultsView(LeaderboardView):
         context = self.get_context()
         questions = game.questions.exclude(type=Question.op).order_by(
             'number').select_related('thread').prefetch_related('thread__comments', 'thread__comments__player')
-        player_answers = []
 
         if request.user.is_authenticated:
             player = request.user
             player_answers = self.game.leaderboard.qid_answer_dict(player.id)
             save_last_visit_t(player.id, self._last_results_visit_key(), our_now().isoformat())
         else:
+            player_answers = self._player_answers_from_session(request)
             messages.info(request, "Login to follow your friends and join the conversation!")
 
         context.update({
@@ -106,6 +106,10 @@ class ResultsView(LeaderboardView):
         })
 
         return render(request, 'leaderboard/results.html', context)
+
+    def _player_answers_from_session(self, request):
+        player_answers = request.session.get(f"game_{self.game.game_id}_answers", [])
+        return player_answers
 
 
 class HostNoteView(LeaderboardView):
