@@ -40,7 +40,7 @@ class Leaderboard(models.Model):
         return our_now() > self.publish_date
 
     def qid_answer_dict(self, player_id):
-        """ Returns a list like [{"123": "ABC", ... ] """
+        """ Returns a dict like {"123": "ABC", ... } """
         qid_ac_tuples = AnswerCode.objects.raw(
             f"""select ac.id, ac.question_id, ac.coded_answer
             from game_answercode ac, game_answer a, game_question q, game_game g
