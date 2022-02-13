@@ -1,7 +1,8 @@
-
+{% if request.user.display_name %}
 <div class="w3-row" style="padding:4px 0;">
   <span style="font-weight: normal;">Welcome {{ request.user.display_name }}!</span>
 </div>
+{% endif %}
 <div class="w3-row" style="padding:4px 0;">
   <span style="">My Score: </span>
   <span style="color:#f26649"> {{ player_score }}</span>
