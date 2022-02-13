@@ -3,6 +3,8 @@ import gspread
 import logging
 from numpy import base_repr
 
+from fuzzywuzzy import fuzz
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
@@ -346,26 +348,49 @@ class GameReplayView(GameFormView):
         if any([not f.is_valid() for f in game_forms.values()]):
             return render(request, 'game/game_form.html', context)
 
-        self._save_forms_to_session(request, game_forms)
+        self._autocode_responses_and_save_to_session(request, game_forms)
 
         if self.slug == "commonology":
             return redirect('leaderboard:current-results')
         else:
             return redirect('series-leaderboard:current-results', self.slug)
 
-    def _save_forms_to_session(self, request, game_forms):
+    def _autocode_responses_and_save_to_session(self, request, game_forms):
         # todo: see if there's a way to start with the top answer and work down
         request.session[f"game_{self.game.game_id}_answers"] = {}
         for question in self.questions.prefetch_related('coded_answers'):
+
+            # all the codes from the live game
+            coded_answers = {ac.raw_string: ac.coded_answer for ac in question.coded_answers.all()}
+
             game_form = game_forms[question.id]
             raw_player_answer = game_form.data.get('raw_string')
             coded_player_answer = raw_player_answer
-            for coded_answer in question.coded_answers.all():
-                # this is the magic line that auto-buckets raw responses
-                if close_enough(raw_player_answer, coded_answer.raw_string, []):
-                    coded_player_answer = coded_answer.raw_string
+
+            # we've seen this exact string before
+            if raw_player_answer in coded_answers:
+                coded_player_answer = coded_answers[raw_player_answer]
+                self._save_answer_to_session(request, question.id, coded_player_answer)
+                continue
+
+            # see if it's "close enough" to any string we've seen before
+            best_score = 0
+            for raw_string, coded_answer in coded_answers.items():
+                if close_enough(raw_player_answer, raw_string, []):
+                    coded_player_answer = coded_answer
+                    self._save_answer_to_session(request, question.id, coded_player_answer)
                     break
-            request.session[f"game_{self.game.game_id}_answers"][question.id] = coded_player_answer
+
+                # finally find the string it's closest to, within reason
+                if (score := fuzz.ratio(raw_player_answer, raw_string)) > best_score:
+                    best_score = score
+                    coded_player_answer = coded_answer
+
+            self._save_answer_to_session(request, question.id, coded_player_answer)
+
+    def _save_answer_to_session(self, request, question_id, coded_player_answer):
+        request.session[f"game_{self.game.game_id}_answers"][question_id] = coded_player_answer
+        return True
 
     def get_game_rules(self):
         try:
