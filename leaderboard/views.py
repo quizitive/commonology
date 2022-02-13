@@ -7,6 +7,7 @@ from django.http import Http404
 from django.contrib import messages
 from django.db.models import Max
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.safestring import mark_safe
 
 from project.utils import our_now
 from game.models import Game, Question
@@ -16,6 +17,7 @@ from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
     player_score_rank_percentile, rank_string, score_string, visible_leaderboards
 from leaderboard.tasks import save_last_visit_t
+from leaderboard.models import PlayerRankScore
 
 
 class LeaderboardView(BaseGameView):
@@ -70,6 +72,20 @@ class LeaderboardView(BaseGameView):
                 'player_rank': rank_string(player_rank),
                 'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
             })
+        elif self._player_answers_from_session(request):
+            # get stats from instant game in session
+            player_score, player_rank = self._instant_game_score_rank(request)
+            player_count = self.game.players_dict.count()
+            player_message = f"This game you scored {player_score} points, which earned you a rank of " \
+                             f"{rank_string(player_rank)} out of a total of {player_count} live players. " \
+                             f"<b>Join a live game to earn your spot on the leaderboard!<b>"
+            context.update({
+                'player_score': score_string(player_score),
+                'player_rank': rank_string(player_rank),
+                'player_message': mark_safe(player_message),
+                'is_instant': True
+            })
+
         return context
 
     def get(self, request, *args, **kwargs):
@@ -78,6 +94,24 @@ class LeaderboardView(BaseGameView):
 
     def _last_results_visit_key(self):
         return f'results_last_visit_t:{self.slug}:{self.game.game_id}'
+
+    def _player_answers_from_session(self, request):
+        player_answers = request.session.get(f"game_{self.game.game_id}_answers", {})
+        return player_answers
+
+    def _instant_game_score_rank(self, request):
+        answer_tally = build_answer_tally(self.game)
+        qid_to_text = {str(q["id"]): q["text"] for q in self.game.questions.values("id", "text")}
+
+        player_score = 0
+        for qid, player_answer in self._player_answers_from_session(request).items():
+            player_score += answer_tally[qid_to_text[qid]][player_answer]
+
+        adjacent_rank = PlayerRankScore.objects.filter(
+            leaderboard__game=self.game, score__gt=player_score
+        ).order_by("score").first()
+        player_rank = adjacent_rank.rank + 1 if adjacent_rank else 1
+        return player_score, player_rank
 
 
 class ResultsView(LeaderboardView):
@@ -106,10 +140,6 @@ class ResultsView(LeaderboardView):
         })
 
         return render(request, 'leaderboard/results.html', context)
-
-    def _player_answers_from_session(self, request):
-        player_answers = request.session.get(f"game_{self.game.game_id}_answers", [])
-        return player_answers
 
 
 class HostNoteView(LeaderboardView):
