@@ -356,7 +356,6 @@ class GameReplayView(GameFormView):
             return redirect('series-leaderboard:current-results', self.slug)
 
     def _autocode_responses_and_save_to_session(self, request, game_forms):
-        # todo: see if there's a way to start with the top answer and work down
         request.session[f"game_{self.game.game_id}_answers"] = {}
         for question in self.questions.prefetch_related('coded_answers'):
 
