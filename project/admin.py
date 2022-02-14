@@ -1,11 +1,9 @@
 from django.contrib import admin
-from django.db.models import Min
 from django.urls import path
 from django.shortcuts import render
 
 from project.htmx import htmx_call
 from charts.charts import Charts
-from game.models import Game
 
 
 class CommonologyAdmin(admin.AdminSite):
