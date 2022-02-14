@@ -11,6 +11,17 @@
   <span style="">My Rank: </span>
   <span style="color:#f26649"> {{ player_rank }}</span>
 </div>
-<div class="w3-row" style="padding:4px 0;">
+<div class="w3-row" style="padding:4px 0">
   <span style="font-weight: normal;font-style: italic;font-size:14px;">{{ player_message }}</span>
 </div>
+{% if is_instant %}
+<div class="w3-row w3-center" style="padding:12px 24px;background: #f1f2f3;margin:16px -24px;">
+  {# todo: make this accurate and update #}
+  The next game begins in 3 days, 4 hours and 2 minutes.
+  <div class="join-button" style="padding: 4px;max-width:300px;margin:auto;">
+    <a href="/join">
+      <button class="leaderboard-header-button w3-button cg-salmon w3-round-xxlarge">Join Now!</button>
+    </a>
+  </div>
+</div>
+{% endif %}
