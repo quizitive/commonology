@@ -3,10 +3,9 @@ from project.utils import quick_cache
 from .models import PendingEmail, Player
 from django.contrib.auth import get_user_model
 from django.core.signing import Signer
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.admin.models import LogEntry, CHANGE
 from django.db.models import Count
 from django.utils.timezone import make_aware
+from project.utils import log_entry
 from game.models import Series
 import logging
 
@@ -69,12 +68,7 @@ def is_validated(email):
 
 
 def player_log_entry(player, message):
-    return LogEntry.objects.log_action(user_id=player.id,
-                                       content_type_id=ContentType.objects.get_for_model(player).pk,
-                                       object_id=player.id,
-                                       object_repr=str(player.email),
-                                       action_flag=CHANGE,
-                                       change_message=message)
+    return log_entry(player, message)
 
 
 def get_player(code):
