@@ -3,8 +3,6 @@ import gspread
 import logging
 from numpy import base_repr
 
-from fuzzywuzzy import fuzz
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
@@ -31,7 +29,7 @@ from project.card_views import recaptcha_check
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
 from game.models import Game, Series, Question, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
-from game.rollups import close_enough
+from game.rollups import autorollup_question_answer
 from game.utils import find_latest_public_game, find_latest_published_game, write_winner_certificate
 from leaderboard.leaderboard import tabulate_results, winners_of_game
 from users.models import PendingEmail, Player
@@ -327,7 +325,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         )
 
 
-class GameReplayView(GameFormView):
+class InstantGameView(GameFormView):
 
     def get_game(self):
         return find_latest_published_game(self.slug)
@@ -358,42 +356,15 @@ class GameReplayView(GameFormView):
     def _autocode_responses_and_save_to_session(self, request, game_forms):
         request.session[f"game_{self.game.game_id}_answers"] = {}
         for question in self.questions.prefetch_related('coded_answers'):
-
-            # all the codes from the live game
-            coded_answers = {ac.raw_string: ac.coded_answer for ac in question.coded_answers.all()}
-
             game_form = game_forms[question.id]
             raw_player_answer = game_form.data.get('raw_string')
-            coded_player_answer = raw_player_answer
-
-            # we've seen this exact string before
-            if raw_player_answer in coded_answers:
-                coded_player_answer = coded_answers[raw_player_answer]
-                self._save_answer_to_session(request, question.id, coded_player_answer)
-                continue
-
-            # see if it's "close enough" to any string we've seen before
-            best_score = 0
-            for raw_string, coded_answer in coded_answers.items():
-                if close_enough(raw_player_answer, raw_string, []):
-                    coded_player_answer = coded_answer
-                    self._save_answer_to_session(request, question.id, coded_player_answer)
-                    break
-
-                # finally find the string it's closest to, within reason
-                if (score := fuzz.ratio(raw_player_answer, raw_string)) > best_score:
-                    best_score = score
-                    coded_player_answer = coded_answer
-
-            self._save_answer_to_session(request, question.id, coded_player_answer)
-
-    def _save_answer_to_session(self, request, question_id, coded_player_answer):
-        request.session[f"game_{self.game.game_id}_answers"][question_id] = coded_player_answer
-        return True
+            # this is the magic line that does the autorollups of inputs
+            coded_player_answer = autorollup_question_answer(question, raw_player_answer)
+            request.session[f"game_{self.game.game_id}_answers"][question.id] = coded_player_answer
 
     def get_game_rules(self):
         try:
-            game_rules = Component.objects.get(name=f'Game Replay Rules | {self.slug}')
+            game_rules = Component.objects.get(name=f'Instant Game Rules | {self.slug}')
         except Component.DoesNotExist:
             game_rules = None
         return game_rules
