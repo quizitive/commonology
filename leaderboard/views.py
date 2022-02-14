@@ -78,7 +78,7 @@ class LeaderboardView(BaseGameView):
             player_count = self.game.players_dict.count()
             player_message = f"This game you scored {player_score} points, which earned you a rank of " \
                              f"{rank_string(player_rank)} out of a total of {player_count} live players. " \
-                             f"<b>Join a live game to earn your spot on the leaderboard!<b>"
+                             f"<b>Join a live game to earn your spot on the leaderboard!</b>"
             context.update({
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
