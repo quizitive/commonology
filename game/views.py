@@ -358,7 +358,7 @@ class InstantGameView(GameFormView):
         for question in self.questions.prefetch_related('coded_answers'):
             game_form = game_forms[question.id]
             raw_player_answer = game_form.data.get('raw_string')
-            # this is the magic line that does the autorollups of inputs
+            # this is the magic line that does the auto-rollups of inputs
             coded_player_answer = autorollup_question_answer(question, raw_player_answer)
             request.session[f"game_{self.game.game_id}_answers"][question.id] = coded_player_answer
 
