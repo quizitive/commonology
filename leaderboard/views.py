@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
 
 from project.utils import our_now
+from project.views import next_game_context
 from game.models import Game, Question
 from game.views import BaseGameView
 from game.utils import n_new_comments
@@ -85,6 +86,7 @@ class LeaderboardView(BaseGameView):
                 'player_message': mark_safe(player_message),
                 'is_instant': True
             })
+            context.update(next_game_context())
 
         return context
 
