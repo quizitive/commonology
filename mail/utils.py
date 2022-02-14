@@ -121,8 +121,13 @@ def mass_mail(obj):
         if played_dont_remind:
             qs = qs.exclude(id__in=played_dont_remind)
 
+    now = int(time.time())
+
+    if obj.scheduled is not None:
+        now = int(obj.scheduled.timestamp())
+
     # First batch in 10 seconds to be sure api call is received before that time.
-    send_at = int(time.time()) + 10
+    send_at = int(now) + 10
     count = 0
     email_list = []
     total_count = 0
