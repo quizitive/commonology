@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from project.utils import slackit
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, To, Category, Header
+from project.utils import log_entry, our_now
 from users.models import Player
 from users.utils import sign_user, unsubscribe
 from game.utils import find_latest_active_game
@@ -121,8 +122,12 @@ def mass_mail(obj):
         if played_dont_remind:
             qs = qs.exclude(id__in=played_dont_remind)
 
+    send_t = our_now()
+    if (obj.scheduled is not None) and (obj.scheduled > send_t):
+        send_t = obj.scheduled
+
     # First batch in 10 seconds to be sure api call is received before that time.
-    send_at = int(time.time()) + 10
+    send_at = int(send_t.timestamp()) + 10
     count = 0
     email_list = []
     total_count = 0
@@ -146,8 +151,9 @@ def mass_mail(obj):
                       send_at=send_at, categories=categories, unsub_link=True,
                       top_components=top_components, bottom_components=bottom_components)
 
-    logger.info(f"{total_count} recipients were just sent a blast with subject = {obj.subject}.")
-    return total_count
+    log_msg = f"{total_count} recipients sent a blast at {send_t} with subject = {obj.subject}."
+
+    return total_count, log_msg
 
 
 def deactivate_blocked_addresses():

@@ -35,6 +35,8 @@ class MailMessage(models.Model):
         Component, blank=True, related_name='messages_bottom',
         help_text=f"These appear below the the main message")
     created = models.DateTimeField(default=timezone.now)
+    scheduled = models.DateTimeField(null=True, blank=True,
+                                     help_text="If set then mail will go out at the scheduled time.")
     sent_date = models.DateTimeField(null=True, blank=True)
     tested = models.BooleanField(default=False,
                                  help_text="Must be checked to send blast.  It is set when a test message is sent.")
