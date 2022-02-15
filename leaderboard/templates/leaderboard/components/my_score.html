@@ -25,17 +25,30 @@
     </script>
   {% endblock %}
 
-<div class="w3-row w3-center" style="padding:12px 24px;background: #f1f2f3;margin:16px -24px;">
-  {# todo: make this accurate and update #}
-  The next game begins in
-  <span id="days">--</span>
-  <span id="hours">--</span>
-  <span id="mins">--</span> and
-  <span id="secs">--</span>
-  <div class="join-button" style="padding: 4px;max-width:300px;margin:auto;">
-    <a href="/join">
-      <button class="leaderboard-header-button w3-button cg-salmon w3-round-xxlarge">Join Now!</button>
-    </a>
+  <div class="w3-row" style="padding:12px 24px;background: #f1f2f3;margin:16px -24px;">
+    <div class="w3-row" >
+      <div class="cg-blue" style="padding: 8px 24px;margin: 0 -24px;">
+        Join the live game!
+      </div>
+
+      <ul style="font-weight: normal">
+        <li>Appear on the leaderboard for a chance to be #1!</li>
+        <li>You are entered into a weekly raffle to win $50!</li>
+        <li>Your answers will be used in our official scoring!</li>
+      </ul>
+    </div>
+
+      <div class="w3-row w3-center">
+        The next game begins in
+        <span id="days">--</span>
+        <span id="hours">--</span>
+        <span id="mins">--</span> and
+        <span id="secs">--</span>
+        <div class="join-button" style="padding: 4px;max-width:300px;margin:auto;">
+          <a href="/join">
+            <button class="leaderboard-header-button w3-button cg-salmon w3-round-xxlarge">Join Now!</button>
+          </a>
+        </div>
+    </div>
   </div>
-</div>
 {% endif %}
