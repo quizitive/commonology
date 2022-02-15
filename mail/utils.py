@@ -1,4 +1,3 @@
-import time
 
 import python_http_client.exceptions
 import socket
