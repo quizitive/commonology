@@ -5,6 +5,42 @@ from num2word import word
 from game.models import AnswerCode
 
 
+def autorollup_question_answer(question, raw_player_answer):
+    """
+    Used in instant games, this method buckets a single raw user input into the best match
+    based on codings from a previous game. It performs the following operations, in order:
+
+    1. Check to see if this exact raw_answer exists as an AnswerCode for this question (and return)
+    2. Loop through each AnswerCodes for this question:
+        a. See if the raw_answer is "close_enough()" to the corresponding AnswerCode.raw_string (and return)
+        b. Get the fuzzy ratio between the raw_answer and AnswerCode.raw_string and if it the best match
+            so far, save it as the fallback code (and continue)
+    """
+
+    # all the codes from the live game
+    coded_answers = {ac.raw_string: ac.coded_answer for ac in question.coded_answers.all()}
+    coded_player_answer = raw_player_answer
+
+    # we've seen this exact string before
+    if raw_player_answer in coded_answers:
+        coded_player_answer = coded_answers[raw_player_answer]
+        return coded_player_answer
+
+    # see if it's "close enough" to any string we've seen before
+    best_score = 0
+    for raw_string, coded_answer in coded_answers.items():
+        if close_enough(raw_player_answer, raw_string, []):
+            coded_player_answer = coded_answer
+            return coded_player_answer
+
+        # finally find the string it's closest to, within reason
+        if (score := fuzz.ratio(raw_player_answer, raw_string)) > best_score:
+            best_score = score
+            coded_player_answer = coded_answer
+
+    return coded_player_answer
+
+
 def close_enough(answer, potential_match, context_synonyms):
     """
     A method that handles fuzzy string matches including:
