@@ -42,9 +42,13 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
                 messages.add_message(request, messages.WARNING, 'You must choose a series.')
                 return
 
-            n = mass_mail(obj)
+            n, log_msg = mass_mail(obj)
+
+            log_entry(obj, log_msg, request.user)
+
             obj.sent = True
             obj.sent_date = our_now()
+            obj.scheduled = None
             obj.save()
             if n:
                 messages.add_message(request, messages.INFO, f'Blast message sent to {n} players.')

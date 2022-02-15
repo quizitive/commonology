@@ -3,6 +3,8 @@ import pytz
 import functools
 from django.conf import settings
 from django.core.cache import caches
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.admin.models import LogEntry, CHANGE
 import requests
 
 
@@ -84,3 +86,17 @@ def to_ascii(s):
     s = s.translate(s.maketrans(table))
     s = str(s.encode('utf-8').decode('ascii', 'ignore'))
     return s
+
+
+def log_entry(model_obj, message, user=None):
+    if user is None:
+        user_id = model_obj.id
+    else:
+        user_id = user.id
+
+    return LogEntry.objects.log_action(user_id=user_id,
+                                       content_type_id=ContentType.objects.get_for_model(model_obj).pk,
+                                       object_id=model_obj.id,
+                                       object_repr=str(model_obj),
+                                       action_flag=CHANGE,
+                                       change_message=message)
