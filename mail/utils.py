@@ -153,10 +153,7 @@ def mass_mail(obj):
 
     log_msg = f"{total_count} recipients sent a blast at {send_t} with subject = {obj.subject}."
 
-    u = Player.objects.get(id=1)
-    log_entry(obj, log_msg, u)
-
-    return total_count
+    return total_count, log_msg
 
 
 def deactivate_blocked_addresses():
