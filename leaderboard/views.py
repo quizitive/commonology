@@ -77,9 +77,8 @@ class LeaderboardView(BaseGameView):
             # get stats from instant game in session
             player_score, player_rank = self._instant_game_score_rank(request)
             player_count = self.game.players_dict.count()
-            player_message = f"This game you scored {player_score} points, which earned you a rank of " \
-                             f"{rank_string(player_rank)} out of a total of {player_count} live players. " \
-                             f"<b>Join a live game to earn your spot on the leaderboard!</b>"
+            player_message = f"You scored {player_score} points, which ranks you " \
+                             f"{rank_string(player_rank)} out of {player_count} live players. "
             context.update({
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
