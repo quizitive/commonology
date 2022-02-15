@@ -38,6 +38,13 @@ def find_latest_public_game(slug):
     return g
 
 
+def find_latest_published_game(slug):
+    t = our_now()
+    g = Game.objects.filter(series__slug=slug, series__public=True,
+                            leaderboard__publish_date__lte=t).order_by('start').reverse().first()
+    return g
+
+
 def most_recently_started_game(slug):
     t = our_now()
     g = Game.objects.filter(series__slug=slug, start__lte=t).order_by('start').reverse().first()
