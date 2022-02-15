@@ -1,4 +1,3 @@
-import time
 
 import python_http_client.exceptions
 import socket
@@ -9,7 +8,7 @@ from django.core.mail import send_mail
 from project.utils import slackit
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, To, Category, Header
-from project.utils import log_entry, our_now
+from project.utils import our_now
 from users.models import Player
 from users.utils import sign_user, unsubscribe
 from game.utils import find_latest_active_game
