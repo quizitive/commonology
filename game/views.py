@@ -15,6 +15,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.contrib.admin.views.decorators import staff_member_required
+from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.views.generic.base import View
 from django.views.generic.edit import FormMixin
@@ -26,10 +27,10 @@ from project.views import CardFormView
 from project.utils import slackit, our_now
 from project.card_views import recaptcha_check
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
-from game.models import Game, Series, Answer
+from game.models import Game, Series, Question, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
-from game.utils import find_latest_public_game, write_winner_certificate
-from game.mail import send_winner_notice
+from game.rollups import autorollup_question_answer
+from game.utils import find_latest_public_game, find_latest_published_game, write_winner_certificate
 from leaderboard.leaderboard import tabulate_results, winners_of_game
 from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
@@ -183,6 +184,10 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
 
         return self.render_answers_submitted_card(request, 'success', player, game)
 
+    @cached_property
+    def questions(self):
+        return self.game.questions.order_by('number')
+
     def _build_game_forms_post(self, player):
         # build a dict with the form inputs from POST request
         form_data = {
@@ -295,21 +300,21 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
                       'raw_string': form_data.get(str(q.id)),
                       'player': player}
             )
-                for q in game.questions.order_by('number')
+                for q in self.questions
             }
         else:
             forms = {q.id: QuestionAnswerForm(
                 question=q,
                 auto_id=f'%s_{q.id}'
             )
-                for q in game.questions.order_by('number')
+                for q in self.questions
             }
         return forms
 
     def questions_with_forms(self, game, forms=None):
         forms = forms or self._build_game_forms(game)
         questions_with_forms = [
-            (q, forms[q.id]) for q in game.questions.order_by('number')
+            (q, forms[q.id]) for q in self.questions.order_by('number')
         ]
         return questions_with_forms
 
@@ -320,7 +325,14 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         )
 
 
-class GameReplayView(GameFormView):
+class InstantGameView(GameFormView):
+
+    def get_game(self):
+        return find_latest_published_game(self.slug)
+
+    @cached_property
+    def questions(self):
+        return self.game.questions.exclude(type__in=(Question.op, Question.ov)).order_by('number')
 
     def get(self, request, *args, **kwargs):
         forms = self._build_game_forms(self.game)
@@ -329,24 +341,30 @@ class GameReplayView(GameFormView):
 
     def post(self, request, *args, **kwargs):
         game_forms = self._build_game_forms_post(None)
-        context = self.get_context(self.game, None, None, game_forms)
+        context = self.get_context(self.game, None, None, forms=game_forms, editable=True, replay=True)
 
         if any([not f.is_valid() for f in game_forms.values()]):
             return render(request, 'game/game_form.html', context)
 
-        # todo: render corresponding results page with current player answers
-        return render(request, 'game/game_form.html', context)
+        self._autocode_responses_and_save_to_session(request, game_forms)
 
-    def get_game(self):
-        uuid = self.kwargs['uuid']
-        try:
-            return Game.objects.get(uuid=uuid)
-        except Game.DoesNotExist:
-            raise Http404
+        if self.slug == "commonology":
+            return redirect('leaderboard:current-results')
+        else:
+            return redirect('series-leaderboard:current-results', self.slug)
+
+    def _autocode_responses_and_save_to_session(self, request, game_forms):
+        request.session[f"game_{self.game.game_id}_answers"] = {}
+        for question in self.questions.prefetch_related('coded_answers'):
+            game_form = game_forms[question.id]
+            raw_player_answer = game_form.data.get('raw_string')
+            # this is the magic line that does the auto-rollups of inputs
+            coded_player_answer = autorollup_question_answer(question, raw_player_answer)
+            request.session[f"game_{self.game.game_id}_answers"][question.id] = coded_player_answer
 
     def get_game_rules(self):
         try:
-            game_rules = Component.objects.get(name=f'Game Replay Rules | {self.slug}')
+            game_rules = Component.objects.get(name=f'Instant Game Rules | {self.slug}')
         except Component.DoesNotExist:
             game_rules = None
         return game_rules
