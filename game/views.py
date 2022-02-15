@@ -341,7 +341,7 @@ class InstantGameView(GameFormView):
 
     def post(self, request, *args, **kwargs):
         game_forms = self._build_game_forms_post(None)
-        context = self.get_context(self.game, None, None, game_forms)
+        context = self.get_context(self.game, None, None, forms=game_forms, editable=True, replay=True)
 
         if any([not f.is_valid() for f in game_forms.values()]):
             return render(request, 'game/game_form.html', context)
