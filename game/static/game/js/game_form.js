@@ -47,7 +47,7 @@ $('#submit-button').click((e) => {
     }
   })
   if (!errors) {
-    $("form").submit();
+    $("#game_form").submit();
   } else {
     // scroll to topmost element with some buffer for the navbar
     $([document.documentElement, document.body]).animate({scrollTop: scrollTop - 75}, 500);
