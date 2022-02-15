@@ -1,13 +1,13 @@
 {% if request.user.display_name %}
 <div class="w3-row" style="padding:4px 0;">
-  <span style="font-weight: normal;">Welcome {{ request.user.display_name }}!</span>
+  <span style="font-weight: normal;font-size:16px;">Welcome {{ request.user.display_name }}!</span>
 </div>
 {% endif %}
-<div class="w3-row" style="padding:4px 0;">
+<div class="w3-row" style="padding:4px 0;font-size:20px">
   <span style="">My Score: </span>
   <span style="color:#f26649"> {{ player_score }}</span>
 </div>
-<div class="w3-row" style="padding:4px 0;">
+<div class="w3-row" style="padding:4px 0;font-size:20px">
   <span style="">My Rank: </span>
   <span style="color:#f26649"> {{ player_rank }}</span>
 </div>
@@ -25,6 +25,26 @@
     </script>
   {% endblock %}
 
+    <style>
+    .pulse-button {
+    position: relative;
+    box-shadow: 0 0 0 0 rgba(232, 76, 61, 0.8);
+    -webkit-animation: pulse 1.25s infinite cubic-bezier(0.5, 0, 0, 0.4);
+    -moz-animation: pulse 1.25s infinite cubic-bezier(0.5, 0, 0, 0.4);
+    -ms-animation: pulse 1.25s infinite cubic-bezier(0.5, 0, 0, 0.4);
+    animation: pulse 1.25s infinite cubic-bezier(0.5, 0, 0, 0.4);
+  }
+  .pulse-button:hover
+  {
+    -webkit-animation: none;-moz-animation: none;-ms-animation: none;animation: none;
+  }
+
+  @-webkit-keyframes pulse {to {box-shadow: 0 0 0 6px rgba(232, 76, 61, 0);}}
+  @-moz-keyframes pulse {to {box-shadow: 0 0 0 6px rgba(232, 76, 61, 0);}}
+  @-ms-keyframes pulse {to {box-shadow: 0 0 0 6px rgba(232, 76, 61, 0);}}
+  @keyframes pulse {to {box-shadow: 0 0 0 6px rgba(232, 76, 61, 0);}}
+  </style>
+
   <div class="w3-row" style="padding:12px 24px;background: #f1f2f3;margin:16px -24px;">
     <div class="w3-row" >
       <div class="cg-blue" style="padding: 8px 24px;margin: 0 -24px;">
@@ -39,15 +59,25 @@
     </div>
 
       <div class="w3-row w3-center">
+
+      {% if game_is_on %}
+      {% else %}
         The next game begins in
         <span id="days">--</span>
         <span id="hours">--</span>
         <span id="mins">--</span> and
         <span id="secs">--</span>
-        <div class="join-button" style="padding: 4px;max-width:300px;margin:auto;">
-          <a href="/join">
-            <button class="leaderboard-header-button w3-button cg-salmon w3-round-xxlarge">Join Now!</button>
-          </a>
+      {% endif %}
+        <div class="join-button container" style="padding: 4px;max-width:300px;margin:auto;">
+          {% if game_is_on %}
+            <a href="/play/">
+              <button class="leaderboard-header-button pulse-button w3-button cg-salmon w3-round-xxlarge">Play Live Game!</button>
+            </a>
+          {% else %}
+            <a href="/join/">
+              <button class="leaderboard-header-button pulse-button w3-button cg-salmon w3-round-xxlarge">Join Now!</button>
+            </a>
+          {% endif %}
         </div>
     </div>
   </div>
