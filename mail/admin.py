@@ -3,7 +3,7 @@ from django_object_actions import DjangoObjectActions
 
 from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
 
-from project.utils import our_now
+from project.utils import our_now, log_entry
 from .models import MailMessage
 from .utils import mass_mail, sendgrid_send
 from users.models import Player
