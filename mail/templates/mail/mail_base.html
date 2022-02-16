@@ -2,7 +2,7 @@
   <head>
     <style>
       #email-content > p {
-        margin: 24px 0 32px 0;
+        margin: 24px 0 24px 0;
       }
       #button-holder {
         width: 100%;
@@ -54,13 +54,13 @@
 
       {#  TOP COMPONENTS  #}
       {% for component in top_components %}
-        <div id="{{ component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px 32px;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px;">
+        <div id="{{ component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px;">
           {{ component.render }}
         </div>
       {% endfor %}
 
       {# EMAIL MESSAGE #}
-        <div id="email-content" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px 32px;border: 1px solid lightgrey;border-top:4px solid #0095da;border-radius:4px">
+        <div id="email-content" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px 24px;border: 1px solid lightgrey;border-top:4px solid #0095da;border-radius:4px">
           {% block email-content %}
             {{ message }}
           {% endblock %}
@@ -69,7 +69,7 @@
 
       {#  BOTTOM COMPONENTS  #}
       {% for component in bottom_components %}
-        <div id="{{ component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;padding:16px;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px">
+        <div id="{{ component.css_name }}" style="max-width:600px;box-sizing:border-box;margin:8px auto;background:#fff;border:1px solid lightgrey;border-top:4px solid #0095da;border-radius: 4px">
           {{ component.render }}
         </div>
       {% endfor %}
