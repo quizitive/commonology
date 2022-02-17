@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib import admin
 from .views import index, about_view, product_view, our_story_view, testimonials_view, \
-    tos_view, privacy_view, ContactView, raffle_rules_view, sponsor_view
+    tos_view, privacy_view, ContactView, raffle_rules_view, sponsor_view, instant_player_stats
 
 admin.site.site_header = "Commonology Administration"
 admin.site.site_title = "Commonology Administration"
@@ -33,6 +33,7 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('admin/', admin.site.urls),
     path('', include('social_django.urls', namespace='social')),
+    path('analytics/', instant_player_stats),
     path('__debug__/', include(debug_toolbar.urls)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + \
     static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
