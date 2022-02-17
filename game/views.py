@@ -24,7 +24,7 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 
 from project.views import CardFormView
-from project.utils import slackit, our_now
+from project.utils import slackit, our_now, ANALYTICS_REDIS
 from project.card_views import recaptcha_check
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
 from game.models import Game, Series, Question, Answer
@@ -335,6 +335,7 @@ class InstantGameView(GameFormView):
         return self.game.questions.exclude(type__in=(Question.op, Question.ov)).order_by('number')
 
     def get(self, request, *args, **kwargs):
+        self._increment_redis(request, "instant_game_starts")
         forms = self._build_game_forms(self.game)
         context = self.get_context(self.game, forms=forms, editable=True, replay=True)
         return render(request, 'game/game_form.html', context)
@@ -346,6 +347,7 @@ class InstantGameView(GameFormView):
         if any([not f.is_valid() for f in game_forms.values()]):
             return render(request, 'game/game_form.html', context)
 
+        self._increment_redis(request, "instant_game_completes")
         self._autocode_responses_and_save_to_session(request, game_forms)
 
         if self.slug == "commonology":
@@ -368,6 +370,15 @@ class InstantGameView(GameFormView):
         except Component.DoesNotExist:
             game_rules = None
         return game_rules
+
+    def _increment_redis(self, request, key):
+        # todo: this is a hack, we could do something more elegant/systematic here
+        if request.session.get('r') != "kBsr1":
+            return
+        try:
+            ANALYTICS_REDIS.incr(key, 1)
+        except ValueError:
+            ANALYTICS_REDIS.set(key, 1, timeout=None)
 
 
 # Ex. https://docs.google.com/forms/d/e/1FAIpQLSeGWLWt4VJ0-Pb9aGhEU9jukstTsGy97vlKgSVHykmLJB3jow/viewform?usp=pp_url&entry.1135425595=alex@commonologygame.com
