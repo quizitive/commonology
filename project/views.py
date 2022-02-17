@@ -1,7 +1,10 @@
+from django.contrib.admin.views.decorators import staff_member_required
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django import forms
 from django.core.mail import send_mail
 from project.card_views import CardFormView, recaptcha_check
+from project.utils import ANALYTICS_REDIS
 from game.utils import next_event, find_latest_public_game
 
 import logging
@@ -101,3 +104,11 @@ class ContactView(CardFormView):
                            form_method="get", form_action='/')
 
         return self.render(request)
+
+
+@staff_member_required
+def instant_player_stats(request):
+    starts = ANALYTICS_REDIS.get("instant_game_starts")
+    completes = ANALYTICS_REDIS.get("instant_game_completes")
+    resp = f"There have been {starts} instant game starts and {completes} completes."
+    return HttpResponse(resp)
