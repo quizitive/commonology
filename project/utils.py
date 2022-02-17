@@ -12,6 +12,10 @@ REDIS = caches['default']
 if settings.IS_TEST:
     REDIS.key_prefix += '_test'
 
+ANALYTICS_REDIS = caches['analytics']
+if settings.IS_TEST:
+    REDIS.key_prefix += '_test'
+
 
 def our_now():
     # This results in a time that can be compared values in our database
