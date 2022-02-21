@@ -46,6 +46,11 @@ class Component(models.Model):
         return render_to_string(self.template, self.context)
 
     @property
+    def render_simple(self):
+        self.context['component'] = self
+        return render_to_string('components/simple_component.html', self.context)
+
+    @property
     def css_name(self):
         return self.name.lower().replace(' ', '-')
 
@@ -55,13 +60,18 @@ class SponsorComponent(Component):
     end_date = models.DateTimeField(null=True, blank=True)
 
     def __repr__(self):
-        return
+        return self.name
 
     @property
     def is_active(self):
         if not self.start_date or not self.end_date:
             return False
         return self.start_date <= our_now() < self.end_date
+
+    @classmethod
+    def active_sponsor_components(cls):
+        now = our_now()
+        return SponsorComponent.objects.filter(start_date__lte=now, end_date__gt=now)
 
     @classmethod
     def render_active_sponsor_components(cls):
