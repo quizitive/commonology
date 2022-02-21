@@ -1,4 +1,5 @@
 {% extends 'game/base.html' %}
+{% load component_tags %}
 
 {% block page_style %}
   <link rel=stylesheet href="{% v_static 'leaderboard/css/results.css' %}">
@@ -8,7 +9,7 @@
 
 {% block content %}
 
-  <div class="content card-content">
+  <div class="content" style="max-width: 500px;padding-top: 16px">
 
     <br/><br/>
 
@@ -16,6 +17,8 @@
     {% block card %}
     {% include card_template|default:"cards/base_card.html" %}
     {% endblock %}
+
+    {% sponsor_component_cards %}
 
   </div>
 
