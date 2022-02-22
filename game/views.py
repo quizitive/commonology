@@ -26,6 +26,7 @@ from django.http import HttpResponse
 from project.views import CardFormView
 from project.utils import slackit, our_now, ANALYTICS_REDIS
 from project.card_views import recaptcha_check
+from components.models import SponsorComponent
 from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
 from game.models import Game, Series, Question, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
@@ -240,7 +241,13 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
         answers_msg = render_to_string('game/game_complete_email.html', email_context)
         referral_link = Component.objects.filter(name="Referral Link", locations__app_name='mail').first()
-        mail_task(f'{game.name}', answers_msg, [(player.email, player.code)], bottom_components=(referral_link,))
+        sponsor_components = list(SponsorComponent.active_sponsor_components())
+        mail_task(
+            subject=f'{game.name}',
+            msg=answers_msg,
+            email_list=[(player.email, player.code)],
+            bottom_components=[referral_link] + sponsor_components
+        )
 
     def test_func(self):
         # override super method, which requires users to be logged in
