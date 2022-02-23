@@ -5,9 +5,7 @@ from mail.utils import sendgrid_send
 
 
 @shared_task(queue='serial')
-def mail_task(subject, msg, email_list, sponsors=False, top_components=(), bottom_components=()):
-    if sponsors:
-        top_components = list(SponsorComponent.active_sponsor_components()) + list(top_components)
+def mail_task(subject, msg, email_list, top_components=(), bottom_components=()):
     sendgrid_send(subject, msg, email_list, top_components=top_components, bottom_components=bottom_components)
 
 
