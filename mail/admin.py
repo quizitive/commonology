@@ -7,7 +7,7 @@ from project.utils import our_now, log_entry
 from .models import MailMessage
 from .utils import mass_mail, sendgrid_send
 from users.models import Player
-from components.models import Component
+from components.models import Component, SponsorComponent
 
 
 @admin.register(MailMessage)
@@ -21,9 +21,10 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             user_code = -1
 
         from_email = (obj.from_email, obj.from_name)
+        top_components = list(SponsorComponent.active_sponsor_components()) + list(obj.top_components.all())
         sendgrid_send(obj.subject, msg=obj.message, email_list=[(email, user_code)],
                       from_email=from_email, unsub_link=True,
-                      top_components=obj.top_components.all(), bottom_components=obj.bottom_components.all())
+                      top_components=top_components, bottom_components=obj.bottom_components.all())
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
