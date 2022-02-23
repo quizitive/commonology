@@ -386,7 +386,7 @@ class InstantGameView(GameFormView):
             source = "facebook"
         else:
             return
-        key = source + key
+        key = source + "_" + key
         try:
             ANALYTICS_REDIS.incr(key, 1)
         except ValueError:
