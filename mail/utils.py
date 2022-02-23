@@ -1,17 +1,22 @@
 
 import python_http_client.exceptions
 import socket
+
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, To, Category, Header
+
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.core.mail import send_mail
-from project.utils import slackit
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, To, Category, Header
-from project.utils import log_entry, our_now
+
+from project.utils import slackit, our_now
+
+from components.models import SponsorComponent
+from game.utils import find_latest_active_game
 from users.models import Player
 from users.utils import sign_user, unsubscribe
-from game.utils import find_latest_active_game
+
 
 import logging
 
@@ -111,7 +116,8 @@ def mass_mail(obj):
     else:
         categories = []
 
-    top_components = obj.top_components.all()
+    sponsors = list(SponsorComponent.active_sponsor_components())
+    top_components = sponsors + list(obj.top_components.all())
     bottom_components = obj.bottom_components.all()
 
     qs = players.filter(subscribed=True)
