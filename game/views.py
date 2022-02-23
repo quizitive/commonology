@@ -380,8 +380,13 @@ class InstantGameView(GameFormView):
 
     def _increment_redis(self, request, key):
         # todo: this is a hack, we could do something more elegant/systematic here
-        if request.session.get('r') != "kBsr1":
+        if request.session.get("r") == "kBsr1":
+            source = "google"
+        elif request.session.get("r") == "Wc6DP":
+            source = "facebook"
+        else:
             return
+        key = source + "_" + key
         try:
             ANALYTICS_REDIS.incr(key, 1)
         except ValueError:
