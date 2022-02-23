@@ -1,5 +1,6 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
+from django.utils.safestring import mark_safe
 from django.shortcuts import render, redirect
 from django import forms
 from django.core.mail import send_mail
@@ -108,7 +109,10 @@ class ContactView(CardFormView):
 
 @staff_member_required
 def instant_player_stats(request):
-    starts = ANALYTICS_REDIS.get("instant_game_starts")
-    completes = ANALYTICS_REDIS.get("instant_game_completes")
-    resp = f"There have been {starts} instant game starts and {completes} completes."
-    return HttpResponse(resp)
+    resp = ""
+    for source in ("google", "facebook"):
+        starts = ANALYTICS_REDIS.get(f"{source}_instant_game_starts")
+        completes = ANALYTICS_REDIS.get(f"{source}_instant_game_completes")
+        resp = resp + f"{source.upper()}: There have been {starts} instant " \
+                      f"game starts and {completes} completes.<br/><br/>"
+    return HttpResponse(mark_safe(resp))
