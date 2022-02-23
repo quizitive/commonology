@@ -1,6 +1,9 @@
-from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
+
+from django.db import models
 from django.template.loader import render_to_string
+
+from project.utils import our_now
 
 
 class Location(models.Model):
@@ -45,3 +48,22 @@ class Component(models.Model):
     @property
     def css_name(self):
         return self.name.lower().replace(' ', '-')
+
+
+class SponsorComponent(Component):
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+
+    def __repr__(self):
+        return self.name
+
+    @property
+    def is_active(self):
+        if not self.start_date or not self.end_date:
+            return False
+        return self.start_date <= our_now() < self.end_date
+
+    @classmethod
+    def active_sponsor_components(cls, as_time=None):
+        as_time = as_time if as_time is not None else our_now()
+        return SponsorComponent.objects.filter(start_date__lte=as_time, end_date__gt=as_time)
