@@ -3,7 +3,7 @@ from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.template.loader import render_to_string
 
-from project.utils import our_now, quick_cache
+from project.utils import our_now
 
 
 class Location(models.Model):
@@ -46,11 +46,6 @@ class Component(models.Model):
         return render_to_string(self.template, self.context)
 
     @property
-    def render_simple(self):
-        self.context['component'] = self
-        return render_to_string('components/simple_component.html', self.context)
-
-    @property
     def css_name(self):
         return self.name.lower().replace(' ', '-')
 
@@ -69,12 +64,6 @@ class SponsorComponent(Component):
         return self.start_date <= our_now() < self.end_date
 
     @classmethod
-    def active_sponsor_components(cls):
-        now = our_now()
-        return SponsorComponent.objects.filter(start_date__lte=now, end_date__gt=now)
-
-    @classmethod
-    def render_active_sponsor_components(cls):
-        now = our_now()
-        active_components = SponsorComponent.objects.filter(start_date__lte=now, end_date__gt=now)
-        return [component.render for component in active_components]
+    def active_sponsor_components(cls, as_time=None):
+        as_time = as_time if as_time is not None else our_now()
+        return SponsorComponent.objects.filter(start_date__lte=as_time, end_date__gt=as_time)
