@@ -1,9 +1,12 @@
 <br/>
+{% load component_tags %}
 
 
 <div class="cg-card cg-border-grey cg-top-blue" style="overflow: visible;">
   {% include 'leaderboard/components/game_date_nav.html' with view=view %}
 </div>
+
+{% sponsor_component_cards %}
 
 {% include 'components/card_component_stream.html' with components=game.leaderboard.top_components.all %}
 

@@ -1,5 +1,6 @@
 from celery import shared_task
 from django.template.loader import render_to_string
+from components.models import SponsorComponent
 from mail.utils import sendgrid_send
 
 
