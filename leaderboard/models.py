@@ -1,4 +1,5 @@
 from datetime import timedelta
+from random import choice
 
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -84,3 +85,11 @@ class LeaderboardMessage(models.Model):
         help_text="This is added to the player results card on the leaderboard/results.",
         max_length=255,
     )
+
+    @classmethod
+    def select_random_eligible(cls, rank, percentile):
+        eligible = LeaderboardMessage.objects.filter(
+            models.Q(metric='rank', max_value__gte=rank, min_value__lte=rank) |
+            models.Q(metric='percentile', max_value__gte=percentile, min_value__lte=percentile)
+        ).values_list('message', flat=True)
+        return choice(list(eligible))
