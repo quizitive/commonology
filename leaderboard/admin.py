@@ -8,7 +8,7 @@ from django_object_actions import DjangoObjectActions
 from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
 
 from components.models import Component
-from leaderboard.models import Leaderboard
+from leaderboard.models import Leaderboard, LeaderboardMessage
 from leaderboard.leaderboard import tabulate_results, clear_leaderboard_cache
 
 
@@ -69,3 +69,9 @@ class LeaderboardAdmin(DjangoObjectActions, admin.ModelAdmin):
 
     def go_to_game(self, request, obj):
         return redirect('admin:game_game_change', obj.game.id)
+
+
+@admin.register(LeaderboardMessage)
+class LeaderboardAdmin(admin.ModelAdmin):
+    save_on_top = True
+    list_display = ('message', 'metric', 'min_value', 'max_value')
