@@ -70,3 +70,17 @@ class PlayerRankScore(models.Model):
 
     class Meta:
         unique_together = ('player', 'leaderboard')
+
+
+class LeaderboardMessage(models.Model):
+    metric = models.CharField(
+        choices=[('rank', 'Rank'), ('percentile', 'Percentile')],
+        help_text="E.g. Players with rank between 1-100. Players in the 90-99th percentile.",
+        max_length=35
+    )
+    min_value = models.IntegerField(help_text="The minimum value of the metric for this message to be eligible")
+    max_value = models.IntegerField(help_text="The maximum value of the metric for this message to be eligible")
+    message = models.CharField(
+        help_text="This is added to the player results card on the leaderboard/results.",
+        max_length=255,
+    )
