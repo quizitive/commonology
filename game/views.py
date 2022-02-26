@@ -99,6 +99,7 @@ class BaseGameView(SeriesPermissionMixin, View):
             'series_slug': self.requested_slug,
             'requested_game_id': self.requested_game_id,
         }
+        context.update(kwargs)
         return context
 
 
@@ -271,8 +272,9 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             game_rules = None
         return game_rules
 
-    def get_context(self, game, player_id=None, psid=None, dn_form=None, forms=None, editable=True, replay=False):
-        context = super().get_context()
+    def get_context(self, game, player_id=None, psid=None, dn_form=None,
+                    forms=None, editable=True, replay=False, **kwargs):
+        context = super().get_context(**kwargs)
         if settings.RECAPTCHA3_INHIBIT:
             recaptcha_key = False
         else:
@@ -337,6 +339,9 @@ class InstantGameView(GameFormView):
     def get_game(self):
         return find_latest_published_game(self.slug)
 
+    def get_context(self, game, **kwargs):
+        return super().get_context(game, instant=True)
+
     @cached_property
     def questions(self):
         return self.game.questions.exclude(type__in=(Question.op, Question.ov)).order_by('number')
@@ -349,7 +354,7 @@ class InstantGameView(GameFormView):
 
     def post(self, request, *args, **kwargs):
         game_forms = self._build_game_forms_post(None)
-        context = self.get_context(self.game, None, None, forms=game_forms, editable=True, replay=True)
+        context = self.get_context(self.game, forms=game_forms, editable=True, replay=True)
 
         if any([not f.is_valid() for f in game_forms.values()]):
             return render(request, 'game/game_form.html', context)
