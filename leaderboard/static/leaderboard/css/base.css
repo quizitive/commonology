@@ -74,6 +74,10 @@ table.leaderboard td:first-child {
   width: 65%;
   word-wrap: break-word;
 }
+.leaderboard-buttons {
+    max-width: 465px;
+    margin: auto;
+  }
 
 /* Medium screens */
 @media only screen and (max-width: 767px) {
@@ -86,22 +90,22 @@ table.leaderboard td:first-child {
   h3.leaderboard {
     font-size: 1.4rem;
   }
-  .leaderboard-buttons {
-    max-width: 200px;
-    margin: auto;
-  }
   #game-name {
     font-size: 26px;
   }
 }
 
 /* Small screens */
-@media only screen and (max-width: 560px) {
+@media only screen and (max-width: 601px) {
   .name {
     width: 50%;
   }
   #following-drp {
     padding: 8px 12px;
+  }
+  .leaderboard-buttons {
+    max-width: 200px;
+    margin: auto;
   }
 }
 
