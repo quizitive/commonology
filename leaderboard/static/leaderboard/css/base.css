@@ -79,6 +79,29 @@ table.leaderboard td:first-child {
     margin: auto;
   }
 
+/* Player stats card style */
+.stat-container {
+  height:112px;
+  padding:4px;
+}
+.stat-tile {
+  border-radius:16px;
+  height: 100%;
+  width: 100%;
+  display: table;
+}
+.stat-tile-contents {
+    display:table-cell;
+    vertical-align: middle;
+    text-align:center;
+}
+.stat-tile-value {
+    font-size: 24px;
+}
+.stat-tile-label {
+    font-size: 13px;
+}
+
 /* Medium screens */
 @media only screen and (max-width: 767px) {
   h1.leaderboard {
