@@ -208,7 +208,7 @@ def player_score_rank_percentile(player, game):
         rank = player_result['Rank'].values[0]
     except IndexError:
         return None, None, None
-    percentile = 1 - rank / len(game_leaderboard)
+    percentile = round(100 * (1 - rank / len(game_leaderboard)))
     return score, rank, percentile
 
 
