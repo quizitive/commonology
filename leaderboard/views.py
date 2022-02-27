@@ -15,7 +15,7 @@ from game.models import Game, Question
 from game.views import BaseGameView
 from game.utils import n_new_comments
 from users.models import Player
-from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
+from leaderboard.leaderboard import build_answer_tally, player_leaderboard_message, \
     player_score_rank_percentile, rank_string, score_string, visible_leaderboards
 from leaderboard.tasks import save_last_visit_t
 from leaderboard.models import PlayerRankScore
@@ -72,7 +72,7 @@ class LeaderboardView(BaseGameView):
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
                 'player_percentile': rank_string(round(player_percentile * 100)),
-                'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
+                'player_message': player_leaderboard_message(player_rank, player_percentile),
             })
         elif self._player_answers_from_session(request):
             # get stats from instant game in session
@@ -177,7 +177,6 @@ class PlayerHomeView(LoginRequiredMixin, View):
 
         context = {
             'display_name': user.first_name or user.email,
-            'message': player_latest_game_message(player, 'commonology', latest_game_id),
             'latest_game_id': latest_game_id,
             'games': player.game_ids,
             'teams': player.teams.all(),
