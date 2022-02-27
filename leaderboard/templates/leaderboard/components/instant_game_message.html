@@ -1,21 +1,5 @@
 {% load leadeboard_tags %}
 
-{% if request.user.display_name %}
-<div class="w3-row" style="padding:4px 0;">
-  <span style="font-weight: normal;font-size:16px;">Welcome {{ request.user.display_name }}!</span>
-</div>
-{% endif %}
-<div class="w3-row" style="padding:4px 0;font-size:20px">
-  <span style="">My Score: </span>
-  <span style="color:#f26649"> {{ player_score }}</span>
-</div>
-<div class="w3-row" style="padding:4px 0;font-size:20px">
-  <span style="">My Rank: </span>
-  <span style="color:#f26649"> {{ player_rank }}</span>
-</div>
-<div class="w3-row" style="padding:4px 0">
-  <span style="font-weight: normal;font-style: italic;font-size:14px;">{{ player_message }}</span>
-</div>
 {% if is_instant %}
   {% block scripts %}
     <script src="{% v_static "js/countdown.js" %}" type="text/javascript"></script>
