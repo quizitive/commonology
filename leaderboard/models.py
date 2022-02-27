@@ -89,7 +89,7 @@ class LeaderboardMessage(models.Model):
     @classmethod
     def select_random_eligible(cls, rank, percentile):
         eligible = LeaderboardMessage.objects.filter(
-            models.Q(metric='rank', max_value__gte=rank, min_value__lte=rank) |
-            models.Q(metric='percentile', max_value__gte=percentile, min_value__lte=percentile)
+            models.Q(metric='rank', max_value__gte=rank, min_value__lte=rank)
+            | models.Q(metric='percentile', max_value__gte=percentile, min_value__lte=percentile)
         ).values_list('message', flat=True)
         return choice(list(eligible)) if eligible else ""
