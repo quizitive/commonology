@@ -15,7 +15,7 @@ from game.models import Game, AnswerCode, Series
 from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
 from game.tasks import api_to_db
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
-from leaderboard.models import Leaderboard, PlayerRankScore
+from leaderboard.models import Leaderboard, PlayerRankScore, LeaderboardMessage
 
 
 def tabulate_results(game, update=False):
@@ -262,19 +262,9 @@ def score_string(score):
 def player_latest_game_message(game, rank, percentile):
     if not rank:
         return "Looks like you missed this game... you'll get 'em next time!"
-
-    player_count = game.players_dict.count()
-    follow_up = "Well, there's always next time."
-    if percentile <= 0.1:
-        follow_up = "That puts you in the top 10%!"
-    elif percentile <= 0.25:
-        follow_up = "That puts you in the top 25%!"
-    elif percentile <= 0.34:
-        follow_up = "That puts you in the top 33%!"
-    elif percentile <= 0.5:
-        follow_up = "That puts you in the top 50%!"
-
-    return f"This game you ranked {rank} out of {player_count} players. {follow_up}"
+    follow_up = LeaderboardMessage.select_random_eligible(rank, percentile)
+    percentile_string = rank_string(round(percentile * 100))
+    return f"That puts you in the {percentile_string} percentile {follow_up}"
 
 
 @quick_cache()
