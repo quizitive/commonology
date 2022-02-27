@@ -71,6 +71,7 @@ class LeaderboardView(BaseGameView):
             context.update({
                 'player_score': score_string(player_score),
                 'player_rank': rank_string(player_rank),
+                'player_percentile': rank_string(round(player_percentile * 100)),
                 'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
             })
         elif self._player_answers_from_session(request):
