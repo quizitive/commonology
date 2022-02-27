@@ -340,7 +340,7 @@ class InstantGameView(GameFormView):
         return find_latest_published_game(self.slug)
 
     def get_context(self, game, **kwargs):
-        return super().get_context(game, instant=True)
+        return super().get_context(game, instant=True, **kwargs)
 
     @cached_property
     def questions(self):
@@ -349,12 +349,12 @@ class InstantGameView(GameFormView):
     def get(self, request, *args, **kwargs):
         self._increment_redis(request, "instant_game_starts")
         forms = self._build_game_forms(self.game)
-        context = self.get_context(self.game, forms=forms, editable=True, replay=True)
+        context = self.get_context(self.game, forms=forms, editable=True)
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
         game_forms = self._build_game_forms_post(None)
-        context = self.get_context(self.game, forms=game_forms, editable=True, replay=True)
+        context = self.get_context(self.game, forms=game_forms, editable=True)
 
         if any([not f.is_valid() for f in game_forms.values()]):
             return render(request, 'game/game_form.html', context)
