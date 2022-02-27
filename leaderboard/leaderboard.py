@@ -208,7 +208,7 @@ def player_score_rank_percentile(player, game):
         rank = player_result['Rank'].values[0]
     except IndexError:
         return None, None, None
-    percentile = rank / len(game_leaderboard)
+    percentile = 1 - rank / len(game_leaderboard)
     return score, rank, percentile
 
 
@@ -259,12 +259,10 @@ def score_string(score):
     return f"{score}"
 
 
-def player_latest_game_message(game, rank, percentile):
+def player_leaderboard_message(rank, percentile):
     if not rank:
         return "Looks like you missed this game... you'll get 'em next time!"
-    follow_up = LeaderboardMessage.select_random_eligible(rank, percentile)
-    percentile_string = rank_string(round(percentile * 100))
-    return f"That puts you in the {percentile_string} percentile {follow_up}"
+    return LeaderboardMessage.select_random_eligible(rank, percentile)
 
 
 @quick_cache()
