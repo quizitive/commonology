@@ -17,13 +17,17 @@ div.content {
     min-height: 100vh;
     padding-bottom:196px;
 }
-
+/* Some overrides of W3 Defaults */
 div.w3-modal-content {
   max-width: 640px;
 }
 
 div.w3-modal-content {
   max-width: 640px;
+}
+
+.w3-modal {
+  padding-top: 100px;
 }
 
 /* so cards have rounded corners on top and bottom */
