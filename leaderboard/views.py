@@ -70,7 +70,7 @@ class LeaderboardView(BaseGameView):
                 player_score_rank_percentile(player, self.game)
             context.update({
                 'player_score': score_string(player_score),
-                'player_rank': player_rank,
+                'player_rank': player_rank or "N/A",
                 'player_percentile': rank_string(player_percentile),
                 'player_message': player_leaderboard_message(self.game, player_rank, player_percentile),
             })
@@ -84,7 +84,7 @@ class LeaderboardView(BaseGameView):
                              f"on the leaderboard."
             context.update({
                 'player_score': score_string(player_score),
-                'player_rank': player_rank,
+                'player_rank': player_rank or "N/A",
                 'player_message': mark_safe(player_message),
                 'player_percentile': rank_string(player_percentile),
                 'is_instant': True
