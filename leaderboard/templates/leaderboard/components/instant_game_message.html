@@ -1,0 +1,55 @@
+{% load leadeboard_tags %}
+
+{% if is_instant %}
+  {% block scripts %}
+    <script src="{% v_static "js/countdown.js" %}" type="text/javascript"></script>
+    <script>
+    window.onload = function() {
+      let event_time = "{{ event_time }}";
+      getCountdown(event_time, true);
+    };
+    </script>
+  {% endblock %}
+
+    <style>
+
+  </style>
+
+  <div class="w3-row" style="padding:12px 24px;background: #f1f2f3;margin:16px -24px;">
+    <div class="w3-row" >
+      <div class="cg-blue" style="padding: 8px 24px;margin: 0 -24px;">
+        Join the live game!
+      </div>
+
+      <ul style="font-weight: normal">
+        <li>Appear on the leaderboard for a chance to be #1!</li>
+        <li>You are entered into a weekly raffle to win $50!</li>
+        <li>Your answers will be used in our official scoring!</li>
+      </ul>
+    </div>
+
+      <div class="w3-row w3-center">
+
+      {% active_game as active_game %}
+      {% if active_game %}
+      {% else %}
+        The next game begins in
+        <span id="days">--</span>
+        <span id="hours">--</span>
+        <span id="mins">--</span> and
+        <span id="secs">--</span>
+      {% endif %}
+        <div class="join-button container" style="padding: 4px;max-width:300px;margin:auto;">
+          {% if active_game %}
+            <a href="{% series_or_default_url 'game' 'play' %}{{ active_game.uuid|default:'' }}">
+              <button class="leaderboard-header-button pulse-button w3-button cg-salmon w3-round-xxlarge">Play Live Game!</button>
+            </a>
+          {% else %}
+            <a href="/join/">
+              <button class="leaderboard-header-button pulse-button w3-button cg-salmon w3-round-xxlarge">Join Now!</button>
+            </a>
+          {% endif %}
+        </div>
+    </div>
+  </div>
+{% endif %}

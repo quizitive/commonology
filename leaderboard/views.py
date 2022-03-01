@@ -15,7 +15,7 @@ from game.models import Game, Question
 from game.views import BaseGameView
 from game.utils import n_new_comments
 from users.models import Player
-from leaderboard.leaderboard import build_answer_tally, player_latest_game_message, \
+from leaderboard.leaderboard import build_answer_tally, player_leaderboard_message, \
     player_score_rank_percentile, rank_string, score_string, visible_leaderboards
 from leaderboard.tasks import save_last_visit_t
 from leaderboard.models import PlayerRankScore
@@ -70,19 +70,23 @@ class LeaderboardView(BaseGameView):
                 player_score_rank_percentile(player, self.game)
             context.update({
                 'player_score': score_string(player_score),
-                'player_rank': rank_string(player_rank),
-                'player_message': player_latest_game_message(self.game, player_rank, player_percentile),
+                'player_rank': player_rank,
+                'player_percentile': rank_string(player_percentile),
+                'player_message': player_leaderboard_message(self.game, player_rank, player_percentile),
             })
         elif self._player_answers_from_session(request):
             # get stats from instant game in session
-            player_score, player_rank = self._instant_game_score_rank(request)
+            player_score, player_rank, player_percentile = self._instant_game_score_rank(request)
             player_count = self.game.players_dict.count()
             player_message = f"You scored {player_score} points, which ranks you " \
-                             f"{rank_string(player_rank)} out of {player_count} live players. "
+                             f"{rank_string(player_rank)} out of {player_count} live players. That's " \
+                             f"better than {player_percentile}% of them! Join the live game to earn your spot " \
+                             f"on the leaderboard."
             context.update({
                 'player_score': score_string(player_score),
-                'player_rank': rank_string(player_rank),
+                'player_rank': player_rank,
                 'player_message': mark_safe(player_message),
+                'player_percentile': rank_string(player_percentile),
                 'is_instant': True
             })
             context.update(next_game_context())
@@ -112,7 +116,8 @@ class LeaderboardView(BaseGameView):
             leaderboard__game=self.game, score__gt=player_score
         ).order_by("score").first()
         player_rank = adjacent_rank.rank + 1 if adjacent_rank else 1
-        return player_score, player_rank
+        player_percentile = round(100 * (1 - player_rank / self.game.players_dict.count()))
+        return player_score, player_rank, player_percentile
 
 
 class ResultsView(LeaderboardView):
@@ -176,7 +181,6 @@ class PlayerHomeView(LoginRequiredMixin, View):
 
         context = {
             'display_name': user.first_name or user.email,
-            'message': player_latest_game_message(player, 'commonology', latest_game_id),
             'latest_game_id': latest_game_id,
             'games': player.game_ids,
             'teams': player.teams.all(),
