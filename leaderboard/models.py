@@ -89,7 +89,16 @@ class LeaderboardMessage(models.Model):
 
     def message_with_subs(self, rank, percentile):
         """Replace occurrences of literal {rank} and {percentile} with the actual value."""
-        return self.message.replace("{rank}", str(rank)).replace("{percentile}", str(percentile))
+        allowed_subs = {
+            "{rank}": str(rank),
+            "{rank + 1}": str(rank + 1),
+            "{percentile}": str(percentile),
+            "{100 - percentile}": str(100 - percentile)
+        }
+        sub_message = self.message
+        for match, sub in allowed_subs.items():
+            sub_message = sub_message.replace(match, sub)
+        return sub_message
 
     @classmethod
     def select_random_eligible(cls, rank, percentile):
