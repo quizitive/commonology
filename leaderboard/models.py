@@ -82,14 +82,22 @@ class LeaderboardMessage(models.Model):
     min_value = models.IntegerField(help_text="The minimum value of the metric for this message to be eligible")
     max_value = models.IntegerField(help_text="The maximum value of the metric for this message to be eligible")
     message = models.CharField(
-        help_text="This is added to the player results card on the leaderboard/results.",
+        help_text=f"This is added to the player results card on the leaderboard/results. You can include the "
+                  f"given player's rank and percentile in the message by using {{rank}} and {{score}}.",
         max_length=255,
     )
+
+    def message_with_subs(self, rank, percentile):
+        """Replace occurrences of literal {rank} and {percentile} with the actual value."""
+        return self.message.replace("{rank}", str(rank)).replace("{percentile}", str(percentile))
 
     @classmethod
     def select_random_eligible(cls, rank, percentile):
         eligible = LeaderboardMessage.objects.filter(
             models.Q(metric='rank', max_value__gte=rank, min_value__lte=rank)
             | models.Q(metric='percentile', max_value__gte=percentile, min_value__lte=percentile)
-        ).values_list('message', flat=True)
-        return choice(list(eligible)) if eligible else ""
+        )
+        if not eligible:
+            return ""
+        rand_msg = choice(list(eligible))
+        return rand_msg.message_with_subs(rank, percentile)
