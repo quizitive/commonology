@@ -4,6 +4,12 @@
 </div>
 {% endif %}
 
+{% if is_instant %}
+  <div class="w3-row" style="padding:8px 0">
+  <span style="font-weight: bold;">Your game results:</span>
+</div>
+{% endif %}
+
 <div class="w3-row" style="padding:8px 0;margin:auto;max-width:440px">
   {# RANK #}
   <div class="stat-container w3-col s4">
@@ -47,7 +53,7 @@
 </div>
 
 <div class="w3-row" style="padding:4px 0">
-  <span style="font-weight: normal;font-style: italic;font-size:14px;">{{ player_message }}</span>
+  <span style="font-weight:normal;font-style:italic;font-size:12px;">{{ player_message }}</span>
 </div>
 
 {% include "leaderboard/components/instant_game_message.html" %}
