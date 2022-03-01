@@ -4,10 +4,10 @@
 </div>
 {% endif %}
 
-<div class="w3-row" style="padding:8px 0;margin:0 -4px;">
+<div class="w3-row" style="padding:8px 0;margin:auto;max-width:440px">
   {# RANK #}
   <div class="stat-container w3-col s4">
-    <div class="stat-tile cg-blue">
+    <div class="stat-tile" style="color:#0095da">
       <div class="stat-tile-contents">
         <div class="w3-row stat-tile-value w3-center">
         {{ player_rank }}
@@ -20,7 +20,7 @@
   </div>
   {# SCORE #}
   <div class="stat-container w3-col s4">
-    <div class="stat-tile cg-salmon">
+    <div class="stat-tile" style="color:#f26649">
       <div class="stat-tile-contents">
         <div class="w3-row stat-tile-value w3-center">
         {{ player_score }}
@@ -33,7 +33,7 @@
   </div>
   {# PERECENTILE #}
   <div class="stat-container w3-col s4">
-    <div class="stat-tile cg-teal">
+    <div class="stat-tile" style="color:#237073">
       <div class="stat-tile-contents">
         <div class="w3-row stat-tile-value w3-center">
         {{ player_percentile }}
