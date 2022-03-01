@@ -76,14 +76,17 @@ class LeaderboardView(BaseGameView):
             })
         elif self._player_answers_from_session(request):
             # get stats from instant game in session
-            player_score, player_rank = self._instant_game_score_rank(request)
+            player_score, player_rank, player_percentile = self._instant_game_score_rank(request)
             player_count = self.game.players_dict.count()
             player_message = f"You scored {player_score} points, which ranks you " \
-                             f"{rank_string(player_rank)} out of {player_count} live players. "
+                             f"{rank_string(player_rank)} out of {player_count} live players. That's " \
+                             f"better than {player_percentile}% of them! Join the live game to earn your spot " \
+                             f"on the leaderboard."
             context.update({
                 'player_score': score_string(player_score),
-                'player_rank': rank_string(player_rank),
+                'player_rank': player_rank,
                 'player_message': mark_safe(player_message),
+                'player_percentile': rank_string(player_percentile),
                 'is_instant': True
             })
             context.update(next_game_context())
@@ -113,7 +116,8 @@ class LeaderboardView(BaseGameView):
             leaderboard__game=self.game, score__gt=player_score
         ).order_by("score").first()
         player_rank = adjacent_rank.rank + 1 if adjacent_rank else 1
-        return player_score, player_rank
+        player_percentile = round(100 * (1 - player_rank / self.game.players_dict.count()))
+        return player_score, player_rank, player_percentile
 
 
 class ResultsView(LeaderboardView):
