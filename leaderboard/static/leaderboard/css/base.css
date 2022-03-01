@@ -74,6 +74,52 @@ table.leaderboard td:first-child {
   width: 65%;
   word-wrap: break-word;
 }
+.leaderboard-buttons {
+    max-width: 465px;
+    margin: auto;
+  }
+
+/* Player stats card style */
+.stat-container {
+  height: 96px;
+  padding:4px;
+}
+.stat-tile {
+  border-radius:16px;
+  height: 100%;
+  width: 100%;
+  display: table;
+}
+.stat-tile-contents {
+    display:table-cell;
+    vertical-align: middle;
+    text-align:center;
+}
+.stat-tile-value {
+    font-size: 36px;
+}
+.stat-tile-label {
+    font-size: 13px;
+}
+
+/* Pulsing play button */
+.pulse-button {
+  position: relative;
+  box-shadow: 0 0 0 0 rgba(232, 76, 61, 0.8);
+  -webkit-animation: pulse 1.25s infinite cubic-bezier(0.5, 0, 0, 0.4);
+  -moz-animation: pulse 1.25s infinite cubic-bezier(0.5, 0, 0, 0.4);
+  -ms-animation: pulse 1.25s infinite cubic-bezier(0.5, 0, 0, 0.4);
+  animation: pulse 1.25s infinite cubic-bezier(0.5, 0, 0, 0.4);
+}
+.pulse-button:hover
+{
+  -webkit-animation: none;-moz-animation: none;-ms-animation: none;animation: none;
+}
+
+@-webkit-keyframes pulse {to {box-shadow: 0 0 0 6px rgba(232, 76, 61, 0);}}
+@-moz-keyframes pulse {to {box-shadow: 0 0 0 6px rgba(232, 76, 61, 0);}}
+@-ms-keyframes pulse {to {box-shadow: 0 0 0 6px rgba(232, 76, 61, 0);}}
+@keyframes pulse {to {box-shadow: 0 0 0 6px rgba(232, 76, 61, 0);}}
 
 /* Medium screens */
 @media only screen and (max-width: 767px) {
@@ -86,22 +132,29 @@ table.leaderboard td:first-child {
   h3.leaderboard {
     font-size: 1.4rem;
   }
-  .leaderboard-buttons {
-    max-width: 200px;
-    margin: auto;
-  }
   #game-name {
     font-size: 26px;
   }
 }
 
 /* Small screens */
-@media only screen and (max-width: 560px) {
+@media only screen and (max-width: 601px) {
   .name {
     width: 50%;
   }
   #following-drp {
     padding: 8px 12px;
+  }
+  .leaderboard-buttons {
+    max-width: 200px;
+    margin: auto;
+  }
+}
+
+/* Tiny screens */
+@media only screen and (max-width: 440px) {
+  .stat-tile-value {
+    font-size: 32px;
   }
 }
 
