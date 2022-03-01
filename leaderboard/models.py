@@ -82,8 +82,10 @@ class LeaderboardMessage(models.Model):
     min_value = models.IntegerField(help_text="The minimum value of the metric for this message to be eligible")
     max_value = models.IntegerField(help_text="The maximum value of the metric for this message to be eligible")
     message = models.CharField(
-        help_text=f"This is added to the player results card on the leaderboard/results. You can include the "
-                  f"given player's rank and percentile in the message by using {{rank}} and {{score}}.",
+        help_text=f"This is added to the player results card on the leaderboard/results. You can reference the "
+                  f"given player's rank and percentile in the message by using {{rank}} and {{score}}."
+                  f"You can even to {{rank + 1}} to reference the next player, or {{100 - percentile}} to get"
+                  f"the percent of players who did better than the player.",
         max_length=255,
     )
 
