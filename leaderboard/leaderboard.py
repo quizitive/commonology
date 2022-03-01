@@ -259,10 +259,13 @@ def score_string(score):
     return f"{score}"
 
 
-def player_leaderboard_message(rank, percentile):
+def player_leaderboard_message(game, rank, percentile):
     if not rank:
         return "Looks like you missed this game... you'll get 'em next time!"
-    return LeaderboardMessage.select_random_eligible(rank, percentile)
+    num_players = game.players_dict.count()
+    message = f"You ranked {rank_string(rank)} out of {num_players} total players. "
+    follow_up = LeaderboardMessage.select_random_eligible(rank, percentile)
+    return message + follow_up
 
 
 @quick_cache()

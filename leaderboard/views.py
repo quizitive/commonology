@@ -72,7 +72,7 @@ class LeaderboardView(BaseGameView):
                 'player_score': score_string(player_score),
                 'player_rank': player_rank,
                 'player_percentile': rank_string(player_percentile),
-                'player_message': player_leaderboard_message(player_rank, player_percentile),
+                'player_message': player_leaderboard_message(self.game, player_rank, player_percentile),
             })
         elif self._player_answers_from_session(request):
             # get stats from instant game in session
