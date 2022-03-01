@@ -70,7 +70,7 @@ class LeaderboardView(BaseGameView):
                 player_score_rank_percentile(player, self.game)
             context.update({
                 'player_score': score_string(player_score),
-                'player_rank': rank_string(player_rank),
+                'player_rank': player_rank,
                 'player_percentile': rank_string(player_percentile),
                 'player_message': player_leaderboard_message(player_rank, player_percentile),
             })
