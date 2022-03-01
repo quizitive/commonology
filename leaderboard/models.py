@@ -1,4 +1,5 @@
 from datetime import timedelta
+from random import choice
 
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -70,3 +71,44 @@ class PlayerRankScore(models.Model):
 
     class Meta:
         unique_together = ('player', 'leaderboard')
+
+
+class LeaderboardMessage(models.Model):
+    metric = models.CharField(
+        choices=[('rank', 'Rank'), ('percentile', 'Percentile')],
+        help_text="E.g. Players with rank between 1-100. Players in the 90-99th percentile.",
+        max_length=35
+    )
+    min_value = models.IntegerField(help_text="The minimum value of the metric for this message to be eligible")
+    max_value = models.IntegerField(help_text="The maximum value of the metric for this message to be eligible")
+    message = models.CharField(
+        help_text=f"This is added to the player results card on the leaderboard/results. You can reference the "
+                  f"given player's rank and percentile in the message by using {{rank}} and {{score}}."
+                  f"You can even to {{rank + 1}} to reference the next player, or {{100 - percentile}} to get"
+                  f"the percent of players who did better than the player.",
+        max_length=255,
+    )
+
+    def message_with_subs(self, rank, percentile):
+        """Replace occurrences of literal {rank} and {percentile} with the actual value."""
+        allowed_subs = {
+            "{rank}": str(rank),
+            "{rank + 1}": str(rank + 1),
+            "{percentile}": str(percentile),
+            "{100 - percentile}": str(100 - percentile)
+        }
+        sub_message = self.message
+        for match, sub in allowed_subs.items():
+            sub_message = sub_message.replace(match, sub)
+        return sub_message
+
+    @classmethod
+    def select_random_eligible(cls, rank, percentile):
+        eligible = LeaderboardMessage.objects.filter(
+            models.Q(metric='rank', max_value__gte=rank, min_value__lte=rank)
+            | models.Q(metric='percentile', max_value__gte=percentile, min_value__lte=percentile)
+        )
+        if not eligible:
+            return ""
+        rand_msg = choice(list(eligible))
+        return rand_msg.message_with_subs(rank, percentile)
