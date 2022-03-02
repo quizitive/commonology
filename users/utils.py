@@ -50,6 +50,10 @@ def add_additional_fields(strategy, details, backend, user=None, *args, **kwargs
         user.display_name = f"{user.first_name} {user.last_name}".strip()
 
     user.is_member = True
+    r_code = strategy.session.get('r')
+    if r_code and user.referrer is None:
+        referrer = Player.objects.filter(_code=r_code).first()
+        user.referrer = referrer
     user.save()
     Series.objects.get(slug='commonology').players.add(user)
 
