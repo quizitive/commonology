@@ -27,7 +27,8 @@ from project.views import CardFormView
 from project.utils import slackit, our_now, ANALYTICS_REDIS
 from project.card_views import recaptcha_check
 from components.models import SponsorComponent
-from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, AwardCertificateForm
+from game.forms import TabulatorForm, QuestionAnswerForm, GameDisplayNameForm, QuestionSuggestionForm, \
+    AwardCertificateForm
 from game.models import Game, Series, Question, Answer
 from game.gsheets_api import write_new_responses_to_gdrive
 from game.rollups import autorollup_question_answer
@@ -438,26 +439,39 @@ class GameEntryView(PSIDMixin, CardFormView):
     card_div_id = "game-entry-card"
 
     def message(self, request, msg):
-        return self.render_card(request, msg, form=None, button_label='Ok', title='Play',
-                                   form_method="get", form_action='/')
+        return self.render_card(request, custom_message=msg, form=None, card_extras=False)
 
     def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
         return self.render_card(request, msg, form=None, button_label='Leaderboard', title='Play',
-                                   form_method="get", form_action=f'/c/{slug}/leaderboard/')
+                                form_method="get", form_action=f'/c/{slug}/leaderboard/')
 
     def join(self, request, msg):
         return self.render_card(request, msg, form=None, button_label='Join', title='Play',
-                                   form_method="get", form_action='/join/')
+                                form_method="get", form_action='/join/')
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "game_name": self.get_game().name,
+            "card_extras": True,
+        }
+        context.update(super().get_context_data(**kwargs))
+        return context
+
+    def get_game(self):
+        slug = self.request.GET.get('series_slug') or 'commonology'
+        game_uuid = self.request.GET.get('game_uuid')
+        if not game_uuid:
+            g = find_latest_public_game(slug)
+        else:
+            g = Game.objects.filter(uuid=game_uuid).first()
+        return g
 
     def get(self, request, *args, **kwargs):
         slug = kwargs.get('series_slug') or 'commonology'
         game_uuid = kwargs.get('game_uuid')
         user = request.user
 
-        if not game_uuid:
-            g = find_latest_public_game(slug)
-        else:
-            g = Game.objects.filter(uuid=game_uuid).first()
+        g = self.get_game()
 
         if g is None:
             if user.is_authenticated:
@@ -509,7 +523,7 @@ class GameEntryView(PSIDMixin, CardFormView):
         if user.is_authenticated:
             return render_game(request, g)
 
-        return super().get(request, title=f'Play', game_name=g.name, *args, **kwargs)
+        return super().get(request, title=f'Play', *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         # The get method already determined that:
@@ -522,14 +536,7 @@ class GameEntryView(PSIDMixin, CardFormView):
         if 'email' not in request.POST:
             return redirect('home')
 
-        game_uuid = kwargs.get('game_uuid')
-
-        if game_uuid:
-            g = Game.objects.filter(uuid=game_uuid).first()
-        else:
-            slug = kwargs.get('series_slug') or 'commonology'
-            g = find_latest_public_game(slug)
-
+        g = self.get_game()
         if g is None:
             return self.message(request, 'Cannot find game.  Perhaps you have a bad link.')
 
@@ -554,13 +561,15 @@ class GameEntryView(PSIDMixin, CardFormView):
             return render_game(request, g, p)
 
         send_confirm(request, g, email, referrer_id)
-        custom_message = mark_safe(f"<b>We sent a game link to {email}. </b>"
-                                   f"Don't forget to check your spam or junk folder if need be. "
-                                   f"By the way, if you were logged in you'd be playing already.")
+        custom_message = (
+            f"<div class=\"w3-center\">"
+            f"<i class=\"fas fa-envelope-open-text fa-4x\" style=\"padding:16px;\"></i></div>"
+            f"<div class=\"w3-row w3-padding w3-center\" style=\"margin-bottom:32px;\">"
+            f"We sent a game link to {email}. </b>"
+            f"Don't forget to check your spam or junk folder if need be.</div>"
+        )
 
-        self.header = "Game link sent!"
-        return self.render_message(request, custom_message, form=None,
-                                   form_method='get', form_action='', button_label=None)
+        return self.message(request, custom_message)
 
 
 class GameEntryValidationView(PSIDMixin, CardFormView):
@@ -702,7 +711,7 @@ class AwardCertificateView(LoginRequiredMixin, BaseGameView):
 
         if env.get('GITHUB_COMMONOLOGY_CI_TEST'):
             response = HttpResponse('pdf', content_type='application/pdf')
-            return(response)
+            return (response)
 
         game_number = self.game.game_id
         name = player.display_name
