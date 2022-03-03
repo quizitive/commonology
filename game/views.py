@@ -432,9 +432,8 @@ def render_game(request, game, user=None, editable=True):
 
 class GameEntryView(PSIDMixin, CardFormView):
     form_class = PendingEmailForm
-    header = "Game starts here!"
-    button_label = "Submit"
-    custom_message = "Enter your email address to play."
+    button_label = "Continue"
+    card_template = "game/cards/game_entry_card.html"
     page_template = "game/game_card_view.html"
 
     def message(self, request, msg):
@@ -509,7 +508,7 @@ class GameEntryView(PSIDMixin, CardFormView):
         if user.is_authenticated:
             return render_game(request, g)
 
-        return super().get(request, title=f'Play', *args, **kwargs)
+        return super().get(request, title=f'Play', game_name=g.name, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         # The get method already determined that:
