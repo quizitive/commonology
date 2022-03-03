@@ -4,7 +4,7 @@ import logging
 from numpy import base_repr
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
@@ -435,17 +435,18 @@ class GameEntryView(PSIDMixin, CardFormView):
     button_label = "Continue"
     card_template = "game/cards/game_entry_card.html"
     page_template = "game/game_card_view.html"
+    card_div_id = "game-entry-card"
 
     def message(self, request, msg):
-        return self.render_message(request, msg, form=None, button_label='Ok', title='Play',
+        return self.render_card(request, msg, form=None, button_label='Ok', title='Play',
                                    form_method="get", form_action='/')
 
     def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
-        return self.render_message(request, msg, form=None, button_label='Leaderboard', title='Play',
+        return self.render_card(request, msg, form=None, button_label='Leaderboard', title='Play',
                                    form_method="get", form_action=f'/c/{slug}/leaderboard/')
 
     def join(self, request, msg):
-        return self.render_message(request, msg, form=None, button_label='Join', title='Play',
+        return self.render_card(request, msg, form=None, button_label='Join', title='Play',
                                    form_method="get", form_action='/join/')
 
     def get(self, request, *args, **kwargs):
@@ -533,7 +534,7 @@ class GameEntryView(PSIDMixin, CardFormView):
             return self.message(request, 'Cannot find game.  Perhaps you have a bad link.')
 
         if not self.get_form().is_valid():
-            return self.render(request, *args, **kwargs)
+            return self.render_card(request, form=self.get_form(), *args, **kwargs)
 
         email = request.POST['email']
 
