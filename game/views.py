@@ -452,7 +452,7 @@ class GameEntryView(PSIDMixin, CardFormView):
 
     def get_context_data(self, **kwargs):
         context = {
-            "game_name": self.get_game().name,
+            "game": self.get_game(),
             "card_extras": True,
         }
         context.update(super().get_context_data(**kwargs))
