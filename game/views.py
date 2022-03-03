@@ -565,7 +565,7 @@ class GameEntryView(PSIDMixin, CardFormView):
             f"<div class=\"w3-center\">"
             f"<i class=\"fas fa-envelope-open-text fa-4x\" style=\"padding:16px;\"></i></div>"
             f"<div class=\"w3-row w3-padding w3-center\" style=\"margin-bottom:32px;\">"
-            f"We sent a game link to {email}. </b>"
+            f"<b>We sent a game link to {email}. </b>"
             f"Don't forget to check your spam or junk folder if need be.</div>"
         )
 
