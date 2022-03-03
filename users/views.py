@@ -33,7 +33,6 @@ def user_logout(request):
 
 
 class ProfileView(LoginRequiredMixin, CardFormView):
-
     form_class = PlayerProfileForm
     card_template = 'users/cards/profile_card.html'
     header = "Edit Profile"
@@ -187,7 +186,6 @@ def send_invite(request, email, referrer=None):
 
 
 class InviteFriendsView(LoginRequiredMixin, BaseCardView):
-
     header = "Invite Friends"
     button_label = ""
     card_template = "users/cards/invite_card.html"
@@ -310,10 +308,11 @@ class EmailConfirmedView(View):
 class PwdResetRequestSentView(PasswordResetDoneView):
 
     def get(self, request, *args, **kwargs):
-        custom_message = f"We've emailed you instructions for setting your password, " \
-                         f"if an account exists with the email you entered. You should receive them shortly." \
-                         f"\n\nIf you don't receive an email, please make sure you've entered the address" \
-                         f" you registered with, and check your spam folder"
+        custom_message = mark_safe(
+            f"We've emailed you instructions for setting your password, "
+            f"if an account exists with the email you entered. You should receive them shortly."
+            f"<br/><br/>If you don't receive an email, please make sure you've entered the address"
+            f" you registered with, and check your spam folder")
 
         context = {'header': "Reset Password", 'custom_message': custom_message}
         return render(request, 'users/base.html', context)
@@ -430,10 +429,10 @@ class SubscribeView(View):
         i, t = token.split(':')
         context = {'header': 'Subscribe'}
 
-        bad_msg = f"There is something wrong with the link you used. "\
-                  f"If you wish to re-subscribe then please log in and "\
-                  f"and check subscribed in your profile settings. You can "\
-                  f"change your profile by selecting your name in the dropdown "\
+        bad_msg = f"There is something wrong with the link you used. " \
+                  f"If you wish to re-subscribe then please log in and " \
+                  f"and check subscribed in your profile settings. You can " \
+                  f"change your profile by selecting your name in the dropdown " \
                   f"menu on the top right of our site.  Sorry for the inconvenience."
 
         try:
