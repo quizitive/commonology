@@ -439,6 +439,7 @@ class GameEntryView(PSIDMixin, CardFormView):
     card_div_id = "game-entry-card"
 
     def message(self, request, msg):
+        msg = "<div style=\"min-height:200px\">" + msg + "</div>"
         return self.render_card(request, custom_message=msg, form=None, card_extras=False)
 
     def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
@@ -564,7 +565,7 @@ class GameEntryView(PSIDMixin, CardFormView):
         custom_message = (
             f"<div class=\"w3-center\">"
             f"<i class=\"fas fa-envelope-open-text fa-4x\" style=\"padding:16px;\"></i></div>"
-            f"<div class=\"w3-row w3-padding w3-center\" style=\"margin-bottom:32px;\">"
+            f"<div class=\"w3-row w3-padding-16 w3-center\" style=\"margin-bottom:32px;\">"
             f"<b>We sent a game link to {email}. </b>"
             f"Don't forget to check your spam or junk folder if need be.</div>"
         )
