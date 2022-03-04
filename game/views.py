@@ -437,23 +437,32 @@ class GameEntryView(PSIDMixin, CardFormView):
     card_template = "game/cards/game_entry_card.html"
     page_template = "game/game_card_view.html"
     card_div_id = "game-entry-card"
+    custom_message = "Please verify your email address."
 
     def message(self, request, msg):
         msg = "<div style=\"min-height:200px\">" + msg + "</div>"
-        return self.render_card(request, custom_message=msg, form=None, card_extras=False)
+        return self.render_card(request, custom_message=msg, form=None, continue_with_google=False)
 
-    def leaderboard(self, request, msg='Seems like the game finished.  See the leaderboard.', slug='commonology'):
+    @staticmethod
+    def icon_message(icon, msg):
+        icon_message = (
+            "<div style=\"min-height:200px\">"
+            f"<div class=\"w3-center\">"
+            f"<i class=\"{icon} fa-4x\" style=\"padding:16px;color:#0095da\"></i></div>"
+            f"<div class=\"w3-row w3-padding-16 w3-center\" style=\"margin-bottom:32px;\">"
+            f"{msg}</div></div>"
+        )
+        return icon_message
+
+    def leaderboard(self, request, msg='Seems like the game finished. See the leaderboard.', slug='commonology'):
         return self.render_card(request, msg, form=None, button_label='Leaderboard', title='Play',
                                 form_method="get", form_action=f'/c/{slug}/leaderboard/')
-
-    def join(self, request, msg):
-        return self.render_card(request, msg, form=None, button_label='Join', title='Play',
-                                form_method="get", form_action='/join/')
 
     def get_context_data(self, **kwargs):
         context = {
             "game": self.get_game(),
-            "card_extras": True,
+            "continue_with_google": True,
+            "nav_button_label": None,
         }
         context.update(super().get_context_data(**kwargs))
         return context
@@ -475,19 +484,20 @@ class GameEntryView(PSIDMixin, CardFormView):
         g = self.get_game()
 
         if g is None:
-            if user.is_authenticated:
-                return self.message(request,
-                                    'Cannot find an active game.  We will let you know when the next game begins.')
-            elif game_uuid:
-                return self.message(request, 'Cannot find an active game.  Perhaps you have a bad link.')
+            if not user.is_authenticated:
+                messages.info(request, "The game you are looking for has ended.")
+                return redirect('join')
             else:
-                if slug is None or slug == 'commonology':
-                    msg = 'Next game begins on Wednesday at noon.  Join so we can send you an invitation when it starts.'
-                else:
-                    msg = 'Cannot find an active game.  Join so we can let you know when the next game begins.'
-                return self.join(request, msg)
-
-        slug = g.series.slug
+                msg = self.icon_message(
+                    icon="far fa-clock", msg="The game has ended. The next game goes live Wednesday at 12pm EST!")
+                return super().get(
+                    request,
+                    custom_message=msg,
+                    form=None,
+                    continue_with_google=False,
+                    nav_button_label="Home",
+                    nav_button_url="/"
+                )
 
         # Backward compatibility
         if g.google_form_url:
@@ -504,16 +514,18 @@ class GameEntryView(PSIDMixin, CardFormView):
             return self.leaderboard(request, slug=slug)
 
         if g.user_played(user):
-            return self.render_message(
+            msg = self.icon_message(
+                icon="far fa-ballot-check",
+                msg=f"Your answers have been successfully submitted! "
+                    f"You can see them again by clicking the button below."
+            )
+            return super().get(
                 request,
-                message=f"You have already submitted answers for this game. "
-                        f"You can see them again by clicking the button below.",
+                custom_message=msg,
                 form=None,
                 button_label="View my answers",
-                header="You've already played!",
-                form_method='get',
-                form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
-            )
+                button_url=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
+               )
 
         if game_uuid and g.not_started_yet:
             return render_game(request, g, editable=False)
@@ -562,15 +574,12 @@ class GameEntryView(PSIDMixin, CardFormView):
             return render_game(request, g, p)
 
         send_confirm(request, g, email, referrer_id)
-        custom_message = (
-            f"<div class=\"w3-center\">"
-            f"<i class=\"fas fa-envelope-open-text fa-4x\" style=\"padding:16px;\"></i></div>"
-            f"<div class=\"w3-row w3-padding-16 w3-center\" style=\"margin-bottom:32px;\">"
-            f"<b>We sent a game link to {email}. </b>"
-            f"Don't forget to check your spam or junk folder if need be.</div>"
+        msg = self.icon_message(
+            icon="fas fa-envelope-open-text",
+            msg=f"We sent a game link to <b>{email}. </b>"
+                f"Don't forget to check your spam or junk folder if need be.</div>"
         )
-
-        return self.message(request, custom_message)
+        return self.message(request, msg)
 
 
 class GameEntryValidationView(PSIDMixin, CardFormView):

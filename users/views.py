@@ -96,7 +96,7 @@ class JoinView(CardFormView):
     header = "Join Commonology"
     button_label = "Join"
     card_template = 'users/cards/join_card.html'
-    custom_message = "Enter your email to join the game, follow your friends, and much more coming soon!"
+    custom_message = "A new game goes live every Wednesday at 12pm EST. Join us to get notified!"
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
