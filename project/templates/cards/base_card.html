@@ -28,9 +28,9 @@
 
   <!-- standard Django user messages e.g. messages.info(request, "message') -->
   {% if messages %}
-    <div style="margin-bottom:24px;">
+    <div class="w3-padding-16">
     {% for msg in messages %}
-      <p class="user-msg {{ msg.level_tag }} w3-padding-top">{{ msg }}</p>
+      <div class="user-msg {{ msg.level_tag }} w3-padding-top">{{ msg }}</div>
     {% endfor %}
     </div>
   {% endif %}

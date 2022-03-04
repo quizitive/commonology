@@ -37,7 +37,7 @@ class PendingEmailForm(forms.ModelForm):
         fields = ('email',)
 
     email = forms.EmailField(
-        label="Please verify your email address.",
+        label="",
         max_length=256,
         widget=forms.TextInput(attrs={'placeholder': 'Email'})
     )
