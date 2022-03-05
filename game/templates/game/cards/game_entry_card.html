@@ -36,14 +36,16 @@
     <path d="M0,0 L-10,40 Q250,120 510,40 L500,0 Z" fill="#0095da" />
   </svg>
 
+  <div class="w3-center">
   {{ block.super }}
+  </div>
 
 
 {% endblock %}
 
 {% block form %}
 
-  <form id="card_form" hx-post="{{ request.path }}" hx-target="#game-entry-card" hx-swap="outerHTML">
+  <form id="card_form" method="post" action="{{ request.path }}">
       {% if form %}
         {% csrf_token %}
           <div style="text-align: center">
