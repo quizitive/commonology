@@ -486,7 +486,7 @@ class GameEntryView(PSIDMixin, CardFormView):
         return g
 
     def get(self, request, *args, **kwargs):
-        slug = kwargs.get('slug') or 'commonology'
+        slug = kwargs.get('series_slug') or 'commonology'
         game_uuid = kwargs.get('game_uuid')
         user = request.user
 
@@ -545,7 +545,7 @@ class GameEntryView(PSIDMixin, CardFormView):
         if 'email' not in request.POST:
             return redirect('home')
 
-        slug = kwargs.get('slug') or 'commonology'
+        slug = kwargs.get('series_slug') or 'commonology'
         game_uuid = kwargs.get('game_uuid')
         g = self.get_game(slug, game_uuid)
         if g is None:
@@ -640,7 +640,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
             header="You've already played!",
             form_method='get',
             form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
-            message=f"You have already submitted answers for this game. "
+            message=f"You have already submitted answers for this game! "
                     f"You can see them again by clicking the button below.",
         )
 
