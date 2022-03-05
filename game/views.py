@@ -472,8 +472,7 @@ class GameEntryView(PSIDMixin, CardFormView):
 
     def get_context_data(self, **kwargs):
         context = {
-            "continue_with_google": True,
-            "nav_button_label": None,
+            "continue_with_google": True
         }
         context.update(super().get_context_data(**kwargs))
         return context
