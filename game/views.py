@@ -444,21 +444,27 @@ class GameEntryView(PSIDMixin, CardFormView):
         return self.render(request, custom_message=msg, form=None, button_label=None, continue_with_google=False)
 
     def no_active_game(self, request):
-        if not request.user.is_authenticated:
-            messages.info(request, "The game you are looking for has ended.")
-            return redirect('join')
+        if request.user.is_authenticated:
+            button_label = "Home",
+            form_method = "get",
+            form_action = "/"
+            msg = "The game has ended. The next game goes live Wednesday at 12PM EST!"
         else:
-            msg = self.icon_message(
-                icon="far fa-clock", msg="The game has ended. The next game goes live Wednesday at 12pm EST!")
-            return super().get(
-                request,
-                custom_message=msg,
-                form=None,
-                continue_with_google=False,
-                button_label="Home",
-                form_method="get",
-                form_action="/"
-            )
+            button_label = "Play Instant Game!",
+            form_method = "get",
+            form_action = "/instant/"
+            msg = "There is no live game currently active, but you can still play the instant game!"
+
+        icon_msg = self.icon_message(icon="fa-solid fa-otter", msg=msg)
+        return super().get(
+            request,
+            custom_message=icon_msg,
+            form=None,
+            continue_with_google=False,
+            button_label=button_label,
+            form_method=form_method,
+            form_action=form_action
+        )
 
     @staticmethod
     def icon_message(icon, msg):

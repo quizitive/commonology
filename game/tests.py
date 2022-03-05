@@ -390,7 +390,9 @@ class TestPlayRequest(TestCase):
         client = Client()
         path = '/c/foobar/play/'
         response = client.get(path)
-        self.assertRedirects(response, '/join/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response,
+                            "There is no live game currently active, but you can still play the instant game!")
 
     def test_with_google_form(self):
         # test with uuid and without
@@ -418,7 +420,7 @@ class TestPlayRequest(TestCase):
         path = f'/play/{game.uuid}/'
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12pm EST!")
+        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
 
         self.series.hosts.add(self.player)
         path = f'/play/{game.uuid}/'
@@ -428,7 +430,8 @@ class TestPlayRequest(TestCase):
         # This should fail because find latest game would return None and so no game can be found.
         path = f'/play/'
         response = client.get(path)
-        self.assertContains(response, 'The game has ended. The next game goes live Wednesday at 12pm EST!')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
 
     def test_with_login(self):
         game = self.game
@@ -446,11 +449,13 @@ class TestPlayRequest(TestCase):
         game.save()
         path = '/play/'
         response = client.get(path)
-        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12pm EST!")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
 
         path = reverse('game:uuidplay', kwargs={'game_uuid': game.uuid})
         response = client.get(path)
-        self.assertContains(response, 'The game has ended. The next game goes live Wednesday at 12pm EST!')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
 
         self.leaderboard.publish_date = our_now()
         self.leaderboard.save()
@@ -527,7 +532,10 @@ class TestPlayRequest(TestCase):
         path = reverse('game:uuidplay', kwargs={'game_uuid': uuid})
         client = Client()
         response = client.get(path)
-        self.assertRedirects(response, '/join/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response,
+                            "There is no live game currently active, but you can still play the instant game!")
 
     def test_game_reviewer(self):
         # Game url with uuid should render the game without a submit button prior to game start.
