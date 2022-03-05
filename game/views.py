@@ -445,13 +445,13 @@ class GameEntryView(PSIDMixin, CardFormView):
 
     def no_active_game(self, request):
         if request.user.is_authenticated:
-            button_label = "Home",
-            form_method = "get",
+            button_label = "Home"
+            form_method = "get"
             form_action = "/"
             msg = "The game has ended. The next game goes live Wednesday at 12PM EST!"
         else:
-            button_label = "Play Instant Game!",
-            form_method = "get",
+            button_label = "Play Instant Game!"
+            form_method = "get"
             form_action = "/instant/"
             msg = "There is no live game currently active, but you can still play the instant game!"
 
