@@ -441,7 +441,7 @@ class GameEntryView(PSIDMixin, CardFormView):
 
     def message(self, request, msg):
         msg = "<div style=\"min-height:200px\">" + msg + "</div>"
-        return self.render(request, custom_message=msg, form=None, continue_with_google=False)
+        return self.render(request, custom_message=msg, form=None, button_label=None, continue_with_google=False)
 
     def no_active_game(self, request):
         if not request.user.is_authenticated:
@@ -455,18 +455,18 @@ class GameEntryView(PSIDMixin, CardFormView):
                 custom_message=msg,
                 form=None,
                 continue_with_google=False,
-                nav_button_label="Home",
-                nav_button_url="/"
+                button_label="Home",
+                form_method="get",
+                form_action="/"
             )
 
     @staticmethod
     def icon_message(icon, msg):
         icon_message = (
-            "<div style=\"min-height:200px\">"
             f"<div class=\"w3-center\">"
             f"<i class=\"{icon} fa-4x\" style=\"padding:16px;color:#0095da\"></i></div>"
-            f"<div class=\"w3-row w3-padding-16 w3-center\" style=\"margin-bottom:32px;\">"
-            f"{msg}</div></div>"
+            f"<div class=\"w3-row w3-padding-16 w3-center\">"
+            f"{msg}</div>"
         )
         return icon_message
 
@@ -519,8 +519,9 @@ class GameEntryView(PSIDMixin, CardFormView):
                 custom_message=msg,
                 form=None,
                 continue_with_google=False,
-                nav_button_label="View my answers",
-                nav_button_url=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
+                form_method="get",
+                form_action=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
+                button_label="View my answers",
             )
 
         if game_uuid and g.not_started_yet:
