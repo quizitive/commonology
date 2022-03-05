@@ -521,7 +521,7 @@ class GameEntryView(PSIDMixin, CardFormView):
                 continue_with_google=False,
                 nav_button_label="View my answers",
                 nav_button_url=f'/c/{g.series.slug}/game/{g.game_id}/{self.sign_game_player(g, user)}',
-               )
+            )
 
         if game_uuid and g.not_started_yet:
             return render_game(request, g, editable=False)
