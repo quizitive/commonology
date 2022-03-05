@@ -40,26 +40,8 @@
   {{ block.super }}
   </div>
 
-
 {% endblock %}
 
-{% block form %}
-
-  <form id="card_form" method="post" action="{{ request.path }}">
-      {% if form %}
-        {% csrf_token %}
-          <div style="text-align: center">
-          {{ form.as_p }}
-          </div>
-
-          {% if button_label %}
-          <input type="submit" form="card_form" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
-        {% endif %}
-      {% endif %}
-
-  </form>
-
-{% endblock %}
 
 {% block card_extras %}
 
@@ -74,14 +56,6 @@
   <div class="w3-row w3-padding-16 w3-center" style="color: #9e9e9e;font-size:13px">
     We do this to protect the game from robots and ballot stuffers.
   </div>
-  {% endif %}
-
-  {% if nav_button_label %}
-    <a href="{{ nav_button_url }}" style="text-decoration:None;">
-      <button class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
-        {{ nav_button_label }}
-      </button>
-    </a>
   {% endif %}
 
 {% endblock %}
