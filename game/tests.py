@@ -390,8 +390,7 @@ class TestPlayRequest(TestCase):
         client = Client()
         path = '/c/foobar/play/'
         response = client.get(path)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Cannot find an active game.  Join so we can let you know when the next game begins.')
+        self.assertRedirects(response, '/join/')
 
     def test_with_google_form(self):
         # test with uuid and without
@@ -419,7 +418,7 @@ class TestPlayRequest(TestCase):
         path = f'/play/{game.uuid}/'
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Seems like the game finished but has not been scored yet.')
+        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12pm EST!")
 
         self.series.hosts.add(self.player)
         path = f'/play/{game.uuid}/'
@@ -429,7 +428,7 @@ class TestPlayRequest(TestCase):
         # This should fail because find latest game would return None and so no game can be found.
         path = f'/play/'
         response = client.get(path)
-        self.assertContains(response, 'Cannot find an active game.  We will let you know when the next game begins.')
+        self.assertContains(response, 'The game has ended. The next game goes live Wednesday at 12pm EST!')
 
     def test_with_login(self):
         game = self.game
@@ -447,17 +446,17 @@ class TestPlayRequest(TestCase):
         game.save()
         path = '/play/'
         response = client.get(path)
-        self.assertContains(response, 'Cannot find an active game.  We will let you know when the next game begins.')
+        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12pm EST!")
 
         path = reverse('game:uuidplay', kwargs={'game_uuid': game.uuid})
         response = client.get(path)
-        self.assertContains(response, 'Seems like the game finished but has not been scored yet.')
+        self.assertContains(response, 'The game has ended. The next game goes live Wednesday at 12pm EST!')
 
         self.leaderboard.publish_date = our_now()
         self.leaderboard.save()
         path = reverse('game:uuidplay', kwargs={'game_uuid': game.uuid})
         response = client.get(path)
-        self.assertContains(response, 'Seems like the game finished.  See the leaderboard.')
+        self.assertRedirects(response, f'/c/{self.series.slug}/leaderboard/{self.game.game_id}/')
 
     def get_invite_url(self, email):
         client = Client()
@@ -482,7 +481,7 @@ class TestPlayRequest(TestCase):
 
         p = Player.objects.filter(email=ABINORMAL).first()
         self.assertIsNone(p)
-        self.assertContains(response, "Enter your email address to play.")
+        self.assertContains(response, "Please verify your email address.")
 
         url = self.get_invite_url(email=ABINORMAL)
         pe = PendingEmail.objects.filter(email=ABINORMAL).first()
@@ -528,15 +527,7 @@ class TestPlayRequest(TestCase):
         path = reverse('game:uuidplay', kwargs={'game_uuid': uuid})
         client = Client()
         response = client.get(path)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Cannot find an active game.  Perhaps you have a bad link.')
-
-        client = get_local_client()
-        path = reverse('game:uuidplay', kwargs={'game_uuid': uuid})
-        client = Client()
-        response = client.get(path)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Cannot find an active game.  Perhaps you have a bad link.')
+        self.assertRedirects(response, '/join/')
 
     def test_game_reviewer(self):
         # Game url with uuid should render the game without a submit button prior to game start.
