@@ -237,7 +237,7 @@ def player_top_game_rank(player, series):
 
 
 def rank_string(rank):
-    if not rank:
+    if rank is None:
         return "N/A"
     if rank % 100 in (11, 12, 13):
         suffix = 'th'
