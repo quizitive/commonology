@@ -2,7 +2,7 @@
 <script src='https://www.google.com/recaptcha/api.js'></script>
 {% endif %}
 
-<div class="cg-card cg-border-grey w3-modal-content" style="overflow: hidden;margin:0 auto 16px;">
+<div id="{{ card_id }}" class="cg-card cg-border-grey w3-modal-content" style="overflow: hidden;margin:0 auto 16px;">
 
   {% if header %}
   <header class="w3-container w3-border-bottom w3-center">
@@ -28,9 +28,9 @@
 
   <!-- standard Django user messages e.g. messages.info(request, "message') -->
   {% if messages %}
-    <div style="margin-bottom:24px;">
+    <div class="w3-padding-16">
     {% for msg in messages %}
-      <p class="user-msg {{ msg.level_tag }} w3-padding-top w3-margin-bottom">{{ msg }}</p>
+      <div class="user-msg {{ msg.level_tag }} w3-padding-top">{{ msg }}</div>
     {% endfor %}
     </div>
   {% endif %}
@@ -38,7 +38,7 @@
   {% block card_top %}
     <!-- any other custom messaging -->
     {% if custom_message %}
-    <p class="custom-msg w3-padding-top w3-margin-bottom">{{ custom_message|linebreaks }}</p>
+    <div class="custom-msg w3-padding-16">{{ custom_message|safe }}</div>
     {% endif %}
   {% endblock %}
 

@@ -82,7 +82,7 @@ class ContactView(CardFormView):
     form_class = ContactForm
     header = "Establishing Contact"
     button_label = "Send"
-    custom_message = "Enter a message and we WILL read it."
+    custom_message = mark_safe("Enter a message and we WILL read it.")
 
     def post(self, request, *args, **kwargs):
         recaptcha_check(request)
