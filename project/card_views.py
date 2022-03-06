@@ -32,6 +32,7 @@ class BaseCardView(ContextMixin, View):
     card_template = 'cards/base_card.html'
     page_template = 'single_card_view.html'
     recaptcha_key = None
+    card_div_id = "base-card"
 
     def get(self, request, *args, **kwargs):
         return self.render(request, *args, **kwargs)
@@ -40,7 +41,7 @@ class BaseCardView(ContextMixin, View):
         return render(request, self.page_template, self.get_context_data(**kwargs))
 
     def render_card(self, request, *args, **kwargs):
-        return render_to_string(self.card_template, self.get_context_data(**kwargs), request)
+        return render(request, self.card_template, self.get_context_data(**kwargs))
 
     def get_context_data(self, *args, **kwargs):
         if settings.RECAPTCHA3_INHIBIT:
@@ -50,7 +51,8 @@ class BaseCardView(ContextMixin, View):
             'card_template': self.card_template,
             'button_label': self.button_label,
             'recaptcha_key': self.recaptcha_key,
-            'custom_message': self.custom_message
+            'custom_message': self.custom_message,
+            'card_id': self.card_div_id
             }
         context.update(kwargs)
         return super().get_context_data(**context)
