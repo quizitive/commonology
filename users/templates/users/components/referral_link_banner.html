@@ -9,20 +9,11 @@
   <div id="share-link" style="padding:8px;border:1px solid #0095da;margin:4px 0;background:white;border-radius: 4px;color:black; text-decoration: none;">https://commonologygame.com/play/{{ player_code }}</div>
 
   {% if not no_button %}
-  <button id="copy-button" class="w3-button w3-round cg-blue w3-border cg-border-blue" onclick="copyToClipboard('#share-link');">
-    Copy Link&nbsp&nbsp&nbsp<i class="far fa-copy"></i>
+  <button id="share-button" class="w3-button w3-round cg-blue w3-border cg-border-blue" style="font-size:16px;">
+    Share<i class="fa-solid fa-share-nodes" style="height:100%;padding-left:10px;"></i>
   </button>
   <div id="copy-msg" style="display:none;">Link copied!</div>
-  <script>
-  function copyToClipboard(tgt) {
-    var $temp = $("<input>");
-    $("body").append($temp);
-    $temp.val($(tgt).text()).select();
-    document.execCommand("copy");
-    $temp.remove();
-    $("#copy-msg").css("display", "inline");
-  }
-  </script>
+  <script src="{% v_static 'js/social_sharing.js' %}" type="text/javascript"></script>
   {% endif %}
 
   <div class="refer-help" style="font-style:italic;font-size: 12px;padding-top:24px">
