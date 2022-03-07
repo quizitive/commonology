@@ -1,69 +1,57 @@
-// --- use this function to register listeners --- //
 $(function() {
-  // $("#share-button").bind("click", (event) => {
-  // sharePlayLink(event, "#share-link");
-  // })
-  // Share must be triggered by "user activation"
-  const filesArray = [];
-  const shareMsg = "I just played Commonology! Get your answers in before Friday at midnight. \n" + $("#share-link").text()
+  // Bind share functionality to #share-button.
+  // Mobile devices attempt to open native share dialogue, fallthrough to copy-to-clipboard.
+  // see: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share
+  // Desktops just copy to clipboard because most people don't have apps installed and poor browser support.
+  $("#share-button").bind('click', async () => {
+    // Define share content. Must have link on page at id #share-link
+    const shareMsg = JSON.parse($("#share-msg").text())["message"];
+    const filesArray = [];
+    if (mobileAndTabletCheck()) {
+      // It's a mobile device
+      await sharePlayLink(shareMsg, filesArray);
+    } else {
+      // It's a desktop device
+      // todo: make a share widget with
+      setClipboard(shareMsg);
+    }
+  });
+})
+
+async function sharePlayLink(shareMsg, filesArray) {
   let shareData = {
         files: filesArray,
         title: "Let's play Commonology!",
         text: shareMsg,
       }
-  const resultPara = document.querySelector('#copy-msg');
 
-  $("#share-button").bind('click', async () => {
-    if (mobileAndTabletCheck()) {
-      console.log("It's a mobile device")
-    } else {
-      console.log("It's a desktop device")
-    }
-
-    try {
+   try {
       await navigator.share(shareData)
-      resultPara.textContent = 'MDN shared successfully'
     } catch(err) {
       if (err instanceof TypeError) {
         // This device doesn't support sharing files.
         console.log(`Your system doesn't support sharing files. Copying to clipboard`);
-        var $temp = $("<input>");
-        $("body").append($temp);
-        $temp.val(shareMsg).select();
-        document.execCommand("copy");
-        $temp.remove();
-        $("#copy-msg").css("display", "inline");
+        setClipboard(shareMsg);
       } else {
-        resultPara.textContent = 'Error: ' + err
+        console.log('Error: ' + err)
       }
-      console.log(resultPara);
     }
-  });
-})
+}
 
-function sharePlayLink(e, tgt) {
-  const shareMsg = "I just played Commonology! Get your answers in before Friday at midnight. \n" + $(tgt).text()
-  const filesArray = [];
-  if (navigator.canShare && navigator.canShare({ files: filesArray })) {
-      navigator.share({
-        files: filesArray,
-        title: "Let's play Commonology!",
-        text: shareMsg,
-      })
-      .then(() => console.log('Share was successful.'))
-      .catch((error) => console.log('Sharing failed', error));
-    } else {
-      // Browser doesn't support web sharing (probably most desktops)
-      console.log(`Your system doesn't support sharing files. copying to clipboard`);
-      var $temp = $("<input>");
-      $("body").append($temp);
-      const shareMsg = "I just played Commonology! Get your answers in before Friday at midnight. \n"
-      $temp.val(shareMsg).select();
-      document.execCommand("copy");
-      $temp.remove();
-      $("#copy-msg").css("display", "inline");
-    }
+function setClipboard(text) {
+    var type = "text/plain";
+    var blob = new Blob([text], { type });
+    var data = [new ClipboardItem({ [type]: blob })];
 
+    navigator.clipboard.write(data).then(
+        function () {
+        console.log("Copied to clipboard")
+        $("#copy-msg").css("display", "inline");
+        },
+        function () {
+        console.log("Failed to copy to clipboard")
+        }
+    );
 }
 
 // Check for mobile
