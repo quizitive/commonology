@@ -55,5 +55,9 @@
 <div class="w3-row" style="padding:4px 0">
   <span style="font-weight:normal;font-style:italic;font-size:13px;">{{ player_message }}</span>
 </div>
+<button id="screenshot" onclick="shareMyResults()" data-html2canvas-ignore>
+			Take Screenshot
+  </button>
+<div id="output"></div>
 
 {% include "leaderboard/components/instant_game_message.html" %}
