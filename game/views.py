@@ -156,6 +156,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
         forms = self._build_game_forms(game, form_data, editable=False)
         context = self.get_context(game, player.id, None, dn_form, forms, False)
+        context.pop("game_rules", None)
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
