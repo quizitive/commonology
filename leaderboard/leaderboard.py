@@ -263,7 +263,7 @@ def player_leaderboard_message(game, rank, percentile):
     if not rank:
         return "Looks like you missed this game... you'll get 'em next time!"
     num_players = game.players_dict.count()
-    message = f"This game you ranked {rank_string(rank)} out of {num_players} total players. "
+    message = f"This game you ranked {rank_string(rank)} out of {num_players} players. "
     follow_up = LeaderboardMessage.select_random_eligible(rank, percentile)
     return message + follow_up
 
