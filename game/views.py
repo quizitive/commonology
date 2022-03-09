@@ -225,6 +225,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         ).render(
             request,
             button_label="View my answers",
+            show_sponsors=True,
             form_class=None,
             form_method='get',
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
