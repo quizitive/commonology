@@ -33,8 +33,6 @@
     <img src="{% v_static 'img/logo.svg' %}">
     </div>
 
-    {% sponsor_component_cards %}
-
     {% include 'components/card_component_stream.html' with components=top_components %}
 
     {% if game_rules %}
@@ -59,6 +57,8 @@
         {% for q, form in questions %}
           {% include 'game/cards/question_form_card.html' with text=q.text q=q responses=q.choices%}
         {% endfor %}
+
+        {% sponsor_component_cards %}
 
         <div class="w3-container w3-padding-48" style="max-width:480px;margin:auto;">
           {% if editable %}
