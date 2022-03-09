@@ -18,7 +18,7 @@
   }
   </style>
 
-  <div class="top-block w3-row cg-blue w3-padding-16 w3-center" style="margin: -16px -24px;">
+  <div class="top-block w3-row cg-blue w3-padding-16 w3-center" style="margin: -16px -24px -8px;">
 
     <div class="w3-row w3-center w3-padding-16">
       <div style="background: white;border-radius: 25px; width: 50px;height: 50px; position: relative; margin: auto;">
@@ -29,12 +29,8 @@
     <div class="w3-row w3-center" style="font-weight:bold;font-size:18px;">
       Welcome{% if game %} to <br/>{{ game.name }}{% else %}!{% endif %}
     </div>
-
   </div>
-
-  <svg width="500" height="30" viewBox="0 0 500 80" preserveAspectRatio="none" style="margin:0 -24px 24px">
-    <path d="M0,0 L-10,40 Q250,120 510,40 L500,0 Z" fill="#0095da" />
-  </svg>
+  <img src="{% v_static 'img/blue_arc.svg' %}" style="margin:0 -24px 8px">
 
   <div class="w3-center">
   {{ block.super }}
