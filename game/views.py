@@ -233,7 +233,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             player_code=f'?r={player.code}',
             player_id=player.id,
             share_message={"message": f"I just played Commonology! Get your answers in before Friday at midnight.\n"
-                                      f"https://commonologygame.com/play?r={self.request.user.code}"},
+                                      f"https://commonologygame.com/play?r={player.code}"},
             title=f'Answers Submitted',
             **msgs[msg]
         )
