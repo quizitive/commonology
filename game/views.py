@@ -440,6 +440,7 @@ class GameEntryView(PSIDMixin, CardFormView):
     button_label = "Continue"
     card_template = "game/cards/game_entry_card.html"
     page_template = "game/game_card_view.html"
+    title = 'Play',
     card_div_id = "game-entry-card"
     custom_message = "Please verify your email address."
 
