@@ -6,8 +6,6 @@
   {% include 'leaderboard/components/game_date_nav.html' with view=view %}
 </div>
 
-{% sponsor_component_cards %}
-
 {% include 'components/card_component_stream.html' with components=game.leaderboard.top_components.all %}
 
 {% if player_score %}
@@ -15,3 +13,5 @@
   {% include 'leaderboard/components/my_score.html' %}
 </div>
 {% endif %}
+
+{% sponsor_component_cards %}
