@@ -38,14 +38,22 @@ async function sharePlayLink(shareMsg, filesArray) {
     }
 }
 
-function shareMyResults() {
+function shareMyResults(displayName) {
     let div = document.getElementById('my-results')
-    html2canvas(div).then(
+    html2canvas(div, {
+      onclone: function(clone) {
+        $(clone).find("#welcome-container").addClass("w3-center")
+        $(clone).find("#welcome-message").text("Results for " + displayName + ":")
+        $(clone).find("#player-leaderboard-message").css({"text-align" :"center"})
+        $(clone).find("#commonology-icon").show().css({"height": "30px", "padding-right": "4px"});
+        $(clone).find("#my-results").css({"width": "400px", "border": "4px solid #0095da"})
+      }
+    }).then(
         function (canvas) {
-          $(canvas).resizeHeightMaintainRatio(100);
+          // $(canvas).resizeHeightMaintainRatio(100);
           canvas.toBlob(function(blob) {
-          const item = new ClipboardItem({ "image/png": blob });
-          navigator.clipboard.write([item]);
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]);
           });
             document
             .getElementById('output')
