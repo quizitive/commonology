@@ -52,6 +52,9 @@ function shareMyResults(displayName) {
         function (canvas) {
           // $(canvas).resizeHeightMaintainRatio(100);
           canvas.toBlob(function(blob) {
+            const shareMsg = "Check out my results on Commonology this week!"
+            const msgBlob = new Blob([text], { type });
+            const msgItem = new ClipboardItem({ "text/plain": msgBlob})
             const item = new ClipboardItem({ "image/png": blob });
             navigator.clipboard.write([item]);
           });

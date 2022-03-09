@@ -1,23 +1,24 @@
 {% if request.user.display_name %}
 
 <style>
-#results-header-container {
-border-bottom-left-radius: 120% 40px;
-border-bottom-right-radius: 120% 40px;
-}
+{##results-header-container {#}
+{#border-bottom-left-radius: 120% 40px;#}
+{#border-bottom-right-radius: 120% 40px;#}
+{#}#}
   </style>
 <div class="x"></div>
 
-<div id="results-header-container" class="w3-row cg-blue w3-padding-16 w3-center" style="margin: -12px -24px 12px;">
+<div id="results-header-container" class="w3-row cg-blue w3-center" style="margin: -12px -24px 12px;padding: 8px 0;">
 
-    <div class="w3-row w3-center">
-      <div style="background: white;border-radius: 25px; width: 50px;height: 50px; position: relative; margin: auto;">
-        <img src="{% v_static "img/icon.svg" %}" alt="Commonology Logo" style="height:40px; position: absolute; left: 6px;top:5px;">
+    <div class="w3-center" style="display: table;margin:auto;">
+      <div class="w3-cell">
+      <div style="background: white;border-radius: 25px; width: 40px;height: 40px; position: relative; margin: auto;">
+        <img id="commonology-icon" src="{% v_static "img/icon_small.png" %}" alt="Commonology Logo" style="height:30px; position: absolute; left: 6px;top:5px;">
       </div>
-    </div>
-
-    <div class="w3-row w3-center" style="font-weight:bold;font-size:18px;">
-      {{ game.name }}
+        </div>
+      <div class="w3-cell w3-cell-middle" style="padding-left: 8px;">
+         {{ game.name }}
+      </div>
     </div>
 
   </div>
