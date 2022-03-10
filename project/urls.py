@@ -2,6 +2,7 @@ import debug_toolbar
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
+from django.shortcuts import redirect
 from django.contrib import admin
 from .views import index, about_view, product_view, our_story_view, testimonials_view, \
     tos_view, privacy_view, ContactView, raffle_rules_view, sponsor_view, instant_player_stats
@@ -10,7 +11,8 @@ admin.site.site_header = "Commonology Administration"
 admin.site.site_title = "Commonology Administration"
 
 urlpatterns = [
-    path('', index, name='home'),
+    # path('', index, name='home'),
+    path('', lambda request: redirect('/instant', permanent=True), name='home'),
     path('about/', about_view, name='about'),
     path('product/', product_view, name='product'),
     path('our_story/', our_story_view, name='our_story'),
