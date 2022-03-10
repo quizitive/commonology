@@ -36,7 +36,7 @@ class TestParametersMiddleWare(TestCase):
         c = Client()
         path = reverse('home') + '?one=1'
         response = c.get(path)
-        self.assertEqual(response.status_code, 200)
+        self.assertIn(response.status_code, [200, 301])
         self.assertEqual('1', c.session.get('one'))
 
 
