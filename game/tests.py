@@ -58,14 +58,6 @@ def suppress_hidden_error_logs(func):
     return wrapper
 
 
-class HomePage(TestCase):
-
-    def test_page(self):
-        client = Client()
-        response = client.get(reverse('home'))
-        self.assertEqual(response.status_code, 200)
-
-
 class BaseGameDataTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
