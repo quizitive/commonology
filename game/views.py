@@ -458,7 +458,7 @@ class GameEntryView(PSIDMixin, CardFormView):
         else:
             button_label = "Play Instant Game!"
             form_method = "get"
-            form_action = "/instant/"
+            form_action = "/"
             msg = "There is no live game currently active, but you can still play the instant game!"
 
         icon_msg = self.icon_message(icon="fa-solid fa-otter", msg=msg)

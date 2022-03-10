@@ -592,7 +592,7 @@ class TestGameForm(BaseGameDataTestCase, PSIDMixin):
         self.client = get_local_client()
         self.game_form_url = reverse('series-game:game-form',
                                      kwargs={'series_slug': self.series.slug, 'game_id': self.game.game_id})
-        self.instant_game_url = reverse('series-game:instant-game', kwargs={'series_slug': self.series.slug})
+        self.instant_game_url = reverse('home', kwargs={'series_slug': self.series.slug})
         self.psid = self.sign_game_player(self.game, self.player)
 
     def test_game_form_view(self):
