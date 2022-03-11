@@ -384,7 +384,7 @@ class InstantGameView(GameFormView):
 
     def get_game_rules(self):
         try:
-            game_rules = Component.objects.get(name=f'Instant Game Rules | {self.slug}')
+            game_rules = Component.objects.get(name=f'Demo Game Rules | {self.slug}')
         except Component.DoesNotExist:
             game_rules = None
         return game_rules
@@ -456,10 +456,10 @@ class GameEntryView(PSIDMixin, CardFormView):
             form_action = "/"
             msg = "The game has ended. The next game goes live Wednesday at 12PM EST!"
         else:
-            button_label = "Play Instant Game!"
+            button_label = "Play Demo Game!"
             form_method = "get"
             form_action = "/instant/"
-            msg = "There is no live game currently active, but you can still play the instant game!"
+            msg = "There is no live game currently active, but you can still play the demo game!"
 
         icon_msg = self.icon_message(icon="fa-solid fa-otter", msg=msg)
         return super().get(
