@@ -30,11 +30,9 @@
       </div>
 
         <div class="button-container w3-center w3-row">
-          {% if game_is_on %}
-          <a href="{% url 'game:play' %}">
-            <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">Play!</button>
+          <a href="{% url 'series-game:instant-game' %}">
+            <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">Demo</button>
           </a>
-          {% else %}
           <a href="{% url 'leaderboard:current-results' %}">
             <button class="home-buttons w3-button cg-salmon w3-round-xxlarge">Results!</button>
           </a>
