@@ -16,19 +16,6 @@ $(function() {
       setClipboard(shareMsg);
     }
   });
-
-  $("#share-my-results").bind('click', async () => {
-    // Define share content. Must have link on page at id #share-link
-    const shareMsg = JSON.parse($("#share-msg").text())["message"];
-    const filesArray = [];
-    if (mobileAndTabletCheck()) {
-      // It's a mobile device
-      await sharePlayLink(shareMsg, filesArray);
-    } else {
-      // It's a desktop device
-      shareMyResults()
-    }
-  });
 })
 
 async function sharePlayLink(shareMsg, filesArray) {
@@ -52,16 +39,15 @@ async function sharePlayLink(shareMsg, filesArray) {
 }
 
 function shareMyResults(displayName) {
-    let div = document.getElementById('share-my-results')
+    let div = document.getElementById('my-results-sharable')
     html2canvas(div, {
       onclone: function(clone) {
         $(clone).find("#welcome-container").addClass("w3-center")
         $(clone).find("#all-stat-container").css({"padding": 0, "margin": "auto", "width": "250px"})
-        // $(clone).find("#welcome-message").text("Results for " + displayName + ":")
-        $(clone).find("#welcome-message").text("Game 84 results for " + displayName)
-        $(clone).find("#player-leaderboard-message").hide()
-        $(clone).find("#commonology-icon").show().css({"height": "23px", "padding-right": "4px"});
-        $(clone).find("#share-my-results").show()
+        $(clone).find("#welcome-message")
+          .text("Game 84 results for " + displayName)
+          .css({"width": "100%"})
+        $(clone).find("#my-results-sharable").show()
       }
     }).then(
         function (canvas) {
@@ -70,9 +56,7 @@ function shareMyResults(displayName) {
             const item = new ClipboardItem({ "image/png": blob });
             navigator.clipboard.write([item]);
           });
-            document
-            .getElementById('output')
-            .appendChild(canvas);
+            $("#copy-msg").show();
         })
 }
 
