@@ -3,11 +3,12 @@
   <div class="w3-cell w3-cell-middle">
     <span style="font-weight: bold;">Welcome {{ request.user.display_name }}! Your game results:</span>
   </div>
-  <div class="w3-cell w3-right" style="font-weight:normal;font-size:12px;padding-left:8px;">
-    <button id="share-my-results" class="w3-button w3-round-xxlarge cg-blue w3-border cg-border-blue" style="font-size:16px;display:       inline;" onclick="shareMyResults({{ request.user.display_name }})">
+  <div class="w3-cell w3-right" style="font-weight:normal;font-size:12px;padding-left:8px;position: relative">
+    <button id="share-my-results" class="w3-button w3-round-xxlarge cg-blue w3-border cg-border-blue" style="font-size:16px;display: inline;" onclick="shareMyResults('{{ request.user.display_name }}')">
       <span class="w3-hide-small" style="padding-right:4px;">Share</span>
       <i class="fa-solid fa-share-nodes" style="height:100%;"></i>
     </button>
+    <div id="copy-msg" style="position:absolute;display:none;">Copied to clipboard!</div>
   </div>
 </div>
 {% endif %}
