@@ -90,7 +90,7 @@ def merge_related_fields(from_p, to_p):
 
 
 @transaction.atomic
-def do_it(from_p, to_p):
+def do_one(from_p, to_p):
     print(from_p)
     print(to_p)
     merge_related_fields(from_p, to_p)
@@ -120,9 +120,9 @@ emails = [
     "zrobb72@gmail.com "
 ]
 
-if __name__ == "__main__":
+
+def do_it():
     for email in emails:
         from_p = Player.objects.get(email=email)
         to_p = Player.objects.get(email=email.strip())
-
-        do_it(from_p, to_p)
+        do_one(from_p, to_p)
