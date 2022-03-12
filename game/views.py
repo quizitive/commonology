@@ -567,12 +567,12 @@ class GameEntryView(PSIDMixin, CardFormView):
             )
             return self.message(request, msg)
 
-        if not self.get_form().is_valid():
+        form = self.get_form()
+        if not form.is_valid():
             # return form with error message
-            return self.render(request, form=self.get_form(), *args, **kwargs)
+            return self.render(request, form=form, *args, **kwargs)
 
-        email = request.POST['email']
-
+        email = form.cleaned_data['email']
         referrer_id = request.session.get('r')
 
         p = get_player(referrer_id)
