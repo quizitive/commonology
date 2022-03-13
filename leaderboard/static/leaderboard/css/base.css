@@ -81,7 +81,7 @@ table.leaderboard td:first-child {
 
 /* Player stats card style */
 .stat-container {
-  padding:24px 0 8px;
+  padding:24px 0 12px;
 }
 .stat-tile {
   border-radius:16px;
