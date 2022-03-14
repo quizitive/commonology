@@ -10,6 +10,7 @@ from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.db import transaction
 from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
@@ -429,6 +430,7 @@ def send_confirm(request, g, email, referrer_id=None):
 def render_game(request, game, user=None, editable=True):
     if user:
         request.session['user_id'] = user.id
+        authenticate(request)
     else:
         user = request.user
     if editable:
@@ -638,6 +640,9 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
         except Player.DoesNotExist:
             p = Player(email=email, referrer=pe.referrer)
             p.save()
+
+        request.session['user_id'] = p.id
+        authenticate(request)
 
         if g.user_played(p):
             return self._user_played(request, g, p)

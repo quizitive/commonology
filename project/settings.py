@@ -9,7 +9,6 @@ import platform
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from project import settings_utils
-# from .celery import app as celery_app
 
 
 BASE_DIR = settings_utils.BASE_DIR
@@ -30,7 +29,7 @@ SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100
 
-ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN]
+ALLOWED_HOSTS = ['127.0.0.1', 'testserver', DOMAIN, 'staging.' + DOMAIN]
 if EXTRA_ALLOWED_HOST:
     ALLOWED_HOSTS.append(EXTRA_ALLOWED_HOST)
 
@@ -90,6 +89,7 @@ AUTH_USER_MODEL = 'users.Player'
 # configuration for social authentication
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 AUTHENTICATION_BACKENDS = (
+    'users.auth.PlayerBackend',
     'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
