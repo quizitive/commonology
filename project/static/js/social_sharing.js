@@ -38,7 +38,7 @@ async function sharePlayLink(shareMsg, filesArray) {
     }
 }
 
-function shareMyResults(displayName) {
+async function shareMyResults(displayName) {
     let div = document.getElementById('my-results-sharable')
     html2canvas(div, {
       onclone: function(clone) {
@@ -50,13 +50,21 @@ function shareMyResults(displayName) {
         $(clone).find("#my-results-sharable").show()
       }
     }).then(
-        function (canvas) {
-          $(canvas).prepend("Check out my results on Commonology this week!")
-          canvas.toBlob(function(blob) {
-            const item = new ClipboardItem({ "image/png": blob });
-            navigator.clipboard.write([item]);
+        async function (canvas) {
+          canvas.toBlob(async function(blob) {
+             if (mobileAndTabletCheck()) {
+                // It's a mobile device
+                let shareMsg = "I totally rocked Commonology this week."
+                await sharePlayLink(shareMsg, [blob]);
+              } else {
+                // It's a desktop device
+                // todo: make a share widget with
+                const item = new ClipboardItem({ "image/png": blob });
+                navigator.clipboard.write([item]);
+              }
           });
             $("#copy-msg").show();
+            // $("#copy-popup").show()
         })
 }
 
@@ -68,7 +76,7 @@ function setClipboard(text) {
     navigator.clipboard.write(data).then(
         function () {
         console.log("Copied to clipboard")
-        $("#copy-msg").css("display", "inline");
+        $("#copy-msg").show();
         },
         function () {
         console.log("Failed to copy to clipboard")
