@@ -2,6 +2,7 @@ from os import environ as env
 import gspread
 import logging
 from numpy import base_repr
+import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse
@@ -633,6 +634,9 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
         pe = PendingEmail.objects.filter(uuid__exact=pending_uuid).first()
         if pe is None:
             return self.message(request, 'Seems like there was a problem with the validation link. Please try again.')
+
+        if pe.created < datetime.datetime.now() - datetime.timedelta(hours=1):
+            return self.message(request, 'The validation linke sent to you is more than an hour old.')
 
         email = pe.email
         try:
