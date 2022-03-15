@@ -3,13 +3,14 @@ import dateutil
 
 from django.shortcuts import render
 from django.views.generic.base import View
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.contrib import messages
 from django.db.models import Max
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
 
-from project.utils import our_now
+from project.utils import our_now, slackit
 from project.views import next_game_context
 from game.models import Game, Question
 from game.views import BaseGameView
@@ -68,10 +69,12 @@ class LeaderboardView(BaseGameView):
             # get the logged in player's stats for the game
             player_score, player_rank, player_percentile = \
                 player_score_rank_percentile(player, self.game)
+            player_count = self.game.players_dict.count()
             context.update({
                 'player_score': score_string(player_score),
                 'player_rank': player_rank or "N/A",
-                'player_percentile': rank_string(player_percentile),
+                'player_percentile': player_percentile,
+                'player_count': player_count,
                 'player_message': player_leaderboard_message(self.game, player_rank, player_percentile),
             })
         elif self._player_answers_from_session(request):
@@ -86,7 +89,8 @@ class LeaderboardView(BaseGameView):
                 'player_score': score_string(player_score),
                 'player_rank': player_rank or "N/A",
                 'player_message': mark_safe(player_message),
-                'player_percentile': rank_string(player_percentile),
+                'player_percentile': player_percentile,
+                'player_count': player_count,
                 'is_instant': True
             })
             context.update(next_game_context())
@@ -187,3 +191,11 @@ class PlayerHomeView(LoginRequiredMixin, View):
             'invite_message': "Enter your friends' emails to invite them to Commonology!"
         }
         return context
+
+
+@login_required
+def results_share_count_view(request):
+    p = request.user
+    msg = f"Player {p.email} with display name: {p.display_name} just shared their results."
+    slackit(msg)
+    return HttpResponse("Thanks for sharing!")
