@@ -42,7 +42,7 @@
         <div class="join-button container" style="padding: 4px;max-width:300px;margin:auto;">
           {% if active_game %}
             <a href="{% series_or_default_url 'game' 'play' %}{{ active_game.uuid|default:'' }}">
-              <button class="leaderboard-header-button pulse-button w3-button cg-salmon w3-round-xxlarge">Play Live Game!</button>
+              <button class="leaderboard-header-button pulse-button w3-button cg-salmon w3-round-xxlarge">Play Game!</button>
             </a>
           {% else %}
             <a href="/join/">

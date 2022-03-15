@@ -392,7 +392,7 @@ class TestPlayRequest(TestCase):
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response,
-                            "There is no live game currently active, but you can still play the instant game!")
+                            "There is no live game currently active, but you can still play the demo game!")
 
     def test_with_google_form(self):
         # test with uuid and without
@@ -535,7 +535,7 @@ class TestPlayRequest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response,
-                            "There is no live game currently active, but you can still play the instant game!")
+                            "There is no live game currently active, but you can still play the demo game!")
 
     def test_game_reviewer(self):
         # Game url with uuid should render the game without a submit button prior to game start.
