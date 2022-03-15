@@ -19,7 +19,9 @@
     {% include card_template|default:"cards/base_card.html" %}
     {% endblock %}
 
+    {% if show_sponsors %}
     {% sponsor_component_cards %}
+    {% endif %}
 
   </div>
 
