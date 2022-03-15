@@ -7,9 +7,10 @@
   <div id="share-link" style="padding:8px;border:1px solid #0095da;margin:4px 0;background:white;border-radius: 4px;color:black; text-decoration: none;">https://commonologygame.com/play/{{ player_code }}</div>
 
   {% if not no_button %}
-  <button id="copy-button" class="w3-button w3-round cg-blue w3-border cg-border-blue" onclick="copyToClipboard('#share-link');">
+  <button id="copy-button" class="w3-button w3-round-xxlarge cg-blue w3-border cg-border-blue" onclick="copyToClipboard('#share-link');">
     Copy Link&nbsp&nbsp&nbsp<i class="far fa-copy"></i>
   </button>
+  <style>#copy-msg {display:inline;}</style>
   <div id="copy-msg" style="display:none;">Link copied!</div>
   <script>
   function copyToClipboard(tgt) {
