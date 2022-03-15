@@ -5,7 +5,7 @@ from numpy import base_repr
 import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
@@ -634,7 +634,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
         if pe is None:
             return self.message(request, 'Seems like there was a problem with the validation link. Please try again.')
 
-        if pe.created < datetime.datetime.now() - datetime.timedelta(hours=1):
+        if pe.created < (our_now() - datetime.timedelta(hours=1)):
             return self.message(request, 'The validation link sent to you is more than an hour old.')
 
         email = pe.email
