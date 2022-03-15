@@ -16,12 +16,11 @@ $(async function() {
 })
 
 async function shareMyResults() {
-  console.log("attempting share results")
   const canvas = $("canvas")[0]
-  // await shareContent("I totally rocked Commonology this week.", [canvas], true)
   canvas.toBlob( function(blob) {
     shareContent("My Commonology results:", blob, true, "image/png")
   });
+  $.get("/share/")
 }
 
 async function generateResultCard(displayName) {
@@ -89,7 +88,6 @@ async function shareContentMobile(shareMsg, blob = null, shareFile= false) {
     } catch(err) {
       if (err instanceof TypeError) {
         // This device doesn't support sharing files.
-        console.log(err)
         console.log(`Your system doesn't support sharing files. Copying to clipboard`);
         if (shareFile) {
           setClipboard(filesArray[0], "image/png")
