@@ -156,6 +156,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
         forms = self._build_game_forms(game, form_data, editable=False)
         context = self.get_context(game, player.id, None, dn_form, forms, False)
+        context.pop("game_rules", None)
+        context['title'] = "My Answers"
         return render(request, 'game/game_form.html', context)
 
     def post(self, request, *args, **kwargs):
@@ -225,6 +227,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         ).render(
             request,
             button_label="View my answers",
+            show_sponsors=True,
             form_class=None,
             form_method='get',
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
@@ -438,6 +441,7 @@ class GameEntryView(PSIDMixin, CardFormView):
     button_label = "Continue"
     card_template = "game/cards/game_entry_card.html"
     page_template = "game/game_card_view.html"
+    title = 'Play',
     card_div_id = "game-entry-card"
     custom_message = "Please verify your email address."
 
@@ -563,12 +567,12 @@ class GameEntryView(PSIDMixin, CardFormView):
             )
             return self.message(request, msg)
 
-        if not self.get_form().is_valid():
+        form = self.get_form()
+        if not form.is_valid():
             # return form with error message
-            return self.render(request, form=self.get_form(), *args, **kwargs)
+            return self.render(request, form=form, *args, **kwargs)
 
-        email = request.POST['email']
-
+        email = form.cleaned_data['email']
         referrer_id = request.session.get('r')
 
         p = get_player(referrer_id)
