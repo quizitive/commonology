@@ -2,7 +2,6 @@ from os import environ as env
 import gspread
 import logging
 from numpy import base_repr
-import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
@@ -11,7 +10,7 @@ from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.db import transaction
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate
+from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
@@ -40,6 +39,7 @@ from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
 from users.utils import get_player
+from users.auth import activate_account, PlayerBackend
 from mail.tasks import mail_task
 from rewards.utils import check_for_reward
 from components.models import Component
@@ -429,10 +429,12 @@ def send_confirm(request, g, email, referrer_id=None):
 
 
 def render_game(request, game, user=None, editable=True):
-    if user:
-        authenticate(request, user_id=user.id)
-    else:
+    if user is None:
         user = request.user
+
+    # This should be temporary and maybe removed by April 7, 2022
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
     if editable:
         game.series.players.add(user)
     return GameFormView().render_game(request, game, user, editable)
@@ -630,21 +632,10 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
                 return self._user_played(request, g, request.user)
             return render_game(request, g)
 
-        pe = PendingEmail.objects.filter(uuid__exact=pending_uuid).first()
-        if pe is None:
-            return self.message(request, 'Seems like there was a problem with the validation link. Please try again.')
+        p = activate_account(request, pending_uuid)
 
-        if pe.created < (our_now() - datetime.timedelta(hours=1)):
-            return self.message(request, 'The validation link sent to you is more than an hour old.')
-
-        email = pe.email
-        try:
-            p = Player.objects.get(email=email)
-        except Player.DoesNotExist:
-            p = Player(email=email, referrer=pe.referrer)
-            p.save()
-
-        authenticate(request, user_id=p.id)
+        if type(p) is str:
+            return self.message(request, msg)
 
         if g.user_played(p):
             return self._user_played(request, g, p)
