@@ -9,11 +9,9 @@ $(async function() {
   });
 
   const displayName = JSON.parse($("#display-name").text());
-  generateResultCard(displayName).then(() => {
-    console.log("generated result card")
-  })
+  await generateResultCard(displayName)
   $("#share-my-results").bind('click', async () => {
-    shareMyResults();
+    await shareMyResults();
   })
 })
 
@@ -22,13 +20,14 @@ async function shareMyResults() {
   const canvas = $("canvas")[0]
   // await shareContent("I totally rocked Commonology this week.", [canvas], true)
   canvas.toBlob( function(blob) {
-    shareContent("I totally rocked Commonology this week.", blob, true, "image/png")
+    shareContent("My Commonology results:", blob, true, "image/png")
   });
 }
 
 async function generateResultCard(displayName) {
   // Generates the actual content for the share card and adds to document
   let div = document.getElementById('my-results-sharable')
+  $("#share-my-results").prop("disabled", true);
   html2canvas(div, {
     onclone: function(clone) {
       $(clone).find("#welcome-container").addClass("w3-center")
@@ -42,6 +41,7 @@ async function generateResultCard(displayName) {
       async function (canvas) {
         document.body.appendChild(canvas);
         $("canvas").hide();
+        $("#share-my-results").prop("disabled", false);
   })
 }
 
@@ -62,27 +62,28 @@ async function shareContent(
     }
 }
 
-async function shareContentMobile(shareMsg, blob = null, copyFile= false) {
+async function shareContentMobile(shareMsg, blob = null, shareFile= false) {
   // Attempt to use webshare api to share content, otherwise copy message or file to clipboard
-  // Use copyFile flag to indicate file should be copied instead of message
+  // Use shareFile flag to indicate file should be copied instead of message
   let filesArray;
+  let shareData;
   if (blob !== null) {
     filesArray = [new File(
       [blob],
-      'results.png',
+      'My Commonology Results.png',
       {
         type: blob.type,
         lastModified: new Date().getTime()
       }
     )]
-  } else {
-    filesArray = []
-  }
-  let shareData = {
+    shareData = {
         files: filesArray,
-        title: "Let's play Commonology!",
+      }
+  } else {
+    shareData = {
         text: shareMsg,
       }
+  }
    try {
       await navigator.share(shareData)
     } catch(err) {
@@ -90,7 +91,7 @@ async function shareContentMobile(shareMsg, blob = null, copyFile= false) {
         // This device doesn't support sharing files.
         console.log(err)
         console.log(`Your system doesn't support sharing files. Copying to clipboard`);
-        if (copyFile) {
+        if (shareFile) {
           setClipboard(filesArray[0], "image/png")
         } else {
           setClipboard(shareMsg);
