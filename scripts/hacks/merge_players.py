@@ -24,13 +24,6 @@ from users.utils import player_log_entry
 # model, i.e. not a foreign table or ManyToMany or ManyToOne fields.
 
 
-from_email = 'sherri.sweren@gmail.com'
-to_email = 'sherri@sweren.com'
-
-from_p = Player.objects.get(email=from_email)
-to_p = Player.objects.get(email=to_email)
-
-
 def merge_unrelated_fields(f, t):
     # skip id, password, last_login, is_superuser, is_staff, email, _code, data
     if f.is_active:
@@ -76,7 +69,7 @@ def merge_related_fields(from_p, to_p):
 
     to_p.referrals.set(from_p.referrals.all())
 
-    PendingEmail.objects.filter(email=from_email).delete()
+    PendingEmail.objects.filter(email=from_p.email).delete()
 
     to_p.comments.set(from_p.comments.all())
 
@@ -97,7 +90,7 @@ def merge_related_fields(from_p, to_p):
 
 
 @transaction.atomic
-def do_it():
+def do_one(from_p, to_p):
     print(from_p)
     print(to_p)
     merge_related_fields(from_p, to_p)
@@ -111,4 +104,25 @@ def do_it():
     player_log_entry(to_p, f'{from_p} merged into {to_p}')
 
 
-do_it()
+emails = [
+    "bluesurf201@gmail.com ",
+    "bobcity16@aol.com ",
+    "ehirsch@gmail.com ",
+    "gidschles@gmail.com ",
+    "herzog.yosef@gmail.com ",
+    "joannam2000@hotmail.com ",
+    "katelyn.goodhues@gmail.com ",
+    "marsha.alvares@live.com ",
+    "mgregory0316@gmail.com ",
+    "mmidey@gmail.com ",
+    "rslien45@gmail.com ",
+    "tightspot@hotmail.com ",
+    "zrobb72@gmail.com "
+]
+
+
+def do_it():
+    for email in emails:
+        from_p = Player.objects.get(email=email)
+        to_p = Player.objects.get(email=email.strip())
+        do_one(from_p, to_p)
