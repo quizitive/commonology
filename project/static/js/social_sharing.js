@@ -62,17 +62,22 @@ async function shareContent(
     }
 }
 
-async function shareContentMobile(shareMsg, blob, copyFile= false) {
+async function shareContentMobile(shareMsg, blob = null, copyFile= false) {
   // Attempt to use webshare api to share content, otherwise copy message or file to clipboard
   // Use copyFile flag to indicate file should be copied instead of message
-  const filesArray = [new File(
+  let filesArray;
+  if (blob !== null) {
+    filesArray = [new File(
       [blob],
       'results.png',
       {
         type: blob.type,
         lastModified: new Date().getTime()
       }
-   )]
+    )]
+  } else {
+    filesArray = []
+  }
   let shareData = {
         files: filesArray,
         title: "Let's play Commonology!",
