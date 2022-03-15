@@ -635,7 +635,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
         p = activate_account(request, pending_uuid)
 
         if type(p) is str:
-            return self.message(request, msg)
+            return self.message(request, p)
 
         if g.user_played(p):
             return self._user_played(request, g, p)
