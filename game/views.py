@@ -430,8 +430,7 @@ def send_confirm(request, g, email, referrer_id=None):
 
 def render_game(request, game, user=None, editable=True):
     if user:
-        request.session['user_id'] = user.id
-        authenticate(request)
+        authenticate(request, user_id=user.id)
     else:
         user = request.user
     if editable:
@@ -645,8 +644,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
             p = Player(email=email, referrer=pe.referrer)
             p.save()
 
-        request.session['user_id'] = p.id
-        authenticate(request)
+        authenticate(request, user_id=p.id)
 
         if g.user_played(p):
             return self._user_played(request, g, p)
