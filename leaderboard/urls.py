@@ -17,6 +17,7 @@ urlpatterns = [
     path('host-note/', views.HostNoteView.as_view(), name='current-host-note'),
     path('host-note/<int:game_id>/', views.HostNoteView.as_view(), name='game-id-host-note'),
     path('leaderboard/htmx/', htmx.LeaderboardHTMXView.as_view(), name='htmx'),
+    path('share/', views.results_share_count_view, name='share'),
     # path('me/', views.PlayerHomeView.as_view(), name='player-home')
 
     # todo: deprecate this after week 42

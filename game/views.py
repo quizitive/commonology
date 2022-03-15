@@ -235,8 +235,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             form_action=f'/c/{game.series.slug}/game/{game.game_id}/{self.sign_game_player(game, player)}',
             player_code=f'?r={player.code}',
             player_id=player.id,
-            share_message={"message": f"I just played Commonology! Get your answers in before Friday at midnight.\n"
-                                      f"https://commonologygame.com/play?r={player.code}"},
+            share_message=f"I just played Commonology! Get your answers in before Friday at midnight.\n"
+                          f"https://commonologygame.com/play?r={self.request.user.code}",
             title=f'Answers Submitted',
             **msgs[msg]
         )

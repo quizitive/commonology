@@ -1,57 +1,122 @@
-$(function() {
+$(async function() {
   // Bind share functionality to #share-button.
   // Mobile devices attempt to open native share dialogue, fallthrough to copy-to-clipboard.
   // see: https://developer.mozilla.org/en-US/docs/Web/API/Navigator/share
   // Desktops just copy to clipboard because most people don't have apps installed and poor browser support.
   $("#share-button").bind('click', async () => {
-    // Define share content. Must have link on page at id #share-link
-    const shareMsg = JSON.parse($("#share-msg").text())["message"];
-    const filesArray = [];
-    if (mobileAndTabletCheck()) {
-      // It's a mobile device
-      await sharePlayLink(shareMsg, filesArray);
-    } else {
-      // It's a desktop device
-      // todo: make a share widget with
-      setClipboard(shareMsg);
-    }
+      const shareMsg = JSON.parse($("#share-msg").text());
+      await shareContent(shareMsg);
   });
+
+  const displayName = JSON.parse($("#display-name").text());
+  await generateResultCard(displayName)
+  $("#share-my-results").bind('click', async () => {
+    await shareMyResults();
+  })
 })
 
-async function sharePlayLink(shareMsg, filesArray) {
-  let shareData = {
+async function shareMyResults() {
+  const canvas = $("canvas")[0]
+  canvas.toBlob( function(blob) {
+    shareContent("My Commonology results:", blob, true, "image/png")
+  });
+  $.get("/share/")
+}
+
+async function generateResultCard(displayName) {
+  // Generates the actual content for the share card and adds to document
+  let div = document.getElementById('my-results-sharable')
+  $("#share-my-results").prop("disabled", true);
+  html2canvas(div, {
+    onclone: function(clone) {
+      $(clone).find("#welcome-container").addClass("w3-center")
+      $(clone).find("#all-stat-container").css({"padding": 0, "margin": "auto", "width": "250px"})
+      $(clone).find("#welcome-message")
+        .text("Game 84 results for " + displayName)
+        .css({"width": "100%"})
+      $(clone).find("#my-results-sharable").show()
+    }
+  }).then(
+      async function (canvas) {
+        document.body.appendChild(canvas);
+        $("canvas").hide();
+        $("#share-my-results").prop("disabled", false);
+  })
+}
+
+async function shareContent(
+  shareMsg = "", file = null, shareFile=false, type = "image/png") {
+    // Determine device category and route accordingly
+    if (mobileAndTabletCheck()) {
+      // It's a mobile device
+      await shareContentMobile(shareMsg, file, shareFile);
+    } else {
+      // It's a desktop device
+      // todo: make a widget for desktop to share to social
+      if (shareFile) {
+        setClipboard(file, type)
+      } else {
+        setClipboard(shareMsg);
+      }
+    }
+}
+
+async function shareContentMobile(shareMsg, blob = null, shareFile= false) {
+  // Attempt to use webshare api to share content, otherwise copy message or file to clipboard
+  // Use shareFile flag to indicate file should be copied instead of message
+  let filesArray;
+  let shareData;
+  if (blob !== null) {
+    filesArray = [new File(
+      [blob],
+      'My Commonology Results.png',
+      {
+        type: blob.type,
+        lastModified: new Date().getTime()
+      }
+    )]
+    shareData = {
         files: filesArray,
-        title: "Let's play Commonology!",
+      }
+  } else {
+    shareData = {
         text: shareMsg,
       }
-
+  }
    try {
       await navigator.share(shareData)
     } catch(err) {
       if (err instanceof TypeError) {
         // This device doesn't support sharing files.
         console.log(`Your system doesn't support sharing files. Copying to clipboard`);
-        setClipboard(shareMsg);
+        if (shareFile) {
+          setClipboard(filesArray[0], "image/png")
+        } else {
+          setClipboard(shareMsg);
+        }
       } else {
         console.log('Error: ' + err)
       }
     }
 }
 
-function setClipboard(text) {
-    var type = "text/plain";
-    var blob = new Blob([text], { type });
-    var data = [new ClipboardItem({ [type]: blob })];
-
-    navigator.clipboard.write(data).then(
-        function () {
-        console.log("Copied to clipboard")
-        $("#copy-msg").css("display", "inline");
-        },
-        function () {
-        console.log("Failed to copy to clipboard")
-        }
-    );
+function setClipboard(content, type = "text/plain") {
+  let blob;
+  if (type === "text/plain") {
+    blob = new Blob([content], { type });
+  } else {
+    blob = content
+  }
+  let data = [new ClipboardItem({ [type]: blob })];
+  navigator.clipboard.write(data).then(
+      function () {
+      console.log("Copied to clipboard")
+      $("#copy-msg").show();
+      },
+      function () {
+      console.log("Failed to copy to clipboard")
+      }
+  );
 }
 
 // Check for mobile
