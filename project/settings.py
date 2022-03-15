@@ -29,7 +29,7 @@ SECRET_KEY = env.get("DJANGO_SECRET_KEY", '!6^d23vriql_*qgxfp7^zg+3j2(0di&!lpf+_
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 100
 
-ALLOWED_HOSTS = ['127.0.0.1', 'testserver', DOMAIN, 'staging.' + DOMAIN]
+ALLOWED_HOSTS = ['127.0.0.1', DOMAIN, 'staging.' + DOMAIN]
 if EXTRA_ALLOWED_HOST:
     ALLOWED_HOSTS.append(EXTRA_ALLOWED_HOST)
 
