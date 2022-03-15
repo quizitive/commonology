@@ -499,6 +499,9 @@ class TestPlayRequest(TestCase):
         p = Player.objects.filter(email=ABINORMAL).first()
         self.assertIsNotNone(p)
 
+        # Is player authenticated
+        self.assertTrue(p.is_authenticated)
+
         # delete pe record and test for failure
         Player.objects.filter(email=ABINORMAL).delete()
         PendingEmail.objects.all().delete()
