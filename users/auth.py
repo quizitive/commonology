@@ -21,14 +21,18 @@ class PlayerBackend(ModelBackend):
                 pass
 
 
+class PlayerActivateError(Exception):
+    pass
+
+
 # Reference: https://stackoverflow.com/questions/2787650/manually-logging-in-a-user-without-password
 def activate_account(request, uuid):
     pe = PendingEmail.objects.filter(uuid__exact=uuid).first()
     if pe is None:
-        return 'Seems like there was a problem with the validation link. Please try again.'
+        raise PlayerActivateError('Seems like there was a problem with the validation link. Please try again.')
 
-    if pe.created < (our_now() - datetime.timedelta(hours=1)):
-        return 'The validation link sent to you is more than an hour old.'
+    if pe.created < (our_now() - datetime.timedelta(minutes=20)):
+        raise PlayerActivateError('The validation link sent to you is more than 20 minutes old.')
 
     email = pe.email
     try:
@@ -42,5 +46,6 @@ def activate_account(request, uuid):
         p.save()
 
     login(request, p, backend='django.contrib.auth.backends.ModelBackend')
+    pe.delete()
 
     return p

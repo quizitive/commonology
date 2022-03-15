@@ -39,7 +39,7 @@ from users.models import PendingEmail, Player
 from users.forms import PendingEmailForm
 from users.views import remove_pending_email_invitations
 from users.utils import get_player
-from users.auth import activate_account, PlayerBackend
+from users.auth import activate_account, PlayerActivateError
 from mail.tasks import mail_task
 from rewards.utils import check_for_reward
 from components.models import Component
@@ -632,10 +632,10 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
                 return self._user_played(request, g, request.user)
             return render_game(request, g)
 
-        p = activate_account(request, pending_uuid)
-
-        if type(p) is str:
-            return self.message(request, p)
+        try:
+            p = activate_account(request, pending_uuid)
+        except PlayerActivateError as e:
+            return self.message(request, str(e))
 
         if g.user_played(p):
             return self._user_played(request, g, p)
