@@ -567,6 +567,13 @@ class TestPlayRequest(TestCase):
 
         self.assertContains(response, '<button id="submit-button"')
 
+    def test_emails_with_whitespace(self):
+        client = Client()
+        user = get_local_user()
+        path = f'/play/?r={user.code}'
+        response = client.post(path, data={'email': f"{user.email} "})
+        self.assertContains(response, self.game.questions.first().text)
+
 
 class TestViews(TestCase):
 
