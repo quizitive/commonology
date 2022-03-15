@@ -1,0 +1,29 @@
+<div id="{{ container_name }}" class="w3-row" style="padding-top:8px;margin:auto;max-width:350px;line-height:20px;">
+
+  {# RANK #}
+  <div class="stat-container w3-col s6">
+    <div class="stat-tile" style="color:#f26649">
+      <div class="stat-tile-contents">
+        <div class="w3-row stat-tile-value w3-center">
+          {{ player_rank }}<span class="line" style="font-size: 11px">/ {{ player_count }}</span>
+        </div>
+        <div class="w3-row stat-tile-label">
+        Rank
+        </div>
+      </div>
+    </div>
+  </div>
+  {# PERCENTILE #}
+  <div class="stat-container w3-col s6">
+    <div class="stat-tile" style="color:#237073">
+      <div class="stat-tile-contents">
+        <div class="w3-row stat-tile-value w3-center">
+          {{ player_percentile }}<span class="line" style="font-size: 11px">/ 99</span>
+        </div>
+        <div class="w3-row stat-tile-label">
+        Percentile
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -88,6 +88,8 @@ class Game(models.Model):
 
     @cached_property
     def players_dict(self):
+        if self.game_questions.first() is None:
+            return Player.objects.none()
         return self.game_questions.first().raw_answers.filter(removed=False).values(
             'player', 'player__display_name').annotate(
             is_host=models.Case(
