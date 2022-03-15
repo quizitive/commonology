@@ -9,7 +9,6 @@ import platform
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from project import settings_utils
-# from .celery import app as celery_app
 
 
 BASE_DIR = settings_utils.BASE_DIR
@@ -90,8 +89,9 @@ AUTH_USER_MODEL = 'users.Player'
 # configuration for social authentication
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
+    'users.auth.PlayerBackend',
+    'social_core.backends.google.GoogleOAuth2',
 )
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
