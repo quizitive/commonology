@@ -636,7 +636,7 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
             return self.message(request, 'Seems like there was a problem with the validation link. Please try again.')
 
         if pe.created < datetime.datetime.now() - datetime.timedelta(hours=1):
-            return self.message(request, 'The validation linke sent to you is more than an hour old.')
+            return self.message(request, 'The validation link sent to you is more than an hour old.')
 
         email = pe.email
         try:
