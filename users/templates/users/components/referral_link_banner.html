@@ -9,9 +9,10 @@
   <div id="share-link" style="padding:8px;border:1px solid #0095da;margin:4px 0;background:white;border-radius: 4px;color:black; text-decoration: none;">https://commonologygame.com/play/{{ player_code }}</div>
 
   {% if not no_button %}
-  <button id="share-button" class="w3-button w3-round cg-blue w3-border cg-border-blue" style="font-size:16px;">
+  <button id="share-button" class="w3-button w3-round-xxlarge cg-blue w3-border cg-border-blue" style="font-size:12px;">
     Share<i class="fa-solid fa-share-nodes" style="height:100%;padding-left:10px;"></i>
   </button>
+  <style>#copy-msg {display:inline;}</style>
   <div id="copy-msg" style="display:none;margin-left:4px;">Copied to clipboard!</div>
   <script src="{% v_static 'js/social_sharing.js' %}" type="text/javascript"></script>
   {% endif %}

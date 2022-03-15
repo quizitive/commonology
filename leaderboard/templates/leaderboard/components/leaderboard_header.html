@@ -9,8 +9,8 @@
 {% include 'components/card_component_stream.html' with components=game.leaderboard.top_components.all %}
 
 {% if player_score %}
-<div class="cg-card cg-border-grey cg-top-blue w3-padding-large" style="font-size: 16px;font-weight:bold;font-style:normal;">
-  {% include 'leaderboard/components/my_score.html' %}
+<div class="cg-card cg-border-grey cg-top-blue w3-padding-large" style="position:relative;font-size: 16px;font-weight:bold;font-style:normal;">
+  {% include 'leaderboard/components/my_results_web.html' %}
 </div>
 {% endif %}
 

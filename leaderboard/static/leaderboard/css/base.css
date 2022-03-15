@@ -81,8 +81,7 @@ table.leaderboard td:first-child {
 
 /* Player stats card style */
 .stat-container {
-  height: 96px;
-  padding:4px;
+  padding:24px 0 12px;
 }
 .stat-tile {
   border-radius:16px;
@@ -153,9 +152,7 @@ table.leaderboard td:first-child {
 
 /* Tiny screens */
 @media only screen and (max-width: 440px) {
-  .stat-tile-value {
-    font-size: 32px;
-  }
+
 }
 
 /* FOLLOWING CHECKBOXES */

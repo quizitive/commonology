@@ -1,0 +1,49 @@
+{% if request.user.display_name %}
+
+{{ request.user.display_name|json_script:"display-name" }}
+<div class="w3-cell-row">
+  <div class="w3-cell w3-cell-middle">
+    <span style="font-weight: bold;">Welcome {{ request.user.display_name }}! Your game results:</span>
+  </div>
+  <div class="w3-cell w3-right" style="font-weight:normal;font-size:12px;padding-left:8px;position: relative;margin-right:-8px;">
+    <button id="share-my-results" class="w3-button w3-round-xxlarge cg-blue w3-border cg-border-blue" style="font-size:12px;display: inline;">
+      <span class="w3-hide-small" style="padding-right:4px;">Share</span>
+      <i class="fa-solid fa-share-nodes" style="height:100%;"></i>
+    </button>
+    <style>#copy-msg {
+      display:block;
+      position:absolute;
+      right:-7px;
+      max-width:80px;
+    }</style>
+    <div id="copy-msg" style="display:none;">Copied to clipboard!</div>
+  </div>
+</div>
+{% endif %}
+
+{% if is_instant %}
+  <div class="w3-row" style="padding:8px 0">
+  <span style="font-weight: bold;">Your game results:</span>
+</div>
+{% endif %}
+
+{% include 'leaderboard/components/my_results.html'%}
+
+<div class="w3-cell-row" style="padding:16px 0 0">
+  <div class="w3-cell w3-cell-middle" style="padding-right: 8px;">
+
+  </div>
+  <div class="w3-cell w3-rest">
+  <span style="font-weight:normal;font-style:italic;font-size:13px;">{{ player_message }}</span>
+    </div>
+
+</div>
+
+{% include 'leaderboard/components/my_results_share.html' %}
+
+
+<div class="w3-row" style="padding:4px 0">
+
+</div>
+
+{% include "leaderboard/components/instant_game_message.html" %}
