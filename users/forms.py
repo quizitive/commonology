@@ -52,8 +52,8 @@ class InviteFriendsForm(forms.Form):
 
 class JoinForm(PlayerCreationForm):
     required_css_class = 'required'
-    first_name = forms.CharField(max_length=30)
-    last_name = forms.CharField(max_length=30)
+    first_name = forms.CharField(max_length=30, required=False)
+    last_name = forms.CharField(max_length=30, required=False)
     display_name = forms.CharField(
         max_length=100,
         help_text="This is what displays on the public leaderboard."
@@ -64,12 +64,15 @@ class JoinForm(PlayerCreationForm):
     password1 = forms.CharField(
         label="Password",
         strip=False,
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'},),
+        required=False,
+        help_text='Passwords are optional.  Leave it out if you want to use email magic links instead.'
     )
     password2 = forms.CharField(
         label="Password confirmation",
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
         strip=False,
+        required=False,
         help_text=password_validators_help_text_html(),
     )
 
