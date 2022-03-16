@@ -9,16 +9,11 @@
     {{ form.as_p }}
     {% endif %}
     <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
+    <input type="submit" value="Login without password" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
   </form>
 {% endblock %}
 
 {% block card_extras %}
-  <button class="login-google w3-button w3-input w3-margin-bottom w3-border-0" style="padding:0">
-  <a href="{% url "game:play" %}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom"
-     style="text-decoration: none;">
-        <span class="login-google">Login with email link.</span>
-    </a>
-  </button>
 
   <button class="login-google w3-button w3-input w3-margin-bottom w3-border-0" style="padding:0">
     <a href="{% url "social:begin" "google-oauth2" %}{% login_next_url request %}" class="w3-center w3-block w3-round w3-border" style="text-decoration: none;">
