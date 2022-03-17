@@ -32,3 +32,4 @@ django-sortedm2m-filter-horizontal-widget==1.3.2
 openpyxl==3.0.9
 pydot==1.4.2
 emoji==1.6.1
+git+https://git@github.com/quizitive/django-request.git
