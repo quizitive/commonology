@@ -17,10 +17,9 @@ $(async function() {
 
 async function shareMyResults() {
   const canvas = $("canvas")[0]
-  canvas.toBlob( function(blob) {
-    shareContent("My Commonology results:", blob, true, "image/png")
+  canvas.toBlob( async function(blob) {
+    await shareContent("My Commonology results:", blob, true, "image/png")
   });
-  $.get("/share/")
 }
 
 async function generateResultCard(displayName) {
@@ -85,6 +84,7 @@ async function shareContentMobile(shareMsg, blob = null, shareFile= false) {
   }
    try {
       await navigator.share(shareData)
+      $.get("/share/?action=api")
     } catch(err) {
       if (err instanceof TypeError) {
         // This device doesn't support sharing files.
@@ -112,6 +112,7 @@ function setClipboard(content, type = "text/plain") {
       function () {
       console.log("Copied to clipboard")
       $("#copy-msg").show();
+      $.get("/share/?action=clipboard")
       },
       function () {
       console.log("Failed to copy to clipboard")
