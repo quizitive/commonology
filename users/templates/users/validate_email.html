@@ -1,0 +1,34 @@
+
+{% autoescape off %}
+
+{% block email-content %}
+
+  <p>Hello!</p>
+
+  <p>Thank you for confirming your email address.</p>
+
+  <div id="button-holder">
+    <button class="w3-button cg-blue" style="display: block;">
+      <a href="{{ url }}">Click here to login.</a>
+    </button>
+  </div>
+
+  <p>Welcome, we're excited for you to visit again!</p>
+
+  <p>
+    Cheers,
+    <br/>
+    The Commonology Team
+  </p>
+  <div id="footer" style="margin-bottom:-24px">
+    <p>
+    Button not working? Try pasting the url directly into your browser:
+      <a href="{{ url }}">{{ url }}</a>
+    </p>
+  </div>
+
+{% endblock %}
+
+{% endautoescape %}
+
+

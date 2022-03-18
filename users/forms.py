@@ -1,3 +1,4 @@
+from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
     AuthenticationForm, PasswordResetForm, SetPasswordForm
@@ -99,7 +100,16 @@ class LoginForm(AuthenticationForm):
             },
         )
     )
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'w3-input'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'w3-input'}),
+                               required=False,
+                               help_text="Leave blank to login without password, we'll send you a link.")
+
+    def clean_username(self):
+        email = self.cleaned_data['username']
+        p = Player.objects.filter(email=email).first()
+        if p is None or (not p.is_active):
+            raise forms.ValidationError(_("The email address entered is not associated with an active account."))
+        return email
 
 
 class PwdResetForm(PasswordResetForm):
