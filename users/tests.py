@@ -400,9 +400,23 @@ class LoginTests(TestCase):
 
     def test_without_password(self):
         user = get_local_user()
+
+        mail.outbox = []
+
         client = Client()
-        response = client.post(reverse('login'), data={"email": user.email})
+        response = client.post(reverse('login'), data={"username": user.email})
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"An email validation link was sent to {user.email}.")
+
+        msg = mail.outbox[0].body
+
+        url = re.search("https?://.*(?P<uidb64>\/validate_email\/[^\s]+)\/\"\>", msg).group("uidb64")
+        mail.outbox = []
+
+        response = client.get(url, follow=True)
+        u, c = response.redirect_chain[1]
+        self.assertEqual(c, 302)
+        self.assertEqual(u, '/leaderboard/')
 
 
 class MergePlayers(TestCase):
