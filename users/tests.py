@@ -400,7 +400,7 @@ class LoginTests(TestCase):
 
     def test_without_password(self):
         user = get_local_user()
-        client= Client()
+        client = Client()
         response = client.post(reverse('login'), data={"email": user.email})
         self.assertEqual(response.status_code, 200)
 
