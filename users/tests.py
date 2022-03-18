@@ -393,10 +393,16 @@ class PendingUsersTests(TestCase):
 
 class LoginTests(TestCase):
     def test_with_password(self):
-        pass
+        user = get_local_user()
+        client = Client()
+        is_logged_in = client.login(email=NORMAL, password=test_pw)
+        self.assertTrue(is_logged_in)
 
     def test_without_password(self):
-        pass
+        user = get_local_user()
+        client= Client()
+        response = client.post(reverse('login'), data={"email": user.email})
+        self.assertEqual(response.status_code, 200)
 
 
 class MergePlayers(TestCase):

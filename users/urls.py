@@ -19,7 +19,7 @@ urlpatterns = [
     path("invite/", views.InviteFriendsView.as_view(), name='invite'),
     path("login/", views.CustomLoginView.as_view(form_class=LoginForm, extra_context={"header": "Login"}), name="login"),
     path("validate_email/<uidb64>", views.ValidateEmailView.as_view(), name='validate_email'),
-    path("accounts/login/", auth_views.LoginView.as_view(template_name="users/login.html")),
+    path("accounts/login/", auth_views.LoginView.as_view(template_name="users/templates/registration/login.html")),
     path('password_reset/', auth_views.PasswordResetView.as_view(
         template_name='users/pwd_reset.html',
         html_email_template_name='emails/password_reset_email.html',

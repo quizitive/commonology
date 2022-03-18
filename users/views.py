@@ -39,8 +39,7 @@ def user_logout(request):
 def create_and_send_confirm(request, player):
     remove_pending_email_invitations()
     email = player.email
-    pe = PendingEmail(email=email)
-    pe.save()
+    pe = PendingEmail.objects.create(email=email)
 
     domain = get_current_site(request)
     url = f'https://{domain}/validate_email/{pe.uuid}/'
@@ -51,7 +50,7 @@ def create_and_send_confirm(request, player):
 
 
 class CustomLoginView(auth_views.LoginView, CardFormView):
-    card_template = "users/login.html"
+    card_template = "registration/login.html"
 
     def form_valid(self, form):
         u = form.get_user()
