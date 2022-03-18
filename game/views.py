@@ -633,8 +633,6 @@ class GameEntryValidationView(PSIDMixin, CardFormView):
                 return self._user_played(request, g, request.user)
             return render_game(request, g)
 
-        return self.message(request, 'Marc is testing.')
-
         try:
             p = activate_account(request, pending_uuid)
         except PlayerActivateError as e:

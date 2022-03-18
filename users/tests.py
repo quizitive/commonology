@@ -391,6 +391,14 @@ class PendingUsersTests(TestCase):
         self.assertTrue(user2 in user1.following.all())
 
 
+class LoginTests(TestCase):
+    def test_with_password(self):
+        pass
+
+    def test_without_password(self):
+        pass
+
+
 class MergePlayers(TestCase):
     def test_fields(self):
         # This test is designed to make sure we maintain merge_players.py
