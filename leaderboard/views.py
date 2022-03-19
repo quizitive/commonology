@@ -167,6 +167,7 @@ class HostNoteView(LeaderboardView):
 
 class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
     header = "My Stats"
+    button_label = None
 
     def get(self, request, *args, **kwargs):
         cards = [
@@ -174,7 +175,7 @@ class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
                 "chart": htmx_call(request, Charts.player_rank_trend.htmx_path(
                     player_id=request.user.id,
                     slug="commonology",
-                    since_game=75
+                    since_game=76
                 )),
                 "header": "My Performance Over Time"
             }
