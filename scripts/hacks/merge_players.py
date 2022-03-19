@@ -83,6 +83,8 @@ def merge_related_fields(from_p, to_p):
 
     to_p.claim_set.set(from_p.claim_set.all())
 
+    to_p.request_set.set(from_p.request_set.all())
+
     try:
         to_p.mailingaddress.set(from_p.mailingaddress.all())
     except MailingAddress.DoesNotExist:
