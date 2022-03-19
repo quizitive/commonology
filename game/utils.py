@@ -1,14 +1,16 @@
+from collections import OrderedDict
 import os
 from os import environ as env
 import subprocess
 import datetime
 
-from django.db.models import Min
+from django.db.models import Min, F, Count
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.admin.models import LogEntry, CHANGE
 from project.settings import WINNER_ROOT, WINNER_TEMPLATE_PDF
 from project.utils import our_now, quick_cache, to_ascii
 from game.models import Game, Answer
+from leaderboard.models import PlayerRankScore
 from chat.models import Comment
 
 
@@ -166,3 +168,12 @@ def n_new_comments(game, player, t):
     else:
         n = Comment.objects.filter(thread__object__game=game).count()
     return n
+
+
+@quick_cache()
+def number_of_players_in_all_games(slug):
+    players_with_filter_count = PlayerRankScore.objects.filter(
+        leaderboard__game__series__slug=slug, leaderboard__publish_date__lte=our_now()).values(
+        game_id=F('leaderboard__game__game_id')).annotate(
+        num_players=Count('game_id')).order_by('game_id')
+    return OrderedDict((game['game_id'], game['num_players']) for game in players_with_filter_count)

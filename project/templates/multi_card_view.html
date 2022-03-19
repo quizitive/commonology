@@ -9,6 +9,7 @@
 
 {% block app_style %}
   <link rel="stylesheet" href="{% v_static 'users/css/form_style.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 {% endblock %}
 
 {% block content %}
@@ -20,9 +21,9 @@
     {# --- Simple cards-on-screen view with default card --- #}
     {% block cards %}
       {% for card in cards %}
-        {{ card }}
-        <div class="w3-padding"></div>
-      {% endfor %}
+        <div class="w3-padding-16"></div>
+      {% include 'cards/base_card.html' with header=card.header chart=card.chart custom_message=card.custom_message%}
+    {% endfor %}
     {% endblock %}
 
   </div>

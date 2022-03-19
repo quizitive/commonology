@@ -115,3 +115,4 @@ class MultiCardPageView(BaseCardView):
 
     def dispatch(self, request, *args, **kwargs):
         self.cards = kwargs.get('cards')
+        return super().dispatch(request, *args, **kwargs)

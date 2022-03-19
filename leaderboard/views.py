@@ -2,16 +2,18 @@ import datetime
 import dateutil
 
 from django.shortcuts import render
-from django.views.generic.base import View
 from django.http import Http404, HttpResponse
 from django.contrib import messages
-from django.db.models import Max
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
 
 from project.utils import our_now, slackit
+from project.card_views import MultiCardPageView
 from project.views import next_game_context
+from project.htmx import htmx_call
+
+from charts.charts import Charts
 from game.models import Game, Question
 from game.views import BaseGameView
 from game.utils import n_new_comments
@@ -163,34 +165,22 @@ class HostNoteView(LeaderboardView):
         return render(request, 'leaderboard/host_note.html', context)
 
 
-class PlayerHomeView(LoginRequiredMixin, View):
-    template = 'leaderboard/player_home.html'
+class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
+    header = "My Stats"
 
-    def get(self, request):
-        context = self._get_context(request)
-        return render(request, self.template, context)
+    def get(self, request, *args, **kwargs):
+        cards = [
+            {
+                "chart": htmx_call(request, Charts.player_rank_trend.htmx_path(
+                    player_id=request.user.id,
+                    slug="commonology",
+                    since_game=75
+                )),
+                "header": "My Performance Over Time"
+            }
+        ]
+        return super().get(request, *args, cards=cards)
 
-    def post(self, request):
-        emails = [e.strip() for e in request.POST.get("invite").split(",")]
-        context = self._get_context(request)
-        context['invite_message'] = "Your invites have been sent! Feel free to enter more below."
-        return render(request, self.template, context)
-
-    def _get_context(self, request):
-        user = request.user
-        player, _ = Player.objects.get_or_create(id=user.id)
-        # todo: hardcoding commonology as series for now for now
-        games = Game.objects.filter(leaderboard__publish_date__lte=our_now(), series__slug='commonology').order_by('-game_id')
-        latest_game_id = games.aggregate(Max('game_id'))['game_id__max']
-
-        context = {
-            'display_name': user.first_name or user.email,
-            'latest_game_id': latest_game_id,
-            'games': player.game_ids,
-            'teams': player.teams.all(),
-            'invite_message': "Enter your friends' emails to invite them to Commonology!"
-        }
-        return context
 
 
 @login_required

@@ -6,7 +6,7 @@ from collections import OrderedDict, deque
 from celery import shared_task
 import pandas as pd
 
-from django.db.models import Sum, Subquery, OuterRef
+from django.db.models import Sum, Subquery, OuterRef, F
 from django.db import transaction
 
 from project.utils import REDIS, quick_cache, quick_cache_key, redis_delete_patterns, our_now
@@ -15,6 +15,7 @@ from game.models import Game, AnswerCode, Series
 from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
 from game.tasks import api_to_db
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
+from game.utils import number_of_players_in_all_games
 from leaderboard.models import Leaderboard, PlayerRankScore, LeaderboardMessage
 
 
@@ -234,6 +235,27 @@ def player_top_game_rank(player, series):
             best = rank
             best_game_id = game_id
     return best_game_id, best
+
+
+# @quick_cache()
+def player_percentile_in_all_games(player_id, series_slug):
+    prs_objs = PlayerRankScore.objects.filter(
+            player_id=player_id,
+            leaderboard__game__series__slug=series_slug,
+            leaderboard__publish_date__lte=our_now()
+    ).values(
+            "rank", game_id=F("leaderboard__game__game_id")
+        )
+    ranks_by_game = {prs["game_id"]: prs["rank"] for prs in prs_objs}
+    game_player_count = number_of_players_in_all_games(series_slug)
+    percentile_by_game = OrderedDict()
+    for game_id, player_count in game_player_count.items():
+        game_rank = ranks_by_game.get(game_id)
+        if game_rank is None:
+            percentile_by_game[game_id] = None
+            continue
+        percentile_by_game[game_id] = round(100 * (1 - game_rank / game_player_count[game_id]))
+    return percentile_by_game
 
 
 def rank_string(rank):
