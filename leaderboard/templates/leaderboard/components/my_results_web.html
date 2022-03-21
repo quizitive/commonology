@@ -1,6 +1,7 @@
 {% if request.user.display_name %}
 
 {{ request.user.display_name|json_script:"display-name" }}
+{{ game_id|json_script:"game-id" }}
 <div class="w3-cell-row">
   <div class="w3-cell w3-cell-middle">
     <span style="font-weight: bold;">Welcome {{ request.user.display_name }}! Your game results:</span>
