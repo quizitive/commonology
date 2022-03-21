@@ -9,7 +9,8 @@ $(async function() {
   });
 
   const displayName = JSON.parse($("#display-name").text());
-  await generateResultCard(displayName)
+  const gameID = JSON.parse($("#game-id").text());
+  await generateResultCard(displayName, gameID)
   $("#share-my-results").bind('click', async () => {
     await shareMyResults();
   })
@@ -22,7 +23,7 @@ async function shareMyResults() {
   });
 }
 
-async function generateResultCard(displayName) {
+async function generateResultCard(displayName, gameID) {
   // Generates the actual content for the share card and adds to document
   let div = document.getElementById('my-results-sharable')
   $("#share-my-results").prop("disabled", true);
@@ -31,7 +32,7 @@ async function generateResultCard(displayName) {
       $(clone).find("#welcome-container").addClass("w3-center")
       $(clone).find("#all-stat-container").css({"padding": 0, "margin": "auto", "width": "250px"})
       $(clone).find("#welcome-message")
-        .text("Game 84 results for " + displayName)
+        .text("Game " + gameID + " results for " + displayName)
         .css({"width": "100%"})
       $(clone).find("#my-results-sharable").show()
     }
