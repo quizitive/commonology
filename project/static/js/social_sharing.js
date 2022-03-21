@@ -31,7 +31,7 @@ async function generateResultCard(displayName) {
       $(clone).find("#welcome-container").addClass("w3-center")
       $(clone).find("#all-stat-container").css({"padding": 0, "margin": "auto", "width": "250px"})
       $(clone).find("#welcome-message")
-        .text("Game 84 results for " + displayName)
+        .text("Game 86 results for " + displayName)
         .css({"width": "100%"})
       $(clone).find("#my-results-sharable").show()
     }
