@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
     AuthenticationForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.password_validation import password_validators_help_text_html
-from .models import Player, PendingEmail, LOCATIONS
+from .models import Player, PendingEmail, LOCATIONS, custom_validate_email
 
 
 class PlayerCreationForm(UserCreationForm):
@@ -92,14 +92,8 @@ class JoinForm(PlayerCreationForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(
-        widget=forms.TextInput(
-            attrs={
-                'class': 'w3-input',
-                'autofocus': True
-            },
-        )
-    )
+    username = forms.CharField(validators=[custom_validate_email],
+                               widget=forms.TextInput(attrs={'class': 'w3-input', 'autofocus': True}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'w3-input'}),
                                required=False,
                                help_text="Leave blank to login without password, we'll send you a link.")

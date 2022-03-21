@@ -50,7 +50,8 @@ def create_and_send_confirm(request, player):
 
 
 class CustomLoginView(auth_views.LoginView, CardFormView):
-    card_template = "registration/login.html"
+    page_template = "registration/login.html"
+    card_template = "users/card/login_card.html"
 
     def form_valid(self, form):
         u = form.get_user()
