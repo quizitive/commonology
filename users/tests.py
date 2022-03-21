@@ -410,11 +410,11 @@ class LoginTests(TestCase):
 
         msg = mail.outbox[0].body
 
-        url = re.search("https?://.*(?P<uidb64>\/validate_email\/[^\s]+)\/\"\>", msg).group("uidb64")
+        url = re.search("https?://.*(?P<uidb64>\/validate_email\/[^\s]+)\"\>", msg).group("uidb64")
         mail.outbox = []
 
         response = client.get(url, follow=True)
-        u, c = response.redirect_chain[1]
+        u, c = response.redirect_chain[2]
         self.assertEqual(c, 302)
         self.assertEqual(u, '/leaderboard/')
 

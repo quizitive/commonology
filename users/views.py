@@ -42,7 +42,7 @@ def create_and_send_confirm(request, player):
     pe = PendingEmail.objects.create(email=email)
 
     domain = get_current_site(request)
-    url = f'https://{domain}/validate_email/{pe.uuid}/'
+    url = f'https://{domain}/validate_email/{pe.uuid}'
 
     msg = render_to_string('users/validate_email.html', {'url': url})
 
