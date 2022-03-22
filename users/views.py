@@ -20,7 +20,7 @@ from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
 from project.card_views import recaptcha_check, BaseCardView, CardFormView
-from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, LoginForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.tasks import mail_task
@@ -49,7 +49,6 @@ def create_and_send_confirm(request, player):
 
     return mail_task("Let's play Commonology", msg, [(email, None)])
 
-from users.forms import LoginForm
 
 class CustomLoginView(auth_views.LoginView, CardFormView):
     page_template = "registration/login.html"

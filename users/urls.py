@@ -17,8 +17,6 @@ urlpatterns = [
     path("invite/", views.InviteFriendsView.as_view(), name='invite'),
     path("login/", views.CustomLoginView.as_view(), name="login"),
     path("validate_email/<uidb64>/", views.ValidateEmailView.as_view(), name='validate_email'),
-    #path("accounts/login/", auth_views.LoginView.as_view(template_name="registration/login.html")),
-    #path("accounts/login/", views.CustomLoginView.as_view()),
     path('password_reset/', auth_views.PasswordResetView.as_view(
         template_name='users/pwd_reset.html',
         html_email_template_name='emails/password_reset_email.html',
