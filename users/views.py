@@ -1,3 +1,4 @@
+import datetime
 from django.conf import settings
 from django.forms import HiddenInput
 from django.urls import reverse, reverse_lazy
@@ -23,7 +24,7 @@ from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.tasks import mail_task
-from project.utils import redis_delete_patterns
+from project.utils import redis_delete_patterns, our_now
 from game.models import Series
 from .utils import remove_pending_email_invitations
 
@@ -52,6 +53,7 @@ def create_and_send_confirm(request, player):
 class CustomLoginView(auth_views.LoginView, CardFormView):
     page_template = "registration/login.html"
     card_template = "users/card/login_card.html"
+    button_label = "Login"
 
     def form_valid(self, form):
         u = form.get_user()
@@ -64,8 +66,7 @@ class CustomLoginView(auth_views.LoginView, CardFormView):
             msg = f'An email validation link was sent to {email}. ' \
                   f'Please check your email and use that link to continue logging into Commonology. ' \
                   f'Sometimes, unfortunately, those messages go to a spam or junk folder.'
-            self.custom_message = msg
-            return super(CardFormView, self).get(self.request, form=None, button_label=None)
+            return self.display_message(self.request, msg)
 
         return super().form_valid(form)
 
@@ -504,6 +505,9 @@ class ValidateEmailView(View):
         try:
             pe = PendingEmail.objects.filter(uuid__exact=uidb64).first()
             if pe is None:
+                return self.login_fail(request)
+
+            if pe.created < (our_now() - datetime.timedelta(minutes=20)):
                 return self.login_fail(request)
 
             email = pe.email

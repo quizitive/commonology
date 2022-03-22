@@ -1,3 +1,4 @@
+import datetime
 import os
 import re
 import uuid
@@ -412,6 +413,17 @@ class LoginTests(TestCase):
 
         url = re.search("https?://.*(?P<uidb64>\/validate_email\/[^\s]+)\"\>", msg).group("uidb64")
         mail.outbox = []
+
+        uid = url.split('/')[-1]
+        pe = PendingEmail.objects.filter(uuid__exact=uid).first()
+        pe.created = pe.created - datetime.timedelta(minutes=21)
+        pe.save()
+        response = client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Login Fail")
+
+        pe.created = pe.created + datetime.timedelta(minutes=21)
+        pe.save()
 
         response = client.get(url, follow=True)
         u, c = response.redirect_chain[2]
