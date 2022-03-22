@@ -114,6 +114,7 @@ RECAPTCHA3_INHIBIT = True
 RECAPTCHA3_KEY = env.get('RECAPTCHA3_KEY', '6LczLAUcAAAAACMff5nNS6xjhUDF3elRC3LpnKiW')
 RECAPTCHA3_SECRET = env.get('RECAPTCHA3_SECRET', '6LczLAUcAAAAADZrdjUJznBAS2eeP9tsBHT7DrEY')
 
+APPEND_SLASH = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

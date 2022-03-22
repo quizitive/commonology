@@ -7,8 +7,9 @@
     {% if form %}
     {% csrf_token %}
     {{ form.as_p }}
+    <input type="submit" value="{{ button_label|default:"Login" }}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
+    <input type="submit" value="Login without password" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
     {% endif %}
-    <input type="submit" value="{{ button_label|default:"Ok" }}" class="w3-button w3-round w3-block cg-blue w3-margin-bottom">
   </form>
 {% endblock %}
 
