@@ -1,3 +1,4 @@
+import datetime
 import os
 import re
 import uuid
@@ -389,6 +390,45 @@ class PendingUsersTests(TestCase):
 
         self.assertTrue(user1 in user2.following.all())
         self.assertTrue(user2 in user1.following.all())
+
+
+class LoginTests(TestCase):
+    def test_with_password(self):
+        user = get_local_user()
+        client = Client()
+        is_logged_in = client.login(email=NORMAL, password=test_pw)
+        self.assertTrue(is_logged_in)
+
+    def test_without_password(self):
+        user = get_local_user()
+
+        mail.outbox = []
+
+        client = Client()
+        response = client.post(reverse('login'), data={"username": user.email})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"An email validation link was sent to {user.email}.")
+
+        msg = mail.outbox[0].body
+
+        url = re.search("https?://.*(?P<uidb64>\/validate_email\/[^\s]+)\"\>", msg).group("uidb64")
+        mail.outbox = []
+
+        uid = url.split('/')[-1]
+        pe = PendingEmail.objects.filter(uuid__exact=uid).first()
+        pe.created = pe.created - datetime.timedelta(minutes=21)
+        pe.save()
+        response = client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Login Fail")
+
+        pe.created = pe.created + datetime.timedelta(minutes=21)
+        pe.save()
+
+        response = client.get(url, follow=True)
+        u, c = response.redirect_chain[2]
+        self.assertEqual(c, 302)
+        self.assertEqual(u, '/leaderboard/')
 
 
 class MergePlayers(TestCase):

@@ -69,7 +69,9 @@
     </form>
   {% endblock %}
 
+  {% if card_extras is not None %}
   {% block card_extras %}{% endblock %}
+  {% endif %}
 
   </div>
 </div>
