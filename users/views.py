@@ -49,11 +49,14 @@ def create_and_send_confirm(request, player):
 
     return mail_task("Let's play Commonology", msg, [(email, None)])
 
+from users.forms import LoginForm
 
 class CustomLoginView(auth_views.LoginView, CardFormView):
     page_template = "registration/login.html"
     card_template = "users/card/login_card.html"
     button_label = "Login"
+    form_class = LoginForm
+    extra_context = {"header": "Login"}
 
     def form_valid(self, form):
         u = form.get_user()
@@ -514,6 +517,9 @@ class ValidateEmailView(View):
 
             p = Player.objects.get(email=email)
             login(request, p, backend='django.contrib.auth.backends.ModelBackend')
+
+            pe.delete()
+
             return redirect(reverse('home'))
 
         except Player.DoesNotExist:
