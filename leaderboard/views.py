@@ -196,12 +196,24 @@ class PlayerHomeView(LoginRequiredMixin, View):
 @login_required
 def results_share_count_view(request):
     p = Player.objects.get(id=request.user.id)
-    if request.GET.get('action') == "api":
-        msg = f"Player {p.email} with display name: {p.display_name} just shared their results with the web api."
-    elif request.GET.get('action') == "clipboard":
-        msg = f"Player {p.email} with display name: {p.display_name} just copied their results to clipboard. " \
-              f"That's all I know. Here's hoping they share it."
+    share_type = request.GET.get("type")
+    if share_type == "image/png":
+        content = "results"
+    elif share_type == "text/plain":
+        content = "play link"
     else:
-        msg = f"An invalid request was made by {p.email} to the share endpoint."
-    slackit(msg)
+        return HttpResponse("Invalid share")
+
+    action_param = request.GET.get('action')
+    if action_param == "api":
+        action, dest = "shared", "with the web api"
+
+    elif action_param == "clipboard":
+        action, dest = "copied", "to clipboard"
+    else:
+        return HttpResponse("Invalid share")
+
+    msg = f"Player {p.email} with display name: {p.display_name} just {action} their {content} {dest}"
+    print(msg)
+    # slackit(msg)
     return HttpResponse("Thanks for sharing!")
