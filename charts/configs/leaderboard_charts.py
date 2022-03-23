@@ -22,7 +22,9 @@ class PlayerRankTrendChart(BaseSmartChart):
     def get_chart(self):
         return {
             "height": 450,
-            "type": 'bar'
+            "type": 'bar',
+            "offsetX": -15,
+            "zoom": {"enabled": False}
         }
 
     def get_grid(self):
@@ -31,11 +33,19 @@ class PlayerRankTrendChart(BaseSmartChart):
     def get_xaxis(self):
         # x axis labels
         return {
-            "categories": self.data_class.get_labels()
+            "categories": self.data_class.get_labels(),
+            "labels": {
+                "rotate": -90,
+                "rotateAlways": True,
+            },
+            "tickPlacement": 'on'
         }
 
     def get_yaxis(self):
         return {"axisTick": {"show": False}, "axisBorder": {"show": False}, "labels": {"show": False}}
+
+    def get_plot_options(self):
+        return {"bar": {"borderRadius": 4, "columnWidth": "85%"}}
 
     def get_stroke(self):
         return {"curve": "smooth"}
@@ -65,11 +75,14 @@ class PlayerRankHistory(BaseChartSeries):
         super().__init__(**kwargs)
         self.player_id = kwargs.get("player_id")
         self.slug = kwargs.get("slug")
-        self.since_game = int(kwargs.get("since_game"))
+        self.from_game = int(kwargs.get("from_game"))
+        self.to_game = int(kwargs.get("to_game"))
         self.player_percentiles = player_percentile_in_all_games(self.player_id, self.slug)
 
     def get_data(self):
-        return [pp for gid, pp in self.player_percentiles.items() if gid >= self.since_game]
+        return [pp for gid, pp in self.player_percentiles.items()
+                if self.from_game <= gid <= self.to_game]
 
     def get_labels(self):
-        return [f"Game {gid}" for gid, _ in self.player_percentiles.items() if gid >= self.since_game]
+        return [f"Game {gid}" for gid, _ in self.player_percentiles.items()
+                if self.from_game <= gid <= self.to_game]

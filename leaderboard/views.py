@@ -16,7 +16,7 @@ from project.htmx import htmx_call
 from charts.charts import Charts
 from game.models import Game, Question
 from game.views import BaseGameView
-from game.utils import n_new_comments
+from game.utils import n_new_comments, find_latest_published_game
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_leaderboard_message, \
     player_score_rank_percentile, rank_string, score_string, visible_leaderboards
@@ -170,18 +170,21 @@ class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
     button_label = None
 
     def get(self, request, *args, **kwargs):
+        latest_game = find_latest_published_game("commonology")
+        to_game = latest_game.game_id
+        from_game = max(to_game - 20, 0)
         cards = [
             {
                 "chart": htmx_call(request, Charts.player_rank_trend.htmx_path(
                     player_id=request.user.id,
                     slug="commonology",
-                    since_game=76
+                    from_game=from_game,
+                    to_game=to_game
                 )),
-                "header": "My Performance Over Time"
+                "header": "My Percentile Over Time"
             }
         ]
         return super().get(request, *args, cards=cards)
-
 
 
 @login_required
