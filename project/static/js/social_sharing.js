@@ -66,6 +66,7 @@ async function shareContentMobile(shareMsg, blob = null, shareFile= false) {
   // Use shareFile flag to indicate file should be copied instead of message
   let filesArray;
   let shareData;
+  let shareType;
   if (blob !== null) {
     filesArray = [new File(
       [blob],
@@ -78,14 +79,16 @@ async function shareContentMobile(shareMsg, blob = null, shareFile= false) {
     shareData = {
         files: filesArray,
       }
+      shareType = "image/png"
   } else {
     shareData = {
         text: shareMsg,
       }
+      shareType = "text/plain"
   }
    try {
       await navigator.share(shareData)
-      $.get("/share/?action=api")
+      $.get("/share/?action=api&type=" + shareType)
     } catch(err) {
       if (err instanceof TypeError) {
         // This device doesn't support sharing files.
@@ -113,7 +116,7 @@ function setClipboard(content, type = "text/plain") {
       function () {
       console.log("Copied to clipboard")
       $("#copy-msg").show();
-      $.get("/share/?action=clipboard")
+      $.get("/share/?action=clipboard&type=" + type)
       },
       function () {
       console.log("Failed to copy to clipboard")
