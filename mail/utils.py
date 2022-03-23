@@ -3,7 +3,7 @@ import python_http_client.exceptions
 import socket
 
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, To, Category, Header
+from sendgrid.helpers.mail import Mail, To, Category, Header, BatchId
 
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -16,7 +16,6 @@ from components.models import SponsorComponent
 from game.utils import find_latest_active_game
 from users.models import Player
 from users.utils import sign_user, unsubscribe
-
 
 import logging
 
@@ -49,6 +48,41 @@ def make_substitutions(e, code):
     return {'-email-': e, '-unsubscribelink-': url, '-game_url_args-': game_url_args}
 
 
+def get_batch_id(sgclient=None):
+    if sgclient is None:
+        sgclient = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
+    response = sgclient.client.mail.batch.post()
+    if response.status_code == 201:
+        return BatchId(response.to_dict['batch_id'])
+    else:
+        return None
+
+
+def sendgrid_cancel(sgclient=None, batch_id=None):
+    if sgclient is None:
+        sgclient = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
+    body = {'batch_id': batch_id, "status": "cancel"}
+    response = sgclient.client.user.scheduled_sends.post(request_body=body)
+    return response
+
+#     x = get_scheduled_sends(sendgrid_client)
+#     print(f"Scheduled sends {x.body}.")
+#
+#     batch_id = 'ZDZiNGVlNmUtYWFjZS0xMWVjLWE2MGItZmE2YWU4NDBmODU0LTA3MmMyYTUxMg'
+#     x = sendgrid_client.client.user.scheduled_sends._(batch_id).patch(request_body={"status": "cancel"})
+#
+#     x =
+#     return 0, ''
+#
+# # '''
+# #  % curl --header "Authorization: Bearer $SENDGRID_APIKEY" --header 'Content-Type: application/json' --request POST --url https://api.sendgrid.com/v3/mail/batch
+# # {"batch_id":"YTljYmQyYzAtYWFkNi0xMWVjLWE2NDQtZWE4MmU5YzNkMWRmLTRhMzdjN2ZkOQ"}
+# #
+# # % curl --header "Authorization: Bearer $SENDGRID_APIKEY" --header 'Content-Type: application/json' --request GET --url https://api.sendgrid.com/v3/user/scheduled_sends/ZDZiNGVlNmUtYWFjZS0xMWVjLWE2MGItZmE2YWU4NDBmODU0LTA3MmMyYTUxMg
+# # []%
+# # '''
+
+
 #
 # Really good examples: https://github.com/sendgrid/sendgrid-python/blob/main/examples/helpers/mail_example.py
 #
@@ -56,7 +90,7 @@ def make_substitutions(e, code):
 def sendgrid_send(subject, msg, email_list,
                   from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME),
                   send_at=None, categories=None, unsub_link=False, top_components=(),
-                  bottom_components=(), force_sendgrid=False):
+                  bottom_components=(), force_sendgrid=False, batch_id=None):
 
     msg = render_to_string('mail/mail_base.html',
                            context={
@@ -74,6 +108,10 @@ def sendgrid_send(subject, msg, email_list,
         send_mail(subject, msg, None, to_emails, html_message=msg)
         return len(to_emails), msg
 
+    sendgrid_client = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
+    if batch_id is None:
+        batch_id = get_batch_id(sendgrid_client)
+
     to_emails = [To(email=e, substitutions=make_substitutions(e, code)) for e, code in email_list]
 
     message = Mail(
@@ -84,6 +122,8 @@ def sendgrid_send(subject, msg, email_list,
         html_content=msg,
         is_multiple=True)
 
+    message.batch_id = batch_id
+
     if send_at:
         message.send_at = send_at
     if unsub_link:
@@ -91,9 +131,8 @@ def sendgrid_send(subject, msg, email_list,
     if categories:
         message.category = [Category(i) for i in categories]
 
-    sendgrid_client = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
     sendgrid_client.send(message)
-    return len(to_emails), msg
+    return len(to_emails), msg, batch_id
 
 
 def mass_mail(obj):
@@ -137,6 +176,8 @@ def mass_mail(obj):
     email_list = []
     total_count = 0
 
+    batch_id = get_batch_id()
+
     for p in qs:
         count += 1
         email_list.append((p.email, p.code))
@@ -145,7 +186,8 @@ def mass_mail(obj):
             total_count += 500
             sendgrid_send(obj.subject, msg, email_list, from_email,
                           send_at=send_at, categories=categories, unsub_link=True,
-                          top_components=top_components, bottom_components=bottom_components)
+                          top_components=top_components, bottom_components=bottom_components,
+                          batch_id=batch_id)
             send_at += 100
             count = 0
             email_list = []
@@ -154,11 +196,12 @@ def mass_mail(obj):
         total_count += len(email_list)
         sendgrid_send(obj.subject, msg, email_list, from_email,
                       send_at=send_at, categories=categories, unsub_link=True,
-                      top_components=top_components, bottom_components=bottom_components)
+                      top_components=top_components, bottom_components=bottom_components,
+                      batch_id=batch_id)
 
-    log_msg = f"{total_count} recipients sent a blast at {send_t} with subject = {obj.subject}."
+    log_msg = f"{total_count} recipients sent a blast at {send_t} with subject = {obj.subject}. Batch ID = {batch_id}."
 
-    return total_count, log_msg
+    return total_count, log_msg, batch_id
 
 
 def deactivate_blocked_addresses():

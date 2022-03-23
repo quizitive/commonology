@@ -4,8 +4,8 @@ from django_object_actions import DjangoObjectActions
 from sortedm2m_filter_horizontal_widget.forms import SortedFilteredSelectMultiple
 
 from project.utils import our_now, log_entry
-from .models import MailMessage
-from .utils import mass_mail, sendgrid_send
+from .models import MailMessage, MailLog, add_mail_log
+from .utils import mass_mail, sendgrid_send, sendgrid_cancel
 from users.models import Player
 from components.models import Component, SponsorComponent
 
@@ -22,9 +22,9 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
 
         from_email = (obj.from_email, obj.from_name)
         top_components = list(SponsorComponent.active_sponsor_components()) + list(obj.top_components.all())
-        sendgrid_send(obj.subject, msg=obj.message, email_list=[(email, user_code)],
-                      from_email=from_email, unsub_link=True,
-                      top_components=top_components, bottom_components=obj.bottom_components.all())
+        n, msg, batch_id = sendgrid_send(obj.subject, msg=obj.message, email_list=[(email, user_code)],
+                                         from_email=from_email, unsub_link=True,
+                                         top_components=top_components, bottom_components=obj.bottom_components.all())
         obj.tested = True
         obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
@@ -43,7 +43,7 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
                 messages.add_message(request, messages.WARNING, 'You must choose a series.')
                 return
 
-            n, log_msg = mass_mail(obj)
+            n, log_msg, batch_id = mass_mail(obj)
 
             log_entry(obj, log_msg, request.user)
 
@@ -51,6 +51,9 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             obj.sent_date = our_now()
             obj.scheduled = None
             obj.save()
+
+            add_mail_log(obj, batch_id=batch_id)
+
             if n:
                 messages.add_message(request, messages.INFO, f'Blast message sent to {n} players.')
             else:
@@ -83,3 +86,36 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
             kwargs['queryset'] = Component.objects.filter(locations__app_name='mail')
             kwargs['widget'] = SortedFilteredSelectMultiple()
         return super(MailMessageAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
+
+
+@admin.register(MailLog)
+class MailLogAdmin(DjangoObjectActions, admin.ModelAdmin):
+
+    def cancel_send(self, request, obj):
+        result = sendgrid_cancel(batch_id=obj.batch_id)
+        obj.canceled = our_now()
+        obj.save()
+        messages.add_message(request, messages.INFO, 'Attempted to cancel message.')
+    cancel_send.label = 'Cancel Message'
+    cancel_send.short_description = "Tries to stop message at SendGrid."
+
+    list_display = ('subject', 'sent_date')
+    list_filter = ('created',)
+    search_fields = ('subject',)
+    ordering = ('-sent_date',)
+    filter_horizontal = ('top_components', 'bottom_components')
+    save_on_top = True
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions
+
+    change_actions = ('cancel_send', )
