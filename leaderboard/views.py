@@ -214,6 +214,5 @@ def results_share_count_view(request):
         return HttpResponse("Invalid share")
 
     msg = f"Player {p.email} with display name: {p.display_name} just {action} their {content} {dest}"
-    print(msg)
-    # slackit(msg)
+    slackit(msg)
     return HttpResponse("Thanks for sharing!")
