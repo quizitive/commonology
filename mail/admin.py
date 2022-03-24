@@ -96,7 +96,7 @@ class MailLogAdmin(DjangoObjectActions, admin.ModelAdmin):
         result = sendgrid_cancel(batch_id=obj.batch_id)
         obj.canceled = our_now()
         obj.save()
-        messages.add_message(request, messages.INFO, 'Attempted to cancel message, may not work if it less than 20 min away.')
+        messages.add_message(request, messages.INFO, 'Attempted to cancel message, may not work if less than 20 min away.')
     cancel_send.label = 'Cancel Message'
     cancel_send.short_description = "Tries to stop message at SendGrid."
 
