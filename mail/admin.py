@@ -12,7 +12,33 @@ from components.models import Component, SponsorComponent
 
 @admin.register(MailMessage)
 class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
+    change_form_template = 'admin/mail_change_form.html'
+
+    def keep_form_open(self, request):
+        request.POST._mutable = True
+        request.POST['_continue'] = 'Save and continue editing'
+        request.POST._mutable = False
+
+    def response_change(self, request, obj):
+        if '_button_test' in request.POST:
+            self.keep_form_open(request)
+            self.send_test(request, obj)
+        elif '_button_blast' in request.POST:
+            if obj.enable_blast:
+                self.blast(request, obj)
+                obj.enable_blast = False
+                obj.save()
+            else:
+                self.keep_form_open(request)
+                if not obj.enable_blast:
+                    messages.add_message(request, messages.WARNING, "You must enable blast with the checkbox below.")
+
+        x = super().response_change(request, obj)
+        return x
+
     def send_test(self, request, obj):
+        # super().save_model(request, obj, self.form)
+        super().response_change(request, obj)
         email = obj.test_recipient
         try:
             test_user = Player.objects.get(email=obj.test_recipient)
@@ -25,44 +51,27 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         n, msg, batch_id = sendgrid_send(obj.subject, msg=obj.message, email_list=[(email, user_code)],
                                          from_email=from_email, unsub_link=True,
                                          top_components=top_components, bottom_components=obj.bottom_components.all())
-        obj.tested = True
-        obj.save()
         messages.add_message(request, messages.INFO, 'Test message sent.')
-    send_test.label = 'Test'
-    send_test.short_description = "Send a test message."
 
     def blast(self, request, obj):
-        if not obj.enable_blast:
-            messages.add_message(request, messages.WARNING,
-                                 "You must enable blast with the checkbox below.")
-        elif obj.sent:
-            messages.add_message(request, messages.WARNING,
-                                 "This blast was already sent.  You can send again by unchecking the sent box below.")
-        elif obj.tested:
-            if obj.series is None:
-                messages.add_message(request, messages.WARNING, 'You must choose a series.')
-                return
+        if obj.series is None:
+            messages.add_message(request, messages.WARNING, 'You must choose a series.')
+            return
 
-            n, log_msg, batch_id = mass_mail(obj)
+        n, log_msg, batch_id = mass_mail(obj)
 
-            log_entry(obj, log_msg, request.user)
+        log_entry(obj, log_msg, request.user)
 
-            obj.sent = True
-            obj.sent_date = our_now()
-            obj.save()
+        obj.sent = True
+        obj.sent_date = our_now()
+        obj.save()
 
-            add_mail_log(obj, batch_id=batch_id)
+        add_mail_log(obj, batch_id=batch_id)
 
-            if n:
-                messages.add_message(request, messages.INFO, f'Blast message sent to {n} players.')
-            else:
-                messages.add_message(request, messages.WARNING, 'No valid recipients found, message not sent.')
+        if n:
+            messages.add_message(request, messages.INFO, f'Blast message sent to {n} players.')
         else:
-            messages.add_message(request, messages.WARNING,
-                                 "Cannot send blast until message is tested.")
-
-    blast.label = "Blast"
-    blast.short_description = "This will send the message to EVERYONE!"
+            messages.add_message(request, messages.WARNING, 'No valid recipients found, message not sent.')
 
     change_actions = ('send_test', 'blast')
 
@@ -72,13 +81,6 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
     ordering = ('-sent_date',)
     filter_horizontal = ('top_components', 'bottom_components')
     save_on_top = True
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if 'message' in form.changed_data:
-            obj.tested = False
-            obj.sent = False
-            obj.save()
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name in ('top_components', 'bottom_components'):
@@ -94,7 +96,7 @@ class MailLogAdmin(DjangoObjectActions, admin.ModelAdmin):
         result = sendgrid_cancel(batch_id=obj.batch_id)
         obj.canceled = our_now()
         obj.save()
-        messages.add_message(request, messages.INFO, 'Attempted to cancel message.')
+        messages.add_message(request, messages.INFO, 'Attempted to cancel message, may not work if it less than 20 min away.')
     cancel_send.label = 'Cancel Message'
     cancel_send.short_description = "Tries to stop message at SendGrid."
 

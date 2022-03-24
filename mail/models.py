@@ -44,12 +44,8 @@ class MailMessageBase(models.Model):
 
 
 class MailMessage(MailMessageBase):
-    tested = models.BooleanField(default=False,
-                                 help_text="Must be checked to send blast.  It is set when a test message is sent.")
     enable_blast = models.BooleanField(default=False,
                                        help_text="Must be check to send blast.")
-    sent = models.BooleanField(default=False,
-                               help_text="You can uncheck this to send blast again.")
     top_components = SortedManyToManyField(
         Component, blank=True, related_name='messages_top',
         help_text=f"These appear just below the header image, above the main message")
