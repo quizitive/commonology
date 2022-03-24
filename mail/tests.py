@@ -85,7 +85,7 @@ class MassMailTests(BaseGameDataTestCase):
         mm = self.mm
         mm.reminder = True
         mm.save()
-        n, log_msg = mass_mail(self.mm)
+        n, log_msg, batch_id = mass_mail(self.mm)
         self.assertEqual(n, 29)
         self.assertEqual(len(mail.outbox), 1)
         p.reminder = True
