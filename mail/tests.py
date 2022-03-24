@@ -25,7 +25,7 @@ class MassMailTests(BaseGameDataTestCase):
 
     def test_bad_series_test(self):
         mail.outbox = []
-        n, log_msg = mass_mail(self.mm)
+        n, log_msg, batch_id = mass_mail(self.mm)
         self.assertEqual(n, 30)
         self.assertEqual(len(mail.outbox), 1)
 
