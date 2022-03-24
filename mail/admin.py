@@ -33,12 +33,9 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
                 if not obj.enable_blast:
                     messages.add_message(request, messages.WARNING, "You must enable blast with the checkbox below.")
 
-        x = super().response_change(request, obj)
-        return x
+        return super().response_change(request, obj)
 
     def send_test(self, request, obj):
-        # super().save_model(request, obj, self.form)
-        super().response_change(request, obj)
         email = obj.test_recipient
         try:
             test_user = Player.objects.get(email=obj.test_recipient)
@@ -48,9 +45,9 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
 
         from_email = (obj.from_email, obj.from_name)
         top_components = list(SponsorComponent.active_sponsor_components()) + list(obj.top_components.all())
-        n, msg, batch_id = sendgrid_send(obj.subject, msg=obj.message, email_list=[(email, user_code)],
-                                         from_email=from_email, unsub_link=True,
-                                         top_components=top_components, bottom_components=obj.bottom_components.all())
+        sendgrid_send(obj.subject, msg=obj.message, email_list=[(email, user_code)],
+                      from_email=from_email, unsub_link=True,
+                      top_components=top_components, bottom_components=obj.bottom_components.all())
         messages.add_message(request, messages.INFO, 'Test message sent.')
 
     def blast(self, request, obj):
