@@ -49,7 +49,6 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
 
             obj.sent = True
             obj.sent_date = our_now()
-            obj.scheduled = None
             obj.save()
 
             add_mail_log(obj, batch_id=batch_id)

@@ -59,34 +59,14 @@ def get_batch_id(sgclient=None):
 
 
 def sendgrid_cancel(sgclient=None, batch_id=None):
+    # Turns out the API does not let you check the status it only lets you cancel or suspend it.
     if sgclient is None:
         sgclient = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
     body = {'batch_id': batch_id, "status": "cancel"}
     response = sgclient.client.user.scheduled_sends.post(request_body=body)
     return response
 
-#     x = get_scheduled_sends(sendgrid_client)
-#     print(f"Scheduled sends {x.body}.")
-#
-#     batch_id = 'ZDZiNGVlNmUtYWFjZS0xMWVjLWE2MGItZmE2YWU4NDBmODU0LTA3MmMyYTUxMg'
-#     x = sendgrid_client.client.user.scheduled_sends._(batch_id).patch(request_body={"status": "cancel"})
-#
-#     x =
-#     return 0, ''
-#
-# # '''
-# #  % curl --header "Authorization: Bearer $SENDGRID_APIKEY" --header 'Content-Type: application/json' --request POST --url https://api.sendgrid.com/v3/mail/batch
-# # {"batch_id":"YTljYmQyYzAtYWFkNi0xMWVjLWE2NDQtZWE4MmU5YzNkMWRmLTRhMzdjN2ZkOQ"}
-# #
-# # % curl --header "Authorization: Bearer $SENDGRID_APIKEY" --header 'Content-Type: application/json' --request GET --url https://api.sendgrid.com/v3/user/scheduled_sends/ZDZiNGVlNmUtYWFjZS0xMWVjLWE2MGItZmE2YWU4NDBmODU0LTA3MmMyYTUxMg
-# # []%
-# # '''
 
-
-#
-# Really good examples: https://github.com/sendgrid/sendgrid-python/blob/main/examples/helpers/mail_example.py
-#
-#
 def sendgrid_send(subject, msg, email_list,
                   from_email=(settings.DEFAULT_FROM_EMAIL, settings.DEFAULT_FROM_EMAIL_NAME),
                   send_at=None, categories=None, unsub_link=False, top_components=(),
