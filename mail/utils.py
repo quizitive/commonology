@@ -49,6 +49,9 @@ def make_substitutions(e, code):
 
 
 def get_batch_id(sgclient=None):
+    if 'console' in settings.EMAIL_BACKEND or 'locmem' in settings.EMAIL_BACKEND:
+        return 'testing_batch_id'
+
     if sgclient is None:
         sgclient = SendGridAPIClient(settings.EMAIL_HOST_PASSWORD)
     response = sgclient.client.mail.batch.post()
