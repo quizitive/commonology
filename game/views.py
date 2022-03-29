@@ -446,7 +446,8 @@ class GameEntryView(PSIDMixin, CardFormView):
     button_label = "Continue"
     card_template = "game/cards/game_entry_card.html"
     page_template = "game/game_card_view.html"
-    title = 'Play',
+    title = 'Play'
+    header = "Welcome!"
     card_div_id = "game-entry-card"
     custom_message = "Please verify your email address."
 
@@ -489,12 +490,12 @@ class GameEntryView(PSIDMixin, CardFormView):
 
     def get_context_data(self, **kwargs):
         context = {
-            "continue_with_google": True
+            "continue_with_google": True,
         }
         context.update(super().get_context_data(**kwargs))
         return context
 
-    def get_game(self, slug, game_uuid):
+    def get_game(self, slug, game_uuid=None):
         if not game_uuid:
             g = find_latest_public_game(slug)
         else:
@@ -509,6 +510,7 @@ class GameEntryView(PSIDMixin, CardFormView):
         g = self.get_game(slug, game_uuid)
         if g is None:
             return self.no_active_game(request)
+        self.header = f"Welcome to Game {g.game_id}!"
 
         # Backward compatibility
         if g.google_form_url:
