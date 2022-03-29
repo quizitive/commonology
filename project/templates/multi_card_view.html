@@ -15,14 +15,11 @@
 {% block content %}
 
   <div class="content card-content">
-
-    <br/><br/>
-
     {# --- Simple cards-on-screen view with default card --- #}
     {% block cards %}
       {% for card in cards %}
         <div class="w3-padding-16"></div>
-      {% include 'cards/base_card.html' with header=card.header chart=card.chart custom_message=card.custom_message%}
+        {{ card }}
     {% endfor %}
     {% endblock %}
 

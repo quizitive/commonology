@@ -170,9 +170,13 @@ class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
     button_label = None
 
     def get(self, request, *args, **kwargs):
+        cards = self.get_cards(request)
+        return super().get(request, *args, cards=cards)
+
+    def get_cards(self, request):
         latest_game = find_latest_published_game("commonology")
-        to_game = latest_game.game_id
-        from_game = max(to_game - 20, 0)
+        to_game = int(request.GET.get("to_game", latest_game.game_id))
+        from_game = request.GET.get("from_game", max(to_game - 10, 0))
         cards = [
             {
                 "chart": htmx_call(request, Charts.player_rank_trend.htmx_path(
@@ -181,10 +185,12 @@ class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
                     from_game=from_game,
                     to_game=to_game
                 )),
-                "header": "My Percentile Over Time"
+                "header": "My Percentile Over Time",
+                "button_label": None,
+                "card_template": "leaderboard/cards/player_stats_card.html"
             }
         ]
-        return super().get(request, *args, cards=cards)
+        return cards
 
 
 @login_required
