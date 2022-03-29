@@ -1,0 +1,22 @@
+{% extends "cards/base_card.html" %}
+
+{% block card_extras %}
+
+  <div class="w3-row">
+    <div class="w3-col">
+      <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}&page={{ page|add:-1 }}&id_filter={{ id_filter }}"
+         hx-target="#component-leaderboard">
+        <i class="fas fa-chevron-left" style="color:#0095da"></i>
+      </a>
+    </div>
+
+  <div class="w3-col w3-right-align">
+    <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}&page={{ page|add:-1 }}&id_filter={{ id_filter }}"
+       hx-target="#component-leaderboard">
+      <i class="fas fa-chevron-right" style="color:#0095da"></i>
+    </a>
+  </div>
+
+  </div>
+
+{% endblock %}

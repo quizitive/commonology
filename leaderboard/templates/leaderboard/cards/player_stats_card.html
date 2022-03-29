@@ -1,0 +1,25 @@
+{% extends 'cards/base_card.html' %}
+
+{% block card_extras %}
+
+  <div class="w3-row">
+{#  {% if prev %}#}
+    <div class="w3-col s6">
+      <a hx-get="charts/htmx/player_rank_trend?player_id=2174&slug=commonology&from_game=66&to_game=86"
+         hx-target="#base-card">
+        <i class="fas fa-chevron-left" style="color:#0095da"></i>
+      </a>
+    </div>
+{#  {% endif %}#}
+
+{#  {% if next %}#}
+  <div class="w3-col s6 w3-right-align">
+    <a hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug|default:"" }}&page={{ page|add:-1 }}&id_filter={{ id_filter }}"
+       hx-target="#base-card">
+      <i class="fas fa-chevron-right" style="color:#0095da"></i>
+    </a>
+  </div>
+{#  {% endif %}#}
+  </div>
+
+{% endblock %}
