@@ -433,10 +433,6 @@ def render_game(request, game, user=None, editable=True):
         user = request.user
 
     if editable:
-        # This should be temporary and maybe removed by April 7, 2022
-        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-
-    if editable:
         game.series.players.add(user)
     return GameFormView().render_game(request, game, user, editable)
 
