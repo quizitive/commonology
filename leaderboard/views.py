@@ -5,18 +5,14 @@ from django.shortcuts import render
 from django.http import Http404, HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.safestring import mark_safe
 
 from project.utils import our_now, slackit
-from project.card_views import MultiCardPageView
 from project.views import next_game_context
-from project.htmx import htmx_call
 
-from charts.charts import Charts
 from game.models import Game, Question
 from game.views import BaseGameView
-from game.utils import n_new_comments, find_latest_published_game
+from game.utils import n_new_comments
 from users.models import Player
 from leaderboard.leaderboard import build_answer_tally, player_leaderboard_message, \
     player_score_rank_percentile, rank_string, score_string, visible_leaderboards

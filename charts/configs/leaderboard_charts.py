@@ -22,6 +22,7 @@ class PlayerRankTrendChart(BaseSmartChart):
     def get_chart(self):
         return {
             "height": 450,
+            "width": f"{len(self.data_class.get_labels()) * 45}px",
             "type": 'bar',
             "offsetX": -15,
             "zoom": {"enabled": False}
