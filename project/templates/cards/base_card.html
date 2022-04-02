@@ -4,17 +4,19 @@
 
 <div id="{{ card_id }}" class="cg-card cg-border-grey w3-modal-content" style="overflow: hidden;margin:0 auto 16px;">
 
-  {% if header %}
-  <header class="w3-container w3-border-bottom w3-center">
+  {% block header %}
+    {% if header %}
+    <header class="w3-container w3-border-bottom w3-center">
 
-    {% if is_modal %}
-    <span onclick="document.getElementById({{ modal_name }}).style.display='none'"
-    class="w3-button w3-display-topright">&times;</span>
+      {% if is_modal %}
+      <span onclick="document.getElementById({{ modal_name }}).style.display='none'"
+      class="w3-button w3-display-topright">&times;</span>
+      {% endif %}
+
+      <h4 style="font-weight:bold;">{{ header }}</h4>
+    </header>
     {% endif %}
-
-    <h4 style="font-weight:bold;">{{ header }}</h4>
-  </header>
-  {% endif %}
+  {% endblock %}
 
 
 
