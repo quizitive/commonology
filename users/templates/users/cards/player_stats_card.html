@@ -1,0 +1,12 @@
+{% extends 'cards/base_card_v2.html' %}
+
+{% block chart %}
+  <div id="scrolling-chart" style="overflow: scroll">
+    {{ block.super }}
+  </div>
+  <script>
+  $("#scrolling-chart").animate({
+    scrollLeft: 5000
+    }, 2000);
+  </script>
+{% endblock %}

@@ -14,13 +14,18 @@ from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
-from project.card_views import recaptcha_check, BaseCardView, CardFormView
+
+from project.card_views import recaptcha_check, BaseCardView, CardFormView, MultiCardPageView
+from project.htmx import htmx_call
+
+from charts.charts import Charts
 from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.tasks import mail_task
 from project.utils import redis_delete_patterns
 from game.models import Series
+from game.utils import n_new_comments, find_latest_published_game
 from .utils import remove_pending_email_invitations
 
 User = get_user_model()
@@ -457,3 +462,32 @@ class SubscribeView(View):
 
     def post(self, request, *args, **kwargs):
         return redirect(reverse('home'))
+
+
+class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
+    header = "My Stats"
+    button_label = None
+
+    def get(self, request, *args, **kwargs):
+        cards = self.get_cards(request)
+        return super().get(request, *args, cards=cards)
+
+    def get_cards(self, request):
+        latest_game = find_latest_published_game("commonology")
+        to_game = int(request.GET.get("to_game", latest_game.game_id))
+        from_game = request.GET.get("from_game", max(to_game - 10, 0))
+        from_game = 1
+        cards = [
+            {
+                "chart": htmx_call(request, Charts.player_rank_trend.htmx_path(
+                    player_id=request.user.id,
+                    slug="commonology",
+                    from_game=from_game,
+                    to_game=to_game
+                )),
+                "header": "My Percentile Over Time",
+                "button_label": None,
+                "card_template": "users/cards/player_stats_card.html"
+            }
+        ]
+        return cards
