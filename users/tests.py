@@ -1,3 +1,4 @@
+import datetime
 import os
 import re
 import uuid
@@ -391,6 +392,45 @@ class PendingUsersTests(TestCase):
         self.assertTrue(user2 in user1.following.all())
 
 
+class LoginTests(TestCase):
+    def test_with_password(self):
+        user = get_local_user()
+        client = Client()
+        is_logged_in = client.login(email=NORMAL, password=test_pw)
+        self.assertTrue(is_logged_in)
+
+    def test_without_password(self):
+        user = get_local_user()
+
+        mail.outbox = []
+
+        client = Client()
+        response = client.post(reverse('login'), data={"username": user.email})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f"An email validation link was sent to {user.email}.")
+
+        msg = mail.outbox[0].body
+
+        url = re.search("https?://.*(?P<uidb64>\/validate_email\/[^\s]+)\"\>", msg).group("uidb64")
+        mail.outbox = []
+
+        uid = url.split('/')[-1]
+        pe = PendingEmail.objects.filter(uuid__exact=uid).first()
+        pe.created = pe.created - datetime.timedelta(minutes=21)
+        pe.save()
+        response = client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Login Fail")
+
+        pe.created = pe.created + datetime.timedelta(minutes=21)
+        pe.save()
+
+        response = client.get(url, follow=True)
+        u, c = response.redirect_chain[2]
+        self.assertEqual(c, 302)
+        self.assertEqual(u, '/leaderboard/')
+
+
 class MergePlayers(TestCase):
     def test_fields(self):
         # This test is designed to make sure we maintain merge_players.py
@@ -402,7 +442,7 @@ class MergePlayers(TestCase):
                     'id', 'password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined',
                     'email', 'first_name', 'last_name', 'location', 'birth_date', 'subscribed', '_code',
                     'reminder', 'referrer', 'display_name', 'is_member', 'data', 'groups', 'user_permissions',
-                    'following', 'rank_scores']
+                    'following', 'rank_scores', 'request']
 
         names = [field.name for field in Player._meta.get_fields()]
         self.assertTrue(set(names) == set(expected),

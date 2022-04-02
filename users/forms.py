@@ -1,8 +1,9 @@
+from django.utils.translation import ugettext_lazy as _
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, \
     AuthenticationForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.password_validation import password_validators_help_text_html
-from .models import Player, PendingEmail, LOCATIONS
+from .models import Player, PendingEmail, LOCATIONS, custom_validate_email
 
 
 class PlayerCreationForm(UserCreationForm):
@@ -52,8 +53,8 @@ class InviteFriendsForm(forms.Form):
 
 class JoinForm(PlayerCreationForm):
     required_css_class = 'required'
-    first_name = forms.CharField(max_length=30)
-    last_name = forms.CharField(max_length=30)
+    first_name = forms.CharField(max_length=30, required=False)
+    last_name = forms.CharField(max_length=30, required=False)
     display_name = forms.CharField(
         max_length=100,
         help_text="This is what displays on the public leaderboard."
@@ -64,12 +65,15 @@ class JoinForm(PlayerCreationForm):
     password1 = forms.CharField(
         label="Password",
         strip=False,
-        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'},),
+        required=False,
+        help_text='Passwords are optional.  Leave it out if you want to use email magic links instead.'
     )
     password2 = forms.CharField(
         label="Password confirmation",
         widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
         strip=False,
+        required=False,
         help_text=password_validators_help_text_html(),
     )
 
@@ -88,15 +92,18 @@ class JoinForm(PlayerCreationForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(
-        widget=forms.TextInput(
-            attrs={
-                'class': 'w3-input',
-                'autofocus': True
-            },
-        )
-    )
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'w3-input'}))
+    username = forms.CharField(validators=[custom_validate_email],
+                               widget=forms.TextInput(attrs={'class': 'w3-input', 'autofocus': True}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'w3-input'}),
+                               required=False,
+                               help_text="Leave blank to login without password, we'll send you a link.")
+
+    def clean_username(self):
+        email = self.cleaned_data['username']
+        p = Player.objects.filter(email=email).first()
+        if p is None or (not p.is_active):
+            raise forms.ValidationError(_("The email address entered is not associated with an active account."))
+        return email
 
 
 class PwdResetForm(PasswordResetForm):

@@ -71,7 +71,7 @@ class LeaderboardView(BaseGameView):
             context.update({
                 'player_score': score_string(player_score),
                 'player_rank': player_rank or "N/A",
-                'player_percentile': player_percentile,
+                'player_percentile': score_string(player_percentile),
                 'player_count': player_count,
                 'player_message': player_leaderboard_message(self.game, player_rank, player_percentile),
             })
@@ -87,7 +87,7 @@ class LeaderboardView(BaseGameView):
                 'player_score': score_string(player_score),
                 'player_rank': player_rank or "N/A",
                 'player_message': mark_safe(player_message),
-                'player_percentile': player_percentile,
+                'player_percentile': score_string(player_percentile),
                 'player_count': player_count,
                 'is_instant': True
             })
@@ -164,12 +164,23 @@ class HostNoteView(LeaderboardView):
 @login_required
 def results_share_count_view(request):
     p = Player.objects.get(id=request.user.id)
-    if request.GET.get('action') == "api":
-        msg = f"Player {p.email} with display name: {p.display_name} just shared their results with the web api."
-    elif request.GET.get('action') == "clipboard":
-        msg = f"Player {p.email} with display name: {p.display_name} just copied their results to clipboard. " \
-              f"That's all I know. Here's hoping they share it."
+    share_type = request.GET.get("type")
+    if share_type == "image/png":
+        content = "results"
+    elif share_type == "text/plain":
+        content = "play link"
     else:
-        msg = f"An invalid request was made by {p.email} to the share endpoint."
+        return HttpResponse("Invalid share")
+
+    action_param = request.GET.get('action')
+    if action_param == "api":
+        action, dest = "shared", "with the web api"
+
+    elif action_param == "clipboard":
+        action, dest = "copied", "to clipboard"
+    else:
+        return HttpResponse("Invalid share")
+
+    msg = f"Player {p.email} with display name: {p.display_name} just {action} their {content} {dest}"
     slackit(msg)
     return HttpResponse("Thanks for sharing!")

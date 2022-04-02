@@ -1,7 +1,7 @@
-{% extends 'cards/base_card_v2.html' %}
+{% extends 'cards/base_card.html' %}
 
 {% block chart %}
-  <div id="scrolling-chart" style="overflow: scroll">
+  <div id="scrolling-chart" style="overflow-x: scroll;overflow-y: hidden">
     {{ block.super }}
   </div>
   <script>

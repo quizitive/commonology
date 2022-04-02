@@ -1,19 +1,25 @@
+import datetime
 from django.conf import settings
 from django.forms import HiddenInput
 from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.contrib.auth import login
 from django.contrib import messages
+from django.contrib.sites.shortcuts import get_current_site
 from django.views.generic.base import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth import authenticate, logout, get_user_model
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfirmView, PasswordChangeView
 from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
+from users.forms import LoginForm
 
 from project.card_views import recaptcha_check, BaseCardView, CardFormView, MultiCardPageView
 from project.htmx import htmx_call
@@ -23,7 +29,7 @@ from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.tasks import mail_task
-from project.utils import redis_delete_patterns
+from project.utils import redis_delete_patterns, our_now
 from game.models import Series
 from game.utils import n_new_comments, find_latest_published_game
 from .utils import remove_pending_email_invitations
@@ -35,6 +41,42 @@ User = get_user_model()
 def user_logout(request):
     logout(request)
     return redirect(reverse('home'))
+
+
+def create_and_send_confirm(request, player):
+    remove_pending_email_invitations()
+    email = player.email
+    pe = PendingEmail.objects.create(email=email)
+
+    domain = get_current_site(request)
+    url = f'https://{domain}/validate_email/{pe.uuid}'
+
+    msg = render_to_string('users/validate_email.html', {'url': url})
+
+    return mail_task("Let's play Commonology", msg, [(email, None)])
+
+
+class CustomLoginView(auth_views.LoginView, CardFormView):
+    page_template = "registration/login.html"
+    card_template = "users/card/login_card.html"
+    button_label = "Login"
+    form_class = LoginForm
+    extra_context = {"header": "Login"}
+
+    def form_valid(self, form):
+        u = form.get_user()
+        if u is None:
+            # The form clean_username() method should have guaranteed an active player
+            email = form.cleaned_data['username']
+            p = Player.objects.get(email=email)
+            create_and_send_confirm(self.request, p)
+
+            msg = f'An email validation link was sent to {email}. ' \
+                  f'Please check your email and use that link to continue logging into Commonology. ' \
+                  f'Sometimes, unfortunately, those messages go to a spam or junk folder.'
+            return self.display_message(self.request, msg)
+
+        return super().form_valid(form)
 
 
 class ProfileView(LoginRequiredMixin, CardFormView):
@@ -287,7 +329,7 @@ class EmailConfirmedView(View):
             Series.objects.get(slug='commonology').players.add(user)
             raw_password = form.clean_password2()
             user = authenticate(email=user.email, password=raw_password)
-            login(request, user)
+            auth_login(request, user)
             PendingEmail.objects.filter(email__iexact=user.email).delete()
 
             return redirect('/')
@@ -462,6 +504,43 @@ class SubscribeView(View):
 
     def post(self, request, *args, **kwargs):
         return redirect(reverse('home'))
+
+
+class ValidateEmailView(View):
+    # Use to validate email for passwordless login
+
+    def get(self, request, uidb64, *args, **kwargs):
+        try:
+            pe = PendingEmail.objects.filter(uuid__exact=uidb64).first()
+            if pe is None:
+                return self.login_fail(request)
+
+            if pe.created < (our_now() - datetime.timedelta(minutes=20)):
+                return self.login_fail(request)
+
+            email = pe.email
+
+            p = Player.objects.get(email=email)
+            login(request, p, backend='django.contrib.auth.backends.ModelBackend')
+
+            pe.delete()
+
+            return redirect(reverse('home'))
+
+        except Player.DoesNotExist:
+            return self.login_fail(request)
+        except PendingEmail.DoesNotExist:
+            return self.login_fail(request)
+        except ValidationError:
+            return self.login_fail(request)
+
+    @staticmethod
+    def login_fail(request):
+        messages.error(request, "It seems the url link we sent you has something wrong with it. "
+                                "Please try one more time.")
+        messages.error(request, "If that does not work then please do not give up on us. Send us a help message.")
+        context = {'header': "Login Fail"}
+        return render(request, 'users/base.html', context)
 
 
 class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):

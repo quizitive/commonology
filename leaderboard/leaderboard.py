@@ -276,7 +276,7 @@ def rank_string(rank):
 
 
 def score_string(score):
-    if not score:
+    if score is None:
         return "N/A"
     return f"{score}"
 

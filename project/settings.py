@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sortedm2m_filter_horizontal_widget',
+    'request',
     'social_django',
     'chat',
     'game',
@@ -113,6 +114,7 @@ RECAPTCHA3_INHIBIT = True
 RECAPTCHA3_KEY = env.get('RECAPTCHA3_KEY', '6LczLAUcAAAAACMff5nNS6xjhUDF3elRC3LpnKiW')
 RECAPTCHA3_SECRET = env.get('RECAPTCHA3_SECRET', '6LczLAUcAAAAADZrdjUJznBAS2eeP9tsBHT7DrEY')
 
+APPEND_SLASH = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -122,6 +124,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'request.middleware.RequestMiddleware',
     'project.middleware.ParametersMiddleware',
 ]
 
@@ -323,5 +326,12 @@ CKEDITOR_CONFIGS = {
         ]),
     }
 }
+
+# django-request settings
+REQUEST_IGNORE_PATHS = (
+    r'^admin/',
+    r'^media/',
+    r'^static/',
+)
 
 REWARD_THRESHOLD = 10
