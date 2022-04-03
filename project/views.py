@@ -1,3 +1,5 @@
+import base64
+from io import BytesIO
 import qrcode
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
@@ -120,20 +122,24 @@ def instant_player_stats(request):
 
 
 class QRView(BaseCardView):
+    page_template = 'qr.html'
+
     def get_context_data(self, *args, **kwargs):
         request = self.request
         url = 'https://commonologygame.com/play'
         if request.user.is_authenticated:
             url = f"{url}?r={request.user.code}"
 
-        #Creating an instance of qrcode
-        qr = qrcode.QRCode(
-                version=1,
-                box_size=10,
-                border=5)
+        # Creating an instance of qrcode
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(url)
         qr.make(fit=True)
-        img = qr.make_image(fill='black', back_color='white')
-        img.save('qr.png')
+        image = qr.make_image(fill='black', back_color='white')
 
-        return super().get_context_data(*args, qr=qr)
+        buffered = BytesIO()
+        image.save(buffered, format='PNG')
+        img_str = base64.b64encode(buffered.getvalue())
+        img_str = img_str.decode('utf-8')
+
+        src = f'data:image/png;base64,{img_str}'
+        return super().get_context_data(*args, qr=src)
