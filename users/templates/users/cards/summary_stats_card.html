@@ -5,80 +5,70 @@
     Performance summary for {{ player.display_name }}
   </div>
 
-  <div id="{{ container_name }}" class="w3-row" style="padding-top:8px;margin:auto;max-width:350px;line-height:20px;">
+  <div class="w3-padding-16">
+    <div id="{{ container_name }}" class="w3-row" style="padding:8px 0;margin:auto;max-width:350px;line-height:20px;">
 
-  {# RANK #}
-  <div class="stat-container w3-col s6">
-    <div class="stat-tile" style="color:#f26649">
-      <div class="stat-tile-contents">
-        <div class="w3-row stat-tile-value w3-center">
-          80{{ player_rank }}<span class="line" style="font-size: 11px">/ {{ player_count }}</span>
+      {# RANK #}
+      <div class="stat-container w3-col s6">
+        <div class="stat-tile" style="color:#f26649">
+          <div class="stat-tile-contents">
+            <div class="w3-row stat-tile-value w3-center">
+              80{{ player_rank }}<span class="line" style="font-size: 11px">/ {{ player_count }}</span>
+            </div>
+            <div class="w3-row stat-tile-label">
+            Best Rank (Game 68)
+            </div>
+          </div>
         </div>
-        <div class="w3-row stat-tile-label">
-        Best Rank
+      </div>
+      {# PERCENTILE #}
+      <div class="stat-container w3-col s6">
+        <div class="stat-tile" style="color:#237073">
+          <div class="stat-tile-contents">
+            <div class="w3-row stat-tile-value w3-center">
+              {{ player_percentile }}<span class="line" style="font-size: 11px">/ 100</span>
+            </div>
+            <div class="w3-row stat-tile-label">
+            Best Percentile
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="{{ container_name }}" class="w3-row" style="padding-top:8px;margin:auto;max-width:350px;line-height:20px;">
+
+      {# RANK #}
+      <div class="stat-container w3-col s6">
+        <div class="stat-tile" style="color:#0095da">
+          <div class="stat-tile-contents">
+            <div class="w3-row stat-tile-value w3-center">
+              35{{ player_rank }}<span class="line" style="font-size: 11px"></span>
+            </div>
+            <div class="w3-row stat-tile-label">
+            Games Played
+            </div>
+          </div>
+        </div>
+      </div>
+      {# PERCENTILE #}
+      <div class="stat-container w3-col s6">
+        <div class="stat-tile" style="color:#522e91">
+          <div class="stat-tile-contents">
+            <div class="w3-row stat-tile-value w3-center">
+              16<span class="line" style="font-size: 11px"></span>
+            </div>
+            <div class="w3-row stat-tile-label">
+            Current Streak
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  {# PERCENTILE #}
-  <div class="stat-container w3-col s6">
-    <div class="stat-tile" style="color:#237073">
-      <div class="stat-tile-contents">
-        <div class="w3-row stat-tile-value w3-center">
-          {{ player_percentile }}<span class="line" style="font-size: 11px">/ 100</span>
-        </div>
-        <div class="w3-row stat-tile-label">
-        Best Percentile
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-  <div class="w3-row">
-    <div class="w3-col s12 m6">
-      <div class="w3-cell-row">
-
-        {# GAMES PLAYED #}
-        <div class="w3-cell">
-          <div class="stat-tile" style="color:#237073">
-            <div class="stat-tile-contents">
-              <div class="w3-row stat-tile-value w3-center">
-                45
-              </div>
-              <div class="w3-row stat-tile-label">
-                Games Played
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {# CURRENT STREAK #}
-        <div class="w3-cell">
-          <div class="stat-tile" style="color:#237073">
-            <div class="stat-tile-contents">
-              <div class="w3-row stat-tile-value w3-center">
-                16
-              </div>
-              <div class="w3-row stat-tile-label">
-                Current Streak
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-    <div class="w3-col s12 m6">
-      <div class="w3-cell-row cg-blue">
-        <div class="w3-cell">
-           First Game: 13
-        </div>
-        <div class="w3-cell">
-          Latest Game: 85
-        </div>
-      </div>
-    </div>
+  <div class="w3-row w3-center" style="font-size: 12px;font-weight: normal;padding-top: 8px;">
+    Playing since September 21, 2020
   </div>
 
 </div>
