@@ -33,3 +33,4 @@ openpyxl==3.0.9
 pydot==1.4.2
 emoji==1.6.1
 git+https://git@github.com/quizitive/django-request.git
+qrcode==7.3.1

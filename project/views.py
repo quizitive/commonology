@@ -1,10 +1,11 @@
+import qrcode
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.shortcuts import render, redirect
 from django import forms
 from django.core.mail import send_mail
-from project.card_views import CardFormView, recaptcha_check
+from project.card_views import BaseCardView, CardFormView, recaptcha_check
 from project.utils import ANALYTICS_REDIS
 from game.utils import next_event, find_latest_public_game
 
@@ -116,3 +117,23 @@ def instant_player_stats(request):
         resp = resp + f"{source.upper()}: There have been {starts} instant " \
                       f"game starts and {completes} completes.<br/><br/>"
     return HttpResponse(mark_safe(resp))
+
+
+class QRView(BaseCardView):
+    def get_context_data(self, *args, **kwargs):
+        request = self.request
+        url = 'https://commonologygame.com/play'
+        if request.user.is_authenticated:
+            url = f"{url}?r={request.user.code}"
+
+        #Creating an instance of qrcode
+        qr = qrcode.QRCode(
+                version=1,
+                box_size=10,
+                border=5)
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(fill='black', back_color='white')
+        img.save('qr.png')
+
+        return super().get_context_data(*args, qr=qr)
