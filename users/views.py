@@ -546,25 +546,35 @@ class ValidateEmailView(View):
 class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
     header = "My Stats"
     button_label = None
+    player = None
+
+    def dispatch(self, request, player_id, *args, **kwargs):
+        self.player = Player.objects.get(id=player_id)
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         cards = self.get_cards(request)
-        return super().get(request, *args, cards=cards)
+        return super().get(request, *args, cards=cards, player=self.player)
 
     def get_cards(self, request):
         latest_game = find_latest_published_game("commonology")
-        to_game = int(request.GET.get("to_game", latest_game.game_id))
-        from_game = request.GET.get("from_game", max(to_game - 10, 0))
         from_game = 1
         cards = [
+            {
+                "header": f"Performance Summary",
+                "header_classes": "cg-blue",
+                "button_label": None,
+                "card_template": "users/cards/summary_stats_card.html"
+            },
             {
                 "chart": htmx_call(request, Charts.player_rank_trend.htmx_path(
                     player_id=request.user.id,
                     slug="commonology",
-                    from_game=from_game,
-                    to_game=to_game
+                    from_game=1,
+                    to_game=latest_game.game_id
                 )),
-                "header": "My Percentile Over Time",
+                "header": "Performance Over Time",
+                "header_classes": "cg-blue",
                 "button_label": None,
                 "card_template": "users/cards/player_stats_card.html"
             }

@@ -66,7 +66,7 @@ class PlayerRankDataset(BaseChartDataset):
 
     def get_all_series(self):
         return [
-            {"name": "My Percentile", "data": self.rank_history.get_data()},
+            {"name": "Percentile", "data": self.rank_history.get_data()},
         ]
 
 

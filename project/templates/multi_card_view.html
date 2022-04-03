@@ -10,6 +10,7 @@
 {% block app_style %}
 {#  <link rel="stylesheet" href="{% v_static 'users/css/form_style.css' %}">#}
   <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <link rel="stylesheet" href="{% v_static 'leaderboard/css/base.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -17,8 +18,8 @@
   <div class="content card-content">
     {# --- Simple cards-on-screen view with default card --- #}
     {% block cards %}
+      <div class="w3-padding-16"></div>
       {% for card in cards %}
-        <div class="w3-padding-16"></div>
         {{ card }}
     {% endfor %}
     {% endblock %}
