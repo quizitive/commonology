@@ -91,7 +91,6 @@ class Player(CustomUser):
     reminder = models.BooleanField(default=True,
                                    help_text="Send game reminder email even if the player played this weeks game already.")
     referrer = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='referrals')
-    goofy = models.OneToOneField
     display_name = models.CharField(max_length=100)
     following = models.ManyToManyField('self', related_name='followers', symmetrical=False)
     is_member = models.BooleanField(
@@ -134,7 +133,9 @@ class Player(CustomUser):
     @property
     def game_ids(self):
         return self.answers.values(
-            game_id=models.F('question__game__game_id'), series=models.F('question__game__series__slug')).exclude(
+            game_id=models.F('question__game__game_id'),
+            game_name=models.F('question__game__name'),
+            series=models.F('question__game__series__slug')).exclude(
             game_id=None).distinct().order_by('-game_id')
 
     @property
@@ -161,6 +162,12 @@ class Player(CustomUser):
     @cached_property
     def following_ids(self):
         return {p for p in self.following.values_list("id", flat=True)}
+
+    @property
+    def games_played(self):
+        games = self.game_ids
+        r = '<br>'.join([r['game_name'] for r in self.game_ids])
+        return mark_safe(r)
 
 
 class PendingEmail(models.Model):
