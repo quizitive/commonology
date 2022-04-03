@@ -166,7 +166,8 @@ class Player(CustomUser):
     @property
     def games_played(self):
         games = self.game_ids
-        r = '<br>'.join([r['game_name'] for r in self.game_ids])
+        r = '<textarea cols="80" rows="5" style="overflow:auto;">'
+        r = r + '\n'.join([r['game_name'] for r in self.game_ids]) + '</textarea>'
         return mark_safe(r)
 
 
