@@ -189,7 +189,9 @@ class TestLeaderboardEngine(BaseGameDataTestCase):
         path = reverse('profile')
 
         # the player has played self.game
-        self.assertTrue({'game_id': self.game.game_id, 'series': self.game.series.slug} in player.game_ids)
+        self.assertTrue({'game_id': self.game.game_id,
+                         'game_name': self.game.name,
+                         'series': self.game.series.slug} in player.game_ids)
         # there is a leaderboard cached for the game
         self.assertIsNotNone(REDIS.keys(f'leaderboard_{self.game.series.slug}_{self.game.game_id}*'))
 
