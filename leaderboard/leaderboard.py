@@ -244,11 +244,11 @@ def player_top_game_percentile(player, series):
 # @quick_cache()
 def player_rank_percentile_in_all_games(player_id, series_slug):
     prs_objs = PlayerRankScore.objects.filter(
-            player_id=player_id,
-            leaderboard__game__series__slug=series_slug,
-            leaderboard__publish_date__lte=our_now()
+        player_id=player_id,
+        leaderboard__game__series__slug=series_slug,
+        leaderboard__publish_date__lte=our_now()
     ).values(
-            "rank", game_id=F("leaderboard__game__game_id")
+        "rank", game_id=F("leaderboard__game__game_id")
         )
     ranks_by_game = {prs["game_id"]: prs["rank"] for prs in prs_objs}
     game_player_count = number_of_players_in_all_games(series_slug)
