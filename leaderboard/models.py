@@ -73,12 +73,6 @@ class PlayerRankScore(models.Model):
         unique_together = ('player', 'leaderboard')
         ordering = ('leaderboard__game__game_id',)
 
-    @classmethod
-    def player_perentile_history(cls, player_id, series_slug):
-        prs = PlayerRankScore.objects.filter(
-            player_id=player_id, leaderboard__game__series__slug=series_slug).annotate(
-            count=models.Count)
-
 
 class LeaderboardMessage(models.Model):
     metric = models.CharField(
