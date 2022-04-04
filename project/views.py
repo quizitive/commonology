@@ -122,7 +122,7 @@ def instant_player_stats(request):
 
 
 class QRView(BaseCardView):
-    page_template = 'qr.html'
+    card_template = 'qr.html'
 
     def get_context_data(self, *args, **kwargs):
         request = self.request
