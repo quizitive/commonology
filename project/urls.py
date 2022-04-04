@@ -21,6 +21,7 @@ urlpatterns = [
     path('contact/', ContactView.as_view(), name='contact'),
     path('sponsor/', sponsor_view, name='sponsor'),
     path('qr/', QRView.as_view(), name='qr'),
+    path('qr/<rcode>', QRView.as_view(), name='qr_r'),
     path('', include('users.urls')),
     path('', include('game.urls')),
     path('', include('mail.urls')),

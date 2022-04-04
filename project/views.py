@@ -1,10 +1,10 @@
 import base64
 from io import BytesIO
-import qrcode
+from qrcode import QRCode
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django import forms
 from django.core.mail import send_mail
 from project.card_views import BaseCardView, CardFormView, recaptcha_check
@@ -126,12 +126,14 @@ class QRView(BaseCardView):
 
     def get_context_data(self, *args, **kwargs):
         request = self.request
-        url = 'https://commonologygame.com/play'
+        url = 'https://commonologygame.com'
         if request.user.is_authenticated:
-            url = f"{url}?r={request.user.code}"
+            url = f"{url}/qr/{request.user.code}"
+        else:
+            url = f"{url}/play"
 
         # Creating an instance of qrcode
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr = QRCode(version=1, box_size=10, border=5)
         qr.add_data(url)
         qr.make(fit=True)
         image = qr.make_image(fill='black', back_color='white')
@@ -143,3 +145,10 @@ class QRView(BaseCardView):
 
         src = f'data:image/png;base64,{img_str}'
         return super().get_context_data(*args, qr=src)
+
+    def get(self, request, *args, **kwargs):
+        if 'rcode' in kwargs:
+            r = kwargs['rcode']
+            url = f"{reverse('game:play')}?r={r}"
+            return redirect(url)
+        return super().get(request, *args, **kwargs)

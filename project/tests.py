@@ -40,6 +40,14 @@ class TestParametersMiddleWare(TestCase):
         self.assertEqual('1', c.session.get('one'))
 
 
+class TestQR(TestCase):
+    def test_parameter(self):
+        path = reverse('qr_r', kwargs={'rcode': 'marc'})
+        c = Client()
+        response = c.get(path)
+        self.assertEqual(response.status_code, 302)
+
+
 # class TestSlack(TestCase):
 #     def test_slackit(self):
 #         slackit('Message from unit test - ignore this.')
