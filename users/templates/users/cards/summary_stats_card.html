@@ -13,10 +13,10 @@
         <div class="stat-tile" style="color:#f26649">
           <div class="stat-tile-contents">
             <div class="w3-row stat-tile-value w3-center">
-              80{{ player_rank }}<span class="line" style="font-size: 11px">/ {{ player_count }}</span>
+              {{ best_rank }}<span class="line" style="font-size: 11px">/ {{ best_rank_game_player_count }}</span>
             </div>
             <div class="w3-row stat-tile-label">
-            Best Rank (Game 68)
+              Best Rank <br/>(Game {{ best_rank_game }})
             </div>
           </div>
         </div>
@@ -26,10 +26,10 @@
         <div class="stat-tile" style="color:#237073">
           <div class="stat-tile-contents">
             <div class="w3-row stat-tile-value w3-center">
-              {{ player_percentile }}<span class="line" style="font-size: 11px">/ 100</span>
+              {{ best_percentile }}<span class="line" style="font-size: 11px">/ 100</span>
             </div>
             <div class="w3-row stat-tile-label">
-            Best Percentile
+            Best Percentile<br/> (Game {{ best_percentile_game }})
             </div>
           </div>
         </div>
@@ -38,12 +38,12 @@
 
     <div id="{{ container_name }}" class="w3-row" style="padding-top:8px;margin:auto;max-width:350px;line-height:20px;">
 
-      {# RANK #}
+      {# GAMES PLAYED #}
       <div class="stat-container w3-col s6">
         <div class="stat-tile" style="color:#0095da">
           <div class="stat-tile-contents">
             <div class="w3-row stat-tile-value w3-center">
-              35{{ player_rank }}<span class="line" style="font-size: 11px"></span>
+              {{ games_played }}<span class="line" style="font-size: 11px"></span>
             </div>
             <div class="w3-row stat-tile-label">
             Games Played
@@ -51,12 +51,12 @@
           </div>
         </div>
       </div>
-      {# PERCENTILE #}
+      {# STREAK #}
       <div class="stat-container w3-col s6">
         <div class="stat-tile" style="color:#522e91">
           <div class="stat-tile-contents">
             <div class="w3-row stat-tile-value w3-center">
-              16<span class="line" style="font-size: 11px"></span>
+              {{ current_streak }}<span class="line" style="font-size: 11px"></span>
             </div>
             <div class="w3-row stat-tile-label">
             Current Streak
@@ -68,7 +68,7 @@
   </div>
 
   <div class="w3-row w3-center" style="font-size: 12px;font-weight: normal;padding-top: 8px;">
-    Playing since September 21, 2020
+    Playing since {{ player.date_joined|date:'M d, Y' }}
   </div>
 
 </div>

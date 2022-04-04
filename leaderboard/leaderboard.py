@@ -11,7 +11,7 @@ from django.db import transaction
 
 from project.utils import REDIS, quick_cache, quick_cache_key, redis_delete_patterns, our_now
 from users.models import Player, Team
-from game.models import Game, AnswerCode, Series
+from game.models import AnswerCode
 from game.gsheets_api import api_and_db_data_as_df, write_all_to_gdrive, get_sheet_doc
 from game.tasks import api_to_db
 from game.rollups import get_user_rollups, build_rollups_dict, build_answer_codes
@@ -214,31 +214,35 @@ def player_score_rank_percentile(player, game):
 
 
 @quick_cache()
-def player_rank_in_all_games(player, series):
-    games = Game.objects.filter(series=series, leaderboard__publish_date__lte=our_now())
-    ranks = OrderedDict()
-    for game in games:
-        try:
-            _, rank, _ = player_score_rank_percentile(player, game)
-        except IndexError:
-            rank = None
-        ranks[game.game_id] = rank
-    return ranks
-
-
-@quick_cache()
 def player_top_game_rank(player, series):
     best = math.inf
     best_game_id = None
-    for game_id, rank in player_rank_in_all_games(player, series).items():
-        if rank and rank < best:
+    for game_id, pctile_rank in player_rank_percentile_in_all_games(player.id, series).items():
+        if pctile_rank is None:
+            continue
+        rank = pctile_rank["rank"]
+        if rank < best:
             best = rank
             best_game_id = game_id
     return best_game_id, best
 
 
+@quick_cache()
+def player_top_game_percentile(player, series):
+    best = 0
+    best_game_id = None
+    for game_id, pctile_rank in player_rank_percentile_in_all_games(player.id, series).items():
+        if pctile_rank is None:
+            continue
+        pctile = pctile_rank["percentile"]
+        if pctile > best:
+            best = pctile
+            best_game_id = game_id
+    return best_game_id, best
+
+
 # @quick_cache()
-def player_percentile_in_all_games(player_id, series_slug):
+def player_rank_percentile_in_all_games(player_id, series_slug):
     prs_objs = PlayerRankScore.objects.filter(
             player_id=player_id,
             leaderboard__game__series__slug=series_slug,
@@ -248,14 +252,17 @@ def player_percentile_in_all_games(player_id, series_slug):
         )
     ranks_by_game = {prs["game_id"]: prs["rank"] for prs in prs_objs}
     game_player_count = number_of_players_in_all_games(series_slug)
-    percentile_by_game = OrderedDict()
+    rank_percentile_by_game = OrderedDict()
     for game_id, player_count in game_player_count.items():
         game_rank = ranks_by_game.get(game_id)
         if game_rank is None:
-            percentile_by_game[game_id] = None
+            rank_percentile_by_game[game_id] = None
             continue
-        percentile_by_game[game_id] = round(100 * (1 - game_rank / game_player_count[game_id]))
-    return percentile_by_game
+        rank_percentile_by_game[game_id] = {
+            "rank": game_rank,
+            "percentile": round(100 * (1 - game_rank / game_player_count[game_id]))
+        }
+    return rank_percentile_by_game
 
 
 def rank_string(rank):

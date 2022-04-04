@@ -31,7 +31,9 @@ from users.utils import unsubscribe, sign_user
 from mail.tasks import mail_task
 from project.utils import redis_delete_patterns, our_now
 from game.models import Series
-from game.utils import n_new_comments, find_latest_published_game
+from game.utils import find_latest_published_game
+from leaderboard.leaderboard import player_top_game_rank, player_top_game_percentile
+from leaderboard.models import PlayerRankScore
 from .utils import remove_pending_email_invitations
 
 User = get_user_model()
@@ -547,18 +549,32 @@ class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
     header = "My Stats"
     button_label = None
     player = None
+    latest_game = None
 
     def dispatch(self, request, player_id, *args, **kwargs):
         self.player = Player.objects.get(id=player_id)
+        self.latest_game = find_latest_published_game("commonology")
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         cards = self.get_cards(request)
-        return super().get(request, *args, cards=cards, player=self.player)
+        best_rank_game, best_rank = player_top_game_rank(self.player, "commonology")
+        best_percentile_game, best_percentile = player_top_game_percentile(self.player, "commonology")
+        game_ids = self.player.game_ids.filter(series="commonology")
+        kwargs = {
+            "cards": cards,
+            "player": self.player,
+            "best_rank": best_rank,
+            "best_rank_game": best_rank_game,
+            "best_rank_game_player_count": PlayerRankScore.objects.filter(leaderboard__game__game_id=best_rank_game).count(),
+            "best_percentile": best_percentile,
+            "best_percentile_game": best_percentile_game,
+            "games_played": game_ids.count(),
+            "current_streak": self._get_current_streak(game_ids)
+        }
+        return super().get(request, *args, **kwargs)
 
     def get_cards(self, request):
-        latest_game = find_latest_published_game("commonology")
-        from_game = 1
         cards = [
             {
                 "header": f"Performance Summary",
@@ -568,10 +584,10 @@ class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
             },
             {
                 "chart": htmx_call(request, Charts.player_rank_trend.htmx_path(
-                    player_id=request.user.id,
+                    player_id=self.player.id,
                     slug="commonology",
                     from_game=1,
-                    to_game=latest_game.game_id
+                    to_game=self.latest_game.game_id
                 )),
                 "header": "Performance Over Time",
                 "header_classes": "cg-blue",
@@ -580,3 +596,15 @@ class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
             }
         ]
         return cards
+
+    def _get_current_streak(self, game_ids):
+        current_streak = 0
+        current_game_id = self.latest_game.game_id
+        for gid_dict in game_ids:
+            gid = gid_dict["game_id"]
+            if gid < current_game_id - 1:
+                # they missed a game
+                break
+            current_streak += 1
+            current_game_id = gid
+        return current_streak

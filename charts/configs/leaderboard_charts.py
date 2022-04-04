@@ -1,12 +1,4 @@
-from datetime import datetime, timedelta
-
-from django.db.models import Count
-from django.db.models.functions import Trunc
-from game.models import Game
-from project.utils import our_now
-from leaderboard.models import PlayerRankScore
-from leaderboard.leaderboard import player_score_rank_percentile, player_percentile_in_all_games
-from users.models import Player
+from leaderboard.leaderboard import player_rank_percentile_in_all_games
 
 from charts.utils import BaseSmartChart, BaseChartDataset, BaseChartSeries
 
@@ -78,12 +70,12 @@ class PlayerRankHistory(BaseChartSeries):
         self.slug = kwargs.get("slug")
         self.from_game = int(kwargs.get("from_game"))
         self.to_game = int(kwargs.get("to_game"))
-        self.player_percentiles = player_percentile_in_all_games(self.player_id, self.slug)
+        self.player_rank_percentiles = player_rank_percentile_in_all_games(self.player_id, self.slug)
 
     def get_data(self):
-        return [pp for gid, pp in self.player_percentiles.items()
+        return [pp["percentile"] if pp else None for gid, pp in self.player_rank_percentiles.items()
                 if self.from_game <= gid <= self.to_game]
 
     def get_labels(self):
-        return [f"Game {gid}" for gid, _ in self.player_percentiles.items()
+        return [f"Game {gid}" for gid, _ in self.player_rank_percentiles.items()
                 if self.from_game <= gid <= self.to_game]
