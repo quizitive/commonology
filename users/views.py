@@ -24,6 +24,7 @@ from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, LoginForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.tasks import mail_task
+from project.views import make_play_qr
 from project.utils import redis_delete_patterns, our_now
 from game.models import Series
 from .utils import remove_pending_email_invitations
@@ -254,8 +255,10 @@ class InviteFriendsView(LoginRequiredMixin, BaseCardView):
 
     def get_context_data(self, *args, **kwargs):
         players_referred = self.request.user.players_referred
+        qr = make_play_qr(self.request)
         return super().get_context_data(
             *args,
+            qr=qr,
             player_code=f'?r={self.request.user.code}',
             players_referred=players_referred,
             referral_count=players_referred.count(),

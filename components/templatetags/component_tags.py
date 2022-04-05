@@ -1,5 +1,6 @@
 from django import template
 from django.template.loader import render_to_string
+from project.views import make_play_qr
 
 from components.models import SponsorComponent
 

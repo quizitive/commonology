@@ -1,10 +1,16 @@
+import base64
+from io import BytesIO
+from qrcode import QRCode
+from xhtml2pdf import pisa
 from django.contrib.admin.views.decorators import staff_member_required
+from django.template.loader import get_template
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django import forms
 from django.core.mail import send_mail
-from project.card_views import CardFormView, recaptcha_check
+
+from project.card_views import BaseCardView, CardFormView, recaptcha_check
 from project.utils import ANALYTICS_REDIS
 from game.utils import next_event, find_latest_public_game
 
@@ -116,3 +122,58 @@ def instant_player_stats(request):
         resp = resp + f"{source.upper()}: There have been {starts} instant " \
                       f"game starts and {completes} completes.<br/><br/>"
     return HttpResponse(mark_safe(resp))
+
+
+def make_play_qr(user_code=None):
+    url = 'https://commonologygame.com'
+    if user_code is None:
+        url = f"{url}/play"
+    else:
+        url = f"{url}/qr/{user_code}"
+
+    # Creating an instance of qrcode
+    qr = QRCode(version=1, box_size=10, border=5)
+    qr.add_data(url)
+    qr.make(fit=True)
+    image = qr.make_image(fill='black', back_color='white')
+
+    buffered = BytesIO()
+    image.save(buffered, format='PNG')
+    img_str = base64.b64encode(buffered.getvalue())
+    img_str = img_str.decode('utf-8')
+
+    return f'data:image/png;base64,{img_str}'
+
+
+class QRView(BaseCardView):
+    # For some reason href params aren't working from QR code scans on iphone.
+    # So, this view translates a https://commonologygame.com/qr/<code> to a play redirect.
+    card_template = 'qr.html'
+
+    def get(self, request, *args, **kwargs):
+        r = kwargs['rcode']
+        url = f"{reverse('game:play')}?r={r}"
+        return redirect(url)
+
+
+# Taken from https://github.com/codingforentrepreneurs/Guides/blob/master/all/Render_to_PDF_in_Django.md
+def render_to_pdf(template_src, context_dict={}):
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    result = BytesIO()
+    pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+    if not pdf.err:
+        return HttpResponse(result.getvalue(), content_type='application/pdf')
+    return None
+
+
+def qr_poster_view(request):
+    user = request.user
+    if user.is_authenticated:
+        rcode = user.code
+    else:
+        rcode = None
+
+    pdf = render_to_pdf('qrposter.html',
+                        context_dict={'rcode': rcode})
+    return HttpResponse(pdf, content_type='application/pdf')

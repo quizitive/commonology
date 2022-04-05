@@ -17,6 +17,11 @@
   <script src="{% v_static 'js/social_sharing.js' %}" type="text/javascript"></script>
   {% endif %}
 
+  <div class="w3-padding-large w3-center">
+  <img src="{% qr_url %}" width="50%"/><br>
+  <a href="{%  url 'qr_poster' %}" target="_blank">Print Poster</a>
+  </div>
+
   <div class="refer-help" style="font-style:italic;font-size: 12px;padding-top:24px">
     <span style="font-weight:bold;font-size:18px;color:#0095da">YES!</span> forwarding the game email still works and will count toward your total referrals!
   </div>

@@ -10,7 +10,6 @@ from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from django.db import transaction
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
