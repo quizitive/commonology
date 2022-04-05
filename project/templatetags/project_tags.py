@@ -67,8 +67,10 @@ def qr_url(context, code=None):
     if code is not None:
         return make_play_qr(code)
 
-    if ('request' in context) and (context['request'].user.is_authenticated):
-        src = make_play_qr(user.code)
+    request = context.get('request')
+
+    if (request is not None) and (request.user.is_authenticated):
+        src = make_play_qr(request.user.code)
     else:
         src = make_play_qr()
 
