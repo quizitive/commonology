@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.core import mail
 from project.settings import STATIC_VERSIONS
+from project.templatetags.project_tags import qr_url
 from game.tests import suppress_hidden_error_logs
 
 
@@ -46,6 +47,10 @@ class TestQR(TestCase):
         c = Client()
         response = c.get(path)
         self.assertEqual(response.status_code, 302)
+
+    def test_qr_url(self):
+        result = qr_url(context={}, code=None)
+        self.assertTrue(result.startswith('data:image/png;base64,'))
 
 
 # class TestSlack(TestCase):

@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from project.settings import STATIC_VERSIONS
 from django.templatetags.static import StaticNode
 from game.utils import players_vs_previous, new_players_v_previous, most_recently_started_game
+from project.views import make_play_qr
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 register = template.Library()
@@ -59,3 +60,16 @@ def current_player_id(context):
     if not player_id:
         player_id = context.get('player_id')
     return player_id
+
+
+@register.simple_tag(takes_context=True)
+def qr_url(context, code=None):
+    if code is not None:
+        return make_play_qr(code)
+
+    if ('request' in context) and (context['request'].user.is_authenticated):
+        src = make_play_qr(user.code)
+    else:
+        src = make_play_qr()
+
+    return src
