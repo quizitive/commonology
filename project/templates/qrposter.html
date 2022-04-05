@@ -1,37 +1,24 @@
-
- <style>
-  .about-sm {
-    display: none;
-    margin-top: 0;
-  }
-
-  /* Tiny screens */
-  @media only screen and (max-width: 400px) {
-    .about-lg {
-      display: none;
-    }
-    .about-sm {
-      display: block;
-      padding-bottom: 24px;
-    }
-  }
-  </style>
-
-
-{% block content %}
-  <div class="w3-center">
-      <h2 class="w3-margin-bottom w3-container" style="vertical-align:bottom;">
-      <img src="project/static/img/logo.svg" class="w3-padding-24">
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600">
+</head>
+<body>
+  <div style="text-align:center">
+    <img src="https://commonologygame.com/static/img/logo.svg" width="70%">
+    <h2 style="vertical-align:bottom;">
          <p>
              is a <span style="font-weight:bold;font-style:italic;font-size:1.2em;">fun</span> and
              <span style="font-weight:bold;font-style:italic;font-size:1.2em;">simple</span>
-             battle of the minds that only takes 2 minutes to play.
+             battle of the minds<br>that only takes 2 minutes to play.
          </p>
     </h2>
 
     <p><img src="{% qr_url rcode %}" /></p>
 
-    <p>Or play with us at CommonologyGame.com.</p>
+    <h2 style="vertical-align:bottom;">
+        <p>Play with us at CommonologyGame.com.</p>
+    </h2>
   </div>
-{% endblock content %}
+</body>
+</html>
