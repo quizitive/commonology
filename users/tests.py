@@ -465,3 +465,5 @@ class MergePlayersTest(TestCase):
         self.assertEqual(from_p.display_name, to_p.display_name)
         self.assertTrue(to_p.is_active)
         self.assertFalse(from_p.is_active)
+        self.assertFalse(from_p.subscribed)
+        self.assertFalse(from_p.is_member)
