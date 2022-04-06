@@ -164,8 +164,8 @@ def merge_players(from_email, to_email):
         except MailingAddress.DoesNotExist:
             pass
 
-    from_p = Player.objects.get(email=from_email.strip())
-    to_p = Player.objects.get(email=to_email.strip())
+    from_p = Player.objects.get(email=from_email)
+    to_p = Player.objects.get(email=to_email)
 
     merge_related_fields(from_p, to_p)
     merge_unrelated_fields(from_p, to_p)
