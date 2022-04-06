@@ -578,7 +578,6 @@ class PlayerStatsView(MultiCardPageView):
         cards = [
             {
                 "header": f"Performance Summary",
-                "header_classes": "cg-blue",
                 "button_label": None,
                 "card_template": "users/cards/summary_stats_card.html"
             },
@@ -590,7 +589,6 @@ class PlayerStatsView(MultiCardPageView):
                     to_game=self.latest_game.game_id
                 )),
                 "header": "Performance Over Time",
-                "header_classes": "cg-blue",
                 "button_label": None,
                 "card_template": "users/cards/player_stats_card.html"
             }

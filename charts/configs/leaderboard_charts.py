@@ -56,7 +56,6 @@ class PlayerRankDataset(BaseChartDataset):
 
     def __init__(self, **kwargs):
         self.rank_history = PlayerRankHistory(**kwargs)
-        # self.subscribers = PlayersOverTime(player_filters={'subscribed': True}, **kwargs)
 
     def get_labels(self):
         return self.rank_history.get_labels()

@@ -27,7 +27,6 @@ class BaseCardView(ContextMixin, View):
     variables that can be set to customize form further.
     """
     header = None
-    header_classes = ""
     custom_message = None
     button_label = "Ok"
     card_template = 'cards/base_card.html'
@@ -51,7 +50,6 @@ class BaseCardView(ContextMixin, View):
             self.recaptcha_key = False
         context = {
             'header': self.header,
-            'header_classes': self.header_classes,
             'card_template': self.card_template,
             'button_label': self.button_label,
             'chart': self.chart,
