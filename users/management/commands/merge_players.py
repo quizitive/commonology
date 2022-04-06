@@ -10,4 +10,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         from_email, to_email = kwargs['email']
+        print(f"Merging {from_email} to {email}")
         merge_players(from_email, to_email)
