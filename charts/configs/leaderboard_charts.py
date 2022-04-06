@@ -49,7 +49,7 @@ class PlayerRankTrendChart(BaseSmartChart):
         }
 
     def get_colors(self):
-        return ["#f26649", "#237073"]
+        return ["#f26649", "#237073", "#0095da"]
 
 
 class PlayerRankDataset(BaseChartDataset):
@@ -63,7 +63,8 @@ class PlayerRankDataset(BaseChartDataset):
     def get_all_series(self):
         return [
             {"name": "Percentile", "data": self.rank_history.get_percentile(), "type": "bar"},
-            {"name": "Rank", "data": self.rank_history.get_rank(), "type": "line"}
+            {"name": "Rank", "data": self.rank_history.get_rank(), "type": "line"},
+            {"name": "Total Players", "data": self.rank_history.get_total_players(), "type": None}
         ]
 
 
@@ -83,6 +84,10 @@ class PlayerRankHistory(BaseChartSeries):
 
     def get_rank(self):
         return [pp["rank"] if pp else None for gid, pp in self.player_rank_percentiles.items()
+                if self.from_game <= gid <= self.to_game]
+
+    def get_total_players(self):
+        return [pp["total_players"] if pp else None for gid, pp in self.player_rank_percentiles.items()
                 if self.from_game <= gid <= self.to_game]
 
     def get_labels(self):

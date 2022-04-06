@@ -260,7 +260,8 @@ def player_rank_percentile_in_all_games(player_id, series_slug):
             continue
         rank_percentile_by_game[game_id] = {
             "rank": game_rank,
-            "percentile": round(100 * (1 - game_rank / game_player_count[game_id]))
+            "percentile": round(100 * (1 - game_rank / game_player_count[game_id])),
+            "total_players": game_player_count[game_id]
         }
     return rank_percentile_by_game
 
