@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.core import mail
 from django.conf import settings
 from users.models import PendingEmail, Player
-from users.utils import sign_user
+from users.utils import sign_user, merge_players
 from game.models import Series, Answer, Question
 
 
@@ -447,3 +447,21 @@ class MergePlayers(TestCase):
         names = [field.name for field in Player._meta.get_fields()]
         self.assertTrue(set(names) == set(expected),
                         msg='Was a model changed that relates to Player? Check impact to scripts/hacks/merge_players.py')
+
+
+class MergePlayersTest(TestCase):
+    def test_simple(self):
+        from_p = get_local_user(e=ABINORMAL)
+        to_p = get_local_user(e=NORMAL)
+        from_p.display_name = 'From'
+        from_p.save()
+        to_p.display_name = ''
+        to_p.save()
+
+        merge_players(ABINORMAL, NORMAL)
+
+        from_p = Player.objects.get(email=ABINORMAL)
+        to_p = Player.objects.get(email=NORMAL)
+        self.assertEqual(from_p.display_name, to_p.display_name)
+        self.assertTrue(to_p.is_active)
+        self.assertFalse(from_p.is_active)
