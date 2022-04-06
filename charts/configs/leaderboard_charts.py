@@ -15,7 +15,6 @@ class PlayerRankTrendChart(BaseSmartChart):
         return {
             "height": 450,
             "width": f"{len(self.data_class.get_labels()) * 45}px",
-            "type": 'bar',
             "offsetX": -15,
             "zoom": {"enabled": False}
         }
@@ -35,13 +34,19 @@ class PlayerRankTrendChart(BaseSmartChart):
         }
 
     def get_yaxis(self):
-        return {"axisTick": {"show": False}, "axisBorder": {"show": False}, "labels": {"show": False}}
+        return [
+            {"axisTick": {"show": False}, "axisBorder": {"show": False}, "labels": {"show": False}, "max": 105},
+            {"opposite": True, "reversed": True, "axisTick": {"show": False}, "axisBorder": {"show": False},
+             "labels": {"show": False}, "max": 3000}
+        ]
 
     def get_plot_options(self):
         return {"bar": {"borderRadius": 4, "columnWidth": "85%"}}
 
-    def get_stroke(self):
-        return {"curve": "smooth"}
+    def get_data_labels(self):
+        return {
+            "enabled": True
+        }
 
     def get_colors(self):
         return ["#f26649", "#237073"]
@@ -58,7 +63,8 @@ class PlayerRankDataset(BaseChartDataset):
 
     def get_all_series(self):
         return [
-            {"name": "Percentile", "data": self.rank_history.get_data()},
+            {"name": "Percentile", "data": self.rank_history.get_percentile(), "type": "bar"},
+            {"name": "Rank", "data": self.rank_history.get_rank(), "type": "line"}
         ]
 
 
@@ -72,8 +78,12 @@ class PlayerRankHistory(BaseChartSeries):
         self.to_game = int(kwargs.get("to_game"))
         self.player_rank_percentiles = player_rank_percentile_in_all_games(self.player_id, self.slug)
 
-    def get_data(self):
+    def get_percentile(self):
         return [pp["percentile"] if pp else None for gid, pp in self.player_rank_percentiles.items()
+                if self.from_game <= gid <= self.to_game]
+
+    def get_rank(self):
+        return [pp["rank"] if pp else None for gid, pp in self.player_rank_percentiles.items()
                 if self.from_game <= gid <= self.to_game]
 
     def get_labels(self):
