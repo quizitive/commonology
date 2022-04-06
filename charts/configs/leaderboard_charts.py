@@ -51,6 +51,9 @@ class PlayerRankTrendChart(BaseSmartChart):
     def get_colors(self):
         return ["#f26649", "#237073", "#0095da"]
 
+    def get_legend(self):
+        return {"show": False}
+
 
 class PlayerRankDataset(BaseChartDataset):
 
