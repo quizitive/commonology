@@ -599,7 +599,7 @@ class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
 
     def _get_current_streak(self, game_ids):
         current_streak = 0
-        current_game_id = self.latest_game.game_id
+        current_game_id = self.latest_game.game_id + 1
         for gid_dict in game_ids:
             gid = gid_dict["game_id"]
             if gid < current_game_id - 1:
