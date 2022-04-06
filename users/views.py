@@ -545,7 +545,7 @@ class ValidateEmailView(View):
         return render(request, 'users/base.html', context)
 
 
-class PlayerStatsView(LoginRequiredMixin, MultiCardPageView):
+class PlayerStatsView(MultiCardPageView):
     header = "My Stats"
     button_label = None
     player = None
