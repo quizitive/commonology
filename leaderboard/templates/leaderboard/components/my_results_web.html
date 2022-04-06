@@ -40,7 +40,7 @@
 
   <div class="w3-row w3-mobile m4" style="padding: 8px 0;margin-right:-8px">
  {% if request.user.is_authenticated %}
-  <a href="{% url 'player-stats' request.user.id %}" style="color:#0095da;font-size:15px">
+  <a href="{% url 'player-view' request.user.id %}" style="color:#0095da;font-size:15px">
     More stats >
   </a>
   {% endif %}

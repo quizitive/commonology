@@ -3,7 +3,7 @@
   <div class="w3-row">
     <div class="w3-padding-bottom w3-col">
       {% for player in leaderboard %}
-      <a href="{% url 'player-stats' player.id %}" style="text-decoration: none;">
+      <a href="{% url 'player-view' player.id %}" style="text-decoration: none;">
       <div {% if player.id == request.user.id %}id="player-rank"{% endif %}
           class="leaderboard-row"
          style="padding: 0 4px;">
