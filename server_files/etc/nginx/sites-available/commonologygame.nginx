@@ -25,6 +25,9 @@ server {
 	    set $project_dir /home/django/$project_name;
 
     	location = /favicon.ico { access_log off; log_not_found off; }
+        location /ads.txt {
+            root $proejct_dir/static;
+        }
     	location /static/ {
     	    root $project_dir;
     	}
