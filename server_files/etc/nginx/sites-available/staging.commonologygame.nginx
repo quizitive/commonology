@@ -26,10 +26,13 @@ server {
 	set $project_name commonology;
 	set $project_dir /home/django/$project_name;
 
-    	location = /favicon.ico { access_log off; log_not_found off; }
-    	location /static/ {
-    	    root $project_dir;
-    	}
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /ads.txt {
+        root $proejct_dir/static;
+    }
+    location /static/ {
+    	root $project_dir;
+    }
 	location /media/ {
 	    root $project_dir;
 	}
