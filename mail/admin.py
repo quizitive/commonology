@@ -97,7 +97,7 @@ class MailLogAdmin(DjangoObjectActions, admin.ModelAdmin):
     cancel_send.label = 'Cancel Message'
     cancel_send.short_description = "Tries to stop message at SendGrid."
 
-    list_display = ('subject', 'sent_date', 'scheduled')
+    list_display = ('subject', 'sent_date', 'scheduled', 'canceled')
     list_filter = ('sent_date',)
     search_fields = ('subject',)
     ordering = ('-sent_date',)
