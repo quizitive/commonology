@@ -264,7 +264,7 @@ class InviteFriendsView(LoginRequiredMixin, BaseCardView):
             referral_count=players_referred.count(),
             reward_threshold=settings.REWARD_THRESHOLD,
             can_claim=players_referred.count() >= settings.REWARD_THRESHOLD,
-            share_message=f"Join me at Commonology. New game every Wednesday at 12pm ET!\n"
+            share_message=f"Join me at Commonology. New game every Monday at 12pm ET!\n"
                           f"https://commonologygame.com/play?r={self.request.user.code}",
             **kwargs
         )
