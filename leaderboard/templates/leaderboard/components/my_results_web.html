@@ -31,20 +31,24 @@
 {% include 'leaderboard/components/my_results.html'%}
 
 <div class="w3-cell-row" style="padding:16px 0 0">
-  <div class="w3-cell w3-cell-middle" style="padding-right: 8px;">
+  <div class="w3-cell w3-cell-middle">
 
   </div>
-  <div class="w3-cell w3-rest">
-  <span style="font-weight:normal;font-style:italic;font-size:13px;">{{ player_message }}</span>
+  <div class="w3-cell w3-cell-middle w3-rest w3-mobile" style="padding-right:8px;">
+  <span style="font-weight:normal;font-size:13px;">{{ player_message }}</span>
     </div>
 
 </div>
 
-{% include 'leaderboard/components/my_results_share.html' %}
-
-
-<div class="w3-row" style="padding:4px 0">
-
+  <div class="w3-row w3-mobile m4" style="padding: 8px 0;margin-right:-8px;width:100px">
+ {% if request.user.is_authenticated %}
+  <a href="{% url 'player-view' request.user.id %}" style="color:#0095da;font-size:14px;width:40px">
+    More Stats
+  </a>
+  {% endif %}
 </div>
+
+
+{% include 'leaderboard/components/my_results_share.html' %}
 
 {% include "leaderboard/components/instant_game_message.html" %}
