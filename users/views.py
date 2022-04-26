@@ -19,14 +19,22 @@ from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
-from project.card_views import recaptcha_check, BaseCardView, CardFormView
-from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm, LoginForm
+from users.forms import LoginForm
+
+from project.card_views import recaptcha_check, BaseCardView, CardFormView, MultiCardPageView
+from project.htmx import htmx_call
+
+from charts.charts import Charts
+from users.forms import PlayerProfileForm, PendingEmailForm, JoinForm
 from users.models import PendingEmail, Player
 from users.utils import unsubscribe, sign_user
 from mail.tasks import mail_task
 from project.views import make_play_qr
 from project.utils import redis_delete_patterns, our_now
 from game.models import Series
+from game.utils import find_latest_published_game
+from leaderboard.leaderboard import player_top_game_rank, player_top_game_percentile
+from leaderboard.models import PlayerRankScore
 from .utils import remove_pending_email_invitations
 
 User = get_user_model()
@@ -538,3 +546,66 @@ class ValidateEmailView(View):
         messages.error(request, "If that does not work then please do not give up on us. Send us a help message.")
         context = {'header': "Login Fail"}
         return render(request, 'users/base.html', context)
+
+
+class PlayerStatsView(MultiCardPageView):
+    header = "My Stats"
+    button_label = None
+    player = None
+    latest_game = None
+
+    def dispatch(self, request, player_id, *args, **kwargs):
+        self.player = Player.objects.get(id=player_id)
+        self.latest_game = find_latest_published_game("commonology")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        cards = self.get_cards(request)
+        best_rank_game, best_rank = player_top_game_rank(self.player, "commonology")
+        best_percentile_game, best_percentile = player_top_game_percentile(self.player, "commonology")
+        game_ids = self.player.game_ids.filter(series="commonology")
+        kwargs = {
+            "cards": cards,
+            "player": self.player,
+            "best_rank": best_rank,
+            "best_rank_game": best_rank_game,
+            "best_rank_game_player_count": PlayerRankScore.objects.filter(leaderboard__game__game_id=best_rank_game).count(),
+            "best_percentile": best_percentile,
+            "best_percentile_game": best_percentile_game,
+            "games_played": game_ids.count(),
+            "current_streak": self._get_current_streak(game_ids)
+        }
+        return super().get(request, *args, **kwargs)
+
+    def get_cards(self, request):
+        cards = [
+            {
+                "header": f"Performance Summary",
+                "button_label": None,
+                "card_template": "users/cards/summary_stats_card.html"
+            },
+            {
+                "chart": htmx_call(request, Charts.player_rank_trend.htmx_path(
+                    player_id=self.player.id,
+                    slug="commonology",
+                    from_game=1,
+                    to_game=self.latest_game.game_id
+                )),
+                "header": "Performance Over Time",
+                "button_label": None,
+                "card_template": "users/cards/player_stats_card.html"
+            }
+        ]
+        return cards
+
+    def _get_current_streak(self, game_ids):
+        current_streak = 0
+        current_game_id = self.latest_game.game_id + 1
+        for gid_dict in game_ids:
+            gid = gid_dict["game_id"]
+            if gid < current_game_id - 1:
+                # they missed a game
+                break
+            current_streak += 1
+            current_game_id = gid
+        return current_streak
