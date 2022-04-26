@@ -65,7 +65,7 @@ class BaseSmartChart(BaseChartSubclass):
         # called from template: .../charts/simple_chart.html
         op_dict = self.options_dict
         for name, get_method in self._get_methods():
-            if name in op_dict and type(op_dict[name]) == dict:
+            if name in op_dict and isinstance(op_dict[name], dict) and isinstance(get_method(), dict):
                 op_dict[name].update(get_method())
             else:
                 op_dict[name] = get_method()
