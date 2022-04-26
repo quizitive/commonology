@@ -71,6 +71,7 @@ class PlayerRankScore(models.Model):
 
     class Meta:
         unique_together = ('player', 'leaderboard')
+        ordering = ('leaderboard__game__game_id',)
 
 
 class LeaderboardMessage(models.Model):

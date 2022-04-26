@@ -47,7 +47,7 @@
   {% if chart %}
   {% block chart %}
     <div class="w3-padding"></div>
-    <div class="card-chart" hx-get="{{ chart }}" hx-trigger="load">
+    <div id="card-chart" class="card-chart" hx-get="{{ chart }}" hx-trigger="load">
     <img width="50" style="margin: 100px auto;display:flex;" src="{% v_static 'img/spinners/puff.svg' %}"/>
     </div>
   {% endblock %}
