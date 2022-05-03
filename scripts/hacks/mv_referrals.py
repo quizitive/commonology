@@ -11,6 +11,7 @@ django.setup()
 
 from users.models import Player
 
+
 def mv_referrals(from_email, to_email):
     from_player = Player.objects.get(email=from_email)
     to_player = Player.objects.get(email=to_email)
