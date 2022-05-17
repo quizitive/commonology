@@ -132,7 +132,11 @@ class Player(CustomUser):
 
     @property
     def game_ids(self):
-        return self.rank_scores.values(game_id=models.F('leaderboard__game__game_id')).order_by('-game_id')
+        return self.rank_scores.values(
+            game_id=models.F('leaderboard__game__game_id'),
+            game_name=models.F('leaderboard__game__name'),
+            series=models.F('leaderboard__game__series__slug')
+        ).order_by('-game_id')
 
     @property
     def players_referred(self):
