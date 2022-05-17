@@ -563,7 +563,7 @@ class PlayerStatsView(MultiCardPageView):
         cards = self.get_cards(request)
         best_rank_game, best_rank = player_top_game_rank(self.player, "commonology")
         best_percentile_game, best_percentile = player_top_game_percentile(self.player, "commonology")
-        game_ids = self.player.game_ids.filter(series="commonology")
+        game_ids = self.player.game_ids.filter(leaderboard__game__series__slug="commonology")
         kwargs = {
             "cards": cards,
             "player": self.player,
