@@ -132,11 +132,7 @@ class Player(CustomUser):
 
     @property
     def game_ids(self):
-        return self.answers.values(
-            game_id=models.F('question__game__game_id'),
-            game_name=models.F('question__game__name'),
-            series=models.F('question__game__series__slug')).exclude(
-            game_id=None).distinct().order_by('-game_id')
+        return self.rank_scores.values(game_id=models.F('leaderboard__game__game_id')).order_by('-game_id')
 
     @property
     def players_referred(self):
@@ -165,7 +161,6 @@ class Player(CustomUser):
 
     @property
     def games_played(self):
-        games = self.game_ids
         r = '<textarea cols="80" rows="5" style="overflow:auto;">'
         r = r + '\n'.join([r['game_name'] for r in self.game_ids]) + '</textarea>'
         return mark_safe(r)
