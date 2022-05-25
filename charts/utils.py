@@ -16,40 +16,40 @@ class BaseSmartChart(BaseChartSubclass):
 
     data_class = None
     name = None
-    options_dict = {
-        "grid": {
-            "row": {
-                "colors": ['#f3f3f3', 'transparent'],
-                "opacity": 0.5
-            }
-        },
-        "chart": {
-            "height": 450,
-            "type": 'line'
-        },
-        "stroke": {
-            "width": 4,
-            "curve": "straight"
-        },
-        "markers": {
-            "size": 3,
-            "strokeWidth": 0
-        },
-        "colors": ["#0095da", "#f26649", "#237073"],
-        "xaxis": {
-            "tickPlacement": "on"
-        },
-        "yaxis": {
-            "labels": {
-                "align": "right"
-            },
-            "decimalsInFloat": 0
-        }
-    }
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
         self.uuid = uuid4().hex
+        self.options_dict = {
+            "grid": {
+                "row": {
+                    "colors": ['#f3f3f3', 'transparent'],
+                    "opacity": 0.5
+                }
+            },
+            "chart": {
+                "height": 450,
+                "type": 'line'
+            },
+            "stroke": {
+                "width": 4,
+                "curve": "straight"
+            },
+            "markers": {
+                "size": 3,
+                "strokeWidth": 0
+            },
+            "colors": ["#0095da", "#f26649", "#237073"],
+            "xaxis": {
+                "tickPlacement": "on"
+            },
+            "yaxis": {
+                "labels": {
+                    "align": "right"
+                },
+                "decimalsInFloat": 0
+            }
+        }
         super().__init__(**kwargs)
 
     def html_id(self):
