@@ -529,6 +529,14 @@ Need a pg_dumps dir for the cron'd `pg_backup.bash` script.
 $ mkdir /home/django/pg_dumps/
 ```
 
+### redis_dumps
+
+Redis seems to dump automatically and frequently.  So, backing
+it up just means copying the dump file.
+
+```shell
+scp django@commonologygame.com:/var/lib/redis/dump.rdb ~/Documents/dev/commonology/redis_dumps
+```
 
 # Try it!
 
