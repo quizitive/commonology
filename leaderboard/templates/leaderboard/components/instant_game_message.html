@@ -31,14 +31,14 @@
       <div class="w3-row w3-center">
 
       {% active_game as active_game %}
-      {% if active_game %}
-      {% else %}
-        The next game begins in
-        <span id="days">--</span>
-        <span id="hours">--</span>
-        <span id="mins">--</span> and
-        <span id="secs">--</span>
-      {% endif %}
+{#      {% if active_game %}#}
+{#      {% else %}#}
+{#        The next game begins in#}
+{#        <span id="days">--</span>#}
+{#        <span id="hours">--</span>#}
+{#        <span id="mins">--</span> and#}
+{#        <span id="secs">--</span>#}
+{#      {% endif %}#}
         <div class="join-button container" style="padding: 4px;max-width:300px;margin:auto;">
           {% if active_game %}
             <a href="{% series_or_default_url 'game' 'play' %}{{ active_game.uuid|default:'' }}">
