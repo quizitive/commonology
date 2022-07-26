@@ -90,8 +90,13 @@ class ContactView(CardFormView):
     button_label = "Send"
     custom_message = mark_safe("Enter a message and we WILL read it.")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['recaptcha_key'] = True
+        return context
+
     def post(self, request, *args, **kwargs):
-        recaptcha_check(request)
+        recaptcha_check(request, force=True)
         form = self.get_form()
         if form.is_valid():
             from_email = form.data['from_email']
