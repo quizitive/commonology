@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 from django.shortcuts import render, redirect, reverse
 from django import forms
 from django.core.mail import send_mail
+from django.conf import settings
 
 from project.card_views import BaseCardView, CardFormView, recaptcha_check
 from project.utils import ANALYTICS_REDIS
@@ -92,7 +93,7 @@ class ContactView(CardFormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['recaptcha_key'] = True
+        context['recaptcha_key'] = settings.RECAPTCHA3_KEY
         return context
 
     def post(self, request, *args, **kwargs):
