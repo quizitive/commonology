@@ -97,7 +97,7 @@ class ContactView(CardFormView):
         return context
 
     def post(self, request, *args, **kwargs):
-        recaptcha_check(request, force=True)
+        recaptcha_check(request, force=not settings.IS_TEST)
         form = self.get_form()
         if form.is_valid():
             from_email = form.data['from_email']
