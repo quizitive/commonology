@@ -6,7 +6,7 @@
 
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/snap/bin
-MAILTO=ms@quizitive.com
+MAILTO=ms@thebrookhavengroup.com
 
 # Example of job definition:
 # .---------------- minute (0 - 59)
@@ -22,5 +22,5 @@ MAILTO=ms@quizitive.com
 52 6	1 * *	root	test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
 #
 0 21 * * * django /home/django/commonology/scripts/pg_backup.bash > /dev/null
-15 15 * * * root /snap/bin/certbot renew --renew-hook 'service nginx reload'
-39 22 * * * root /usr/local/sbin/update-ngxblocker -e ms@quizitive.com
+40 17 * * * root /snap/bin/certbot renew --renew-hook 'service nginx reload'
+39 22 * * * root /usr/local/sbin/update-ngxblocker -e ms@thebrookhavengroup.com
