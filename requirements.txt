@@ -6,7 +6,7 @@ gspread==4.0.1
 fuzzywuzzy==0.18.0
 num2word==1.0.1
 pandas==1.3.3
-psycopg2-binary==2.9.1
+psycopg2-binary==2.9.5
 python-Levenshtein==0.12.2
 gunicorn==20.1.0
 pycodestyle==2.8.0
