@@ -20,7 +20,7 @@ xz-utils
 tk-dev
 libffi-dev
 liblzma-dev
-python-openssl
+python3-openssl
 git
 python-is-python3
 redis-server
