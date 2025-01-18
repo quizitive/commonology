@@ -10,7 +10,7 @@ from django.core.validators import EmailValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import CIEmailField
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import cached_property
 from django.db.models.signals import post_save
 from django.dispatch import receiver
