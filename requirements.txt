@@ -5,13 +5,14 @@ google-auth-oauthlib==0.4.6
 gspread==4.0.1
 fuzzywuzzy==0.18.0
 num2word==1.0.1
-pandas==1.3.3
+numpy==1.26.4
+pandas==1.5.3
 psycopg2-binary==2.9.5
 python-Levenshtein==0.12.2
 gunicorn==20.1.0
 pycodestyle==2.8.0
 redis==3.5.3
-celery==5.1.2
+celery==5.2.7
 newrelic==7.2.1.168
 git+https://git@github.com/quizitive/django-bulk-update-or-create.git
 django-redis==5.0.0
@@ -28,7 +29,7 @@ Pillow==8.3.2
 django-object-actions==3.0.2
 channels==3.0.4
 channels-redis==3.3.1
-django-sortedm2m-filter-horizontal-widget==1.3.2
+django-sortedm2m-filter-horizontal-widget==2.0.1
 openpyxl==3.0.9
 pydot==1.4.2
 emoji==1.6.1
