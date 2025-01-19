@@ -16,7 +16,7 @@ class PlayerRankTrendChart(BaseSmartChart):
             "height": 450,
             "width": f"{len(self.data_class.get_labels()) * 45}px",
             "offsetX": -15,
-            "zoom": {"enabled": False}
+            "zoom": {"enabled": False},
         }
 
     def get_grid(self):
@@ -30,23 +30,27 @@ class PlayerRankTrendChart(BaseSmartChart):
                 "rotate": -90,
                 "rotateAlways": True,
             },
-            "tickPlacement": 'on'
+            "tickPlacement": "on",
         }
 
     def get_yaxis(self):
         return [
             {"axisTick": {"show": False}, "axisBorder": {"show": False}, "labels": {"show": False}, "max": 105},
-            {"opposite": True, "reversed": True, "axisTick": {"show": False}, "axisBorder": {"show": False},
-             "labels": {"show": False}, "max": 3000}
+            {
+                "opposite": True,
+                "reversed": True,
+                "axisTick": {"show": False},
+                "axisBorder": {"show": False},
+                "labels": {"show": False},
+                "max": 3000,
+            },
         ]
 
     def get_plot_options(self):
         return {"bar": {"borderRadius": 4, "columnWidth": "85%"}}
 
     def get_data_labels(self):
-        return {
-            "enabled": True
-        }
+        return {"enabled": True}
 
     def get_colors(self):
         return ["#f26649", "#237073", "#0095da"]
@@ -67,7 +71,7 @@ class PlayerRankDataset(BaseChartDataset):
         return [
             {"name": "Percentile", "data": self.rank_history.get_percentile(), "type": "bar"},
             {"name": "Rank", "data": self.rank_history.get_rank(), "type": "line"},
-            {"name": "Total Players", "data": self.rank_history.get_total_players(), "type": None}
+            {"name": "Total Players", "data": self.rank_history.get_total_players(), "type": None},
         ]
 
 
@@ -82,17 +86,27 @@ class PlayerRankHistory(BaseChartSeries):
         self.player_rank_percentiles = player_rank_percentile_in_all_games(self.player_id, self.slug)
 
     def get_percentile(self):
-        return [pp["percentile"] if pp else None for gid, pp in self.player_rank_percentiles.items()
-                if self.from_game <= gid <= self.to_game]
+        return [
+            pp["percentile"] if pp else None
+            for gid, pp in self.player_rank_percentiles.items()
+            if self.from_game <= gid <= self.to_game
+        ]
 
     def get_rank(self):
-        return [pp["rank"] if pp else None for gid, pp in self.player_rank_percentiles.items()
-                if self.from_game <= gid <= self.to_game]
+        return [
+            pp["rank"] if pp else None
+            for gid, pp in self.player_rank_percentiles.items()
+            if self.from_game <= gid <= self.to_game
+        ]
 
     def get_total_players(self):
-        return [pp["total_players"] if pp else None for gid, pp in self.player_rank_percentiles.items()
-                if self.from_game <= gid <= self.to_game]
+        return [
+            pp["total_players"] if pp else None
+            for gid, pp in self.player_rank_percentiles.items()
+            if self.from_game <= gid <= self.to_game
+        ]
 
     def get_labels(self):
-        return [f"Game {gid}" for gid, _ in self.player_rank_percentiles.items()
-                if self.from_game <= gid <= self.to_game]
+        return [
+            f"Game {gid}" for gid, _ in self.player_rank_percentiles.items() if self.from_game <= gid <= self.to_game
+        ]

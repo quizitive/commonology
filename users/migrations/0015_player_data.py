@@ -15,9 +15,9 @@ def fix(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0014_player_code'),
+        ("users", "0014_player_code"),
     ]
 
     operations = [
         migrations.RunPython(fix),
-   ]
+    ]

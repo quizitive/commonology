@@ -1,4 +1,3 @@
-
 import sys
 import os
 import django
@@ -15,7 +14,7 @@ from users.models import Player
 
 
 def player_str(p):
-    result = '-Unknown-'
+    result = "-Unknown-"
     if p.display_name:
         result = p.display_name
 
@@ -31,7 +30,7 @@ def player_str(p):
     return result
 
 
-graph = pydot.Dot(graph_type='digraph', rankdir='LR')
+graph = pydot.Dot(graph_type="digraph", rankdir="LR")
 for p in Player.objects.all():
     if p.referrer:
         referrer = player_str(p.referrer)
@@ -39,7 +38,7 @@ for p in Player.objects.all():
 
         graph.add_edge(pydot.Edge(referrer, referee))
 
-print('About to write file.')
+print("About to write file.")
 
-fn = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop', 'family_tree.pdf')
+fn = os.path.join(os.path.join(os.path.expanduser("~")), "Desktop", "family_tree.pdf")
 graph.write_pdf(fn)

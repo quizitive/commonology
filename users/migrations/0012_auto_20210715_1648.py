@@ -2,9 +2,10 @@
 
 from django.db import migrations, models
 
+
 def clear_none_referrer(apps, schema_editor):
-    Player = apps.get_model('users', 'Player')
-    qs = Player.objects.filter(referrer='none').all()
+    Player = apps.get_model("users", "Player")
+    qs = Player.objects.filter(referrer="none").all()
     for p in qs:
         p.referrer = None
         p.save()
@@ -13,19 +14,19 @@ def clear_none_referrer(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0011_auto_20210506_1414'),
+        ("users", "0011_auto_20210506_1414"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='player',
-            name='first_name',
+            model_name="player",
+            name="first_name",
             field=models.CharField(blank=True, max_length=30),
         ),
         migrations.AlterField(
-            model_name='player',
-            name='last_name',
+            model_name="player",
+            name="last_name",
             field=models.CharField(blank=True, max_length=30),
         ),
-        migrations.RunPython(clear_none_referrer, reverse_code=migrations.RunPython.noop)
+        migrations.RunPython(clear_none_referrer, reverse_code=migrations.RunPython.noop),
     ]

@@ -10,34 +10,34 @@ from django.forms.models import model_to_dict
 
 
 def reorg_components(apps, schema_editor):
-    MailComponent = apps.get_model('mail', 'Component')
-    Component = apps.get_model('components', 'Component')
-    Location = apps.get_model('components', 'Location')
-    mail_loc = Location.objects.create(app_name='mail')
-    game_loc = Location.objects.create(app_name='game')
+    MailComponent = apps.get_model("mail", "Component")
+    Component = apps.get_model("components", "Component")
+    Location = apps.get_model("components", "Location")
+    mail_loc = Location.objects.create(app_name="mail")
+    game_loc = Location.objects.create(app_name="game")
     for mc in MailComponent.objects.all():
         model_dict = model_to_dict(mc)
-        del model_dict['location']
-        del model_dict['mail_component']
+        del model_dict["location"]
+        del model_dict["mail_component"]
         c = Component.objects.create(**model_dict)
-        if c.template == 'mail/simple_component.html':
-            c.template = 'components/simple_component.html'
+        if c.template == "mail/simple_component.html":
+            c.template = "components/simple_component.html"
             c.save()
         if mc.mail_component:
             c.locations.add(mail_loc)
-        if 'Rules' in mc.name:
+        if "Rules" in mc.name:
             c.locations.add(game_loc)
 
 
 def undo_reorg(apps, schema_editor):
-    MailComponent = apps.get_model('mail', 'Component')
-    Component = apps.get_model('components', 'Component')
-    Location = apps.get_model('components', 'Location')
+    MailComponent = apps.get_model("mail", "Component")
+    Component = apps.get_model("components", "Component")
+    Location = apps.get_model("components", "Location")
     for c in Component.objects.all():
         model_dict = model_to_dict(c)
-        del model_dict['locations']
+        del model_dict["locations"]
         mc = MailComponent.objects.create()
-        if 'mail' in c.locations.values_list('app_name', flat=True):
+        if "mail" in c.locations.values_list("app_name", flat=True):
             mc.mail_component = True
             mc.save()
     pass
@@ -48,31 +48,46 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('mail', '0017_alter_mailmessage_from_email'),
+        ("mail", "0017_alter_mailmessage_from_email"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Location',
+            name="Location",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('app_name', models.CharField(help_text='The django app name of the location.', max_length=64)),
-                ('location', models.CharField(blank=True, help_text='The exact location. Leave blank for all app locations.', max_length=64, null=True)),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("app_name", models.CharField(help_text="The django app name of the location.", max_length=64)),
+                (
+                    "location",
+                    models.CharField(
+                        blank=True,
+                        help_text="The exact location. Leave blank for all app locations.",
+                        max_length=64,
+                        null=True,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('app_name', 'location')},
+                "unique_together": {("app_name", "location")},
             },
         ),
         migrations.CreateModel(
-            name='Component',
+            name="Component",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150, unique=True)),
-                ('message', ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True)),
-                ('template', models.CharField(default='components/simple_component.html', max_length=150)),
-                ('context', models.JSONField(blank=True, default=dict)),
-                ('locations', models.ManyToManyField(related_name='components', to='components.Location', help_text='Make this component available to these apps/locations. NOTE: This does not automatically make the component appear in these locations, that must be configured explicitly.')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=150, unique=True)),
+                ("message", ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True)),
+                ("template", models.CharField(default="components/simple_component.html", max_length=150)),
+                ("context", models.JSONField(blank=True, default=dict)),
+                (
+                    "locations",
+                    models.ManyToManyField(
+                        related_name="components",
+                        to="components.Location",
+                        help_text="Make this component available to these apps/locations. NOTE: This does not automatically make the component appear in these locations, that must be configured explicitly.",
+                    ),
+                ),
             ],
         ),
-        migrations.RunPython(reorg_components, undo_reorg)
+        migrations.RunPython(reorg_components, undo_reorg),
     ]

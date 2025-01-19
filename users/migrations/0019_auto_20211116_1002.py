@@ -7,18 +7,23 @@ import users.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0018_player_reminder'),
+        ("users", "0018_player_reminder"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='pendingemail',
-            name='email',
+            model_name="pendingemail",
+            name="email",
             field=models.EmailField(max_length=254, validators=[users.models.custom_validate_email]),
         ),
         migrations.AlterField(
-            model_name='player',
-            name='email',
-            field=users.models.CustomCIEmailField(max_length=254, unique=True, validators=[users.models.custom_validate_email], verbose_name='email address'),
+            model_name="player",
+            name="email",
+            field=users.models.CustomCIEmailField(
+                max_length=254,
+                unique=True,
+                validators=[users.models.custom_validate_email],
+                verbose_name="email address",
+            ),
         ),
     ]

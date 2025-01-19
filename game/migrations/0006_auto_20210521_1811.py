@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0005_auto_20210512_0023'),
+        ("game", "0005_auto_20210512_0023"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='game',
-            name='game_id',
+            model_name="game",
+            name="game_id",
             field=models.IntegerField(),
         ),
         migrations.AlterUniqueTogether(
-            name='game',
-            unique_together={('series', 'game_id')},
+            name="game",
+            unique_together={("series", "game_id")},
         ),
     ]

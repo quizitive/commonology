@@ -20,7 +20,7 @@ project.settings.REWARD_THRESHOLD = 3
 class RewardTests(TestCase):
     def setUp(self):
         self.player = get_local_user()
-        self.q = Question.objects.create(text='question text')
+        self.q = Question.objects.create(text="question text")
         for i in range(settings.REWARD_THRESHOLD - 1):
             self.make_referee(i)
 
@@ -29,34 +29,35 @@ class RewardTests(TestCase):
         p = get_local_user(e=e)
         p.referrer = self.player
         p.save()
-        Answer.objects.create(player=p, raw_string='answer', question=self.q)
+        Answer.objects.create(player=p, raw_string="answer", question=self.q)
         return p
 
     def test_claim(self):
         client = get_local_client()
-        path = reverse('claim')
+        path = reverse("claim")
 
         response = client.get(path)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.reason_phrase, "OK")
         self.assertContains(response, f"It seems you have not made {settings.REWARD_THRESHOLD} referrals yet")
 
         p = self.make_referee(settings.REWARD_THRESHOLD)
 
         mail.outbox = []
         check_for_reward(p)
-        self.assertEqual(mail.outbox[1].subject, 'You earned a coffee mug!')
+        self.assertEqual(mail.outbox[1].subject, "You earned a coffee mug!")
         self.assertEqual(mail.outbox[0].subject, "Thank you for the referral.")
 
         response = client.get(path)
-        self.assertEqual(response.reason_phrase, 'OK')
-        self.assertContains(response, "Please fill out this form so you can enjoy a hot drink in your beautiful new mug.")
+        self.assertEqual(response.reason_phrase, "OK")
+        self.assertContains(
+            response, "Please fill out this form so you can enjoy a hot drink in your beautiful new mug."
+        )
 
-        data = {'name': 'NORMAL', 'address1': '1 First Street', 'city': 'Patchogue',
-                'state': 'NY', 'zip_code': '12345'}
+        data = {"name": "NORMAL", "address1": "1 First Street", "city": "Patchogue", "state": "NY", "zip_code": "12345"}
         response = client.post(path, data=data)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.reason_phrase, "OK")
         self.assertContains(response, "sent a confirmation email to")
 
         response = client.get(path)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.reason_phrase, "OK")
         self.assertContains(response, "Claim staked!")

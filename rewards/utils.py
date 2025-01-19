@@ -1,4 +1,3 @@
-
 from django.template.loader import render_to_string
 from project import settings
 from mail.utils import send_one
@@ -14,11 +13,9 @@ logger = logging.getLogger(__name__)
 def send_reward_notice(referrer):
     slackit(f"{referrer} earned a coffee mug.")
     try:
-        email_context = {
-            'url': f'https://commonologygame.com/claim/'
-        }
-        msg = render_to_string('rewards/emails/reward_earned.html', email_context).replace("\n", "")
-        send_one(referrer, 'You earned a coffee mug!', msg)
+        email_context = {"url": f"https://commonologygame.com/claim/"}
+        msg = render_to_string("rewards/emails/reward_earned.html", email_context).replace("\n", "")
+        send_one(referrer, "You earned a coffee mug!", msg)
     except Exception as e:
         logger.exception(f"Could not send reward notification email {e}")
         slackit(f"{referrer} earned a coffee mug but something went wrong with the notification email.")

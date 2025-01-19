@@ -14,8 +14,14 @@ from game.models import Game, Question
 from game.views import BaseGameView
 from game.utils import n_new_comments
 from users.models import Player
-from leaderboard.leaderboard import build_answer_tally, player_leaderboard_message, \
-    player_score_rank_percentile, rank_string, score_string, visible_leaderboards
+from leaderboard.leaderboard import (
+    build_answer_tally,
+    player_leaderboard_message,
+    player_score_rank_percentile,
+    rank_string,
+    score_string,
+    visible_leaderboards,
+)
 from leaderboard.tasks import save_last_visit_t
 from leaderboard.models import PlayerRankScore
 
@@ -27,8 +33,11 @@ class LeaderboardView(BaseGameView):
 
         # if no id is specified get the most recent published game for this series
         if not self.requested_game_id:
-            game = Game.objects.filter(
-                leaderboard__publish_date__lte=our_now(), series__slug=self.slug).order_by('-game_id').first()
+            game = (
+                Game.objects.filter(leaderboard__publish_date__lte=our_now(), series__slug=self.slug)
+                .order_by("-game_id")
+                .first()
+            )
         else:
             game = Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
 
@@ -48,7 +57,7 @@ class LeaderboardView(BaseGameView):
 
     def get_context(self, *args, **kwargs):
         context = super().get_context(*args, **kwargs)
-        context['historical_leaderboards'] = visible_leaderboards(self.slug)
+        context["historical_leaderboards"] = visible_leaderboards(self.slug)
         request = self.request
         player = request.user
 
@@ -61,46 +70,51 @@ class LeaderboardView(BaseGameView):
                 t = dateutil.parser.isoparse(t)
                 t = t + datetime.timedelta(minutes=5)
         n_comments = n_new_comments(self.game, player, t)
-        context['n_comments'] = n_comments
+        context["n_comments"] = n_comments
 
         if player.is_authenticated:
             # get the logged in player's stats for the game
-            player_score, player_rank, player_percentile = \
-                player_score_rank_percentile(player, self.game)
+            player_score, player_rank, player_percentile = player_score_rank_percentile(player, self.game)
             player_count = self.game.players_dict.count()
-            context.update({
-                'player_score': score_string(player_score),
-                'player_rank': player_rank or "N/A",
-                'player_percentile': score_string(player_percentile),
-                'player_count': player_count,
-                'player_message': player_leaderboard_message(self.game, player_rank, player_percentile),
-            })
+            context.update(
+                {
+                    "player_score": score_string(player_score),
+                    "player_rank": player_rank or "N/A",
+                    "player_percentile": score_string(player_percentile),
+                    "player_count": player_count,
+                    "player_message": player_leaderboard_message(self.game, player_rank, player_percentile),
+                }
+            )
         elif self._player_answers_from_session(request):
             # get stats from instant game in session
             player_score, player_rank, player_percentile = self._instant_game_score_rank(request)
             player_count = self.game.players_dict.count()
-            player_message = f"You scored {player_score} points, which ranks you " \
-                             f"{rank_string(player_rank)} out of {player_count} live players. That's " \
-                             f"better than {player_percentile}% of them! Join the live game to earn your spot " \
-                             f"on the leaderboard."
-            context.update({
-                'player_score': score_string(player_score),
-                'player_rank': player_rank or "N/A",
-                'player_message': mark_safe(player_message),
-                'player_percentile': score_string(player_percentile),
-                'player_count': player_count,
-                'is_instant': True
-            })
+            player_message = (
+                f"You scored {player_score} points, which ranks you "
+                f"{rank_string(player_rank)} out of {player_count} live players. That's "
+                f"better than {player_percentile}% of them! Join the live game to earn your spot "
+                f"on the leaderboard."
+            )
+            context.update(
+                {
+                    "player_score": score_string(player_score),
+                    "player_rank": player_rank or "N/A",
+                    "player_message": mark_safe(player_message),
+                    "player_percentile": score_string(player_percentile),
+                    "player_count": player_count,
+                    "is_instant": True,
+                }
+            )
             context.update(next_game_context())
 
         return context
 
     def get(self, request, *args, **kwargs):
         messages.info(request, "Login to follow your friends and join the conversation!")
-        return render(request, 'leaderboard/leaderboard_view.html', self.get_context(*args, **kwargs))
+        return render(request, "leaderboard/leaderboard_view.html", self.get_context(*args, **kwargs))
 
     def _last_results_visit_key(self):
-        return f'results_last_visit_t:{self.slug}:{self.game.game_id}'
+        return f"results_last_visit_t:{self.slug}:{self.game.game_id}"
 
     def _player_answers_from_session(self, request):
         player_answers = request.session.get(f"game_{self.game.game_id}_answers", {})
@@ -114,9 +128,11 @@ class LeaderboardView(BaseGameView):
         for qid, player_answer in self._player_answers_from_session(request).items():
             player_score += answer_tally[qid_to_text[qid]][player_answer]
 
-        adjacent_rank = PlayerRankScore.objects.filter(
-            leaderboard__game=self.game, score__gt=player_score
-        ).order_by("score").first()
+        adjacent_rank = (
+            PlayerRankScore.objects.filter(leaderboard__game=self.game, score__gt=player_score)
+            .order_by("score")
+            .first()
+        )
         player_rank = adjacent_rank.rank + 1 if adjacent_rank else 1
         player_percentile = round(100 * (1 - player_rank / self.game.players_dict.count()))
         return player_score, player_rank, player_percentile
@@ -128,8 +144,12 @@ class ResultsView(LeaderboardView):
         game = self.get_game()
         answer_tally = build_answer_tally(game)
         context = self.get_context()
-        questions = game.questions.exclude(type=Question.op).order_by(
-            'number').select_related('thread').prefetch_related('thread__comments', 'thread__comments__player')
+        questions = (
+            game.questions.exclude(type=Question.op)
+            .order_by("number")
+            .select_related("thread")
+            .prefetch_related("thread__comments", "thread__comments__player")
+        )
 
         if request.user.is_authenticated:
             player = request.user
@@ -139,26 +159,30 @@ class ResultsView(LeaderboardView):
             player_answers = self._player_answers_from_session(request)
             messages.info(request, "Login to follow your friends and join the conversation!")
 
-        context.update({
-            'answer_tally': answer_tally,
-            'player_answers': player_answers,
-            'questions': questions,
-            'host': game.hosts.filter(email="alex@commonologygame.com").first() or game.hosts.first(),
-            'visible_comments': 5
-        })
+        context.update(
+            {
+                "answer_tally": answer_tally,
+                "player_answers": player_answers,
+                "questions": questions,
+                "host": game.hosts.filter(email="alex@commonologygame.com").first() or game.hosts.first(),
+                "visible_comments": 5,
+            }
+        )
 
-        return render(request, 'leaderboard/results.html', context)
+        return render(request, "leaderboard/results.html", context)
 
 
 class HostNoteView(LeaderboardView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context(*args, **kwargs)
-        context.update({
-            'game_top_commentary': self.game.leaderboard.top_commentary,
-            'game_bottom_commentary': self.game.leaderboard.bottom_commentary,
-        })
-        return render(request, 'leaderboard/host_note.html', context)
+        context.update(
+            {
+                "game_top_commentary": self.game.leaderboard.top_commentary,
+                "game_bottom_commentary": self.game.leaderboard.bottom_commentary,
+            }
+        )
+        return render(request, "leaderboard/host_note.html", context)
 
 
 @login_required
@@ -172,7 +196,7 @@ def results_share_count_view(request):
     else:
         return HttpResponse("Invalid share")
 
-    action_param = request.GET.get('action')
+    action_param = request.GET.get("action")
     if action_param == "api":
         action, dest = "shared", "with the web api"
 

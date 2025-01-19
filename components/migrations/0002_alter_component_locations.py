@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('components', '0001_initial'),
+        ("components", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='component',
-            name='locations',
-            field=models.ManyToManyField(blank=True, help_text='Make this component available to these apps/locations. NOTE: This does not automatically make the component appear in these locations, that must be configured explicitly.', related_name='components', to='components.Location'),
+            model_name="component",
+            name="locations",
+            field=models.ManyToManyField(
+                blank=True,
+                help_text="Make this component available to these apps/locations. NOTE: This does not automatically make the component appear in these locations, that must be configured explicitly.",
+                related_name="components",
+                to="components.Location",
+            ),
         ),
     ]

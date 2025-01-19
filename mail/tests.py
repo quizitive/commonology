@@ -1,4 +1,3 @@
-
 from django.core import mail
 from users.tests import get_local_user
 from game.tests import BaseGameDataTestCase
@@ -12,13 +11,15 @@ class MassMailTests(BaseGameDataTestCase):
     @classmethod
     def setUpTestData(cls):
         cls.mySetUpTestData()
-        cls.game_player_not = get_local_user(e='someone@noplayer.com', subscribed=False)
-        cls.mm = MailMessage.objects.create(series=cls.series,
-                                            from_name='test',
-                                            from_email='test@quizitive.com',
-                                            test_recipient='test@quizitive.com',
-                                            subject='testing_template',
-                                            message='this is the mail message body')
+        cls.game_player_not = get_local_user(e="someone@noplayer.com", subscribed=False)
+        cls.mm = MailMessage.objects.create(
+            series=cls.series,
+            from_name="test",
+            from_email="test@quizitive.com",
+            test_recipient="test@quizitive.com",
+            subject="testing_template",
+            message="this is the mail message body",
+        )
 
     def setUp(self):
         self.activate_game()
@@ -32,16 +33,16 @@ class MassMailTests(BaseGameDataTestCase):
     def test_template_component_order(self):
         mm = self.mm
         c1 = Component.objects.create(
-            name='component1',
-            template='components/simple_component.html',
-            message='<b>bolded string</b>',
-            context={'name': 'component_1'}
+            name="component1",
+            template="components/simple_component.html",
+            message="<b>bolded string</b>",
+            context={"name": "component_1"},
         )
         c2 = Component.objects.create(
-            name='component2',
-            template='components/simple_component.html',
-            message='<i>italic string</i>',
-            context={'name': 'component_2'}
+            name="component2",
+            template="components/simple_component.html",
+            message="<i>italic string</i>",
+            context={"name": "component_2"},
         )
         mm.bottom_components.add(c2, c1)
         _, rendered_msg = sendgrid_send(
@@ -49,11 +50,11 @@ class MassMailTests(BaseGameDataTestCase):
             msg=mm.message,
             email_list=[],
             from_email=mm.from_email,
-            bottom_components=mm.bottom_components.all()
+            bottom_components=mm.bottom_components.all(),
         )
 
-        c1_loc = rendered_msg.find('<b>bolded string</b>')
-        c2_loc = rendered_msg.find('<i>italic string</i>')
+        c1_loc = rendered_msg.find("<b>bolded string</b>")
+        c2_loc = rendered_msg.find("<i>italic string</i>")
 
         # assert the components are in the rendered message
         self.assertNotEqual(c1_loc, -1)
@@ -71,10 +72,10 @@ class MassMailTests(BaseGameDataTestCase):
             email_list=[],
             from_email=mm.from_email,
             top_components=mm.top_components.all(),
-            bottom_components=mm.bottom_components.all()
+            bottom_components=mm.bottom_components.all(),
         )
-        msg_loc = rendered_msg.find('this is the mail message body')
-        c1_new_loc = rendered_msg.find('<b>bolded string</b>')
+        msg_loc = rendered_msg.find("this is the mail message body")
+        c1_new_loc = rendered_msg.find("<b>bolded string</b>")
         self.assertLess(c1_new_loc, msg_loc)
 
     def test_reminder(self):

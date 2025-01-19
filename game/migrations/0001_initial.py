@@ -15,48 +15,84 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Game',
+            name="Game",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('game_id', models.IntegerField(unique=True)),
-                ('name', models.CharField(max_length=100)),
-                ('sheet_name', models.CharField(help_text='The name of the Google Sheet which contains response data', max_length=10000)),
-                ('publish', models.BooleanField(default=False, help_text='This game can be published to the dashboard')),
-                ('hosts', models.ManyToManyField(related_name='hosted_games', to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("game_id", models.IntegerField(unique=True)),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "sheet_name",
+                    models.CharField(
+                        help_text="The name of the Google Sheet which contains response data", max_length=10000
+                    ),
+                ),
+                (
+                    "publish",
+                    models.BooleanField(default=False, help_text="This game can be published to the dashboard"),
+                ),
+                ("hosts", models.ManyToManyField(related_name="hosted_games", to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'ordering': ['-game_id'],
+                "ordering": ["-game_id"],
             },
         ),
         migrations.CreateModel(
-            name='Question',
+            name="Question",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('text', models.CharField(max_length=10000)),
-                ('type', models.CharField(choices=[('MC', 'Multiple Choice'), ('FR', 'Free Response'), ('OP', 'Optional')], max_length=2)),
-                ('game', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='questions', to='game.game')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("text", models.CharField(max_length=10000)),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[("MC", "Multiple Choice"), ("FR", "Free Response"), ("OP", "Optional")], max_length=2
+                    ),
+                ),
+                (
+                    "game",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="questions",
+                        to="game.game",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Answer',
+            name="Answer",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timestamp', models.DateTimeField()),
-                ('raw_string', models.CharField(max_length=1000)),
-                ('player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answers', to=settings.AUTH_USER_MODEL)),
-                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='raw_answers', to='game.question')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("timestamp", models.DateTimeField()),
+                ("raw_string", models.CharField(max_length=1000)),
+                (
+                    "player",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="answers", to=settings.AUTH_USER_MODEL
+                    ),
+                ),
+                (
+                    "question",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="raw_answers", to="game.question"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='AnswerCode',
+            name="AnswerCode",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('raw_string', models.CharField(max_length=1000)),
-                ('coded_answer', models.CharField(db_index=True, max_length=1000)),
-                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='coded_answers', to='game.question')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("raw_string", models.CharField(max_length=1000)),
+                ("coded_answer", models.CharField(db_index=True, max_length=1000)),
+                (
+                    "question",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="coded_answers", to="game.question"
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('question', 'raw_string')},
+                "unique_together": {("question", "raw_string")},
             },
         ),
     ]

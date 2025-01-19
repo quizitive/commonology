@@ -1,4 +1,3 @@
-
 import sys
 import os
 import datetime
@@ -15,14 +14,14 @@ from game.mail import send_prior_winner_notice
 from project.utils import our_now
 from users.utils import player_log_entry
 
-data = '''64,Emma Himes
-64,Ryan Murphy'''
-data = [i.split(',') for i in data.split("\n")]
+data = """64,Emma Himes
+64,Ryan Murphy"""
+data = [i.split(",") for i in data.split("\n")]
 
-data = '''Emma Himes,emma@not_her_email.com,64
-Ryan Murphy,rmurphy@not_his_email.com,64'''
+data = """Emma Himes,emma@not_her_email.com,64
+Ryan Murphy,rmurphy@not_his_email.com,64"""
 
-data = [i.split(',') for i in data.split('\n')]
+data = [i.split(",") for i in data.split("\n")]
 data = [(i[1], i[2]) for i in data]
 
 

@@ -1,4 +1,3 @@
-
 from datetime import datetime, timedelta
 
 from django.db import transaction
@@ -23,12 +22,12 @@ def remove_pending_email_invitations(n=7):
 
 def sign_user(email, id):
     signed_email = Signer().sign(value=email)
-    e, x = signed_email.split(':')
-    x = ':'.join([str(id), x])
+    e, x = signed_email.split(":")
+    x = ":".join([str(id), x])
     return x
 
 
-def unsubscribe(email, reason='user asked'):
+def unsubscribe(email, reason="user asked"):
     User = get_user_model()
     try:
         u = User.objects.get(email=email)
@@ -54,12 +53,12 @@ def add_additional_fields(strategy, details, backend, user=None, *args, **kwargs
         user.display_name = f"{user.first_name} {user.last_name}".strip()
 
     user.is_member = True
-    r_code = strategy.session.get('r')
+    r_code = strategy.session.get("r")
     if r_code and user.referrer is None:
         referrer = Player.objects.filter(_code=r_code).first()
         user.referrer = referrer
     user.save()
-    Series.objects.get(slug='commonology').players.add(user)
+    Series.objects.get(slug="commonology").players.add(user)
 
 
 def is_validated(email):
@@ -85,8 +84,11 @@ def get_player(code):
 
 @quick_cache()
 def players_with_referral_badge(threshold=3):
-    return Player.objects.annotate(
-        ref_count=Count("referrals")).filter(ref_count__gte=threshold).values_list("id", flat=True)
+    return (
+        Player.objects.annotate(ref_count=Count("referrals"))
+        .filter(ref_count__gte=threshold)
+        .values_list("id", flat=True)
+    )
 
 
 @transaction.atomic
@@ -174,5 +176,5 @@ def merge_players(from_email, to_email):
     from_p.is_member = False
     from_p.reminder = False
     from_p.save()
-    player_log_entry(from_p, f'Deactivated and moved to {to_p}')
-    player_log_entry(to_p, f'{from_p} merged into {to_p}')
+    player_log_entry(from_p, f"Deactivated and moved to {to_p}")
+    player_log_entry(to_p, f"{from_p} merged into {to_p}")

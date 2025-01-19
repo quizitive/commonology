@@ -6,19 +6,18 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0015_player_data'),
+        ("users", "0015_player_data"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Referrer',
-            fields=[
-            ],
+            name="Referrer",
+            fields=[],
             options={
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('users.player',),
+            bases=("users.player",),
         ),
     ]

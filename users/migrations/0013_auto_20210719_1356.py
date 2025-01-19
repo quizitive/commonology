@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 
 def player_fix(apps, schema_editor):
-    Player = apps.get_model('users', 'Player')
+    Player = apps.get_model("users", "Player")
 
     for p in Player.objects.all():
         try:
@@ -19,8 +19,8 @@ def player_fix(apps, schema_editor):
 
 
 def pending_fix(apps, schema_editor):
-    Player = apps.get_model('users', 'Player')
-    PendingEmail = apps.get_model('users', 'PendingEmail')
+    Player = apps.get_model("users", "Player")
+    PendingEmail = apps.get_model("users", "PendingEmail")
 
     for p in PendingEmail.objects.all():
         if p.referrer:
@@ -35,41 +35,42 @@ def pending_fix(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0012_auto_20210715_1648'),
+        ("users", "0012_auto_20210715_1648"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='pendingemail',
-            name='referrer_player',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="pendingemail",
+            name="referrer_player",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
-
         migrations.AddField(
-            model_name='player',
-            name='referrer_player',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="player",
+            name="referrer_player",
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
-
         migrations.RunPython(pending_fix),
         migrations.RunPython(player_fix),
-
         migrations.RemoveField(
-            model_name='pendingemail',
-            name='referrer',
+            model_name="pendingemail",
+            name="referrer",
         ),
         migrations.RemoveField(
-            model_name='player',
-            name='referrer',
+            model_name="player",
+            name="referrer",
         ),
         migrations.RenameField(
-            model_name='pendingemail',
-            old_name='referrer_player',
-            new_name='referrer',
+            model_name="pendingemail",
+            old_name="referrer_player",
+            new_name="referrer",
         ),
         migrations.RenameField(
-            model_name='player',
-            old_name='referrer_player',
-            new_name='referrer',
+            model_name="player",
+            old_name="referrer_player",
+            new_name="referrer",
         ),
     ]

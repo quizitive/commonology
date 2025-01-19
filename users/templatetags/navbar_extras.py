@@ -10,11 +10,11 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def login_logout_url(context):
-    request = context['request']
+    request = context["request"]
     if request.user.is_authenticated:
-        s = 'logout'
+        s = "logout"
     else:
-        s = 'login'
+        s = "login"
     url = reverse(s)
     # url = f"<A HREF={url}>{s}</A>"
     return url
@@ -27,16 +27,16 @@ login_logout_url.is_safe = True
 def login_modal(request):
     if not request:
         return
-    return render_to_string('users/modals/login_modal.html', {'form': LoginForm}, request=request)
+    return render_to_string("users/modals/login_modal.html", {"form": LoginForm}, request=request)
 
 
 @register.simple_tag
 def login_next_url(request):
     if not request:
-        return ''
+        return ""
     if val := request.GET.get("next"):
-        return f'?next={val}'
+        return f"?next={val}"
     p = request.path
-    if p == '/login/' or p == '/join/':
-        return ''
-    return f'?next={p}'
+    if p == "/login/" or p == "/join/":
+        return ""
+    return f"?next={p}"

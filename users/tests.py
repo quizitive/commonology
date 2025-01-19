@@ -15,14 +15,14 @@ from game.models import Series, Answer, Question
 
 User = get_user_model()
 
-NORMAL = 'normal@user.com'
-ABINORMAL = 'abinormal@user.com'
-test_pw = 'foo'
+NORMAL = "normal@user.com"
+ABINORMAL = "abinormal@user.com"
+test_pw = "foo"
 
 
 def get_local_user(e=NORMAL, subscribed=True, pw=test_pw):
     User.objects.filter(email=e).delete()
-    u = User.objects.create_user(email=e, subscribed=subscribed, display_name='dn')
+    u = User.objects.create_user(email=e, subscribed=subscribed, display_name="dn")
     if pw:
         u.set_password(pw)
         u.save()
@@ -43,7 +43,7 @@ class MailTests(TestCase):
 
     def test_sendmail(self):
         mail.outbox = []
-        mail.send_mail(subject='testing', from_email=ABINORMAL, recipient_list=[NORMAL], message='')
+        mail.send_mail(subject="testing", from_email=ABINORMAL, recipient_list=[NORMAL], message="")
         self.assertEqual(len(mail.outbox), 1)
         mail.outbox = []
 
@@ -65,9 +65,9 @@ class UsersManagersTests(TestCase):
         with self.assertRaises(TypeError):
             User.objects.create_user()
         with self.assertRaises(ValueError):
-            User.objects.create_user(email='')
+            User.objects.create_user(email="")
         with self.assertRaises(ValueError):
-            User.objects.create_user(email='', password=test_pw)
+            User.objects.create_user(email="", password=test_pw)
 
     def test_create_superuser(self):
         su = "super@user.com"
@@ -84,25 +84,29 @@ class UsersManagersTests(TestCase):
         except AttributeError:
             pass
         with self.assertRaises(ValueError):
-            User.objects.create_superuser(
-                email=su, password=test_pw, is_superuser=False)
+            User.objects.create_superuser(email=su, password=test_pw, is_superuser=False)
 
     def test_profile(self):
         user = get_local_user()
         client = get_local_client()
-        path = reverse('profile')
+        path = reverse("profile")
         response = client.get(path)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.reason_phrase, "OK")
 
-        data = {'email': NORMAL, 'first_name': 'Iam', 'last_name': 'Normal',
-                'location': 'Turkey', 'display_name': user.display_name}
+        data = {
+            "email": NORMAL,
+            "first_name": "Iam",
+            "last_name": "Normal",
+            "location": "Turkey",
+            "display_name": user.display_name,
+        }
         response = client.post(path, data=data)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.reason_phrase, "OK")
 
         user = User.objects.get(email=NORMAL)
-        self.assertEqual(user.first_name, data['first_name'])
-        self.assertEqual(user.last_name, data['last_name'])
-        self.assertEqual(user.location, data['location'])
+        self.assertEqual(user.first_name, data["first_name"])
+        self.assertEqual(user.last_name, data["last_name"])
+        self.assertEqual(user.location, data["location"])
 
     def test_logout(self):
         # Make sure user exists.
@@ -121,14 +125,14 @@ class UsersManagersTests(TestCase):
         mail.outbox = []
 
         client = get_local_client()
-        path = reverse('password_change')
+        path = reverse("password_change")
         response = client.get(path)
         self.assertIn(response.status_code, [200, 302])
 
-        path = reverse('password_change')
-        pw = 'nAPrZuTg9pr8dLN2'
+        path = reverse("password_change")
+        pw = "nAPrZuTg9pr8dLN2"
 
-        response = client.post(path, {'old_password': test_pw, 'new_password1': pw, 'new_password2': pw})
+        response = client.post(path, {"old_password": test_pw, "new_password1": pw, "new_password2": pw})
         self.assertIn(response.status_code, [200, 302])
 
         logged_in = client.logout()
@@ -144,28 +148,26 @@ class UsersManagersTests(TestCase):
         logged_in = client.login(email=NORMAL, password=test_pw)
         self.assertEqual(logged_in, True)
 
-        response = client.get(reverse('password_reset'))
+        response = client.get(reverse("password_reset"))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.template_name[0], 'users/pwd_reset.html')
+        self.assertEqual(response.template_name[0], "users/pwd_reset.html")
 
         mail.outbox = []
-        response = client.post(reverse('password_reset'), {'email': NORMAL})
+        response = client.post(reverse("password_reset"), {"email": NORMAL})
         self.assertIn(response.status_code, [200, 302])
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, 'Commonology password reset')
+        self.assertEqual(mail.outbox[0].subject, "Commonology password reset")
 
-        token = response.context[0]['token']
-        uid = response.context[0]['uid']
+        token = response.context[0]["token"]
+        uid = response.context[0]["uid"]
 
-        response = client.get(reverse('password_reset_confirm',
-                                      kwargs={'token': token, 'uidb64': uid}))
+        response = client.get(reverse("password_reset_confirm", kwargs={"token": token, "uidb64": uid}))
         self.assertIn(response.status_code, [200, 302])
 
         # Now we post to the same url with our new password:
-        path = reverse('password_reset_confirm',
-                       kwargs={'token': token, 'uidb64': uid})
-        response = client.post(path, {'new_password1': test_pw, 'new_password2': test_pw})
+        path = reverse("password_reset_confirm", kwargs={"token": token, "uidb64": uid})
+        response = client.post(path, {"new_password1": test_pw, "new_password2": test_pw})
         self.assertIn(response.status_code, [200, 302])
 
     def test_unsubscribe_link(self):
@@ -173,7 +175,7 @@ class UsersManagersTests(TestCase):
         id = user.code
 
         saved_key = settings.SECRET_KEY
-        settings.SECRET_KEY = 'Test'
+        settings.SECRET_KEY = "Test"
 
         token = sign_user(user, id)
         self.assertEqual(token, f"{id}:0s9kU4sbRep-eXx01wMXH7dfp84JlIrkIxEJpAstUnI")
@@ -182,7 +184,7 @@ class UsersManagersTests(TestCase):
         client = Client()
 
         mail.outbox = []
-        url = reverse('unsubscribe', kwargs={'token': token})
+        url = reverse("unsubscribe", kwargs={"token": token})
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
         email = user.email
@@ -190,16 +192,16 @@ class UsersManagersTests(TestCase):
         self.assertFalse(user.subscribed)
 
         msg = mail.outbox[0].body
-        url = re.search("HTTPS.*://.*/subscribe/.*\"", msg).group(0)[:-1]
-        base_url, token = url.rsplit('/', 1)
-        response = client.get(reverse('subscribe', kwargs={'token': token}))
+        url = re.search('HTTPS.*://.*/subscribe/.*"', msg).group(0)[:-1]
+        base_url, token = url.rsplit("/", 1)
+        response = client.get(reverse("subscribe", kwargs={"token": token}))
         self.assertEqual(response.status_code, 200)
         user = User.objects.filter(email=user.email).get()
         self.assertTrue(user.subscribed)
 
         # Trying a bad unsubscribe url
         mail.outbox = []
-        url += 'foo'
+        url += "foo"
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
         user = User.objects.get(email=email)
@@ -220,41 +222,43 @@ class UsersManagersTests(TestCase):
 class PendingUsersTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        owner = get_local_user(e='series@owner.com')
+        owner = get_local_user(e="series@owner.com")
         Series.objects.create(name="Commonology", owner=owner, public=True)
 
     def setUp(self):
-        pw = '3CgAQCHzyv5x5yhN'
-        self.data = {'email': ABINORMAL,
-                     'first_name': 'Abi',
-                     'last_name': 'Normal',
-                     'display_name': 'abnormal',
-                     'location': 'Andorra',
-                     'referrer': NORMAL,
-                     'password1': pw,
-                     'password2': pw}
+        pw = "3CgAQCHzyv5x5yhN"
+        self.data = {
+            "email": ABINORMAL,
+            "first_name": "Abi",
+            "last_name": "Normal",
+            "display_name": "abnormal",
+            "location": "Andorra",
+            "referrer": NORMAL,
+            "password1": pw,
+            "password2": pw,
+        }
 
     def assert_user_was_created(self, path, data, flag):
         client = Client()
         response = client.post(path, data=data)
         self.assertIn(response.status_code, [200, 302])
-        x = User.objects.filter(email__exact=data['email']).exists()
+        x = User.objects.filter(email__exact=data["email"]).exists()
         self.assertEqual(x, flag)
         if flag:
-            p = User.objects.get(email=data['email'])
-            self.assertTrue(p.series.filter(slug='commonology').exists())
+            p = User.objects.get(email=data["email"])
+            self.assertTrue(p.series.filter(slug="commonology").exists())
 
     def test_invite(self):
         user = get_local_user()
         remove_abinormal()
 
-        self.assertEqual(test_pw, 'foo')
+        self.assertEqual(test_pw, "foo")
         client = Client()
         result = client.login(email=NORMAL, password=test_pw)
         self.assertTrue(result)
 
         mail.outbox = []
-        url = reverse('invite')
+        url = reverse("invite")
         response = client.post(url, data={"emails": ABINORMAL})
         self.assertIn(response.status_code, [200, 302])
 
@@ -268,13 +272,13 @@ class PendingUsersTests(TestCase):
         client = Client()
 
         # test unsubscribe from invite
-        path = reverse('unsubscribe', kwargs={'token': 'None:' + str(pe.uuid)})
+        path = reverse("unsubscribe", kwargs={"token": "None:" + str(pe.uuid)})
         response = client.get(path)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.reason_phrase, "OK")
 
-        path = reverse('join') + str(pe.uuid)
+        path = reverse("join") + str(pe.uuid)
         response = client.get(path)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.reason_phrase, "OK")
 
         x = User.objects.filter(email__exact=ABINORMAL).exists()
         self.assertEqual(x, True)
@@ -283,12 +287,12 @@ class PendingUsersTests(TestCase):
 
     def join_test_helper(self, data, taint_uuid_flag=False):
         client = Client()
-        response = client.post(reverse('join'), data={"email": data['email']})
-        self.assertEqual(response.reason_phrase, 'OK')
+        response = client.post(reverse("join"), data={"email": data["email"]})
+        self.assertEqual(response.reason_phrase, "OK")
 
         msg = mail.outbox[0].body
-        url = re.search("https?://.*/join/.*\"", msg).group(0)[:-1]
-        base_url, uuid_str = url.rsplit('/', 1)
+        url = re.search('https?://.*/join/.*"', msg).group(0)[:-1]
+        base_url, uuid_str = url.rsplit("/", 1)
 
         mail.outbox = []
 
@@ -299,7 +303,7 @@ class PendingUsersTests(TestCase):
 
         path = os.path.join(base_url, uuid_str)
 
-        if data['password1'] != data['password2']:
+        if data["password1"] != data["password2"]:
             flag = False
 
         self.assert_user_was_created(path, data, flag)
@@ -312,15 +316,15 @@ class PendingUsersTests(TestCase):
 
         self.join_test_helper(data, taint_uuid_flag=True)
 
-        data['password2'] = test_pw
+        data["password2"] = test_pw
         self.join_test_helper(data)
-        data['password2'] = data['password1']
+        data["password2"] = data["password1"]
 
         self.join_test_helper(data)
 
     def test_join_email_exists(self):
         data = self.data
-        email = data['email']
+        email = data["email"]
         get_local_user(e=email)
         self.join_test_helper(data)
 
@@ -331,15 +335,20 @@ class PendingUsersTests(TestCase):
         user = get_local_user()
         client = Client()
         client.login(email=NORMAL, password=test_pw)
-        path = reverse('profile')
+        path = reverse("profile")
         response = client.get(path)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.reason_phrase, "OK")
 
-        data = {'email': ABINORMAL, 'first_name': 'Iam', 'last_name': 'Normal',
-                'location': 'Turkey', 'display_name': user.display_name}
+        data = {
+            "email": ABINORMAL,
+            "first_name": "Iam",
+            "last_name": "Normal",
+            "location": "Turkey",
+            "display_name": user.display_name,
+        }
         mail.outbox = []
         response = client.post(path, data=data)
-        self.assertEqual(response.reason_phrase, 'OK')
+        self.assertEqual(response.reason_phrase, "OK")
 
         flag = User.objects.filter(email__exact=ABINORMAL).exists()
         self.assertFalse(flag)
@@ -361,13 +370,13 @@ class PendingUsersTests(TestCase):
 
     def test_join_bad_email(self):
         client = Client()
-        response = client.post(reverse('join'), data={"email": 'foo@goo.con'})
-        self.assertEqual(response.reason_phrase, 'OK')
+        response = client.post(reverse("join"), data={"email": "foo@goo.con"})
+        self.assertEqual(response.reason_phrase, "OK")
         self.assertContains(response, "ends with .con and probably should be .com")
 
     def test_referral_count(self):
         user1 = get_local_user()
-        user2 = get_local_user(e='igot@referred.com')
+        user2 = get_local_user(e="igot@referred.com")
         user2.referrer = user1
         user2.save()
 
@@ -375,16 +384,16 @@ class PendingUsersTests(TestCase):
         self.assertEqual(user1.players_referred.count(), 0)
 
         # give them an answer
-        q = Question.objects.create(text='question text')
-        Answer.objects.create(player=user2, raw_string='answer', question=q)
+        q = Question.objects.create(text="question text")
+        Answer.objects.create(player=user2, raw_string="answer", question=q)
         self.assertEqual(user1.players_referred.count(), 1)
 
     def test_email_join_referral(self):
         user1 = get_local_user()
-        referred_email = 'igot@referred.com'
+        referred_email = "igot@referred.com"
         pe = PendingEmail.objects.create(referrer=user1, email=referred_email)
 
-        join_view = reverse('join', args=[pe.uuid])
+        join_view = reverse("join", args=[pe.uuid])
         Client().get(join_view)
         user2 = Player.objects.get(email=referred_email)
 
@@ -405,16 +414,16 @@ class LoginTests(TestCase):
         mail.outbox = []
 
         client = Client()
-        response = client.post(reverse('login'), data={"username": user.email})
+        response = client.post(reverse("login"), data={"username": user.email})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, f"An email validation link was sent to {user.email}.")
 
         msg = mail.outbox[0].body
 
-        url = re.search("https?://.*(?P<uidb64>\/validate_email\/[^\s]+)\"\>", msg).group("uidb64")
+        url = re.search('https?://.*(?P<uidb64>\/validate_email\/[^\s]+)"\>', msg).group("uidb64")
         mail.outbox = []
 
-        uid = url.split('/')[-1]
+        uid = url.split("/")[-1]
         pe = PendingEmail.objects.filter(uuid__exact=uid).first()
         pe.created = pe.created - datetime.timedelta(minutes=21)
         pe.save()
@@ -428,7 +437,7 @@ class LoginTests(TestCase):
         response = client.get(url, follow=True)
         u, c = response.redirect_chain[2]
         self.assertEqual(c, 302)
-        self.assertEqual(u, '/leaderboard/')
+        self.assertEqual(u, "/leaderboard/")
 
 
 class MergePlayers(TestCase):
@@ -436,26 +445,62 @@ class MergePlayers(TestCase):
         # This test is designed to make sure we maintain merge_players.py
         # when new Player related fields are added.
 
-        expected = ['referrals', 'followers', 'pendingemail', 'captain_teams', 'teams',
-                    'logentry', 'social_auth', 'comments', 'owned_series', 'hosted_series',
-                    'series', 'hosted_games', 'answers', 'claim', 'mailingaddress',
-                    'id', 'password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined',
-                    'email', 'first_name', 'last_name', 'location', 'birth_date', 'subscribed', '_code',
-                    'reminder', 'referrer', 'display_name', 'is_member', 'data', 'groups', 'user_permissions',
-                    'following', 'rank_scores', 'request']
+        expected = [
+            "referrals",
+            "followers",
+            "pendingemail",
+            "captain_teams",
+            "teams",
+            "logentry",
+            "social_auth",
+            "comments",
+            "owned_series",
+            "hosted_series",
+            "series",
+            "hosted_games",
+            "answers",
+            "claim",
+            "mailingaddress",
+            "id",
+            "password",
+            "last_login",
+            "is_superuser",
+            "is_staff",
+            "is_active",
+            "date_joined",
+            "email",
+            "first_name",
+            "last_name",
+            "location",
+            "birth_date",
+            "subscribed",
+            "_code",
+            "reminder",
+            "referrer",
+            "display_name",
+            "is_member",
+            "data",
+            "groups",
+            "user_permissions",
+            "following",
+            "rank_scores",
+            "request",
+        ]
 
         names = [field.name for field in Player._meta.get_fields()]
-        self.assertTrue(set(names) == set(expected),
-                        msg='Was a model changed that relates to Player? Check impact to scripts/hacks/merge_players.py')
+        self.assertTrue(
+            set(names) == set(expected),
+            msg="Was a model changed that relates to Player? Check impact to scripts/hacks/merge_players.py",
+        )
 
 
 class MergePlayersTest(TestCase):
     def test_simple(self):
         from_p = get_local_user(e=ABINORMAL)
         to_p = get_local_user(e=NORMAL)
-        from_p.display_name = 'From'
+        from_p.display_name = "From"
         from_p.save()
-        to_p.display_name = ''
+        to_p.display_name = ""
         to_p.save()
 
         merge_players(ABINORMAL, NORMAL)

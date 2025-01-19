@@ -9,11 +9,11 @@ class PlayerBackend(ModelBackend):
 
     def authenticate(self, request, **kwargs):
         if request is not None:
-            user_id = kwargs.get('user_id')
+            user_id = kwargs.get("user_id")
             if user_id is None:
-                user_id = request.session.get('user_id')
+                user_id = request.session.get("user_id")
             else:
-                request.session['user_id'] = user_id
+                request.session["user_id"] = user_id
 
             try:
                 return Player.objects.get(id=user_id)
@@ -29,10 +29,10 @@ class PlayerActivateError(Exception):
 def activate_account(request, uuid):
     pe = PendingEmail.objects.filter(uuid__exact=uuid).first()
     if pe is None:
-        raise PlayerActivateError('Seems like there was a problem with the validation link. Please try again.')
+        raise PlayerActivateError("Seems like there was a problem with the validation link. Please try again.")
 
     if pe.created < (our_now() - datetime.timedelta(minutes=20)):
-        raise PlayerActivateError('The validation link sent to you is more than 20 minutes old.')
+        raise PlayerActivateError("The validation link sent to you is more than 20 minutes old.")
 
     email = pe.email
     try:
@@ -45,7 +45,7 @@ def activate_account(request, uuid):
         p.activate()
         p.save()
 
-    login(request, p, backend='django.contrib.auth.backends.ModelBackend')
+    login(request, p, backend="django.contrib.auth.backends.ModelBackend")
     pe.delete()
 
     return p

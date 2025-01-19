@@ -15,8 +15,8 @@ class PlayersHTMXView(View):
         user = User.objects.get(id=request.user.id)
         data = request.POST.dict()
 
-        if data.get('to_follow'):
-            to_follow = data.get('to_follow')
+        if data.get("to_follow"):
+            to_follow = data.get("to_follow")
             return self._follow_unfollow(user, to_follow)
 
         return HttpResponseBadRequest("Request provided no target follower")

@@ -12,18 +12,18 @@ from components.models import Component, SponsorComponent
 
 @admin.register(MailMessage)
 class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
-    change_form_template = 'admin/mail_change_form.html'
+    change_form_template = "admin/mail_change_form.html"
 
     def keep_form_open(self, request):
         request.POST._mutable = True
-        request.POST['_continue'] = 'Save and continue editing'
+        request.POST["_continue"] = "Save and continue editing"
         request.POST._mutable = False
 
     def response_change(self, request, obj):
-        if '_button_test' in request.POST:
+        if "_button_test" in request.POST:
             self.keep_form_open(request)
             self.send_test(request, obj)
-        elif '_button_blast' in request.POST:
+        elif "_button_blast" in request.POST:
             if obj.enable_blast:
                 self.blast(request, obj)
                 obj.enable_blast = False
@@ -45,14 +45,20 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
 
         from_email = (obj.from_email, obj.from_name)
         top_components = list(SponsorComponent.active_sponsor_components()) + list(obj.top_components.all())
-        sendgrid_send(obj.subject, msg=obj.message, email_list=[(email, user_code)],
-                      from_email=from_email, unsub_link=True,
-                      top_components=top_components, bottom_components=obj.bottom_components.all())
-        messages.add_message(request, messages.INFO, 'Test message sent.')
+        sendgrid_send(
+            obj.subject,
+            msg=obj.message,
+            email_list=[(email, user_code)],
+            from_email=from_email,
+            unsub_link=True,
+            top_components=top_components,
+            bottom_components=obj.bottom_components.all(),
+        )
+        messages.add_message(request, messages.INFO, "Test message sent.")
 
     def blast(self, request, obj):
         if obj.series is None:
-            messages.add_message(request, messages.WARNING, 'You must choose a series.')
+            messages.add_message(request, messages.WARNING, "You must choose a series.")
             return
 
         n, log_msg, batch_id = mass_mail(obj)
@@ -66,23 +72,23 @@ class MailMessageAdmin(DjangoObjectActions, admin.ModelAdmin):
         add_mail_log(obj, batch_id=batch_id)
 
         if n:
-            messages.add_message(request, messages.INFO, f'Blast message sent to {n} players.')
+            messages.add_message(request, messages.INFO, f"Blast message sent to {n} players.")
         else:
-            messages.add_message(request, messages.WARNING, 'No valid recipients found, message not sent.')
+            messages.add_message(request, messages.WARNING, "No valid recipients found, message not sent.")
 
-    change_actions = ('send_test', 'blast')
+    change_actions = ("send_test", "blast")
 
-    list_display = ('subject', 'sent_date', 'test_recipient')
-    list_filter = ('created',)
-    search_fields = ('subject',)
-    ordering = ('-sent_date',)
-    filter_horizontal = ('top_components', 'bottom_components')
+    list_display = ("subject", "sent_date", "test_recipient")
+    list_filter = ("created",)
+    search_fields = ("subject",)
+    ordering = ("-sent_date",)
+    filter_horizontal = ("top_components", "bottom_components")
     save_on_top = True
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        if db_field.name in ('top_components', 'bottom_components'):
-            kwargs['queryset'] = Component.objects.filter(locations__app_name='mail')
-            kwargs['widget'] = SortedFilteredSelectMultiple()
+        if db_field.name in ("top_components", "bottom_components"):
+            kwargs["queryset"] = Component.objects.filter(locations__app_name="mail")
+            kwargs["widget"] = SortedFilteredSelectMultiple()
         return super(MailMessageAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
 
 
@@ -93,15 +99,18 @@ class MailLogAdmin(DjangoObjectActions, admin.ModelAdmin):
         result = sendgrid_cancel(batch_id=obj.batch_id)
         obj.canceled = our_now()
         obj.save()
-        messages.add_message(request, messages.INFO, 'Attempted to cancel message, may not work if less than 20 min away.')
-    cancel_send.label = 'Cancel Message'
+        messages.add_message(
+            request, messages.INFO, "Attempted to cancel message, may not work if less than 20 min away."
+        )
+
+    cancel_send.label = "Cancel Message"
     cancel_send.short_description = "Tries to stop message at SendGrid."
 
-    list_display = ('subject', 'sent_date', 'scheduled', 'canceled')
-    list_filter = ('sent_date',)
-    search_fields = ('subject',)
-    ordering = ('-sent_date',)
-    filter_horizontal = ('top_components', 'bottom_components')
+    list_display = ("subject", "sent_date", "scheduled", "canceled")
+    list_filter = ("sent_date",)
+    search_fields = ("subject",)
+    ordering = ("-sent_date",)
+    filter_horizontal = ("top_components", "bottom_components")
     save_on_top = True
 
     def has_change_permission(self, request, obj=None):
@@ -112,8 +121,8 @@ class MailLogAdmin(DjangoObjectActions, admin.ModelAdmin):
 
     def get_actions(self, request):
         actions = super().get_actions(request)
-        if 'delete_selected' in actions:
-            del actions['delete_selected']
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
         return actions
 
-    change_actions = ('cancel_send', )
+    change_actions = ("cancel_send",)

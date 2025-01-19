@@ -3,12 +3,12 @@ from users.utils import merge_players
 
 
 class Command(BaseCommand):
-    help = 'Merge Players.'
+    help = "Merge Players."
 
     def add_arguments(self, parser):
-        parser.add_argument('email', nargs='+', type=str, help="<from_email> <into_email>")
+        parser.add_argument("email", nargs="+", type=str, help="<from_email> <into_email>")
 
     def handle(self, *args, **kwargs):
-        from_email, to_email = kwargs['email']
+        from_email, to_email = kwargs["email"]
         print(f"Merging {from_email} to {to_email}")
         merge_players(from_email, to_email)

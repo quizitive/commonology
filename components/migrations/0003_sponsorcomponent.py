@@ -7,17 +7,27 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('components', '0002_alter_component_locations'),
+        ("components", "0002_alter_component_locations"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SponsorComponent',
+            name="SponsorComponent",
             fields=[
-                ('component_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='components.component')),
-                ('start_date', models.DateTimeField(blank=True, null=True)),
-                ('end_date', models.DateTimeField(blank=True, null=True)),
+                (
+                    "component_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="components.component",
+                    ),
+                ),
+                ("start_date", models.DateTimeField(blank=True, null=True)),
+                ("end_date", models.DateTimeField(blank=True, null=True)),
             ],
-            bases=('components.component',),
+            bases=("components.component",),
         ),
     ]

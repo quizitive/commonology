@@ -7,14 +7,16 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('chat', '0001_initial'),
-        ('game', '0006_auto_20210521_1811'),
+        ("chat", "0001_initial"),
+        ("game", "0006_auto_20210521_1811"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='question',
-            name='thread',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='object', to='chat.thread'),
+            model_name="question",
+            name="thread",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.CASCADE, related_name="object", to="chat.thread"
+            ),
         ),
     ]

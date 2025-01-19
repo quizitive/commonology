@@ -7,13 +7,13 @@ import users.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0020_alter_player_referrer'),
+        ("users", "0020_alter_player_referrer"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='player',
-            name='data',
+            model_name="player",
+            name="data",
             field=models.JSONField(default=users.models.default_data_dict),
         ),
     ]

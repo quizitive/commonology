@@ -2,19 +2,22 @@
 
 from django.db import migrations, models
 
+
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ('users', '0013_auto_20210719_1356'),
+        ("users", "0013_auto_20210719_1356"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='player',
-            name='_code',
-            field=models.CharField(db_index=True, max_length=5, null=True,
-                                   help_text='Unique identifier useful for url parameters like referrer.'),
+            model_name="player",
+            name="_code",
+            field=models.CharField(
+                db_index=True,
+                max_length=5,
+                null=True,
+                help_text="Unique identifier useful for url parameters like referrer.",
+            ),
         ),
     ]
-
-

@@ -24,24 +24,29 @@ from game.utils import game_log_entry
 
 @admin.register(Series)
 class SeriesAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug')
-    search_fields = ('name', 'slug')
-    filter_horizontal = ('hosts', )
-    exclude = ('players',)
+    list_display = ("name", "slug")
+    search_fields = ("name", "slug")
+    filter_horizontal = ("hosts",)
+    exclude = ("players",)
 
 
 class QuestionAdminForm(ModelForm):
-    choices = SimpleArrayField(CharField(), delimiter='\r\n', widget=Textarea(attrs={'cols': '30', 'rows': '5'}),
-        required=False, help_text="Enter each choice on a new line")
+    choices = SimpleArrayField(
+        CharField(),
+        delimiter="\r\n",
+        widget=Textarea(attrs={"cols": "30", "rows": "5"}),
+        required=False,
+        help_text="Enter each choice on a new line",
+    )
 
     class Meta:
-        fields = '__all__'
+        fields = "__all__"
 
 
 @admin.register(Question)
 class QuestionSearchAdmin(admin.ModelAdmin):
     model = Question
-    search_fields = ('text',)
+    search_fields = ("text",)
 
     def has_change_permission(self, request, obj=None):
         return False
@@ -52,21 +57,22 @@ class QuestionSearchAdmin(admin.ModelAdmin):
 
 class QuestionAdmin(admin.StackedInline):
     model = Question
-    list_display = ('text', 'game')
-    list_filter = ('game__name',)
-    search_fields = ('text', 'game__name')
-    ordering = ('number', )
+    list_display = ("text", "game")
+    list_filter = ("game__name",)
+    search_fields = ("text", "game__name")
+    ordering = ("number",)
     form = QuestionAdminForm
     fieldsets = (
-        (None, {
-            'fields': ()
-        }),
-        ('Question', {
-            'classes': ('collapse',),
-            'fields': ('number', 'text', 'image', 'choices', 'type', 'caption'),
-        }),
+        (None, {"fields": ()}),
+        (
+            "Question",
+            {
+                "classes": ("collapse",),
+                "fields": ("number", "text", "image", "choices", "type", "caption"),
+            },
+        ),
     )
-    formfield_overrides = {models.CharField: {'widget': Textarea(attrs={'cols': '100', 'rows': '2'})}}
+    formfield_overrides = {models.CharField: {"widget": Textarea(attrs={"cols": "100", "rows": "2"})}}
 
     def get_extra(self, request, obj=None, **kwargs):
         return 0
@@ -77,21 +83,26 @@ class GameAdmin(DjangoObjectActions, admin.ModelAdmin):
 
     save_on_top = True
     readonly_fields = ["uuid"]
-    list_display = ('name', 'game_id', 'series', 'start', 'end', 'play')
-    ordering = ('-game_id', )
-    search_fields = ('game_id', 'name', 'series__slug')
-    filter_horizontal = ('hosts', 'top_components')
-    list_filter = ('series',)
+    list_display = ("name", "game_id", "series", "start", "end", "play")
+    ordering = ("-game_id",)
+    search_fields = ("game_id", "name", "series__slug")
+    filter_horizontal = ("hosts", "top_components")
+    list_filter = ("series",)
     inlines = (QuestionAdmin,)
-    actions = ('clear_cache', 'score_selected_games',
-               'score_selected_games_update_existing', 'email_winner_certificates', 'find_raffle_winner')
-    change_actions = ('go_to_leaderboard',)
+    actions = (
+        "clear_cache",
+        "score_selected_games",
+        "score_selected_games_update_existing",
+        "email_winner_certificates",
+        "find_raffle_winner",
+    )
+    change_actions = ("go_to_leaderboard",)
     view_on_site = True
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
-        if db_field.name in ('top_components',):
-            kwargs['queryset'] = Component.objects.filter(locations__app_name='leaderboard')
-            kwargs['widget'] = SortedFilteredSelectMultiple()
+        if db_field.name in ("top_components",):
+            kwargs["queryset"] = Component.objects.filter(locations__app_name="leaderboard")
+            kwargs["widget"] = SortedFilteredSelectMultiple()
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def clear_cache(self, request, queryset):
@@ -102,20 +113,21 @@ class GameAdmin(DjangoObjectActions, admin.ModelAdmin):
     def score_selected_games(self, request, queryset):
         for game in queryset:
             self._score_game(request, game)
+
     score_selected_games.short_description = "Score Selected Games"
 
     def score_selected_games_update_existing(self, request, queryset):
         for game in queryset:
             self._score_game(request, game, update=True)
-    score_selected_games_update_existing.short_description = 'Score Selected Games (update existing - slower!)'
+
+    score_selected_games_update_existing.short_description = "Score Selected Games (update existing - slower!)"
 
     def _score_game(self, request, game, update=False):
         try:
             tabulate_results(game, update)
             self.message_user(request, f"{game.name} has successfully been scored!")
         except Exception as e:
-            self.message_user(request, "An unexpected error occurred. Ping Ted.",
-                              level=messages.ERROR)
+            self.message_user(request, "An unexpected error occurred. Ping Ted.", level=messages.ERROR)
             logging.error("Exception occurred", exc_info=True)
 
     def email_winner_certificates(self, request, queryset):
@@ -154,18 +166,19 @@ class GameAdmin(DjangoObjectActions, admin.ModelAdmin):
             return format_html(f"<a href=/c/{series.slug}/play/{obj.uuid}>play</a>")
         else:
             return f"{obj.uuid}"
+
     play.allow_tags = True
 
     def go_to_leaderboard(self, request, obj):
-        return redirect('admin:leaderboard_leaderboard_change', obj.leaderboard.id)
+        return redirect("admin:leaderboard_leaderboard_change", obj.leaderboard.id)
 
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('raw_string', 'question', 'player', 'game')
-    search_fields = ('raw_string', 'question__text', 'question__game__name', 'player__email')
-    actions = ('remove_selected_answers',)
-    list_filter = ('question__game__name', )
+    list_display = ("raw_string", "question", "player", "game")
+    search_fields = ("raw_string", "question__text", "question__game__name", "player__email")
+    actions = ("remove_selected_answers",)
+    list_filter = ("question__game__name",)
 
     def game(self, obj):
         return obj.game
@@ -189,15 +202,16 @@ class AnswerAdmin(admin.ModelAdmin):
             self.message_user(
                 request,
                 f"{queryset.count()} answers could not be removed because the game has already been published.",
-                level=messages.WARNING
+                level=messages.WARNING,
             )
+
     remove_selected_answers.short_description = "Remove select answers (USE THIS ONE)"
 
 
 @admin.register(AnswerCode)
 class AnswerCodeAdmin(admin.ModelAdmin):
-    list_display = ('coded_answer', 'question')
-    search_fields = ('coded_answer', 'question__text', 'question__game__name')
+    list_display = ("coded_answer", "question")
+    search_fields = ("coded_answer", "question__text", "question__game__name")
 
     def game(self, obj):
         return obj.game

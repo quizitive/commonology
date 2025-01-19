@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0017_auto_20210914_1746'),
+        ("users", "0017_auto_20210914_1746"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='player',
-            name='reminder',
-            field=models.BooleanField(default=True, help_text='Send game reminder email even if the player played this weeks game already.'),
+            model_name="player",
+            name="reminder",
+            field=models.BooleanField(
+                default=True, help_text="Send game reminder email even if the player played this weeks game already."
+            ),
         ),
     ]

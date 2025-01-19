@@ -7,14 +7,20 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0004_auto_20210506_1923'),
-        ('mail', '0007_mailmessage_series'),
+        ("game", "0004_auto_20210506_1923"),
+        ("mail", "0007_mailmessage_series"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mailmessage',
-            name='series',
-            field=models.ForeignKey(default=2, help_text='Only subscribed players will receive the email.', null=True, on_delete=django.db.models.deletion.SET_NULL, to='game.series'),
+            model_name="mailmessage",
+            name="series",
+            field=models.ForeignKey(
+                default=2,
+                help_text="Only subscribed players will receive the email.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="game.series",
+            ),
         ),
     ]

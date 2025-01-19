@@ -19,8 +19,8 @@ from users.models import Player
 players = Player.objects.all()
 
 fixes = {
-    'Mr. Nobody': '',
-    'Mr. Someone': 'someone@somebody.edu',
+    "Mr. Nobody": "",
+    "Mr. Someone": "someone@somebody.edu",
 }
 
 fixes = {k.lower(): v for k, v in fixes.items()}
@@ -58,7 +58,7 @@ def process_column(w, c):
     referrer_obj = find_by_name(referrer)
 
     if not referrer_obj:
-        print('Cannot resolve ', referrer)
+        print("Cannot resolve ", referrer)
         return
 
     while referrer:
@@ -70,12 +70,12 @@ def process_column(w, c):
         p = find_by_name(referee)
         if p:
             if p.referrer:
-                print(referee, 'already referred by', p.referrer, 'not changing it to', referrer_obj)
+                print(referee, "already referred by", p.referrer, "not changing it to", referrer_obj)
             else:
                 p.referrer = referrer_obj
                 p.save()
         else:
-            print('Referee', referee, 'does not exist.')
+            print("Referee", referee, "does not exist.")
 
 
 def read_sheet(w):
@@ -87,9 +87,7 @@ def read_sheet(w):
         referrer = w.active.cell(row=1, column=c).value
 
 
-fn = os.path.join(os.path.join(os.path.expanduser('~')),
-                  'commonology/scripts/hacks/',
-                  'Kingdoms.xlsx')
+fn = os.path.join(os.path.join(os.path.expanduser("~")), "commonology/scripts/hacks/", "Kingdoms.xlsx")
 ws = openpyxl.load_workbook(fn)
 
 for sheet_name in ws.sheetnames:
@@ -97,8 +95,8 @@ for sheet_name in ws.sheetnames:
     read_sheet(ws)
 
 # Move all from ms@quizitive.com to ms@koplon.com
-k = Player.objects.get(email='ms@koplon.com')
-q = Player.objects.get(email='ms@quizitive.com')
+k = Player.objects.get(email="ms@koplon.com")
+q = Player.objects.get(email="ms@quizitive.com")
 for p in Player.objects.all():
     if p.referrer == q:
         p.referrer = k

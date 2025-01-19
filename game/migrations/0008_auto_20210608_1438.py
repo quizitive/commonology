@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0007_question_thread'),
+        ("game", "0007_question_thread"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='game',
-            name='google_form_url',
-            field=models.CharField(blank=True, help_text='Enter the form url', max_length=255),
+            model_name="game",
+            name="google_form_url",
+            field=models.CharField(blank=True, help_text="Enter the form url", max_length=255),
         ),
     ]

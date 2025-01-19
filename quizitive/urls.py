@@ -3,5 +3,5 @@ from quizitive import views
 
 
 urlpatterns = [
-    path('quizitive/', views.HomeView.as_view(), name='quizitive_home'),
+    path("quizitive/", views.HomeView.as_view(), name="quizitive_home"),
 ]

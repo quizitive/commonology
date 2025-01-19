@@ -20,7 +20,7 @@ class SubscribersDataset(BaseChartDataset):
 
     def __init__(self, **kwargs):
         self.all_players = PlayersOverTime(**kwargs)
-        self.subscribers = PlayersOverTime(player_filters={'subscribed': True}, **kwargs)
+        self.subscribers = PlayersOverTime(player_filters={"subscribed": True}, **kwargs)
 
     def get_labels(self):
         return self.all_players.get_labels()
@@ -42,19 +42,23 @@ class PlayersOverTime(BaseChartSeries):
         self.query = self._query()
 
     def _query(self):
-        return Player.objects.filter(**self.player_filters).annotate(
-            joined=Trunc('date_joined', 'day')).order_by('joined').values('joined').annotate(
-            count=Count('id'))
+        return (
+            Player.objects.filter(**self.player_filters)
+            .annotate(joined=Trunc("date_joined", "day"))
+            .order_by("joined")
+            .values("joined")
+            .annotate(count=Count("id"))
+        )
 
     def get_data(self):
         total_players = []
         cur_total = 0
         cur_date = self.min_date.date()
         for d in self.query:
-            while cur_date < d['joined'].date():
+            while cur_date < d["joined"].date():
                 total_players.append(cur_total)
                 cur_date += timedelta(days=1)
-            cur_total += d['count']
+            cur_total += d["count"]
             total_players.append(cur_total)
             cur_date += timedelta(days=1)
         return total_players
