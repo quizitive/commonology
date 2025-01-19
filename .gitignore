@@ -2,6 +2,7 @@
 *.tar
 .idea/
 .tox/
+.db/
 .config
 /static
 __pycache__
