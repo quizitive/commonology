@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16
+    restart: always
+    ports:
+      - 5434:5432
+    volumes:
+      - ./.db:/var/lib/postgresql/data
+      - ./docker/postgres-initdb.d:/docker-entrypoint-initdb.d
+      - ./pg_dumps/:/pg_dumps
+      - ./scripts:/scripts
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      DBNAME: commonology
