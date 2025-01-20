@@ -447,12 +447,12 @@ class GameEntryView(PSIDMixin, CardFormView):
         msg = '<div style="min-height:200px">' + msg + "</div>"
         return self.render(request, custom_message=msg, form=None, button_label=None, continue_with_google=False)
 
-    def no_active_game(self, request):
+    def no_active_game(self, request, slug):
         if request.user.is_authenticated:
             button_label = "Home"
             form_method = "get"
-            form_action = "/"
-            msg = "The game has ended. The next game goes live Wednesday at 12PM EST!"
+            form_action = f"/c/{slug}/"
+            msg = "No active game. Check your email for a play link soon!"
         else:
             button_label = "Play Demo Game!"
             form_method = "get"
@@ -501,7 +501,7 @@ class GameEntryView(PSIDMixin, CardFormView):
 
         g = self.get_game(slug, game_uuid)
         if g is None:
-            return self.no_active_game(request)
+            return self.no_active_game(request, slug)
         self.header = f"Welcome to Game {g.game_id}!"
 
         # Backward compatibility
@@ -538,7 +538,7 @@ class GameEntryView(PSIDMixin, CardFormView):
             return render_game(request, g, editable=False)
 
         if not is_active:
-            return self.no_active_game(request)
+            return self.no_active_game(request, slug)
 
         if user.is_authenticated:
             return render_game(request, g)

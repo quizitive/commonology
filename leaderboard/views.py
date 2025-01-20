@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 from project.utils import our_now, slackit
 from project.views import next_game_context
 
-from game.models import Game, Question
+from game.models import Game, Question, Series
 from game.views import BaseGameView
 from game.utils import n_new_comments
 from users.models import Player
@@ -40,6 +40,9 @@ class LeaderboardView(BaseGameView):
             )
         else:
             game = Game.objects.get(series__slug=self.slug, game_id=self.requested_game_id)
+
+        if game is None:
+            return None
 
         # staff and hosts can view unpublished games
         if self.request.user.is_staff or self.request.user in game.hosts.all():
@@ -109,7 +112,19 @@ class LeaderboardView(BaseGameView):
 
         return context
 
+    def _get_no_game_context(self):
+        series = Series.objects.get(slug=self.slug)
+        return {
+            "series_slug": self.slug,
+            "game_name": series.name,
+            "no_games_yet": True,
+        }
+
     def get(self, request, *args, **kwargs):
+
+        if self.game is None:
+            return render(request, "leaderboard/leaderboard_view.html", self._get_no_game_context())
+
         messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, "leaderboard/leaderboard_view.html", self.get_context(*args, **kwargs))
 
@@ -142,6 +157,9 @@ class ResultsView(LeaderboardView):
 
     def get(self, request, *args, **kwargs):
         game = self.get_game()
+        if game is None:
+            return render(request, "leaderboard/results.html", self._get_no_game_context())
+
         answer_tally = build_answer_tally(game)
         context = self.get_context()
         questions = (
@@ -175,6 +193,9 @@ class ResultsView(LeaderboardView):
 class HostNoteView(LeaderboardView):
 
     def get(self, request, *args, **kwargs):
+        if self.game is None:
+            return render(request, "leaderboard/host_note.html", self._get_no_game_context())
+
         context = self.get_context(*args, **kwargs)
         context.update(
             {

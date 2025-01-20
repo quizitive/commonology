@@ -1,0 +1,16 @@
+
+{{ request.user.display_name|json_script:"display-name" }}
+{{ game_id|json_script:"game-id" }}
+<div class="w3-row w3-padding-top-24">
+    <span style="font-weight: bold;">Welcome {{ request.user.display_name }}!</span>
+</div>
+<div class="w3-row w3-padding-top-24">
+    <span style="font-weight: normal;">Your game results:
+    We're excited for you to play your first game! Your host will be in touch soon with the first game,
+    so keep an eye on your email for the link.
+    </span>
+</div>
+<div class="w3-row w3-padding-top-24">
+Once the first game is complete, be sure to check back here to see how you did!
+</div>
+<div class="w3-row w3-padding-top-24"></div>

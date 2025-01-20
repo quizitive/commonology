@@ -421,7 +421,7 @@ class TestPlayRequest(TestCase):
         path = f"/play/{game.uuid}/"
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
+        self.assertContains(response, "No active game. Check your email for a play link soon!")
 
         self.series.hosts.add(self.player)
         path = f"/play/{game.uuid}/"
@@ -432,7 +432,7 @@ class TestPlayRequest(TestCase):
         path = f"/play/"
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
+        self.assertContains(response, "No active game. Check your email for a play link soon!")
 
     def test_with_login(self):
         game = self.game
@@ -451,12 +451,12 @@ class TestPlayRequest(TestCase):
         path = "/play/"
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
+        self.assertContains(response, "No active game. Check your email for a play link soon!")
 
         path = reverse("game:uuidplay", kwargs={"game_uuid": game.uuid})
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
+        self.assertContains(response, "No active game. Check your email for a play link soon!")
 
         self.leaderboard.publish_date = our_now()
         self.leaderboard.save()
@@ -693,7 +693,7 @@ class CertificateTests(BaseGameDataTestCase):
         self.remove_winner_files(fn)
 
     def test_award_certificate(self):
-        player = winners_of_game(self.game)[0]
+        player = winners_of_game(self.game, force_refresh=True)[0]
         player.set_password("foobar")
         player.save()
 
