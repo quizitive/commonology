@@ -169,12 +169,7 @@ class JoinView(CardFormView):
         elif request.user.is_authenticated:
             # If you're a known user, get added automatically
             request.user.series.add(series)
-            messages.info(request, f'You have been added to the game series "{series.name}"!')
-            self.custom_message = (
-                f'You have been added to the game series "{series.name}"! '
-                f"You will receive an email when the game begins. You can close this browser now."
-            )
-            return self.info(request, message=self.custom_message)
+            return redirect("series-leaderboard:series-home", series_slug)
 
         # If you're not a known user, show the join form
         self.custom_message = f'Join the game series "{series.name}" on Commonology.'
@@ -201,7 +196,7 @@ class JoinView(CardFormView):
                     f"Looks like you've played with us before! We sent a link to your email "
                     f'to join the game series "{series.name}"',
                 )
-                return redirect("login")
+                return redirect(reverse("login") + f"?c={series_slug}")
 
         except User.DoesNotExist:
             pass

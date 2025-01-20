@@ -37,6 +37,7 @@ def login_next_url(request):
     if val := request.GET.get("next"):
         return f"?next={val}"
     p = request.path
-    if p == "/login/" or p == "/join/":
-        return ""
-    return f"?next={p}"
+    qp = request.GET.urlencode()
+    if p == "/login/":
+        p = "/join/"
+    return f"?next={p}?{qp}"
