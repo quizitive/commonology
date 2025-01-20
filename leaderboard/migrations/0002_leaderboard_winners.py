@@ -8,13 +8,15 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('leaderboard', '0001_initial'),
+        ("leaderboard", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='leaderboard',
-            name='winners',
-            field=models.ManyToManyField(blank=True, db_index=True, related_name='games_won', to=settings.AUTH_USER_MODEL),
+            model_name="leaderboard",
+            name="winners",
+            field=models.ManyToManyField(
+                blank=True, db_index=True, related_name="games_won", to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

@@ -76,14 +76,11 @@ def close_enough(answer, potential_match, context_synonyms):
 
     # it's a typo, slightly different, or shortened version (where both strings are 6 or more characters)
     # or if it's a short string, it is a complete subset and has a full ratio greater than 50
-    if all((
-            fuzz.partial_ratio(answer.lower(), potential_match.lower()) > 70,
-            len(answer) > 5,
-            len(potential_match) > 5
-    )) or all((
-            fuzz.partial_ratio(answer.lower(), potential_match.lower()) == 100,
-            fuzz.ratio(answer, potential_match) > 50
-    )):
+    if all(
+        (fuzz.partial_ratio(answer.lower(), potential_match.lower()) > 70, len(answer) > 5, len(potential_match) > 5)
+    ) or all(
+        (fuzz.partial_ratio(answer.lower(), potential_match.lower()) == 100, fuzz.ratio(answer, potential_match) > 50)
+    ):
         return True
 
     # it's like "four" instead of "4"
@@ -107,8 +104,9 @@ def process_rollups(col_name, raw_counts, user_rollups):
     updated_counts = {}
     processed_rollups = {}
     resolved = {}
-    for unique_resp, count in raw_counts.sort_index(
-            axis=0, ascending=False).sort_values(axis=0, ascending=False).items():
+    for unique_resp, count in (
+        raw_counts.sort_index(axis=0, ascending=False).sort_values(axis=0, ascending=False).items()
+    ):
 
         # this answer was merged into a larger answer
         if unique_resp not in resolved:
@@ -156,7 +154,7 @@ def process_rollups(col_name, raw_counts, user_rollups):
 # all the merged answers, with auto codes where needed
 def build_answer_codes(df, rollups_dict):
     answer_codes = {}
-    optional_cols = [c for c in df.columns if c.startswith('OPTIONAL: ')]
+    optional_cols = [c for c in df.columns if c.startswith("OPTIONAL: ")]
     for col in df.iloc[:, 3:]:
         counts = df[col].value_counts()
         _, col_answer_codes = process_rollups(col, counts, rollups_dict)
@@ -166,7 +164,7 @@ def build_answer_codes(df, rollups_dict):
 
 def answer_merges(game):
     game_merges = {}
-    for q_text in game.questions.values_list('text', flat=True):
+    for q_text in game.questions.values_list("text", flat=True):
         game_merges[q_text] = question_merges(game, q_text)
     return game_merges
 
@@ -185,13 +183,11 @@ def question_merges(game, q_text):
 def get_user_rollups(sheet_doc):
     # add the sheet if it doesn't exist
     try:
-        sheet_doc.add_worksheet('[auto] rollups', 500, 100)
+        sheet_doc.add_worksheet("[auto] rollups", 500, 100)
     except gspread.exceptions.APIError:
         pass
 
-    user_rollups = sheet_doc.values_get(
-        range='[auto] rollups', params={'major_dimension': "COLUMNS"}
-    ).get('values')
+    user_rollups = sheet_doc.values_get(range="[auto] rollups", params={"major_dimension": "COLUMNS"}).get("values")
 
     return user_rollups
 
@@ -205,7 +201,5 @@ def build_rollups_dict(user_rollups):
         coding_col = user_rollups[col_idx + 1]
         question_text = unique_string_col[0].strip()
         unique_strings_codings = zip(unique_string_col[2:], coding_col[2:])
-        rollups[question_text] = {
-            unique_string: coding for unique_string, coding in unique_strings_codings
-        }
+        rollups[question_text] = {unique_string: coding for unique_string, coding in unique_strings_codings}
     return rollups

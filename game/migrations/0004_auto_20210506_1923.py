@@ -7,43 +7,51 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0003_auto_20210504_1617'),
+        ("game", "0003_auto_20210504_1617"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='game',
-            name='bottom_commentary',
+            model_name="game",
+            name="bottom_commentary",
             field=ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='game',
-            name='top_commentary',
+            model_name="game",
+            name="top_commentary",
             field=ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='question',
-            name='caption',
-            field=models.CharField(blank=True, default='', max_length=255),
+            model_name="question",
+            name="caption",
+            field=models.CharField(blank=True, default="", max_length=255),
         ),
         migrations.AddField(
-            model_name='question',
-            name='hide_default_results',
+            model_name="question",
+            name="hide_default_results",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='question',
-            name='image',
-            field=models.FileField(blank=True, null=True, upload_to='questions/'),
+            model_name="question",
+            name="image",
+            field=models.FileField(blank=True, null=True, upload_to="questions/"),
         ),
         migrations.AddField(
-            model_name='question',
-            name='number',
+            model_name="question",
+            name="number",
             field=models.PositiveIntegerField(default=1),
         ),
         migrations.AlterField(
-            model_name='question',
-            name='type',
-            field=models.CharField(choices=[('MC', 'Multiple Choice'), ('FR', 'Free Response'), ('OP', 'Optional'), ('OV', 'Optional (visible)')], max_length=2),
+            model_name="question",
+            name="type",
+            field=models.CharField(
+                choices=[
+                    ("MC", "Multiple Choice"),
+                    ("FR", "Free Response"),
+                    ("OP", "Optional"),
+                    ("OV", "Optional (visible)"),
+                ],
+                max_length=2,
+            ),
         ),
     ]

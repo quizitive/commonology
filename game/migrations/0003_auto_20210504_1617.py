@@ -6,12 +6,12 @@ import django.db.models.deletion
 
 
 def create_commonology_series(apps, schema_editor):
-    Game = apps.get_model('game', 'Game')
-    Player = apps.get_model('users', 'Player')
+    Game = apps.get_model("game", "Game")
+    Player = apps.get_model("users", "Player")
 
     if Player.objects.count() and Game.objects.count():
         owner = Player.objects.get(email="alex@commonologygame.com")
-        Series = apps.get_model('game', 'Series')
+        Series = apps.get_model("game", "Series")
         commonology = Series.objects.create(name="Commonology", slug="commonology", public=True, owner=owner)
         commonology.hosts.add(owner)
         for g in Game.objects.all():
@@ -30,29 +30,43 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('game', '0002_auto_20210428_2119'),
+        ("game", "0002_auto_20210428_2119"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Series',
+            name="Series",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('slug', models.SlugField(unique=True)),
-                ('public', models.BooleanField(default=False, help_text='Anyone can see the games, results, and leaderboards in this series')),
-                ('hosts', models.ManyToManyField(related_name='hosted_series', to=settings.AUTH_USER_MODEL)),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='owned_series', to=settings.AUTH_USER_MODEL)),
-                ('players', models.ManyToManyField(related_name='series', to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=50)),
+                ("slug", models.SlugField(unique=True)),
+                (
+                    "public",
+                    models.BooleanField(
+                        default=False, help_text="Anyone can see the games, results, and leaderboards in this series"
+                    ),
+                ),
+                ("hosts", models.ManyToManyField(related_name="hosted_series", to=settings.AUTH_USER_MODEL)),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="owned_series",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                ("players", models.ManyToManyField(related_name="series", to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'verbose_name_plural': 'series',
+                "verbose_name_plural": "series",
             },
         ),
         migrations.AddField(
-            model_name='game',
-            name='series',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='games', to='game.series'),
+            model_name="game",
+            name="series",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.CASCADE, related_name="games", to="game.series"
+            ),
         ),
         migrations.RunPython(create_commonology_series, backwards_passthrough),
     ]

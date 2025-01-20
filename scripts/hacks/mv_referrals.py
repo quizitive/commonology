@@ -22,6 +22,6 @@ def mv_referrals(from_email, to_email):
 
 
 def alex():
-    alex_emails = ['alex@quizitive.com', 'alexandrafruin@gmail.com']
+    alex_emails = ["alex@quizitive.com", "alexandrafruin@gmail.com"]
     for e in alex_emails:
-        mv_referrals(e, 'alex@commonologygame.com')
+        mv_referrals(e, "alex@commonologygame.com")

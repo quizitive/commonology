@@ -21,7 +21,7 @@ class GamePlayerTrendChart(BaseSmartChart):
 
     def get_xaxis(self):
         xaxis = super().get_xaxis()
-        xaxis['tickAmount'] = max(12.0, len(self.data_class.get_labels()) / 4)
+        xaxis["tickAmount"] = max(12.0, len(self.data_class.get_labels()) / 4)
         return xaxis
 
 
@@ -29,7 +29,7 @@ class PlayersAndMembersDataset(BaseChartDataset):
 
     def __init__(self, **kwargs):
         self.Players = GamePlayerCount(**kwargs)
-        self.NewPlayers = GamePlayerCount(numerator_fcn='new_players', **kwargs)
+        self.NewPlayers = GamePlayerCount(numerator_fcn="new_players", **kwargs)
 
     def get_labels(self):
         return self.Players.get_labels()
@@ -46,32 +46,35 @@ class GamePlayerCount(BaseChartSeries):
     # defines the count of players for each game based on custom filters. It returns
     # a dict of such as {game_id: player_count}
 
-    def __init__(self, slug='commonology', since_game=0, player_filters=None, agg_period=1, **kwargs):
+    def __init__(self, slug="commonology", since_game=0, player_filters=None, agg_period=1, **kwargs):
         self.slug = slug
         self.since_game = int(since_game)
-        self.numerator_fcn = 'players_with_filters'
+        self.numerator_fcn = "players_with_filters"
         self.player_filters = player_filters or {}
         self.agg_period = int(agg_period)
         super().__init__(**kwargs)
 
     def players_with_filters(self):
-        players_with_filter_count = PlayerRankScore.objects.filter(
-            leaderboard__game__series__slug=self.slug,
-            **self.player_filters).values(
-            game_id=F('leaderboard__game__game_id')).annotate(
-            num_players=Count('game_id')).order_by('game_id')
-        return {game['game_id']: game['num_players'] for game in players_with_filter_count}
+        players_with_filter_count = (
+            PlayerRankScore.objects.filter(leaderboard__game__series__slug=self.slug, **self.player_filters)
+            .values(game_id=F("leaderboard__game__game_id"))
+            .annotate(num_players=Count("game_id"))
+            .order_by("game_id")
+        )
+        return {game["game_id"]: game["num_players"] for game in players_with_filter_count}
 
     def new_players(self):
-        first_games = Player.objects.filter(
-            rank_scores__leaderboard__game__series__slug='commonology').annotate(
-            first_game=Min('rank_scores__leaderboard__game__game_id')
-        ).values_list('id', 'first_game')
+        first_games = (
+            Player.objects.filter(rank_scores__leaderboard__game__series__slug="commonology")
+            .annotate(first_game=Min("rank_scores__leaderboard__game__game_id"))
+            .values_list("id", "first_game")
+        )
         return Counter([fg[1] for fg in first_games])
 
     def periods(self):
-        gids = Game.objects.filter(series__slug=self.slug, game_id__gte=self.since_game,
-                                   end__lte=our_now()).values_list('game_id', flat=True)
+        gids = Game.objects.filter(
+            series__slug=self.slug, game_id__gte=self.since_game, end__lte=our_now()
+        ).values_list("game_id", flat=True)
         periods = []
         for idx in range(0, len(gids), self.agg_period):
             g = gids[idx]

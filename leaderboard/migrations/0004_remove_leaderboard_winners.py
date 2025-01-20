@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaderboard', '0003_playerrankscore'),
+        ("leaderboard", "0003_playerrankscore"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='leaderboard',
-            name='winners',
+            model_name="leaderboard",
+            name="winners",
         ),
     ]

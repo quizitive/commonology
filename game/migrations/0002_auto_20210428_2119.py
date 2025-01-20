@@ -8,12 +8,12 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('game', '0001_initial'),
+        ("game", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name='answer',
-            unique_together={('player', 'question')},
+            name="answer",
+            unique_together={("player", "question")},
         ),
     ]

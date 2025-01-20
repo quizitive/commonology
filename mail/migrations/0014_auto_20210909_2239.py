@@ -6,18 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mail', '0013_auto_20210826_1156'),
+        ("mail", "0013_auto_20210826_1156"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='component',
-            name='mail_component',
-            field=models.BooleanField(default=True, help_text='Check this if this component is being used in emails, otherwise it will not appear in the MailMessage admin.'),
+            model_name="component",
+            name="mail_component",
+            field=models.BooleanField(
+                default=True,
+                help_text="Check this if this component is being used in emails, otherwise it will not appear in the MailMessage admin.",
+            ),
         ),
         migrations.AlterField(
-            model_name='component',
-            name='location',
-            field=models.CharField(choices=[('top', 'Top'), ('btm', 'Bottom')], default='btm', help_text='Only used in emails. This determines whether the component is placed above or below the main MailMessage.', max_length=3),
+            model_name="component",
+            name="location",
+            field=models.CharField(
+                choices=[("top", "Top"), ("btm", "Bottom")],
+                default="btm",
+                help_text="Only used in emails. This determines whether the component is placed above or below the main MailMessage.",
+                max_length=3,
+            ),
         ),
     ]

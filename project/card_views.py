@@ -11,13 +11,12 @@ from django.conf import settings
 def recaptcha_check(request, force=False):
     if (not force) and (settings.IS_TEST or settings.RECAPTCHA3_INHIBIT):
         return
-    recaptcha_response = request.POST.get('g-recaptcha-response')
-    data = {'secret': settings.RECAPTCHA3_SECRET,
-            'response': recaptcha_response}
-    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
+    recaptcha_response = request.POST.get("g-recaptcha-response")
+    data = {"secret": settings.RECAPTCHA3_SECRET, "response": recaptcha_response}
+    r = requests.post("https://www.google.com/recaptcha/api/siteverify", data=data)
     result = r.json()
-    if not result['success']:
-        raise PermissionDenied('Invalid reCaptcha response')
+    if not result["success"]:
+        raise PermissionDenied("Invalid reCaptcha response")
 
 
 class BaseCardView(ContextMixin, View):
@@ -26,11 +25,12 @@ class BaseCardView(ContextMixin, View):
     See template cards/base_card.html for additional template
     variables that can be set to customize form further.
     """
+
     header = None
     custom_message = None
     button_label = "Ok"
-    card_template = 'cards/base_card.html'
-    page_template = 'single_card_view.html'
+    card_template = "cards/base_card.html"
+    page_template = "single_card_view.html"
     chart = None
     recaptcha_key = None
     card_div_id = "base-card"
@@ -49,25 +49,25 @@ class BaseCardView(ContextMixin, View):
         if settings.RECAPTCHA3_INHIBIT:
             self.recaptcha_key = False
         context = {
-            'header': self.header,
-            'card_template': self.card_template,
-            'button_label': self.button_label,
-            'chart': self.chart,
-            'recaptcha_key': self.recaptcha_key,
-            'custom_message': self.custom_message,
-            'card_id': self.card_div_id,
-            'card_extras': self.card_extras
-            }
+            "header": self.header,
+            "card_template": self.card_template,
+            "button_label": self.button_label,
+            "chart": self.chart,
+            "recaptcha_key": self.recaptcha_key,
+            "custom_message": self.custom_message,
+            "card_id": self.card_div_id,
+            "card_extras": self.card_extras,
+        }
         context.update(kwargs)
         return super().get_context_data(**context)
 
     def warning(self, request, message, *args, **kwargs):
-        self.custom_message = ''
+        self.custom_message = ""
         messages.warning(request, message)
         return self.render(request, *args, **kwargs)
 
     def info(self, request, message, *args, **kwargs):
-        self.custom_message = ''
+        self.custom_message = ""
         messages.info(request, message)
         return self.render(request, *args, **kwargs)
 
@@ -88,6 +88,7 @@ class CardFormView(FormMixin, BaseCardView):
     Common use case would be to define a form_class and override post()
     to handle form-specific functionality
     """
+
     # form_class = YourFormClass
     recaptcha_key = settings.RECAPTCHA3_KEY
 
@@ -104,10 +105,10 @@ class CardFormView(FormMixin, BaseCardView):
     @staticmethod
     def format_form(form):
         for key, field in form.fields.items():
-            if field.widget.__class__.__name__ == 'CheckboxInput':
-                field.widget.attrs['class'] = 'w3-check'
+            if field.widget.__class__.__name__ == "CheckboxInput":
+                field.widget.attrs["class"] = "w3-check"
             else:
-                field.widget.attrs['class'] = 'w3-input'
+                field.widget.attrs["class"] = "w3-input"
         return form
 
 
@@ -118,7 +119,7 @@ class CardChartView(BaseCardView):
 class MultiCardPageView(BaseCardView):
     """Renders many card views to a single page"""
 
-    page_template = 'multi_card_view.html'
+    page_template = "multi_card_view.html"
     cards = []
 
     def get(self, request, *args, **kwargs):

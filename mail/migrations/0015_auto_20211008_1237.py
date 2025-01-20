@@ -6,18 +6,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mail', '0014_auto_20210909_2239'),
+        ("mail", "0014_auto_20210909_2239"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mailmessage',
-            name='reminder',
-            field=models.BooleanField(default=False, help_text='This is a game reminder messsage.  Only players opting for reminders will get it'),
+            model_name="mailmessage",
+            name="reminder",
+            field=models.BooleanField(
+                default=False,
+                help_text="This is a game reminder messsage.  Only players opting for reminders will get it",
+            ),
         ),
         migrations.AlterField(
-            model_name='mailmessage',
-            name='categories',
-            field=models.CharField(blank=True, help_text='A comma separated list of categories. i.e GameOn|Reminder|Results + Week#', max_length=50),
+            model_name="mailmessage",
+            name="categories",
+            field=models.CharField(
+                blank=True,
+                help_text="A comma separated list of categories. i.e GameOn|Reminder|Results + Week#",
+                max_length=50,
+            ),
         ),
     ]

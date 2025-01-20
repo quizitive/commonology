@@ -7,19 +7,27 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0011_auto_20210702_2101'),
-        ('mail', '0008_auto_20210514_1513'),
+        ("game", "0011_auto_20210702_2101"),
+        ("mail", "0008_auto_20210514_1513"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mailmessage',
-            name='series',
-            field=models.ForeignKey(default=1, help_text='Only subscribed players will receive the email.', null=True, on_delete=django.db.models.deletion.SET_NULL, to='game.series'),
+            model_name="mailmessage",
+            name="series",
+            field=models.ForeignKey(
+                default=1,
+                help_text="Only subscribed players will receive the email.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="game.series",
+            ),
         ),
         migrations.AlterField(
-            model_name='mailmessage',
-            name='tested',
-            field=models.BooleanField(default=False, help_text='Must be checked to send blast.  It is set when a test message is sent.'),
+            model_name="mailmessage",
+            name="tested",
+            field=models.BooleanField(
+                default=False, help_text="Must be checked to send blast.  It is set when a test message is sent."
+            ),
         ),
     ]

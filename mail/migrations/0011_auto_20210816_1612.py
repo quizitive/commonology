@@ -6,22 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mail', '0010_auto_20210720_1020'),
+        ("mail", "0010_auto_20210720_1020"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Component',
+            name="Component",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=150, unique=True)),
-                ('template', models.CharField(max_length=150)),
-                ('context', models.JSONField(blank=True, default=dict)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=150, unique=True)),
+                ("template", models.CharField(max_length=150)),
+                ("context", models.JSONField(blank=True, default=dict)),
             ],
         ),
         migrations.AddField(
-            model_name='mailmessage',
-            name='components',
-            field=models.ManyToManyField(related_name='messages', to='mail.Component'),
+            model_name="mailmessage",
+            name="components",
+            field=models.ManyToManyField(related_name="messages", to="mail.Component"),
         ),
     ]

@@ -5,41 +5,46 @@ from django.db import migrations, models
 
 
 def forwards(apps, schema_editor):
-    Question = apps.get_model('game', 'Question')
+    Question = apps.get_model("game", "Question")
     for q in Question.objects.all():
-        if q.type == 'MC':
-            q.type = 'GA'
+        if q.type == "MC":
+            q.type = "GA"
         q.save()
 
 
 def backwards(apps, schema_editor):
-    Question = apps.get_model('game', 'Question')
+    Question = apps.get_model("game", "Question")
     for q in Question.objects.all():
-        if q.type == 'GA':
-            q.type = 'MC'
+        if q.type == "GA":
+            q.type = "MC"
         q.save()
+
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0010_auto_20210630_1342'),
+        ("game", "0010_auto_20210630_1342"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='question',
-            name='choices',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=100, null=True), blank=True, null=True, size=None),
+            model_name="question",
+            name="choices",
+            field=django.contrib.postgres.fields.ArrayField(
+                base_field=models.CharField(max_length=100, null=True), blank=True, null=True, size=None
+            ),
         ),
         migrations.AlterField(
-            model_name='question',
-            name='type',
-            field=models.CharField(choices=[('GA', 'Game'), ('OP', 'Optional'), ('OV', 'Optional (visible)')], max_length=2),
+            model_name="question",
+            name="type",
+            field=models.CharField(
+                choices=[("GA", "Game"), ("OP", "Optional"), ("OV", "Optional (visible)")], max_length=2
+            ),
         ),
         migrations.RunPython(forwards, backwards),
         migrations.AlterField(
-            model_name='answer',
-            name='timestamp',
+            model_name="answer",
+            name="timestamp",
             field=models.DateTimeField(auto_now_add=True),
         ),
     ]

@@ -3,7 +3,7 @@ from django.views import View
 
 
 class HomeView(View):
-    template = 'quizitive/index.html'
+    template = "quizitive/index.html"
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template)

@@ -5,28 +5,24 @@ import uuid
 
 
 def gen_uuid(apps, schema_editor):
-    Game = apps.get_model('game', 'Game')
+    Game = apps.get_model("game", "Game")
     for row in Game.objects.all():
         row.uuid = uuid.uuid4()
-        row.save(update_fields=['uuid'])
+        row.save(update_fields=["uuid"])
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0008_auto_20210608_1438'),
+        ("game", "0008_auto_20210608_1438"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='game',
-            name='uuid',
+            model_name="game",
+            name="uuid",
             field=models.UUIDField(default=uuid.uuid4, null=True),
         ),
         migrations.RunPython(gen_uuid, reverse_code=migrations.RunPython.noop),
-        migrations.AlterField(
-            model_name='game',
-            name='uuid',
-            field=models.UUIDField(default=uuid.uuid4, unique=True)
-        )
+        migrations.AlterField(model_name="game", name="uuid", field=models.UUIDField(default=uuid.uuid4, unique=True)),
     ]

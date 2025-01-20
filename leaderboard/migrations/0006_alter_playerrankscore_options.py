@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaderboard', '0005_leaderboardmessage'),
+        ("leaderboard", "0005_leaderboardmessage"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='playerrankscore',
-            options={'ordering': ('leaderboard__game__game_id',)},
+            name="playerrankscore",
+            options={"ordering": ("leaderboard__game__game_id",)},
         ),
     ]

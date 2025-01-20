@@ -9,22 +9,26 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='MailMessage',
+            name="MailMessage",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('from_name', models.CharField(default='Alex Fruin', max_length=150)),
-                ('from_email', models.EmailField(default='alex@commonologygame.com', max_length=254, verbose_name='from email address')),
-                ('test_recipient', models.EmailField(max_length=254, verbose_name='test recipient email address')),
-                ('subject', models.CharField(max_length=150)),
-                ('message', ckeditor_uploader.fields.RichTextUploadingField(blank=True)),
-                ('created', models.DateTimeField(default=django.utils.timezone.now)),
-                ('tested', models.BooleanField(default=False)),
-                ('sent', models.BooleanField(default=False)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("from_name", models.CharField(default="Alex Fruin", max_length=150)),
+                (
+                    "from_email",
+                    models.EmailField(
+                        default="alex@commonologygame.com", max_length=254, verbose_name="from email address"
+                    ),
+                ),
+                ("test_recipient", models.EmailField(max_length=254, verbose_name="test recipient email address")),
+                ("subject", models.CharField(max_length=150)),
+                ("message", ckeditor_uploader.fields.RichTextUploadingField(blank=True)),
+                ("created", models.DateTimeField(default=django.utils.timezone.now)),
+                ("tested", models.BooleanField(default=False)),
+                ("sent", models.BooleanField(default=False)),
             ],
         ),
     ]

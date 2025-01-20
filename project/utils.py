@@ -8,13 +8,13 @@ from django.contrib.admin.models import LogEntry, CHANGE
 import requests
 
 
-REDIS = caches['default']
+REDIS = caches["default"]
 if settings.IS_TEST:
-    REDIS.key_prefix += '_test'
+    REDIS.key_prefix += "_test"
 
-ANALYTICS_REDIS = caches['analytics']
+ANALYTICS_REDIS = caches["analytics"]
 if settings.IS_TEST:
-    REDIS.key_prefix += '_test'
+    REDIS.key_prefix += "_test"
 
 
 def our_now():
@@ -30,7 +30,7 @@ def redis_delete_patterns(*patterns):
     """
     total_keys_deleted = 0
     for p in patterns:
-        keys = REDIS.keys(f'{p}*')
+        keys = REDIS.keys(f"{p}*")
         if keys:
             REDIS.delete_many(keys)
             total_keys_deleted += len(keys)
@@ -51,6 +51,7 @@ def quick_cache(ttl=600):
     NOTE: Make sure arguments are unique! If passing a model instance, make
     sure the model has a unique __repr__ defined.
     """
+
     def inner(func):
         @functools.wraps(func)
         def wrapper(*args, force_refresh=False, **kwargs):
@@ -62,12 +63,14 @@ def quick_cache(ttl=600):
             res = func(*args, **kwargs)
             REDIS.set(redis_key, res, timeout=ttl)
             return res
+
         return wrapper
+
     return inner
 
 
 def quick_cache_key(func, *args, **kwargs):
-    return f'{func.__name__}:' + "_".join([repr(a) for a in args]) + "_".join(repr(k) for k in kwargs.values())
+    return f"{func.__name__}:" + "_".join([repr(a) for a in args]) + "_".join(repr(k) for k in kwargs.values())
 
 
 def slackit(msg):
@@ -76,8 +79,8 @@ def slackit(msg):
     # Manage App here: https://api.slack.com/apps/A02D8J3T1S9/general
     # Can get oath token here: https://api.slack.com/apps/A02D8J3T1S9/oauth
     url = f"https://hooks.slack.com/services/{settings.SLACK_TOKEN}"
-    headers = {'content-type': 'application/json'}
-    data = {'text': msg}
+    headers = {"content-type": "application/json"}
+    data = {"text": msg}
     if settings.IS_TEST:
         return
     result = requests.post(url, headers=headers, json=data)
@@ -88,7 +91,7 @@ def to_ascii(s):
     # 8217 is found by ord(x) where x is the character on the original string.
     table = {8217: "'", 9728: "*", 233: "e"}
     s = s.translate(s.maketrans(table))
-    s = str(s.encode('utf-8').decode('ascii', 'ignore'))
+    s = str(s.encode("utf-8").decode("ascii", "ignore"))
     return s
 
 
@@ -98,9 +101,11 @@ def log_entry(model_obj, message, user=None):
     else:
         user_id = user.id
 
-    return LogEntry.objects.log_action(user_id=user_id,
-                                       content_type_id=ContentType.objects.get_for_model(model_obj).pk,
-                                       object_id=model_obj.id,
-                                       object_repr=str(model_obj),
-                                       action_flag=CHANGE,
-                                       change_message=message)
+    return LogEntry.objects.log_action(
+        user_id=user_id,
+        content_type_id=ContentType.objects.get_for_model(model_obj).pk,
+        object_id=model_obj.id,
+        object_repr=str(model_obj),
+        action_flag=CHANGE,
+        change_message=message,
+    )

@@ -5,7 +5,7 @@ from project.utils import our_now
 
 
 def set_sent_dates(apps, schmea_editor):
-    MailMessages = apps.get_model('mail', 'MailMessage')
+    MailMessages = apps.get_model("mail", "MailMessage")
 
     for m in MailMessages.objects.all():
         m.sent_date = our_now()
@@ -15,15 +15,14 @@ def set_sent_dates(apps, schmea_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mail', '0015_auto_20211008_1237'),
+        ("mail", "0015_auto_20211008_1237"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mailmessage',
-            name='sent_date',
+            model_name="mailmessage",
+            name="sent_date",
             field=models.DateTimeField(blank=True, null=True),
         ),
-
         migrations.RunPython(set_sent_dates),
     ]

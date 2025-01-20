@@ -6,13 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mail', '0004_auto_20210421_1755'),
+        ("mail", "0004_auto_20210421_1755"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mailmessage',
-            name='from_email',
-            field=models.EmailField(choices=[('alex@commonologygame.com', 'alex@commonologygame.com'), ('ms@commonologygame.com', 'ms@commonologygame.com'), ('ted@commonologygame.com', 'ted@commonologygame.com'), ('concierge@commonologygame.com', 'concierge@commonologygame.com')], default='alex@commonologygame.com', max_length=254, verbose_name='from email address'),
+            model_name="mailmessage",
+            name="from_email",
+            field=models.EmailField(
+                choices=[
+                    ("alex@commonologygame.com", "alex@commonologygame.com"),
+                    ("ms@commonologygame.com", "ms@commonologygame.com"),
+                    ("ted@commonologygame.com", "ted@commonologygame.com"),
+                    ("concierge@commonologygame.com", "concierge@commonologygame.com"),
+                ],
+                default="alex@commonologygame.com",
+                max_length=254,
+                verbose_name="from email address",
+            ),
         ),
     ]

@@ -21,34 +21,13 @@ class BaseSmartChart(BaseChartSubclass):
         self.kwargs = kwargs
         self.uuid = uuid4().hex
         self.options_dict = {
-            "grid": {
-                "row": {
-                    "colors": ['#f3f3f3', 'transparent'],
-                    "opacity": 0.5
-                }
-            },
-            "chart": {
-                "height": 450,
-                "type": 'line'
-            },
-            "stroke": {
-                "width": 4,
-                "curve": "straight"
-            },
-            "markers": {
-                "size": 3,
-                "strokeWidth": 0
-            },
+            "grid": {"row": {"colors": ["#f3f3f3", "transparent"], "opacity": 0.5}},
+            "chart": {"height": 450, "type": "line"},
+            "stroke": {"width": 4, "curve": "straight"},
+            "markers": {"size": 3, "strokeWidth": 0},
             "colors": ["#0095da", "#f26649", "#237073"],
-            "xaxis": {
-                "tickPlacement": "on"
-            },
-            "yaxis": {
-                "labels": {
-                    "align": "right"
-                },
-                "decimalsInFloat": 0
-            }
+            "xaxis": {"tickPlacement": "on"},
+            "yaxis": {"labels": {"align": "right"}, "decimalsInFloat": 0},
         }
         super().__init__(**kwargs)
 
@@ -77,8 +56,8 @@ class BaseSmartChart(BaseChartSubclass):
     def get_xaxis(self):
         # x axis labels
         return {
-            'tickAmount': min(12.0, len(self.data_class.get_labels()) / 4),
-            "categories": self.data_class.get_labels()
+            "tickAmount": min(12.0, len(self.data_class.get_labels()) / 4),
+            "categories": self.data_class.get_labels(),
         }
 
     def _get_methods(self):
@@ -92,7 +71,7 @@ class BaseSmartChart(BaseChartSubclass):
 
     @staticmethod
     def _to_camel_case(components):
-        return components[0] + ''.join(x.title() for x in components[1:])
+        return components[0] + "".join(x.title() for x in components[1:])
 
 
 class BaseChartDataset:

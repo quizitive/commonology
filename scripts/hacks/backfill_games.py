@@ -1,4 +1,3 @@
-
 import sys
 import os
 import django
@@ -19,8 +18,8 @@ from users.utils import player_log_entry
 from game.models import Game, Series, Answer
 from leaderboard.models import PlayerRankScore
 
-fn = os.path.expanduser('~/Downloads')
-fn = os.path.join(os.path.join(fn, 'CommonologyBackfillWeeks.xlsx'))
+fn = os.path.expanduser("~/Downloads")
+fn = os.path.join(os.path.join(fn, "CommonologyBackfillWeeks.xlsx"))
 ws = openpyxl.load_workbook(fn)
 
 commonology = Series.objects.get(slug="commonology")
@@ -75,7 +74,7 @@ def get_player(email, display_name, join_date):
 @transaction.atomic
 def process_game(game_id, data):
     g = Game(game_id=game_id)
-    g.name = f'Commonology Game {game_id}'
+    g.name = f"Commonology Game {game_id}"
     g.series = commonology
     set_game_dates(g)
     g.save()
@@ -107,7 +106,7 @@ def read_sheet(w):
     r = 1
 
     email = w.active.cell(row=r, column=1).value
-    if '@' not in email:
+    if "@" not in email:
         r += 1
         email = w.active.cell(row=r, column=1).value
     while email:
@@ -119,11 +118,11 @@ def read_sheet(w):
         email = w.active.cell(row=r, column=1).value
 
     rank = 0
-    last_score = '0'
+    last_score = "0"
 
     missing_scores = [x for x in data if not x[2]]
     if missing_scores:
-        print(f'Missing scores for: {missing_scores}')
+        print(f"Missing scores for: {missing_scores}")
 
     data.sort(key=lambda x: -x[2])
     for rec in data:
@@ -142,9 +141,9 @@ def read_sheet(w):
 def process(game_id):
 
     if 0 == game_id:
-        sheet_name = 'Week A1'
+        sheet_name = "Week A1"
     else:
-        sheet_name = f'Week {game_id}'
+        sheet_name = f"Week {game_id}"
 
     print(f"Processing {sheet_name}")
     ws.active = ws.sheetnames.index(sheet_name)
@@ -154,12 +153,12 @@ def process(game_id):
 
 
 def do_it():
-    print('Starting to backfill game results into PlayerRankScore model.')
+    print("Starting to backfill game results into PlayerRankScore model.")
     for game_id in range(0, 28):
         if Game.objects.filter(series=commonology, game_id=game_id).exists():
-            print(f'Skipping game_id {game_id} because it exists.')
+            print(f"Skipping game_id {game_id} because it exists.")
         else:
-            print(f'Processing game_id {game_id}')
+            print(f"Processing game_id {game_id}")
             process(game_id)
             # print_player_scores(game_id)
         print()
@@ -167,8 +166,8 @@ def do_it():
 
 
 def set_join_dates():
-    print('Better than set_join_dates because it we do not have Answer recs for first 27 games.')
-    print('Setting players join dates to min(end time of first game played, player.date_joined).')
+    print("Better than set_join_dates because it we do not have Answer recs for first 27 games.")
+    print("Setting players join dates to min(end time of first game played, player.date_joined).")
 
     for prs in PlayerRankScore.objects.all():
         g = prs.leaderboard.game
@@ -196,16 +195,17 @@ def game_winner_sanity_check():
         for i in y:
             print(f"These games have the same winner score: {i[0]} and {i[2]}")
     else:
-        print('None of the games have the same winning score.')
+        print("None of the games have the same winning score.")
     print()
     print()
 
 
 def list_winners():
     print("Listing game winners for all games.")
-    winners = [[i.leaderboard.game.game_id, str(i.leaderboard.game.start.date()),
-                i.player.email, i.score, i.rank] for i in
-               PlayerRankScore.objects.filter(rank=1, leaderboard__game__series=commonology).all()]
+    winners = [
+        [i.leaderboard.game.game_id, str(i.leaderboard.game.start.date()), i.player.email, i.score, i.rank]
+        for i in PlayerRankScore.objects.filter(rank=1, leaderboard__game__series=commonology).all()
+    ]
     winners.sort()
     for w in winners:
         print(w)

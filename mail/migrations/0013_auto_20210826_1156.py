@@ -9,28 +9,30 @@ from sortedm2m.operations import AlterSortedManyToManyField
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mail', '0012_auto_20210825_1420'),
+        ("mail", "0012_auto_20210825_1420"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='component',
-            name='location',
-            field=models.CharField(choices=[('top', 'Top'), ('btm', 'Bottom')], default='btm', max_length=3),
+            model_name="component",
+            name="location",
+            field=models.CharField(choices=[("top", "Top"), ("btm", "Bottom")], default="btm", max_length=3),
         ),
         migrations.AddField(
-            model_name='component',
-            name='message',
+            model_name="component",
+            name="message",
             field=ckeditor_uploader.fields.RichTextUploadingField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='component',
-            name='template',
-            field=models.CharField(default='mail/simple_component.html', max_length=150),
+            model_name="component",
+            name="template",
+            field=models.CharField(default="mail/simple_component.html", max_length=150),
         ),
         AlterSortedManyToManyField(
-            model_name='mailmessage',
-            name='components',
-            field=sortedm2m.fields.SortedManyToManyField(blank=True, help_text=None, related_name='messages', to='mail.Component'),
+            model_name="mailmessage",
+            name="components",
+            field=sortedm2m.fields.SortedManyToManyField(
+                blank=True, help_text=None, related_name="messages", to="mail.Component"
+            ),
         ),
     ]

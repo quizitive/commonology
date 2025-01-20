@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
 
 
-bad_addrs = '''
+bad_addrs = """
 themickman&@gmail.com
-'''
+"""
 
 bad_addrs = bad_addrs.split()
 

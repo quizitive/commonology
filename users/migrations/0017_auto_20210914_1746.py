@@ -8,13 +8,19 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0016_auto_20210913_2044'),
+        ("users", "0016_auto_20210913_2044"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='player',
-            name='referrer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='referrers', to=settings.AUTH_USER_MODEL),
+            model_name="player",
+            name="referrer",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="referrers",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

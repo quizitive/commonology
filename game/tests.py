@@ -51,10 +51,12 @@ def suppress_hidden_error_logs(func):
     This decorator prevents writing to logs that clog up test output
     See https://docs.djangoproject.com/en/dev/topics/testing/tools/#exceptions
     """
+
     def wrapper(*args, **kwargs):
         logging.disable(logging.CRITICAL)
         func(*args, **kwargs)
         logging.disable(logging.NOTSET)
+
     return wrapper
 
 
@@ -62,7 +64,7 @@ class HomePage(TestCase):
 
     def test_page(self):
         client = Client()
-        response = client.get(reverse('home'))
+        response = client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
 
 
@@ -74,20 +76,20 @@ class BaseGameDataTestCase(TestCase):
 
     @classmethod
     def mySetUpTestData(cls):
-        cls.resp_fp = f'{LOCAL_DIR}/test_data/test_data.csv'
-        cls.rollup_fp = f'{LOCAL_DIR}/test_data/test_rollups.csv'
+        cls.resp_fp = f"{LOCAL_DIR}/test_data/test_data.csv"
+        cls.rollup_fp = f"{LOCAL_DIR}/test_data/test_rollups.csv"
         cls.sheet_name = "Test Commonology Game (Responses)"
-        with open(cls.resp_fp, 'r') as f:
+        with open(cls.resp_fp, "r") as f:
             raw = reader(f)
             raw_responses = list(raw)
             cls.resp_df = api_data_to_df(raw_responses)
-        with open(cls.rollup_fp, 'r') as f:
+        with open(cls.rollup_fp, "r") as f:
             raw = reader(f)
             raw_rollups = list(raw)
             cls.rollups = build_rollups_dict(raw_rollups)
 
         # data is written from api
-        cls.series_owner = get_local_user(e='series@owner.com')
+        cls.series_owner = get_local_user(e="series@owner.com")
         cls.game_player = get_local_user()
         cls.series = Series.objects.create(name="Commonology", owner=cls.series_owner, public=True)
 
@@ -128,26 +130,26 @@ class TestGameTabulation(BaseGameDataTestCase):
         raw_data_df = pd.read_csv(self.resp_fp)
 
         # test no duplicate emails
-        dupe_emails_raw = raw_data_df[raw_data_df.duplicated('Email Address', keep=False)]
+        dupe_emails_raw = raw_data_df[raw_data_df.duplicated("Email Address", keep=False)]
         self.assertEqual(len(dupe_emails_raw), 2)
-        dupe_emails_clean = self.resp_df[self.resp_df.duplicated('Email Address')]
+        dupe_emails_clean = self.resp_df[self.resp_df.duplicated("Email Address")]
         self.assertEqual(len(dupe_emails_clean), 0)
 
         # test email remaining is the first one
-        first_resp_ts = min(dupe_emails_raw['Timestamp'])
-        dupe_email = dupe_emails_raw['Email Address'].iloc[0]
-        kept_resp_ts = self.resp_df[self.resp_df['Email Address'] == dupe_email]['Timestamp'].iloc[0]
+        first_resp_ts = min(dupe_emails_raw["Timestamp"])
+        dupe_email = dupe_emails_raw["Email Address"].iloc[0]
+        kept_resp_ts = self.resp_df[self.resp_df["Email Address"] == dupe_email]["Timestamp"].iloc[0]
         self.assertEqual(first_resp_ts, kept_resp_ts)
 
     def test_close_enough(self):
         # test a simple spelling case
-        self.assertTrue(close_enough('pretzel', 'pretxel', {}))
+        self.assertTrue(close_enough("pretzel", "pretxel", {}))
 
         # test short strings don't count
-        self.assertFalse(close_enough('foo', 'fob', {}))
+        self.assertFalse(close_enough("foo", "fob", {}))
 
         # test a number string
-        self.assertTrue(close_enough('4', 'four', {}))
+        self.assertTrue(close_enough("4", "four", {}))
 
     def test_build_rollups_dict(self):
         # make sure it's still a list of dicts for all questions
@@ -189,23 +191,21 @@ class TestGameTabulation(BaseGameDataTestCase):
         self.assertEqual(len(players), 29)
 
         new_disply_name_df = pd.DataFrame(
-            columns=['Email Address', 'Name'],
-            data=[['user1@fakeemail.com', 'New Display Name']]
+            columns=["Email Address", "Name"], data=[["user1@fakeemail.com", "New Display Name"]]
         )
         players_to_db(self.series, new_disply_name_df)
         User = get_user_model()
-        new_display_name = User.objects.get(email='user1@fakeemail.com').display_name
-        self.assertEqual(new_display_name, 'New Display Name')
+        new_display_name = User.objects.get(email="user1@fakeemail.com").display_name
+        self.assertEqual(new_display_name, "New Display Name")
 
     def test_player_name_trim(self):
-        long_name = ''.join(random.choices(string.ascii_letters, k=199))
+        long_name = "".join(random.choices(string.ascii_letters, k=199))
         new_disply_name_df = pd.DataFrame(
-            columns=['Email Address', 'Name'],
-            data=[['long_name@fakeemail.com', long_name]]
+            columns=["Email Address", "Name"], data=[["long_name@fakeemail.com", long_name]]
         )
         players_to_db(self.series, new_disply_name_df)
         User = get_user_model()
-        new_display_name = User.objects.get(email='long_name@fakeemail.com').display_name
+        new_display_name = User.objects.get(email="long_name@fakeemail.com").display_name
         self.assertEqual(new_display_name, long_name[:100])
 
     def test_answers_to_db(self):
@@ -221,23 +221,28 @@ class TestGameTabulation(BaseGameDataTestCase):
         new_user_email = "userx@fakeemail.com"
         User = get_user_model()
         p = User.objects.create(email=new_user_email)
-        new_answer_with_blanks = pd.DataFrame([[
-            "2020-12-02 16:11:00",
-            new_user_email,
-            "UserX",
-            "",
-            "Big",
-            'D. "Sourdough / Large"',
-            "Winbledon",
-            "PEE-can",
-            "",
-            "Ontario",
-            "The Amazing Race",
-            "Katie",
-            "Pancakes",
-            "",
-            ""
-        ]], columns=self.resp_df.columns)
+        new_answer_with_blanks = pd.DataFrame(
+            [
+                [
+                    "2020-12-02 16:11:00",
+                    new_user_email,
+                    "UserX",
+                    "",
+                    "Big",
+                    'D. "Sourdough / Large"',
+                    "Winbledon",
+                    "PEE-can",
+                    "",
+                    "Ontario",
+                    "The Amazing Race",
+                    "Katie",
+                    "Pancakes",
+                    "",
+                    "",
+                ]
+            ],
+            columns=self.resp_df.columns,
+        )
         resp_df = self.resp_df.append(new_answer_with_blanks)
         answers_to_db(self.game, resp_df)
 
@@ -279,13 +284,13 @@ class TestGSheetsAPI(BaseGameDataTestCase):
         self.rollups_and_tallies = build_rollups_and_tallies(self.answer_tally, self.answer_codes)
 
     def test_make_answers_sheet(self):
-        with open(f'{LOCAL_DIR}/test_data/test_answers.json', 'r') as f:
+        with open(f"{LOCAL_DIR}/test_data/test_answers.json", "r") as f:
             expected_answers_sheet = json.load(f)
         answers_sheet = make_answers_sheet(self.rollups_and_tallies)
         self.assertEqual(answers_sheet, expected_answers_sheet)
 
     def test_make_merges_sheet(self):
-        with open(f'{LOCAL_DIR}/test_data/test_rollups.json', 'r') as f:
+        with open(f"{LOCAL_DIR}/test_data/test_rollups.json", "r") as f:
             expected_rollups_sheet = json.load(f)
         rollups_sheet = make_rollups_sheet(self.rollups_and_tallies)
         self.assertEqual(rollups_sheet, expected_rollups_sheet)
@@ -306,11 +311,11 @@ class TestUtils(TestCase):
         self.assertEqual(next_game_end.strftime(format="%H:%M:%S"), "23:59:59")
 
     def test_clear_redis_trailing_wildcard(self):
-        key1 = 'leaderboard_3_@crAzyS+r!ng'
-        key2 = 'leaderboard_3_$0H!pSoHODL'
+        key1 = "leaderboard_3_@crAzyS+r!ng"
+        key2 = "leaderboard_3_$0H!pSoHODL"
         REDIS.set(key1, "a value")
         REDIS.set(key2, "a value")
-        redis_delete_patterns(['leaderboard_3'])
+        redis_delete_patterns(["leaderboard_3"])
         self.assertIsNone(REDIS.get(key1))
         self.assertIsNone(REDIS.get(key2))
 
@@ -336,15 +341,12 @@ class TestModels(TestCase):
 
     def test_optional_questions(self):
         op_q = Question.objects.create(
-            text="This question is optional.", type=Question.op, number=1, choices=['a', 'b'])
+            text="This question is optional.", type=Question.op, number=1, choices=["a", "b"]
+        )
         self.assertEqual(op_q.text, "OPTIONAL: This question is optional.")
 
         user = get_local_user()
-        op_q_form = QuestionAnswerForm(op_q, data={
-            'question': op_q,
-            'raw_string': '',
-            'player': user
-        })
+        op_q_form = QuestionAnswerForm(op_q, data={"question": op_q, "raw_string": "", "player": user})
 
         self.assertNotIn("required", op_q_form.as_p())
         self.assertTrue(op_q_form.is_valid())
@@ -352,11 +354,11 @@ class TestModels(TestCase):
     def test_unique_question_number(self):
         series, game = make_test_series()
         with self.assertRaises(IntegrityError):
-            Question.objects.create(game=game, text='q1', number=1)
+            Question.objects.create(game=game, text="q1", number=1)
 
 
-def make_test_series(series_name='Commonology', hour_window=False):
-    series_owner = get_local_user(e='series@owner.com')
+def make_test_series(series_name="Commonology", hour_window=False):
+    series_owner = get_local_user(e="series@owner.com")
     series = Series.objects.create(name=series_name, owner=series_owner, public=True)
     t = et = our_now()
     if hour_window:
@@ -370,13 +372,13 @@ def make_test_series(series_name='Commonology', hour_window=False):
 
 class TestPlayRequest(TestCase):
     def setUp(self):
-        self.series, self.game = make_test_series(series_name='Commonology', hour_window=True)
+        self.series, self.game = make_test_series(series_name="Commonology", hour_window=True)
         pub_date = self.game.end + relativedelta(days=1)
         self.leaderboard = self.game.leaderboard
         self.player = get_local_user()
 
     def test_find_latest_public_game(self):
-        slug = 'commonology'
+        slug = "commonology"
         game = find_latest_public_game(slug)
         self.assertIsNotNone(game)
 
@@ -388,25 +390,24 @@ class TestPlayRequest(TestCase):
 
     def test_no_games(self):
         client = Client()
-        path = '/c/foobar/play/'
+        path = "/c/foobar/play/"
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response,
-                            "There is no live game currently active, but you can still play the demo game!")
+        self.assertContains(response, "There is no live game currently active, but you can still play the demo game!")
 
     def test_with_google_form(self):
         # test with uuid and without
         g = self.game
-        g.google_form_url = 'https://docs.google.com/forms/u/1/d/1nrL3Me1hek9loJqNHWnCkphfLZhKP4D1C_92pYbK3sU/'
+        g.google_form_url = "https://docs.google.com/forms/u/1/d/1nrL3Me1hek9loJqNHWnCkphfLZhKP4D1C_92pYbK3sU/"
         g.save()
 
         client = Client()
-        path = '/play/'
+        path = "/play/"
         response = client.get(path)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, g.google_form_url)
 
-        path = reverse('game:uuidplay', kwargs={'game_uuid': g.uuid})
+        path = reverse("game:uuidplay", kwargs={"game_uuid": g.uuid})
         response = client.get(path)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, g.google_form_url)
@@ -417,18 +418,18 @@ class TestPlayRequest(TestCase):
         game.save()
 
         client = get_local_client()
-        path = f'/play/{game.uuid}/'
+        path = f"/play/{game.uuid}/"
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
 
         self.series.hosts.add(self.player)
-        path = f'/play/{game.uuid}/'
+        path = f"/play/{game.uuid}/"
         response = client.get(path)
         self.assertContains(response, self.game.questions.first().text)
 
         # This should fail because find latest game would return None and so no game can be found.
-        path = f'/play/'
+        path = f"/play/"
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
@@ -437,40 +438,40 @@ class TestPlayRequest(TestCase):
         game = self.game
         client = get_local_client()
 
-        path = '/play/'
+        path = "/play/"
         response = client.get(path)
         self.assertContains(response, game.questions.first().text)
 
-        path = reverse('game:uuidplay', kwargs={'game_uuid': game.uuid})
+        path = reverse("game:uuidplay", kwargs={"game_uuid": game.uuid})
         response = client.get(path)
         self.assertContains(response, game.questions.first().text)
 
         game.end = game.start
         game.save()
-        path = '/play/'
+        path = "/play/"
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
 
-        path = reverse('game:uuidplay', kwargs={'game_uuid': game.uuid})
+        path = reverse("game:uuidplay", kwargs={"game_uuid": game.uuid})
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "The game has ended. The next game goes live Wednesday at 12PM EST!")
 
         self.leaderboard.publish_date = our_now()
         self.leaderboard.save()
-        path = reverse('game:uuidplay', kwargs={'game_uuid': game.uuid})
+        path = reverse("game:uuidplay", kwargs={"game_uuid": game.uuid})
         response = client.get(path)
-        self.assertRedirects(response, f'/c/{self.series.slug}/leaderboard/{self.game.game_id}/')
+        self.assertRedirects(response, f"/c/{self.series.slug}/leaderboard/{self.game.game_id}/")
 
     def get_invite_url(self, email):
         client = Client()
         mail.outbox = []
-        response = client.post(reverse('game:play'), data={"email": email})
+        response = client.post(reverse("game:play"), data={"email": email})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "forget to check your spam or junk folder if need be.")
         msg = mail.outbox[0].body
-        url = re.search("(?P<url>https?://[^\s]+)\"\>Click", msg).group("url")
+        url = re.search('(?P<url>https?://[^\s]+)"\>Click', msg).group("url")
         mail.outbox = []
         return url
 
@@ -478,7 +479,7 @@ class TestPlayRequest(TestCase):
         # try with just /play and /c/rambus/play and /c/commonology/play
         # test with uuid and without
         game = self.game
-        path = reverse('game:uuidplay', kwargs={'game_uuid': game.uuid})
+        path = reverse("game:uuidplay", kwargs={"game_uuid": game.uuid})
 
         client = Client()
         response = client.get(path)
@@ -506,7 +507,7 @@ class TestPlayRequest(TestCase):
         Player.objects.filter(email=ABINORMAL).delete()
         PendingEmail.objects.all().delete()
         response = client.get(url)
-        self.assertContains(response, 'Seems like there was a problem with the validation link. Please try again.')
+        self.assertContains(response, "Seems like there was a problem with the validation link. Please try again.")
 
     def test_stale_email_confirm_link(self):
         game = self.game
@@ -519,33 +520,32 @@ class TestPlayRequest(TestCase):
         game.save()
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Sorry the next game is no longer active.')
+        self.assertContains(response, "Sorry the next game is no longer active.")
 
     def test_bad_uuid(self):
         game = self.game
 
         uuid = str(game.uuid)
         last_char = uuid[-1]
-        if last_char == '0':
-            last_char = '1'
+        if last_char == "0":
+            last_char = "1"
         else:
-            last_char = '0'
+            last_char = "0"
         uuid = uuid[:-1] + last_char
 
-        path = reverse('game:uuidplay', kwargs={'game_uuid': uuid})
+        path = reverse("game:uuidplay", kwargs={"game_uuid": uuid})
         client = Client()
         response = client.get(path)
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response,
-                            "There is no live game currently active, but you can still play the demo game!")
+        self.assertContains(response, "There is no live game currently active, but you can still play the demo game!")
 
     def test_game_reviewer(self):
         # Game url with uuid should render the game without a submit button prior to game start.
         game = self.game
 
         client = get_local_client()
-        path = f'/play/{game.uuid}/'
+        path = f"/play/{game.uuid}/"
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.game.questions.first().text)
@@ -556,7 +556,7 @@ class TestPlayRequest(TestCase):
         game.save()
 
         client = get_local_client()
-        path = f'/play/{game.uuid}/'
+        path = f"/play/{game.uuid}/"
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.game.questions.first().text)
@@ -565,7 +565,7 @@ class TestPlayRequest(TestCase):
 
     def test_submit_button_id(self):
         client = get_local_client()
-        path = f'/play/{self.game.uuid}/'
+        path = f"/play/{self.game.uuid}/"
         response = client.get(path)
 
         self.assertContains(response, '<button id="submit-button"')
@@ -573,8 +573,8 @@ class TestPlayRequest(TestCase):
     def test_emails_with_whitespace(self):
         client = Client()
         user = get_local_user()
-        path = f'/play/?r={user.code}'
-        response = client.post(path, data={'email': f"{user.email} "})
+        path = f"/play/?r={user.code}"
+        response = client.post(path, data={"email": f"{user.email} "})
         self.assertContains(response, self.game.questions.first().text)
 
 
@@ -583,23 +583,20 @@ class TestViews(TestCase):
     def test_suggest_question(self):
         # anonymous user redirects to login
         client = Client()
-        response = client.get(reverse('game:question-suggest'))
+        response = client.get(reverse("game:question-suggest"))
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, '/login/?next=/suggest-a-question/')
+        self.assertEqual(response.url, "/login/?next=/suggest-a-question/")
 
         # logged in user renders form
         get_local_user()
         client = get_local_client()
-        response = client.get(reverse('game:question-suggest'))
+        response = client.get(reverse("game:question-suggest"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Suggest a Question")
 
         # post form sends email
         mail.outbox = []
-        client.post(
-            reverse('game:question-suggest'),
-            data={"suggestion": "A question suggestion"}
-        )
+        client.post(reverse("game:question-suggest"), data={"suggestion": "A question suggestion"})
         self.assertEqual(len(mail.outbox), 1)
 
 
@@ -608,20 +605,21 @@ class TestGameForm(BaseGameDataTestCase, PSIDMixin):
     def setUp(self):
         self.player = get_local_user()
         self.client = get_local_client()
-        self.game_form_url = reverse('series-game:game-form',
-                                     kwargs={'series_slug': self.series.slug, 'game_id': self.game.game_id})
-        self.instant_game_url = reverse('series-game:instant-game', kwargs={'series_slug': self.series.slug})
+        self.game_form_url = reverse(
+            "series-game:game-form", kwargs={"series_slug": self.series.slug, "game_id": self.game.game_id}
+        )
+        self.instant_game_url = reverse("series-game:instant-game", kwargs={"series_slug": self.series.slug})
         self.psid = self.sign_game_player(self.game, self.player)
 
     def test_game_form_view(self):
         # can't render game form directly (needs to go through GameValidationView)
         response = self.client.get(self.game_form_url)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, f'/play/{self.game.uuid}/')
+        self.assertEqual(response.url, f"/play/{self.game.uuid}/")
 
     def test_game_form_post_success(self):
         form_data = self._valid_game_form_data()
-        self._test_game_form_post_response(form_data, 'Your answers have been submitted.')
+        self._test_game_form_post_response(form_data, "Your answers have been submitted.")
 
     def test_incomplete_form_post_fail(self):
         form_data = self._psid_display_name_form_data()
@@ -631,38 +629,33 @@ class TestGameForm(BaseGameDataTestCase, PSIDMixin):
     def test_valid_string_not_in_choices(self):
         # if an answer isn't in choices, redirect to game form
         q = self.game.questions.first()
-        q.choices = ['foo', 'bar']
+        q.choices = ["foo", "bar"]
         q.save()
         form_data = self._valid_game_form_data()
         self._test_game_form_post_response(form_data, self.game.questions.first().text)
         self._test_game_form_post_response(form_data, 'div class="errors"')
 
     def _psid_display_name_form_data(self) -> list:
-        return [
-            (('psid', self.psid),),
-            (('display_name', 'test_guy'),)
-        ]
+        return [(("psid", self.psid),), (("display_name", "test_guy"),)]
 
     def _valid_game_form_data(self) -> list:
         form_data = self._psid_display_name_form_data()
-        form_data.extend([
-            (('question', str(q.id)), ('raw_string', f'test_{q.id}')) for q in self.game.questions.all()
-        ])
+        form_data.extend([(("question", str(q.id)), ("raw_string", f"test_{q.id}")) for q in self.game.questions.all()])
         return form_data
 
     def _url_encode_form_data(self, form_data):
         # accepts a list of tuples (representing a form) which contains key value pair tuples representing
         # field name and value e.g. ('form_field', 'value') and outputs as encoded form data
-        url_encoded = f'?'
+        url_encoded = f"?"
         for form in form_data:
-            url_encoded += '&' + '&'.join([f'{k}={quote_plus(v)}' for k, v in form])
+            url_encoded += "&" + "&".join([f"{k}={quote_plus(v)}" for k, v in form])
         return url_encoded
 
     def _test_game_form_post_response(self, game_data, expected_text):
         response = self.client.post(
             self.game_form_url,
             data=self._url_encode_form_data(game_data),
-            content_type="application/x-www-form-urlencoded"
+            content_type="application/x-www-form-urlencoded",
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, expected_text)
@@ -679,42 +672,42 @@ class TestGameForm(BaseGameDataTestCase, PSIDMixin):
         response = self.client.post(
             self.instant_game_url,
             data=self._url_encode_form_data(form_data),
-            content_type="application/x-www-form-urlencoded"
+            content_type="application/x-www-form-urlencoded",
         )
         self.assertRedirects(response, "/results/")
 
 
 class CertificateTests(BaseGameDataTestCase):
     def remove_winner_files(self, fn):
-        if env.get('GITHUB_COMMONOLOGY_CI_TEST'):
+        if env.get("GITHUB_COMMONOLOGY_CI_TEST"):
             return
 
         fs = FileSystemStorage(location=settings.WINNER_ROOT)
         fs.delete(fn)
-        fn = fn.removesuffix('.pdf') + '.fdf'
+        fn = fn.removesuffix(".pdf") + ".fdf"
         fs.delete(fn)
 
     def test_write(self):
-        fn = write_winner_certificate(name='Marc Schwarzschild', date='October 21, 2021', game_number=59)
-        self.assertEqual(fn, 'MarcSchwarzschildOctober21202159.pdf')
+        fn = write_winner_certificate(name="Marc Schwarzschild", date="October 21, 2021", game_number=59)
+        self.assertEqual(fn, "MarcSchwarzschildOctober21202159.pdf")
         self.remove_winner_files(fn)
 
     def test_award_certificate(self):
         player = winners_of_game(self.game)[0]
-        player.set_password('foobar')
+        player.set_password("foobar")
         player.save()
 
-        client = get_local_client(player.email, pw='foobar')
-        path = reverse('game:award_certificate', kwargs={'game_id': self.game.game_id})
+        client = get_local_client(player.email, pw="foobar")
+        path = reverse("game:award_certificate", kwargs={"game_id": self.game.game_id})
         response = client.get(path)
         self.assertEqual(response.status_code, 200)
         headers = response.headers
-        self.assertEqual(headers['Content-Type'], 'application/pdf')
-        if 'Content-Disposition' in headers:
-            fn = headers['Content-Disposition'].replace('attachment; filename=', '')
+        self.assertEqual(headers["Content-Type"], "application/pdf")
+        if "Content-Disposition" in headers:
+            fn = headers["Content-Disposition"].replace("attachment; filename=", "")
             self.remove_winner_files(fn)
 
-        player.set_password('')
+        player.set_password("")
         player.save()
 
 
@@ -727,44 +720,44 @@ class SessionReferralTests(BaseGameDataTestCase):
         cls.game.end = our_now() + relativedelta(hours=1)
         cls.game.save()
 
-    def start_session(self, name='home'):
+    def start_session(self, name="home"):
         self.user1 = get_local_user()
         client = Client()
-        path = reverse(name) + f'?r={self.user1.code}'
+        path = reverse(name) + f"?r={self.user1.code}"
         client.get(path)
-        self.assertEqual(self.user1.code, client.session.get('r'))
+        self.assertEqual(self.user1.code, client.session.get("r"))
         return client
 
-    def url_tester(self, name='home'):
+    def url_tester(self, name="home"):
         client = self.start_session(name)
         mail.outbox = []
-        email = 'button_player@commonologygame.com'
-        response = client.post(reverse('game:play'), data={"email": email})
+        email = "button_player@commonologygame.com"
+        response = client.post(reverse("game:play"), data={"email": email})
         self.assertEqual(response.status_code, 200)
 
         pe = PendingEmail.objects.filter(email=email).first()
         self.assertEqual(pe.referrer, self.user1)
 
         msg = mail.outbox[0].body
-        url = re.search("(?P<url>https?://[^\s]+)\"\>Click", msg).group("url")
+        url = re.search('(?P<url>https?://[^\s]+)"\>Click', msg).group("url")
         mail.outbox = []
 
         pe.delete()
 
     def test_play_from_home(self):
-        self.url_tester('home')
+        self.url_tester("home")
 
     def test_play_from_referral_rules(self):
-        self.url_tester('raffle_rules')
+        self.url_tester("raffle_rules")
 
     def test_play_from_play(self):
         # Special case: click play link but don't submit. Leave page.  Then use play link on sise somewhere.
-        client = self.start_session('game:play')
-        response = client.get(reverse('about'))
+        client = self.start_session("game:play")
+        response = client.get(reverse("about"))
         self.assertEqual(response.status_code, 200)
 
-        email = 'button_player@commonologygame.com'
-        response = client.post(reverse('game:play'), data={"email": email})
+        email = "button_player@commonologygame.com"
+        response = client.post(reverse("game:play"), data={"email": email})
         self.assertEqual(response.status_code, 200)
 
         pe = PendingEmail.objects.filter(email=email).first()
@@ -772,11 +765,11 @@ class SessionReferralTests(BaseGameDataTestCase):
 
     def test_join(self):
         client = self.start_session()
-        email = 'button_player@commonologygame.com'
+        email = "button_player@commonologygame.com"
 
         mail.outbox = []
-        response = client.post(reverse('join'), data={"email": email})
-        self.assertEqual(response.reason_phrase, 'OK')
+        response = client.post(reverse("join"), data={"email": email})
+        self.assertEqual(response.reason_phrase, "OK")
 
         pe = PendingEmail.objects.filter(email=email).first()
         self.assertEqual(pe.referrer, self.user1)
@@ -798,21 +791,21 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
 
     def get_time(self, client, player):
         # Set session time
-        response = client.get(reverse('leaderboard:current-results'))
+        response = client.get(reverse("leaderboard:current-results"))
         self.assertEqual(response.status_code, 200)
         player = Player.objects.get(id=player.id)
-        last_visit_t = player.data.get(f'results_last_visit_t:{self.series.slug}:{self.game.game_id}')
+        last_visit_t = player.data.get(f"results_last_visit_t:{self.series.slug}:{self.game.game_id}")
         last_visit_t = dateutil.parser.isoparse(last_visit_t)
         return last_visit_t
 
     def test_indicator(self):
         client1 = self.authenticated_client
         player1 = self.game_player
-        player2 = get_local_user(e='two@foo.com')
-        client2 = get_local_client(e='two@foo.com')
-        player3 = get_local_user(e='three@foo.com')
-        client3 = get_local_client(e='three@foo.com')
-        comment_badge = "<div id=\"comment-indicator-badge-container\" class=\"w3-tooltip\">"
+        player2 = get_local_user(e="two@foo.com")
+        client2 = get_local_client(e="two@foo.com")
+        player3 = get_local_user(e="three@foo.com")
+        client3 = get_local_client(e="three@foo.com")
+        comment_badge = '<div id="comment-indicator-badge-container" class="w3-tooltip">'
 
         # Set session time for client 1 and client2
         self.get_time(client2, player2)
@@ -824,29 +817,29 @@ class NewMessageIndicatorTests(BaseGameDataTestCase):
         self.assertFalse(f)
 
         # Player 2 adds a comment 6 minutes after player 1 last visited the results page.
-        self.add_comment(player2, 'hi', last_visit_t + datetime.timedelta(minutes=6))
+        self.add_comment(player2, "hi", last_visit_t + datetime.timedelta(minutes=6))
         flag = n_new_comments(self.game, player1, last_visit_plus_5)
         self.assertTrue(flag)
 
         # Player 1 visits the leaderboard which indicates a new message.
-        response = client1.get(reverse('leaderboard:current-leaderboard'))
+        response = client1.get(reverse("leaderboard:current-leaderboard"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, comment_badge)
 
         # Player 2 visits the leaderboard but should not see an indication because he posted new comment
-        response = client2.get(reverse('leaderboard:current-leaderboard'))
+        response = client2.get(reverse("leaderboard:current-leaderboard"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, comment_badge)
 
         # Player 3 visits leaderboard but never visited results
-        response = client3.get(reverse('leaderboard:current-leaderboard'))
+        response = client3.get(reverse("leaderboard:current-leaderboard"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, comment_badge)
 
     def test_save_last_visit_t(self):
         player_id = self.game_player.id
         t = our_now().isoformat()
-        key = 'leaderboard_last_t'
+        key = "leaderboard_last_t"
         save_last_visit_t.delay(player_id, key, t)
         p = Player.objects.get(id=player_id)
         self.assertEqual(p.data[key], t)

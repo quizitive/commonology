@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0010_auto_20210423_2302'),
+        ("users", "0010_auto_20210423_2302"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='player',
-            name='subscribed',
-            field=models.BooleanField(default=True, help_text='If email address is bad then unsubscribe and deactivate them.'),
+            model_name="player",
+            name="subscribed",
+            field=models.BooleanField(
+                default=True, help_text="If email address is bad then unsubscribe and deactivate them."
+            ),
         ),
     ]

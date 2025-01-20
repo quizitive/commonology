@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mail', '0018_auto_20211121_1311'),
+        ("mail", "0018_auto_20211121_1311"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mailmessage',
-            name='scheduled',
-            field=models.DateTimeField(blank=True, help_text='If set then mail will go out at the scheduled time.', null=True),
+            model_name="mailmessage",
+            name="scheduled",
+            field=models.DateTimeField(
+                blank=True, help_text="If set then mail will go out at the scheduled time.", null=True
+            ),
         ),
     ]

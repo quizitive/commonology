@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mail', '0002_mailmessage_categories'),
+        ("mail", "0002_mailmessage_categories"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mailmessage',
-            name='categories',
-            field=models.CharField(blank=True, help_text='A comma separated list of categories.', max_length=50),
+            model_name="mailmessage",
+            name="categories",
+            field=models.CharField(blank=True, help_text="A comma separated list of categories.", max_length=50),
         ),
     ]

@@ -8,33 +8,37 @@ from django.utils.timezone import make_aware
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0004_auto_20210506_1923'),
+        ("game", "0004_auto_20210506_1923"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='game',
-            name='end',
-            field=models.DateTimeField(default=make_aware(datetime.datetime(2020, 1, 1, 0, 0)), verbose_name='When the game ends:'),
+            model_name="game",
+            name="end",
+            field=models.DateTimeField(
+                default=make_aware(datetime.datetime(2020, 1, 1, 0, 0)), verbose_name="When the game ends:"
+            ),
         ),
         migrations.AddField(
-            model_name='game',
-            name='google_form_url',
-            field=models.CharField(blank=True, help_text='Enter the form url with prefilled email', max_length=255),
+            model_name="game",
+            name="google_form_url",
+            field=models.CharField(blank=True, help_text="Enter the form url with prefilled email", max_length=255),
         ),
         migrations.AddField(
-            model_name='game',
-            name='start',
-            field=models.DateTimeField(default=make_aware(datetime.datetime(2020, 1, 1, 0, 0)), verbose_name='When the game starts:'),
+            model_name="game",
+            name="start",
+            field=models.DateTimeField(
+                default=make_aware(datetime.datetime(2020, 1, 1, 0, 0)), verbose_name="When the game starts:"
+            ),
         ),
         migrations.AlterField(
-            model_name='game',
-            name='end',
-            field=models.DateTimeField(verbose_name='When the game ends:'),
+            model_name="game",
+            name="end",
+            field=models.DateTimeField(verbose_name="When the game ends:"),
         ),
         migrations.AlterField(
-            model_name='game',
-            name='start',
-            field=models.DateTimeField(verbose_name='When the game starts:'),
+            model_name="game",
+            name="start",
+            field=models.DateTimeField(verbose_name="When the game starts:"),
         ),
     ]

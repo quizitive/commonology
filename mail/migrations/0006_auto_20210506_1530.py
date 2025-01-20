@@ -6,23 +6,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mail', '0005_auto_20210506_1414'),
+        ("mail", "0005_auto_20210506_1414"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mailmessage',
-            name='enable_blast',
-            field=models.BooleanField(default=False, help_text='Must be check to send blast.'),
+            model_name="mailmessage",
+            name="enable_blast",
+            field=models.BooleanField(default=False, help_text="Must be check to send blast."),
         ),
         migrations.AlterField(
-            model_name='mailmessage',
-            name='sent',
-            field=models.BooleanField(default=False, help_text='You can uncheck this to send blast again.'),
+            model_name="mailmessage",
+            name="sent",
+            field=models.BooleanField(default=False, help_text="You can uncheck this to send blast again."),
         ),
         migrations.AlterField(
-            model_name='mailmessage',
-            name='tested',
-            field=models.BooleanField(default=False, help_text='Must be check to send blast but set automatically when a test message is sent.'),
+            model_name="mailmessage",
+            name="tested",
+            field=models.BooleanField(
+                default=False,
+                help_text="Must be check to send blast but set automatically when a test message is sent.",
+            ),
         ),
     ]

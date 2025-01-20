@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('game', '0012_auto_20210807_0849'),
+        ("game", "0012_auto_20210807_0849"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='answer',
-            name='removed',
-            field=models.BooleanField(default=False, help_text='This answer should be removed from the thread'),
+            model_name="answer",
+            name="removed",
+            field=models.BooleanField(default=False, help_text="This answer should be removed from the thread"),
         ),
     ]
