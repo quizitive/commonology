@@ -6,7 +6,7 @@
       <div class="w3-cell-row">
         <div class="w3-cell w3-mobile" style="width:6%;"></div>
         <div class="w3-cell w3-cell-middle">
-          <a href="{% url 'home' %}">
+          <a href="{% url 'series-leaderboard:current-leaderboard' active_series|default:'commonology' %}">
             <img class="navbar-logo-large" src="{% v_static 'img/logo_threeface_medium.svg' %}">
             <img class="navbar-logo-small" src="{% v_static 'img/icon.svg' %}">
           </a>

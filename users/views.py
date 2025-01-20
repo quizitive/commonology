@@ -18,6 +18,7 @@ from django.contrib.auth.views import PasswordResetDoneView, PasswordResetConfir
 from django.core.exceptions import ValidationError
 from django.core.signing import Signer, BadSignature
 from django.core.validators import validate_email
+from django.http import Http404
 from django.template.loader import render_to_string
 from users.forms import LoginForm
 
@@ -150,11 +151,33 @@ class JoinView(CardFormView):
     header = "Join Commonology"
     button_label = "Join"
     card_template = "users/cards/join_card.html"
-    custom_message = "A new game goes live every Wednesday at 12pm EST. Join us to get notified!"
+    custom_message = "Join us to get notified when the game begins!"
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect("home")
+        series_slug = request.GET.get("c", "commonology")
+
+        try:
+            series = Series.objects.get(slug=series_slug, public=True)
+        except Series.DoesNotExist:
+            # You must have a real series as a query param
+            raise Http404
+
+        if request.user.is_authenticated and request.user in series.players.all():
+            # If you're already in the series, just go to the home page
+            return redirect("series-leaderboard:series-home", series_slug)
+
+        elif request.user.is_authenticated:
+            # If you're a known user, get added automatically
+            request.user.series.add(series)
+            messages.info(request, f'You have been added to the game series "{series.name}"!')
+            self.custom_message = (
+                f'You have been added to the game series "{series.name}"! '
+                f"You will receive an email when the game begins. You can close this browser now."
+            )
+            return self.info(request, message=self.custom_message)
+
+        # If you're not a known user, show the join form
+        self.custom_message = f'Join the game series "{series.name}" on Commonology.'
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -164,14 +187,20 @@ class JoinView(CardFormView):
             return self.render(request, *args, **kwargs)
 
         email = request.POST["email"]
-
         if not email:
             return redirect("login")
 
         try:
             user = User.objects.get(email=email)
             if user.is_member:
-                messages.info(request, "There is already an account with that email, please login.")
+                series_slug = request.GET.get("c", "commonology")
+                series = self._get_series(series_slug)
+                send_invite(request, email, slug=series_slug)
+                messages.info(
+                    request,
+                    f"Looks like you've played with us before! We sent a link to your email "
+                    f'to join the game series "{series.name}"',
+                )
                 return redirect("login")
 
         except User.DoesNotExist:
@@ -180,7 +209,9 @@ class JoinView(CardFormView):
         referrer = request.session.get("r")
         if referrer:
             referrer = Player.objects.filter(_code=referrer).first()
-        send_invite(request, email, referrer=referrer)
+
+        slug = request.GET.get("c", "commonology")
+        send_invite(request, email, slug=slug, referrer=referrer)
 
         self.custom_message = (
             f"We sent your unique join link to {email}. "
@@ -193,10 +224,18 @@ class JoinView(CardFormView):
             request, message=self.custom_message, form=None, form_method="get", form_action="/", button_label="Ok"
         )
 
+    def _get_series(self, series_slug: str):
+        try:
+            series = Series.objects.get(slug=series_slug, public=True)
+        except Series.DoesNotExist:
+            # You must have a real series as a query param
+            raise Http404
+        return series
+
 
 def make_uuid_url(request, uuid=None, name="/join/", slug=None):
     if slug:
-        return request.build_absolute_uri(f"c/{slug}/{name}/{uuid}")
+        return request.build_absolute_uri(f"{name}{uuid}?c={slug}")
     else:
         url = request.build_absolute_uri(name)
     if uuid:
@@ -204,15 +243,14 @@ def make_uuid_url(request, uuid=None, name="/join/", slug=None):
     return url
 
 
-def send_invite(request, email, referrer=None):
+def send_invite(request, email, slug, referrer=None):
     remove_pending_email_invitations()
 
     pe = PendingEmail(email=email, referrer=referrer)
     pe.save()
 
     email = pe.email
-    join_url = make_uuid_url(request, uuid=pe.uuid)
-    referrer_str = ""
+    join_url = make_uuid_url(request, uuid=pe.uuid, slug=slug)
     if pe.referrer:
         referrer = User.objects.filter(email=pe.referrer).first()
         if referrer is None:
@@ -260,7 +298,8 @@ class InviteFriendsView(LoginRequiredMixin, BaseCardView):
                 # can't join if user exists
                 messages.warning(request, f"User {email} already exists")
             except User.DoesNotExist:
-                send_invite(request, email, request.user)
+                # TODO: Make this work for other series
+                send_invite(request, email, "commonology", referrer=request.user)
                 messages.info(request, f"Invite successfully sent to {email}.")
 
         return redirect("invite")
@@ -291,12 +330,18 @@ class EmailConfirmedView(View):
                 return self._join_fail(request)
 
             email = pe.email
-
+            series_slug = request.GET.get("c", "commonology")
+            series = Series.objects.get(slug=series_slug, public=True)
             try:
                 user = User.objects.get(email=email)
-                if user.is_member:
-                    messages.info(request, "You already have an account.")
-                    return redirect("/login/")
+                if user.is_member and series in user.series.all():
+                    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+                    return redirect(reverse("series-leaderboard:series-home", args=[series_slug]))
+
+                elif user.is_member:
+                    user.series.add(series)
+                    return redirect(reverse("series-leaderboard:series-home", args=[series_slug]))
+
                 display_name = user.display_name
             except User.DoesNotExist:
                 display_name = ""
@@ -314,10 +359,13 @@ class EmailConfirmedView(View):
 
     def post(self, request, uidb64, *args, **kwargs):
         email = request.POST.get("email")
+        series_slug = request.GET.get("c", "commonology")
+        series = Series.objects.get(slug=series_slug, public=True)
 
         # if the player is already in our database, update that record
         try:
             user = User.objects.get(email=email)
+            user.series.add(series)
             form = JoinForm(request.POST, instance=user)
         except User.DoesNotExist:
             form = JoinForm(request.POST)
@@ -335,13 +383,14 @@ class EmailConfirmedView(View):
             user.referrer = pe.referrer
             user.is_member = True
             user.save()
-            Series.objects.get(slug="commonology").players.add(user)
+            user.series.add(series)
             raw_password = form.clean_password2()
             user = authenticate(email=user.email, password=raw_password)
             auth_login(request, user)
             PendingEmail.objects.filter(email__iexact=user.email).delete()
 
-            return redirect("/")
+            messages.info(request, f'You have been added to the series "{series.name}"!')
+            return redirect(reverse("series-game:play", args=[series.slug]))
 
         messages.info(request, mark_safe(f"Email: {email}<br/>(you can change this after signing up)"))
         return render(request, "users/register.html", {"form": self._format_form(form)})
