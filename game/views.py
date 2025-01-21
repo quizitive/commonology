@@ -232,7 +232,8 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
         }
         return CardFormView(
             page_template="game/game_card_view.html",
-            card_template="game/cards/game_complete_card.html",
+            # card_template="game/cards/game_complete_card.html",
+            card_template="cards/base_card_v2.html"
         ).render(
             request,
             button_label="View my answers",
@@ -259,7 +260,7 @@ class GameFormView(FormMixin, PSIDMixin, BaseGameView):
             subject=f"{game.name}",
             msg=answers_msg,
             email_list=[(player.email, player.code)],
-            bottom_components=[referral_link] + sponsor_components,
+            # bottom_components=[referral_link] + sponsor_components,
         )
 
     def test_func(self):
