@@ -10,6 +10,8 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from project import settings_utils
 
+from logtail import LogtailHandler
+
 
 BASE_DIR = settings_utils.BASE_DIR
 # BUILD_NUMBER = settings_utils.find_latest_css()
@@ -251,9 +253,15 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
         },
+        "logtail": {
+            "class": "logtail.LogtailHandler",
+            "source_token": env.get("LOGTAIL_TOKEN"),
+        },
     },
     "root": {
-        "handlers": ["console"],
+        # There is a weird bug with logtail and the auto-reload development server,
+        # this is so the logger doesn't try to configure logtail locally
+        "handlers": ["console"] + ["logtail"] if "LOGTAIL_TOKEN" in env else [],
         "level": "INFO",
     },
 }

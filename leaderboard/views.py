@@ -1,5 +1,6 @@
 import datetime
 import dateutil
+import logging
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
@@ -121,7 +122,6 @@ class LeaderboardView(BaseGameView):
         }
 
     def get(self, request, *args, **kwargs):
-
         if self.game is None:
             return render(request, "leaderboard/leaderboard_view.html", self._get_no_game_context())
 
