@@ -249,9 +249,16 @@ GOOGLE_DRIVE_FOLDER_ID = env.get("GOOGLE_DRIVE_FOLDER_ID")
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(funcName)s:%(lineno)d - %(message)s",
+            "datefmt": "%b %d %H:%M:%S",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
         "logtail": {
             "class": "logtail.LogtailHandler",
