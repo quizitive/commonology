@@ -248,7 +248,7 @@ class PendingUsersTests(TestCase):
             p = User.objects.get(email=data["email"])
             self.assertTrue(p.series.filter(slug="commonology").exists())
 
-    def test_invite(self):
+    def deprecated_test_invite(self):
         user = get_local_user()
         remove_abinormal()
 

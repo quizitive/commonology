@@ -15,7 +15,7 @@ urlpatterns = [
     path("join/", views.JoinView.as_view(), name="join"),
     path("join/<uidb64>", views.EmailConfirmedView.as_view(), name="join"),
     path("email_change_confirm/<uidb64>", views.EmailChangeConfirmedView.as_view(), name="email_change_confirm"),
-    path("invite/", views.InviteFriendsView.as_view(), name="invite"),
+    # path("invite/", views.InviteFriendsView.as_view(), name="invite"),
     path("login/", views.CustomLoginView.as_view(), name="login"),
     path("validate_email/<uidb64>/", views.ValidateEmailView.as_view(), name="validate_email"),
     path(

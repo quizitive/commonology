@@ -13,7 +13,7 @@ gunicorn==20.1.0
 pycodestyle==2.8.0
 redis==3.5.3
 celery==5.2.7
-newrelic==7.2.1.168
+# newrelic==7.2.1.168
 git+https://git@github.com/quizitive/django-bulk-update-or-create.git
 django-redis==5.0.0
 django-redis-sessions==0.6.2

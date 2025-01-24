@@ -172,8 +172,8 @@ See the end of the `staging.bashrc` file in this repo.
 Then logout and log back in again.  It could take a long time, 5-10 minutes, for the `pyenv install` line.
 
 ```
-  $ pyenv install 3.9.4
-  $ pyenv shell 3.9.4
+  $ pyenv install 3.10
+  $ pyenv shell 3.10.15
   $ pyenv virtualenv project
 ```
 
@@ -443,29 +443,7 @@ Ref: `https://github.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker`
 
 This uses databases that are frequently updated to block traffic from known bad actors.
 
-```commandline
-$ sudo su -
-# wget https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/install-ngxblocker -O /usr/local/sbin/install-ngxblocker
-# cd /usr/local/sbin
-# chmod +x install-ngxblocker
-# ./install-ngxblocker
-# ./install-ngxblocker -x
-# chmod +x setup-ngxblocker
-# chmod +x update-ngxblocker
-# ./setup-ngxblocker -x -e nginx
-# nginx -t
-# nginx -s reload
-# service nginx reload
-# service nginx restart
-```
-
-Note: used `-e nginx` arg with `setup-ngxblocker` because that is the extension we use on our nginx config files.
-
-Add this line to the crontab:
-
-`13 22 * * * root /usr/local/sbin/update-ngxblocker -e ms@quizitive.com`
-
-Try tests suggested at the end of hte github home page.
+See install documentation on their site.
 
 ## Set outbound email using sendgrid.net
 
