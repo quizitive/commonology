@@ -1,5 +1,6 @@
 import datetime
 import dateutil
+import logging
 
 from django.shortcuts import render
 from django.http import Http404, HttpResponse
@@ -24,6 +25,8 @@ from leaderboard.leaderboard import (
 )
 from leaderboard.tasks import save_last_visit_t
 from leaderboard.models import PlayerRankScore
+
+logger = logging.getLogger(__name__)
 
 
 class LeaderboardView(BaseGameView):
@@ -124,6 +127,7 @@ class LeaderboardView(BaseGameView):
         if self.game is None:
             return render(request, "leaderboard/leaderboard_view.html", self._get_no_game_context())
 
+        logger.info(f"Loading leaderboard for series {self.slug} and game {self.game.game_id}")
         messages.info(request, "Login to follow your friends and join the conversation!")
         return render(request, "leaderboard/leaderboard_view.html", self.get_context(*args, **kwargs))
 
