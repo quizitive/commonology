@@ -186,17 +186,16 @@ class JoinView(CardFormView):
             return redirect("login")
 
         try:
-            user = User.objects.get(email=email)
-            if user.is_member:
-                series_slug = request.GET.get("c", "commonology")
-                series = self._get_series(series_slug)
-                send_invite(request, email, slug=series_slug)
-                messages.info(
-                    request,
-                    f"Looks like you've played with us before! We sent a link to your email "
-                    f'to join the game series "{series.name}"',
-                )
-                return redirect(reverse("login") + f"?c={series_slug}")
+            _ = User.objects.get(email=email)
+            series_slug = request.GET.get("c", "commonology")
+            series = self._get_series(series_slug)
+            send_invite(request, email, slug=series_slug)
+            messages.info(
+                request,
+                f"Looks like you've played with us before! We sent a link to your email "
+                f'to join the game series "{series.name}".',
+            )
+            return redirect(reverse("login") + f"?c={series_slug}")
 
         except User.DoesNotExist:
             pass
@@ -320,37 +319,30 @@ class EmailConfirmedView(View):
 
     def get(self, request, uidb64, *args, **kwargs):
         try:
-            pe = PendingEmail.objects.filter(uuid__exact=uidb64).first()
-            if pe is None:
-                return self._join_fail(request)
-
-            email = pe.email
-            series_slug = request.GET.get("c", "commonology")
-            series = Series.objects.get(slug=series_slug, public=True)
-            try:
-                user = User.objects.get(email=email)
-                if user.is_member and series in user.series.all():
-                    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-                    return redirect(reverse("series-leaderboard:series-home", args=[series_slug]))
-
-                elif user.is_member:
-                    user.series.add(series)
-                    return redirect(reverse("series-leaderboard:series-home", args=[series_slug]))
-
-                display_name = user.display_name
-            except User.DoesNotExist:
-                display_name = ""
-                user = User(email=email, referrer=pe.referrer)
-                user.save()
-
-            form = JoinForm(initial={"email": pe.email, "referrer": pe.referrer, "display_name": display_name})
-            messages.info(request, mark_safe(f"Email: {pe.email}<br/>(you can change this after signing up)"))
-            return render(request, "users/register.html", {"form": self._format_form(form), "email": email})
-
+            pe = PendingEmail.objects.get(uuid__exact=uidb64)
         except PendingEmail.DoesNotExist:
             return self._join_fail(request)
         except ValidationError:
             return self._join_fail(request)
+
+        email = pe.email
+        series_slug = request.GET.get("c", "commonology")
+        series = Series.objects.get(slug=series_slug, public=True)
+        try:
+            user = User.objects.get(email=email)
+            user.series.add(series)
+            user.is_member = True
+            user.save()
+            return redirect(reverse("series-leaderboard:series-home", args=[series_slug]))
+
+        except User.DoesNotExist:
+            display_name = ""
+            user = User(email=email, referrer=pe.referrer)
+            user.save()
+
+        form = JoinForm(initial={"email": pe.email, "referrer": pe.referrer, "display_name": display_name})
+        messages.info(request, mark_safe(f"Email: {pe.email}<br/>(you can change this after signing up)"))
+        return render(request, "users/register.html", {"form": self._format_form(form), "email": email})
 
     def post(self, request, uidb64, *args, **kwargs):
         email = request.POST.get("email")
