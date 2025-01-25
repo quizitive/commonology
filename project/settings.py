@@ -128,6 +128,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "request.middleware.RequestMiddleware",
     "project.middleware.ParametersMiddleware",
+    "project.middleware.RequestLoggingMiddleware",
 ]
 
 if DEBUG_TOOLBAR:
@@ -253,6 +254,11 @@ HANDLERS = ["console", "logtail"] if env.get("LOGTAIL_TOKEN") else ["console"]
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "log_context": {
+            "()": "project.log_context.LogContext",
+        },
+    },
     "formatters": {
         "simple": {
             "format": "%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(funcName)s:%(lineno)d - %(message)s",
@@ -263,19 +269,18 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "simple",
+            "filters": ["log_context"],
         },
         "logtail": {
             "class": "logtail.LogtailHandler",
             "source_token": env.get("LOGTAIL_TOKEN"),
+            "filters": ["log_context"],
         },
     },
     "loggers": {
         "django": {
             "level": "INFO",
             "propagate": True,
-        },
-        "django.request": {
-            "level": "INFO",
         },
         "": {
             "handlers": HANDLERS,
