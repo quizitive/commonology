@@ -246,23 +246,38 @@ SLACK_TOKEN = env.get("SLACK_TOKEN")
 GOOGLE_GSPREAD_API_CONFIG = os.path.join(BASE_DIR, ".config/gspread/commonology_service_account.json")
 GOOGLE_DRIVE_FOLDER_ID = env.get("GOOGLE_DRIVE_FOLDER_ID")
 
+# There is a weird bug with logtail enabled and the auto-reload development server,
+# this is so the logger doesn't try to configure logtail locally
+HANDLERS = ["console", "logtail"] if env.get("LOGTAIL_TOKEN") else ["console"]
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(funcName)s:%(lineno)d - %(message)s",
+            "datefmt": "%b %d %H:%M:%S",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "formatter": "simple",
         },
         "logtail": {
             "class": "logtail.LogtailHandler",
             "source_token": env.get("LOGTAIL_TOKEN"),
         },
     },
-    "root": {
-        # There is a weird bug with logtail and the auto-reload development server,
-        # this is so the logger doesn't try to configure logtail locally
-        "handlers": ["console"] + ["logtail"] if "LOGTAIL_TOKEN" in env else [],
-        "level": "INFO",
+    "loggers": {
+        "django": {
+            "level": "INFO",
+            "propagate": True,
+        },
+        "": {
+            "handlers": HANDLERS,
+            "level": "INFO",
+        },
     },
 }
 
