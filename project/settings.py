@@ -274,6 +274,9 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
+        "django.request": {
+            "level": "INFO",
+        },
         "": {
             "handlers": HANDLERS,
             "level": "INFO",
