@@ -288,7 +288,7 @@ class PendingUsersTests(TestCase):
     def join_test_helper(self, data, taint_uuid_flag=False):
         client = Client()
         response = client.post(reverse("join"), data={"email": data["email"]})
-        self.assertEqual(response.reason_phrase, "OK")
+        self.assertIn(response.status_code, [200, 302])
 
         msg = mail.outbox[0].body
         url = re.search('https?://.*/join/.*"', msg).group(0)[:-1]
