@@ -89,6 +89,7 @@ class LeaderboardHTMXView(SeriesPermissionMixin, View):
 
         context = {
             "game_id": self.game_id,
+            "series_slug": self.slug,
             "leaderboard": leaderboard,
             "search_term": search_term,
             "id_filter": id_filter,
