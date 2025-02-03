@@ -7,7 +7,7 @@
     <div class="leaderboard-filter-button-container w3-col m6">
       <div class="leaderboard-header-button filter-button w3-button w3-round-xxlarge leaderboard cg-blue"
            id-filter="all_players"
-           hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
+           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug }}"
            hx-target="#component-leaderboard"
            hx-include="[name='q']"
            onclick="filterFocus(this)">
@@ -15,7 +15,7 @@
       </div>
       <div class="leaderboard-header-button filter-button w3-button w3-round-xxlarge leaderboard w3-light-grey"
            id-filter="following"
-           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=following"
+           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug }}&id_filter=following"
            hx-target="#component-leaderboard"
            hx-include="[name='q']"
            onclick="filterFocus(this)">
@@ -25,7 +25,7 @@
     <div class="leaderboard-filter-button-container w3-col m6">
       <div class="leaderboard-header-button filter-button w3-button w3-round-xxlarge leaderboard w3-light-grey"
            id-filter="followers"
-           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=followers"
+           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug }}&id_filter=followers"
            hx-target="#component-leaderboard"
            hx-include="[name='q']"
            onclick="filterFocus(this)">
@@ -34,7 +34,7 @@
       <div id="new-players-button"
            id-filter="new_players"
            class="leaderboard-header-button filter-button w3-button w3-round-xxlarge leaderboard w3-light-grey"
-           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&id_filter=new_players"
+           hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug }}&id_filter=new_players"
            hx-target="#component-leaderboard"
            hx-include="[name='q']"
            onclick="filterFocus(this)">
@@ -59,7 +59,7 @@
             class="w3-input w3-round w3-border"
             incremental="incremental"
             placeholder="Search..." {% if search_term %} value="{{ search_term }}"{% endif %}
-            hx-get="/leaderboard/htmx/?game_id={{ game_id }}"
+            hx-get="/leaderboard/htmx/?game_id={{ game_id }}&series={{ series_slug }}"
             hx-target="#component-leaderboard"
             hx-include="[name='id_filter']"
             hx-trigger="search delay:0.5s">
