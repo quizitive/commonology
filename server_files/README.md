@@ -49,40 +49,44 @@ An obvious first step.
 
 
 - login as root
-  ```
-  # ssh root@staging.commonologygame.com
-  # apt update
-  # apt upgrade
-  ```
+
+```
+ssh root@staging.commonologygame.com 
+apt update
+apt upgrade
+```
+
 - You may want to add your development platform public ssh key to the droplets root account 
   `.ssh/authorized_keys` file so you don't need a password to login.
 - Install your favorite editor.
-  ```
-  # apt install emacs
-  ```
+
+```
+apt install emacs
+```
+
 - [set hostname](https://www.digitalocean.com/community/questions/how-do-i-change-hostname)
 
-  ```
-  # hostnamectl set-hostname staging.commonologygame.com
-  ```
+```
+hostnamectl set-hostname staging.commonologygame.com
+```
   
   Edit `/etc/hosts` and add your domain name to the right of localhost:
 
-  ```
-  127.0.0.1 localhost staging.commonologygame.com
-  ```
+```
+127.0.0.1 localhost staging.commonologygame.com
+```
   
   Change `preserve_hostname` in `/etc/cloud/cloud.cfg` is set to true.
 
   Now execute hostnamectl to finish up:
 
-     ```
-     # hostnamectl
-     # reboot
-     ```
+```bash
+hostnamectl
+reboot
+```
 
   Log back in with:
-  `# ssh root@staging.commonologygame.com`
+  `ssh root@staging.commonologygame.com`
   
   You should have a nice prompt stating domain name of your server as the prompt.  It may just state the subdomain.
   You can always, safely, use `$ hostname` to see the fully qualified domain name (FQDN).
@@ -90,12 +94,14 @@ An obvious first step.
 
 ## ufw (Uncomplicated Firewall)
 
-```
-# ufw default deny incoming
-# ufw default allow outgoing
-# ufw allow ssh
-# ufw allow OpenSSH
-# ufw enable
+- Login as root.
+
+```bash
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow ssh
+ufw allow OpenSSH
+ufw enable
 ```
 
 ## Install Software
@@ -103,18 +109,21 @@ An obvious first step.
 At this point you can copy the contents of `packages.txt` and add them to a new file in your root directory. You will need to copy them from your local directory, as the git repo is not yet available on the server.
 
 From your local terminal:
+
 ```
-  $ scp packages.txt root@staging.commonologygame.com:~/
+scp packages.txt root@staging.commonologygame.com:~/
 ```
- 
+
+- Login in as root. 
+
 ```
-  # apt update -y
-  # xargs -a /root/packages.txt sudo apt-get install
-  # cd /usr/bin
-  # ln -s pip3 pip
-  # ufw allow "Nginx Full"
-  # ufw status
-  ```
+apt update -y
+xargs -a /root/packages.txt sudo apt-get install
+cd /usr/bin
+ln -s pip3 pip
+ufw allow "Nginx Full"
+ufw status
+```
 The output of that status should look like this:
 
 ```
@@ -139,9 +148,9 @@ Don't worry yet that it isn't secure.  We'll get an ssl certificate soon to secu
 
 ## Create user django.
 
-  ```
-  $ adduser django
-  ```
+```
+adduser django
+```
 
   Enable django to as sudo user, allow django to run commands as superuser using sudo.
 
@@ -163,18 +172,18 @@ Don't worry yet that it isn't secure.  We'll get an ssl certificate soon to secu
 
 Reference: [pyenv-installer](https://github.com/pyenv/pyenv-installer)
 
-```
-  $ curl https://pyenv.run | bash
+```bash
+curl https://pyenv.run | bash
 ```
 
 That command will give you a few lines to add to `/home/django/.bashrc` do that.
 See the end of the `staging.bashrc` file in this repo.
 Then logout and log back in again.  It could take a long time, 5-10 minutes, for the `pyenv install` line.
 
-```
-  $ pyenv install 3.10
-  $ pyenv shell 3.10.15
-  $ pyenv virtualenv project
+```bash
+pyenv install 3.10
+pyenv shell 3.10.15
+pyenv virtualenv project
 ```
 
 
@@ -182,9 +191,9 @@ Then logout and log back in again.  It could take a long time, 5-10 minutes, for
 
   You'll need a set of ssh keys for github and maybe other things described later.
 
-  ```
-  $ ssh-keygen
-  ```
+```
+ssh-keygen
+```
 
   The public key file is `/home/django/.ssh/id_rsa.pub`.
   Copy the contents of your public key for this server to the quizitiveprod github acccount.
@@ -196,13 +205,13 @@ That should create `/home/django/.ssh/id_rsa_.pub`, a public key.
 
 Clone your git project in the django account on the server.
 
-```
-$ cd
-$ git clone git@github.com:quizitive/commonology.git
-$ pyenv shell project
-$ cd commonology
-$ pip install -r requirements
-$ python manage.py collectstatic --noinput
+```bash
+cd
+git clone git@github.com:quizitive/commonology.git
+pyenv shell project
+cd commonology
+pip install -r requirements
+python manage.py collectstatic --noinput
 ```
 
 Note: you will need to make sure your project settings.py file has the appropriate files for ALLOWED_HOSTS.
@@ -232,20 +241,26 @@ set +a
  
 ### Create a database:
 
+Start psql with:
   ```
   $ sudo -u postgres psql
-  
-  postgres=# CREATE DATABASE commonology;
-  postgres=# CREATE USER postgres with password 'postgres';
-  postgres=# ALTER ROLE postgres SET client_encoding TO 'utf8';
-  postgres=# ALTER ROLE postgres SET default_transaction_isolation TO 'read committed';
-  postgres=# ALTER ROLE postgres SET timezone TO 'UTC';
-  postgres=# GRANT ALL PRIVILEGES ON DATABASE commonology TO postgres;
-  postgres=# alter user postgres PASSWORD 'postgres';
-  postgres=# alter user postgres createdb;
-  postgres=# 
-  postgres=# \q
   ```
+
+Then create a database and user with these commands:
+    
+```sql
+CREATE DATABASE commonology;
+CREATE USER postgres with password 'postgres';
+ALTER ROLE postgres SET client_encoding TO 'utf8';
+ALTER ROLE postgres SET default_transaction_isolation TO 'read committed';
+ALTER ROLE postgres SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE commonology TO postgres;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
+alter user postgres PASSWORD 'postgres';
+alter user postgres createdb;
+```
+
+Then quit psql with `\q`.
 
 ### Copy production database to staging server (optional).
   You may want to do this if you are building a staging server.
@@ -255,10 +270,11 @@ set +a
   Now you can use `rsync -avz -e ssh django@commonologygame.com:~/pg_dumps ~/` to copy over postgres dump files.
 
   You can load the dump into postgres like this:
-  ```
-  $ cd
-  $ sudo -u postgres pg_restore --verbose --clean --no-acl -d commonology -h 127.0.0.1 ~/pg_dumps/commonology_Mon.tar 
-  ```
+
+```bash
+cd
+sudo -u postgres pg_restore --verbose --clean --no-acl -d commonology -h 127.0.0.1 ~/pg_dumps/commonology_Mon.tar 
+```
 
 ## Redis
 
@@ -268,24 +284,24 @@ This was installed earlier when Ubuntu packages were installed.  There shouldn't
 systemd files for celery
 
 ```
-$ sudo su -
-# cp /home/django/commonology/server_files/etc/systemd/system/celery.service /etc/systemd/system/
-# cp /home/django/commonology/server_files/etc/systemd/system/celeryserial.service /etc/systemd/system/
-# cp /home/django/commonology/server_files/etc/systemd/system/celerybeat.service /etc/systemd/system/
-# mkdir /etc/conf.d
-# cp /home/django/commonology/server_files/etc/conf.d/celery /etc/conf.d/
-# cp /home/django/commonology/server_files/etc/tmpfiles.d/celery.conf /etc/tmpfiles.d/ 
-# systemctl enable celery
-# systemctl enable celeryserial
-# systemctl enable celerybeat
-# sudo systemctl daemon-reload
-# mkdir /var/log/celery
-# chown django:django /var/log/celery
-# mkdir /var/run/celery
-# chown django:django /var/run/celery
-# sudo systemctl restart celery
-# sudo systemctl restart celeryserial
-# sudo systemctl restart celerybeat
+sudo su -
+cp /home/django/commonology/server_files/etc/systemd/system/celery.service /etc/systemd/system/
+cp /home/django/commonology/server_files/etc/systemd/system/celeryserial.service /etc/systemd/system/
+cp /home/django/commonology/server_files/etc/systemd/system/celerybeat.service /etc/systemd/system/
+mkdir /etc/conf.d
+cp /home/django/commonology/server_files/etc/conf.d/celery /etc/conf.d/
+cp /home/django/commonology/server_files/etc/tmpfiles.d/celery.conf /etc/tmpfiles.d/ 
+systemctl enable celery
+systemctl enable celeryserial
+systemctl enable celerybeat
+sudo systemctl daemon-reload
+mkdir /var/log/celery
+chown django:django /var/log/celery
+mkdir /var/run/celery
+chown django:django /var/run/celery
+sudo systemctl restart celery
+sudo systemctl restart celeryserial
+sudo systemctl restart celerybeat
 ```
 
 Note: you can use wildcards with systemctl like this `sudo systemctl restart 'celery*'`.
@@ -295,24 +311,24 @@ Note: you can use wildcards with systemctl like this `sudo systemctl restart 'ce
 Daphne is needed for real time messages on our results page.
 
 ```shell
-$ sudo su -
-# cp /home/django/commonology/server_files/etc/systemd/system/daphne.service /etc/systemd/system/
-# systemctl enable daphne
+sudo su -
+cp /home/django/commonology/server_files/etc/systemd/system/daphne.service /etc/systemd/system/
+systemctl enable daphne
 ```
 
 ## GUnicorn
 
 ```shell
-$ sudo su -
-# cd /etc/systemd/system/
-# cp /home/django/commonology/server_files/etc/systemd/system/gunicorn.service ./
-# sudo systemctl daemon-reload
-# systemctl start gunicorn
-# systemctl enable gunicorn
-# exit
-$ cd
-$ cd commonology
-$ ls
+sudo su -
+cd /etc/systemd/system/
+cp /home/django/commonology/server_files/etc/systemd/system/gunicorn.service ./
+sudo systemctl daemon-reload
+systemctl start gunicorn
+systemctl enable gunicorn
+exit
+cd
+cd commonology
+ls
 ```
 
 At this point you should see the `commonology.sock` file in the ls listing.
@@ -328,20 +344,20 @@ Before we start we need to make sure the server is answering for our domain.
 Make sure to start nginx with default values.  Later we'll change them for Django.
 
 ```shell
-$ sudo su 
-# ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
-# systemctl restart nginx
+sudo su 
+ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+systemctl restart nginx
 ```
 
 
 Install and run letsencrypt certbot:
 
 ```shell
-$ sudo snap install core
-$ sudo snap refresh core
-$ sudo apt update
-$ sudo snap install --classic certbot
-$ sudo certbot certonly --nginx
+sudo snap install core
+sudo snap refresh core
+sudo apt update
+sudo snap install --classic certbot
+sudo certbot certonly --nginx
 ```
 
 For some reason this command sometimes adds the appropriate references to
@@ -351,7 +367,8 @@ from the ones in our repo.  We should not have to do this.
 ## Email - Postfix (Optional)
 
 It can be valuable to send email from the command line or from a crontab command.  For example, in a later section
-we'll add a crontab entry to keep the Nginx blocker data up to date by running `update-ngxblocker -e ms@quizitivecom`.
+we'll add a crontab entry to keep the Nginx blocker data up to date by 
+running `update-ngxblocker -e ms@quizitive.com`.
 That results in a daily email message with output from that command.
 
 Rather than run a full fledged mail server we can take advantage of our SendGrid server by using postfix as a relay
@@ -388,17 +405,17 @@ to Mail Send only.
 Set permissions and ignore warnings about overriding earlier entries.
 
 ```commandline
-$ sudo su -
-# chmod 600 /etc/postfix/sasl_passwd
-# postmap /etc/postfix/sasl_passwd
-# systemctl enable postfix
-# systemctl daemon-reload
-# systemctl restart postfix
+sudo su -
+chmod 600 /etc/postfix/sasl_passwd
+postmap /etc/postfix/sasl_passwd
+systemctl enable postfix
+systemctl daemon-reload
+systemctl restart postfix
 ```
 
 Test it:
 
-`$ mail -s testing -r ms@quizitive.com ms@koplon.com < /dev/null`
+`mail -s testing -r ms@quizitive.com ms@koplon.com < /dev/null`
 
 
 ## Nginx
@@ -408,12 +425,12 @@ Test it:
 Copy site config files from repo.
 
 ```shell
-$ sudo su 
-# cp /home/django/commonology/server_files/etc/nginx/ted.conf /etc/nginx/
-# ln -s /etc/nginx/sites-available/ted.nginx /etc/nginx/sites-enabled/
-# cp /home/django/commonology/server_files/etc/nginx/sites-available/staging.commonologygame.com /etc/nginx/sites-available/
-# ln -s /etc/nginx/sites-available/staging.commonologygame.nginx /etc/nginx/sites-enabled/
-# rm /etc/nginx/sites-enabled/default
+sudo su 
+cp /home/django/commonology/server_files/etc/nginx/ted.conf /etc/nginx/
+ln -s /etc/nginx/sites-available/ted.nginx /etc/nginx/sites-enabled/
+cp /home/django/commonology/server_files/etc/nginx/sites-available/staging.commonologygame.com /etc/nginx/sites-available/
+ln -s /etc/nginx/sites-available/staging.commonologygame.nginx /etc/nginx/sites-enabled/
+rm /etc/nginx/sites-enabled/default
 ```
 
 You can do the same with other nginx files for other appropriate domains you find in
@@ -424,17 +441,18 @@ You can do the same with other nginx files for other appropriate domains you fin
 Copy site config files from repo.
 
 ```shell
-$ sudo su
-# cp /home/django/commonology/server_files/etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-available/
-# ln -s /etc/nginx/sites-available/commonologygame.nginx /etc/nginx/sites-enabled/
-# cp /home/django/commonology/server_files/etc/nginx/sites-available/quzitive.com /etc/nginx/sites-available/
-# ln -s /etc/nginx/sites-available/quizitive.nginx /etc/nginx/sites-enabled/
-# rm /etc/nginx/sites-enabled/default
+$ sudo su -
+cp /home/django/commonology/server_files/etc/nginx/sites-available/commonologygame.com /etc/nginx/sites-available/
+ln -s /etc/nginx/sites-available/commonologygame.nginx 
+/etc/nginx/sites-enabled/
+cp /home/django/commonology/server_files/etc/nginx/sites-available/quzitive.com /etc/nginx/sites-available/
+ln -s /etc/nginx/sites-available/quizitive.nginx /etc/nginx/sites-enabled/
+rm /etc/nginx/sites-enabled/default
 ```
 
 ```shell
-# systemctl restart nginx
-# systemctl restart gunicorn.service 
+systemctl restart nginx
+systemctl restart gunicorn.service 
 ```
 
 ### Nginx-ulitimate-bad-bot-blocker
@@ -492,9 +510,9 @@ These three lines should be added to /etc/crontab.  That file is in the repo.
 
 Sometimes certbot is installed in `/snap/bin` so you may need to do this:
 ```shell
-$ sudo su -
-# cd /usr/bin
-# ln -s /snap/bin/certbot
+sudo su -
+cd /usr/bin
+ln -s /snap/bin/certbot
 ```
 
 It is not necessary to have `pg_backup.bash` run on a staging server.
@@ -504,7 +522,7 @@ It is not necessary to have `pg_backup.bash` run on a staging server.
 Need a pg_dumps dir for the cron'd `pg_backup.bash` script.
 
 ```shell
-$ mkdir /home/django/pg_dumps/
+mkdir /home/django/pg_dumps/
 ```
 
 ### redis_dumps
